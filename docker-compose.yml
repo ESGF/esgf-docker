@@ -1,0 +1,190 @@
+# required env variables:
+#
+# ESGF_CONFIG : points to the root ESGF configuration directory
+#       example: export ESGF_CONFIG=/Users/cinquini/ESGF_CONFIG
+# ESGF_HOSTNAME: HostName or IP address for apache httpd front-end server
+#       example: export ESGF_HOSTNAME=my.esgf.node
+#       example: export ESGF_HOSTNAME=`docker-machine ip`
+# ESGF_DATA_DIR: root of ESGF data directories
+
+version: '2'
+
+networks:
+  # network to keep postgres database isolated
+  dbnetwork:
+
+services:
+
+  # ESGF Data Node
+  esgf-data-node:
+    image: esgfhub/esgf-data-node
+    container_name: data-node
+    expose:
+      - "8080"
+      - "8443"
+    ports:
+      - "8080:8080"
+      - "8443:8443"
+    networks:
+      - default
+      - dbnetwork 
+    volumes:
+      - tds_data:/esg/content/thredds
+    volumes_from:
+      - esgf-config
+    environment:
+     - ESGF_HOSTNAME
+    depends_on:
+      - esgf-postgres
+
+  # ESGF Identity Provider
+  esgf-idp-node:
+    image: esgfhub/esgf-idp-node
+    container_name: idp-node
+    expose:
+      - "8080"
+      - "8443"
+    ports:
+      - "8082:8080"
+      - "8445:8443"
+    networks:
+      - default
+      - dbnetwork
+    volumes_from:
+      - esgf-config
+    depends_on:
+      - esgf-postgres
+
+  # data container holding site-specific ESGF configuration
+  # this container stops after the volumes are initialized
+  esgf-config:
+    image: centos:centos6.7
+    container_name: esgf-config
+    volumes:
+     - $ESGF_CONFIG/httpd/certs/:/etc/certs/
+     - $ESGF_CONFIG/httpd/conf/esgf-httpd.conf:/etc/httpd/conf.d/esgf-httpd.conf
+     - $ESGF_CONFIG/grid-security/certificates/:/etc/grid-security/certificates/
+     - $ESGF_CONFIG/esg/config/:/esg/config/
+     - $ESGF_CONFIG/webapps/thredds/WEB-INF/web.xml:/usr/local/tomcat/webapps/thredds/WEB-INF/web.xml
+     - $ESGF_CONFIG/esg/config/tomcat/esg-truststore.ts:/usr/java/latest/jre/lib/security/jssecacerts
+
+
+  # Solr engine running within Jetty
+  esgf-solr:
+    image: esgfhub/esgf-solr
+    container_name: solr
+    expose:
+      - "8983"
+      - "8984"
+    ports:
+      - "8983:8983"
+      - "8984:8984" 
+    volumes:
+     - solr_data:/esg/solr-index
+    networks:
+      - default
+
+  # ESGF Index Node
+  esgf-index-node:
+    image: esgfhub/esgf-index-node
+    container_name: index-node
+    expose:
+      - "8080"
+      - "8443"
+    ports:
+      - "8081:8080"
+      - "8444:8443"
+    depends_on:
+      - esgf-solr
+    volumes_from:
+      - esgf-config
+    networks:
+      - default
+    #  - dbnetwork
+
+  # ESGF postgres database
+  esgf-postgres:
+     image: esgfhub/esgf-postgres
+     expose:
+       - "5432"
+     ports:
+       - "5432:5432"
+     container_name: postgres
+     networks:
+       - dbnetwork
+     volumes:
+       - pg_data:/var/lib/pgsql/data
+
+  # data container to hold CoG source code and python virtual environment
+  # this container stops after the volume 'cog_data' is initialized
+  esgf-cog:
+     image: esgfhub/esgf-cog
+     container_name: cog
+     expose:
+       - "8000"
+     ports:
+       - "8000:8000"
+     volumes:
+       - cog_data:/usr/local/cog/cog_config
+     volumes_from:
+      - esgf-config
+     #command: $ESGF_HOSTNAME true true # keep django runnining on port 8000
+     command: $ESGF_HOSTNAME true false
+     depends_on:
+       - esgf-postgres
+     networks:
+       - dbnetwork
+     environment:
+       - COG_DIR=/usr/local/cog
+       - COG_INSTALL_DIR=/usr/local/cog/cog_install
+       - COG_CONFIG_DIR=/usr/local/cog/cog_config
+
+
+  esgf-httpd:
+   image: esgfhub/esgf-httpd
+   container_name: httpd
+   entrypoint: /usr/local/bin/docker-entrypoint.sh
+   volumes:
+     - cog_data:/usr/local/cog/cog_config
+   volumes_from:
+     - esgf-config
+     - esgf-cog
+   environment:
+     - SSL_CERT_DIR=/etc/grid-security/certificates
+     - COG_CONFIG_DIR=/usr/local/cog/cog_config
+   ports:
+     - "80:80"
+     - "443:443"
+   depends_on:
+     - esgf-cog
+   # httpd URLs must use hostname=$ESGF_HOSTNAME
+   networks:
+     default:
+       aliases:
+         - "${ESGF_HOSTNAME}"
+     dbnetwork: {}
+
+  # FTP server
+  esgf-ftp:
+   image: esgfhub/esgf-vsftp
+   container_name: ftp 
+   ports:
+     - "21:21"
+   networks:
+     - default
+   volumes:
+     - $ESGF_DATA_DIR:/var/ftp/pub
+   
+
+# use Docker volumes to store persistent data
+# (which survives when the containers are removed)
+volumes:
+  # postgres data and configuration
+  pg_data:
+  # cog data directory
+  cog_data:
+  # contains Solr index data
+  solr_data:
+  # contains TDS configuration, catalogs, cache, and logs
+  # (directory below -Dtds.content.root.path=/esg/content)
+  tds_data:

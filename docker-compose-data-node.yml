@@ -1,0 +1,93 @@
+# required env variables:
+#
+# ESGF_CONFIG : points to the root ESGF configuration directory
+#       example: export ESGF_CONFIG=/Users/cinquini/ESGF_CONFIG
+# ESGF_HOSTNAME: HostName or IP address for apache httpd front-end server
+#       example: export ESGF_HOSTNAME=my.esgf.node
+#       example: export ESGF_HOSTNAME=`docker-machine ip`
+# ESGF_DATA_DIR: root of ESGF data directories
+
+version: '2'
+
+networks:
+  # network to keep postgres database isolated
+  dbnetwork:
+
+services:
+
+  esgf-data-node:
+    image: esgfhub/esgf-data-node
+    container_name: data-node
+    expose:
+      - "8080"
+      - "8443"
+    ports:
+      - "8080:8080"
+      - "8443:8443"
+    networks:
+      - default
+      - dbnetwork 
+    volumes:
+      - tds_data:/esg/content/thredds
+    volumes_from:
+      - esgf-config
+    environment:
+     - ESGF_HOSTNAME
+    depends_on:
+      - esgf-postgres
+
+  # data container holding site-specific ESGF configuration
+  esgf-config:
+    image: centos:centos6.7
+    container_name: esgf-config
+    volumes:
+     - $ESGF_CONFIG/httpd/certs/:/etc/certs/
+     - $ESGF_CONFIG/httpd/conf/esgf-httpd.conf:/etc/httpd/conf.d/esgf-httpd.conf
+     - $ESGF_CONFIG/grid-security/certificates/:/etc/grid-security/certificates/
+     - $ESGF_CONFIG/esg/config/:/esg/config/
+     - $ESGF_CONFIG/webapps/thredds/WEB-INF/web.xml:/usr/local/tomcat/webapps/thredds/WEB-INF/web.xml
+     - $ESGF_CONFIG/esg/config/tomcat/esg-truststore.ts:/usr/java/latest/jre/lib/security/jssecacerts
+
+  esgf-postgres:
+     image: esgfhub/esgf-postgres
+     expose:
+       - "5432"
+     ports:
+       - "5432:5432"
+     container_name: postgres
+     networks:
+       - dbnetwork
+
+  esgf-httpd:
+   image: esgfhub/esgf-httpd
+   container_name: httpd
+   entrypoint: /usr/local/bin/docker-entrypoint.sh
+   volumes_from:
+     - esgf-config
+   ports:
+     - "80:80"
+     - "443:443"
+   # httpd URLs must use hostname=$ESGF_HOSTNAME
+   networks:
+     default:
+       aliases:
+         - "${ESGF_HOSTNAME}"
+     dbnetwork: {}
+
+  # FTP server
+  esgf-ftp:
+   image: esgfhub/esgf-vsftp
+   container_name: ftp
+   ports:
+     - "21:21"
+   networks:
+     - default
+   volumes:
+     - $ESGF_DATA_DIR:/var/ftp/pub
+
+# use Docker volumes to store persistent data
+# (which survives when the containers are removed)
+volumes:
+  # contains TDS configuration, catalogs, cache, and logs
+  # (directory below -Dtds.content.root.path=/esg/content)
+  tds_data:
