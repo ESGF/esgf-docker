@@ -1,7 +1,7 @@
 #!/bin/sh
 # script to build (and optionally push) all ESGF Docker images
 # Usage:
-# ./docker_build_all.sh [--push] 
+# docker_build_and_push_all.sh [--push] 
 
 function build_and_push() {
 
