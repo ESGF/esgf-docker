@@ -30,4 +30,10 @@ RUN cd $SRC_DIR && \
 # start/stop scripts
 RUN cp $SRC_DIR/esg-search/etc/solr-cloud/scripts/* /usr/local/bin/.
 
+# Python software for harvesting/migrating Solr catalogs
+# and dependencies
+RUN pip install solrpy
+RUN cd $SRC_DIR && \
+    git clone https://github.com/EarthSystemCoG/esgfpy-publish.git
+
 EXPOSE 8983 8984 8985
