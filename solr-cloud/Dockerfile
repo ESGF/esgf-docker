@@ -17,9 +17,9 @@ VOLUME /root/.m2
 ENV SOLR_CLOUD_HOME /usr/local/solr-cloud
 RUN mkdir -p $SOLR_CLOUD_HOME
 
-# mvn: Solr installation + ESGF configuration
+# mvn: install 3 Solr instances configured for ESGF
 ENV SRC_DIR /usr/local/src
-RUN mkdir -p $SRC_DIR
+RUN mkdir  -p $SRC_DIR
 RUN cd $SRC_DIR && \
     git clone https://github.com/ESGF/esg-search.git && \
     cd esg-search && \
@@ -27,13 +27,13 @@ RUN cd $SRC_DIR && \
     cd etc/solr-cloud && \    
     mvn install
 
-# start/stop scripts
-RUN cp $SRC_DIR/esg-search/etc/solr-cloud/scripts/* /usr/local/bin/.
-
 # Python software for harvesting/migrating Solr catalogs
 # and dependencies
 RUN pip install solrpy
 RUN cd $SRC_DIR && \
     git clone https://github.com/EarthSystemCoG/esgfpy-publish.git
+
+# scripts
+COPY scripts/ /usr/local/bin/
 
 EXPOSE 8983 8984 8985

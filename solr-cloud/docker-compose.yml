@@ -1,0 +1,34 @@
+# docker-compose file for setting up an ESGF Solr Cloud
+
+version: '2'
+
+services:
+
+  # node with 3 Solr instances + embedded ZooKeeper
+  esgf-solr-cloud1:
+    image: esgfhub/esgf-solr-cloud
+    container_name: esgf-solr-cloud1
+    ports:
+      - "8983:8983"
+      - "9983:9983"
+      - "8984:8984"
+      - "8985:8985"
+    networks:
+      - default
+    entrypoint: /usr/local/bin/docker-entrypoint.sh
+
+  # other node with 3 Solr instances
+  esgf-solr-cloud2:
+    image: esgfhub/esgf-solr-cloud
+    container_name: esgf-solr-cloud2
+    expose:
+      - "8983"
+      - "8984"
+      - "8985"
+    networks:
+      - default
+    entrypoint: /usr/local/bin/docker-entrypoint.sh esgf-solr-cloud1
+    #command: tail -f /dev/null
+    # dependency garantees that this node does not start untill ZK is up
+    depends_on:
+      - esgf-solr-cloud1
