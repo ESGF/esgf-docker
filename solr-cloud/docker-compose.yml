@@ -16,6 +16,8 @@ services:
     networks:
       - default
     entrypoint: /usr/local/bin/docker-entrypoint.sh
+    volumes:
+      - solr_cloud_data1:/esg/solr-cloud-home
 
   # other node with 3 Solr instances
   esgf-solr-cloud2:
@@ -28,7 +30,13 @@ services:
     networks:
       - default
     entrypoint: /usr/local/bin/docker-entrypoint.sh esgf-solr-cloud1
-    #command: tail -f /dev/null
+    volumes:
+      - solr_cloud_data2:/esg/solr-cloud-home
     # dependency garantees that this node does not start untill ZK is up
     depends_on:
       - esgf-solr-cloud1
+
+# persistent volumes containing Solr index data and configuration (one for each container)
+volumes:
+  solr_cloud_data1:
+  solr_cloud_data2:

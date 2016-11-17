@@ -6,7 +6,7 @@
 # All necessary Solr instances must be running prior to executing this script.
 
 # upload configuration to ZooKeeper
-$SOLR_CLOUD_HOME/solr/server/scripts/cloud-scripts/zkcli.sh \
+$SOLR_CLOUD_INSTALL/solr/server/scripts/cloud-scripts/zkcli.sh \
 	-zkhost localhost:9983 \
 	-cmd upconfig -confdir $SOLR_CLOUD_HOME/node8983/solr/conf -confname esgf_config
 

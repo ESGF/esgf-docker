@@ -7,4 +7,4 @@ zkhost=$1
 
 /usr/local/bin/solr_cloud_start.sh $zkhost
 
-tail -f $SOLR_CLOUD_HOME/solr/server/logs/solr.log
+tail -f $SOLR_CLOUD_INSTALL/solr/server/logs/solr.log

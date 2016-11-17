@@ -13,8 +13,10 @@ RUN mkdir -p /usr/share/maven \
 ENV MAVEN_HOME /usr/share/maven
 VOLUME /root/.m2
 
-# create installation directory
-ENV SOLR_CLOUD_HOME /usr/local/solr-cloud
+# create installation and data directories
+ENV SOLR_CLOUD_INSTALL /usr/local/solr-cloud-install
+RUN mkdir -p $SOLR_CLOUD_INSTALL
+ENV SOLR_CLOUD_HOME /esg/solr-cloud-home
 RUN mkdir -p $SOLR_CLOUD_HOME
 
 # mvn: install 3 Solr instances configured for ESGF
