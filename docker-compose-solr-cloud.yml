@@ -1,0 +1,91 @@
+# docker-compose file for setting up an ESGF Solr Cloud
+
+version: '2'
+
+services:
+
+  # data container holding site-specific ESGF configuration
+  esgf-config:
+    image: centos:centos6.7
+    container_name: esgf-config
+    volumes:
+     # esgf.properties
+     - $ESGF_CONFIG/esg/config/:/esg/config/
+     # apache httpd certificates and configuration
+     - $ESGF_CONFIG/httpd/certs/:/etc/certs/
+     - $ESGF_CONFIG/httpd/conf/esgf-httpd.conf:/etc/httpd/conf.d/esgf-httpd.conf
+     # Tomcat configuration
+     - $ESGF_CONFIG/esg/config/tomcat/esg-truststore.ts:/usr/java/latest/jre/lib/security/jssecacerts
+
+  # node with 3 Solr instances + embedded ZooKeeper
+  # note: use service name='esgf-solr' to match value of property used by esgf-search to connect to solr:
+  # esg.search.solr.query.url=http://esgf-solr:8983/solr
+  esgf-solr:
+    image: esgfhub/esgf-solr-cloud
+    container_name: esgf-solr
+    ports:
+      - "8983:8983"
+      - "9983:9983"
+      - "8984:8984"
+      - "8985:8985"
+    networks:
+      - default
+    entrypoint: /usr/local/bin/docker-entrypoint.sh
+    volumes:
+      - solr_cloud_data1:/esg/solr-cloud-home
+
+  # other node with 3 Solr instances
+  esgf-solr2:
+    image: esgfhub/esgf-solr-cloud
+    container_name: esgf-solr2
+    expose:
+      - "8983"
+      - "8984"
+      - "8985"
+    networks:
+      - default
+    entrypoint: /usr/local/bin/docker-entrypoint.sh esgf-solr-cloud1
+    volumes:
+      - solr_cloud_data2:/esg/solr-cloud-home
+    # dependency garantees that this node does not start untill ZK is up
+    depends_on:
+      - esgf-solr
+
+  # ESGF search web application
+  esgf-index-node:
+    image: esgfhub/esgf-index-node
+    container_name: index-node
+    expose:
+      - "8080"
+      - "8443"
+    ports:
+      - "8080:8080"
+      - "8443:8443"
+    depends_on:
+      - esgf-solr
+      - esgf-solr2
+    networks:
+      - default
+    volumes_from:
+      - esgf-config
+
+  # apache httpd front-end
+  esgf-httpd:
+   image: esgfhub/esgf-httpd
+   container_name: httpd
+   entrypoint: /usr/local/bin/docker-entrypoint.sh
+   volumes_from:
+     - esgf-config
+   ports:
+     - "80:80"
+     - "443:443"
+   # httpd URLs must use hostname=$ESGF_HOSTNAME
+   networks:
+     default:
+       aliases:
+         - "${ESGF_HOSTNAME}"
+
+# persistent volumes containing Solr index data and configuration (one for each container)
+volumes:
+  solr_cloud_data1:
+  solr_cloud_data2:

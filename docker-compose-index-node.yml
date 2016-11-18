@@ -44,8 +44,8 @@ services:
       - "8080"
       - "8443"
     ports:
-      - "8081:8080"
-      - "8444:8443"
+      - "8080:8080"
+      - "8443:8443"
     depends_on:
       - esgf-solr
     volumes_from:
