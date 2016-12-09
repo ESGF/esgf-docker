@@ -33,7 +33,10 @@ services:
       - "8983:8983"
       - "8984:8984" 
     volumes:
-     - solr_data:/esg/solr-index
+     # use solr index on Docker volume
+      - solr_data:/esg/solr-index
+     # use solr index from existing local directory
+     #- /Users/cinquini/tmp/solr-index:/esg/solr-index
     networks:
       - default
 
