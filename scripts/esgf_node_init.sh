@@ -3,6 +3,7 @@
 # Configuration is provided via env variables:
 # $ESGF_HOSTNAME : FQDN of ESGF host
 # $ESGF_CONFIG : root directory where all site specific configuration is stored
+# $ESGF_VERSION : version of ESGF/Docker distribution
 #
 # This script will:
 # o initialize the content of a new site-specific configuration directory: <configuration directory>
@@ -10,13 +11,14 @@
 # o change all site configuration to use <hostname>
 
 # verify env variables are set
-if [ "${ESGF_HOSTNAME}" = "" ] || [ "${ESGF_CONFIG}" = "" ];
+if [ "${ESGF_HOSTNAME}" = "" ] || [ "${ESGF_CONFIG}" = "" ] || [ "${ESGF_VERSION}" = "" ];
 then
-   echo "All env variables: ESGF_HOSTNAME, ESGF_CONFIG must be set  "
+   echo "All env variables: ESGF_HOSTNAME, ESGF_CONFIG, ESGF_VERSION must be set  "
    exit -1
 else
    echo "Using ESGF_HOSTNAME=$ESGF_HOSTNAME"
    echo "Using ESGF_CONFIG=$ESGF_CONFIG"
+   echo "Using ESGF_VERSION=$ESGF_VERSION"
 fi
 
 # initialize the node configuration directory

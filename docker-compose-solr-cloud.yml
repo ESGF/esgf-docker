@@ -1,4 +1,7 @@
 # docker-compose file for setting up an ESGF Solr Cloud
+#
+# ESGF_VERSION: version of ESGF/Docker distribution
+#       example: export ESGF_VERSION=1.0
 
 version: '2'
 
@@ -6,7 +9,7 @@ services:
 
   # data container holding site-specific ESGF configuration
   esgf-config:
-    image: centos:centos6.7
+    image: centos:6
     container_name: esgf-config
     volumes:
      # esgf.properties
@@ -21,7 +24,7 @@ services:
   # note: use service name='esgf-solr' to match value of property used by esgf-search to connect to solr:
   # esg.search.solr.query.url=http://esgf-solr:8983/solr
   esgf-solr:
-    image: esgfhub/esgf-solr-cloud
+    image: esgfhub/esgf-solr-cloud:${ESGF_VERSION}
     container_name: esgf-solr
     ports:
       - "8983:8983"
@@ -36,7 +39,7 @@ services:
 
   # other node with 3 Solr instances
   esgf-solr2:
-    image: esgfhub/esgf-solr-cloud
+    image: esgfhub/esgf-solr-cloud:${ESGF_VERSION}
     container_name: esgf-solr2
     expose:
       - "8983"
@@ -53,7 +56,7 @@ services:
 
   # ESGF search web application
   esgf-index-node:
-    image: esgfhub/esgf-index-node
+    image: esgfhub/esgf-index-node:${ESGF_VERSION}
     container_name: index-node
     expose:
       - "8080"
@@ -71,7 +74,7 @@ services:
 
   # apache httpd front-end
   esgf-httpd:
-   image: esgfhub/esgf-httpd
+   image: esgfhub/esgf-httpd:${ESGF_VERSION}
    container_name: httpd
    entrypoint: /usr/local/bin/docker-entrypoint.sh
    volumes_from:

@@ -5,15 +5,16 @@
 # ESGF_HOSTNAME: HostName or IP address for apache httpd front-end server
 #       example: export ESGF_HOSTNAME=my.esgf.node
 #       example: export ESGF_HOSTNAME=`docker-machine ip`
+# ESGF_VERSION: version of ESGF/Docker distribution
+#       example: export ESGF_VERSION=1.0
 
 version: '2'
-
 
 services:
 
   # data container holding site-specific ESGF configuration
   esgf-config:
-    image: centos:centos6.7
+    image: centos:6
     container_name: esgf-config
     volumes:
      - $ESGF_CONFIG/httpd/certs/:/etc/certs/
@@ -24,7 +25,7 @@ services:
      - $ESGF_CONFIG/esg/config/tomcat/esg-truststore.ts:/usr/java/latest/jre/lib/security/jssecacerts
 
   esgf-solr:
-    image: esgfhub/esgf-solr
+    image: esgfhub/esgf-solr:${ESGF_VERSION}
     container_name: solr
     expose:
       - "8983"
@@ -41,7 +42,7 @@ services:
       - default
 
   esgf-index-node:
-    image: esgfhub/esgf-index-node
+    image: esgfhub/esgf-index-node:${ESGF_VERSION}
     container_name: index-node
     expose:
       - "8080"
@@ -57,7 +58,7 @@ services:
       - default
 
   esgf-httpd:
-   image: esgfhub/esgf-httpd
+   image: esgfhub/esgf-httpd:${ESGF_VERSION}
    container_name: httpd
    entrypoint: /usr/local/bin/docker-entrypoint.sh
    volumes_from:

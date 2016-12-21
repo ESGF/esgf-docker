@@ -3,13 +3,14 @@
 # All certificates are generated in the directory $ESGF_CONFIG/esgfcerts, then moved to the proper location under $ESGF_CONFIG
 
 # verify env variables are set
-if [ "${ESGF_HOSTNAME}" = "" ] || [ "${ESGF_CONFIG}" = "" ];
+if [ "${ESGF_HOSTNAME}" = "" ] || [ "${ESGF_CONFIG}" = "" ] || [ "${ESGF_VERSION}" = "" ];
 then
-   echo "All env variables: ESGF_HOSTNAME, ESGF_CONFIG must be set  "
+   echo "All env variables: ESGF_HOSTNAME, ESGF_CONFIG, ESGF_VERSION must be set  "
    exit -1
 else
    echo "Using ESGF_HOSTNAME=$ESGF_HOSTNAME"
    echo "Using ESGF_CONFIG=$ESGF_CONFIG"
+   echo "Using ESGF_VERSION=$ESGF_VERSION"
 fi
 
 # working directory
@@ -45,7 +46,7 @@ cat hostcert.pem >> esgf-ca-bundle.crt
 echo ""
 echo "Generating certificate hash"
 
-cert_hash=`docker run -ti --rm -v $ESGF_CONFIG/esgfcerts/:/tmp/certs/ esgfhub/esgf-node openssl x509 -noout -hash -in /tmp/certs/hostcert.pem`
+cert_hash=`docker run -ti --rm -v $ESGF_CONFIG/esgfcerts/:/tmp/certs/ esgfhub/esgf-node:$ESGF_VERSION openssl x509 -noout -hash -in /tmp/certs/hostcert.pem`
 #cert_hash=`openssl x509 -noout -hash -in hostcert.pem`
 # must remove the trailing white space i.e. end of line
 cert_hash=${cert_hash%%[[:space:]]}
