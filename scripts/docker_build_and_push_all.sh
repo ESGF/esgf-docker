@@ -1,14 +1,16 @@
 #!/bin/sh
 # script to build (and optionally push) all ESGF Docker images
 # Usage:
-# docker_build_and_push_all.sh [--push] 
+# docker_build_and_push_all.sh <version> [--pushit] 
+# Example:
+# docker_build_and_push_all.sh 1.0 --pushit
 
 function build_and_push() {
 
   # function parameters
-  img=esgf-$1
-  pushit=$2
-  echo "\nBUILDING MODULE=$img PUSH=$pushit\n"
+  img="esgf-$1:$2"
+  pushit=$3
+  echo "BUILDING MODULE=$img PUSH=$pushit\n"
 
   # build the module
   docker build --no-cache -t esgfhub/$img .
@@ -20,8 +22,11 @@ function build_and_push() {
 
 }
 
+# required version
+version=$1
+
 # optional 'push' argument
-pushit=${1:-false}
+pushit=${2:-false}
  
 # this directory
 wrkdir=`pwd`
@@ -32,5 +37,5 @@ subdirs=('node' 'postgres' 'tomcat' 'solr' 'httpd' 'cog' 'data-node' 'idp-node' 
 for subdir in ${subdirs[*]}; do
    # cd to parallel directory
    cd "$wrkdir/../$subdir"
-   build_and_push $subdir $pushit
+   build_and_push $subdir $version $pushit
 done
