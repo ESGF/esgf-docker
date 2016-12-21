@@ -1,6 +1,6 @@
 # vsftp (Verty Secure File Transfer protocol) server installed on centOS
 
-FROM centos:centos6.7
+FROM centos:6
 
 MAINTAINER Luca Cinquini <luca.cinquini@jpl.nasa.gov>
 

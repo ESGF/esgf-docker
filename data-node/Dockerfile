@@ -2,7 +2,7 @@
 # o TDS customized with ESGF access control filters
 # o ORP
 
-FROM esgfhub/esgf-tomcat
+FROM esgfhub/esgf-tomcat:1.0
 
 MAINTAINER Luca Cinquini <luca.cinquini@jpl.nasa.gov>
 
@@ -11,9 +11,9 @@ ARG ESGF_REPO=http://distrib-coffee.ipsl.jussieu.fr/pub/esgf
 
 # ESGF ORP
 RUN mkdir -p /usr/local/tomcat/webapps/esg-orp
-# FIXME
-COPY esgf-orp/esg-orp.war /usr/local/tomcat/webapps/esg-orp/esg-orp.war
-#ADD $ESGF_REPO/dist/devel/esg-orp/esg-orp.war /usr/local/tomcat/webapps/esg-orp/
+
+#COPY esgf-orp/esg-orp.war /usr/local/tomcat/webapps/esg-orp/esg-orp.war
+ADD $ESGF_REPO/dist/devel/esg-orp/esg-orp.war /usr/local/tomcat/webapps/esg-orp/
 RUN cd /usr/local/tomcat/webapps/esg-orp && \
     jar xvf esg-orp.war && \
     rm esg-orp.war

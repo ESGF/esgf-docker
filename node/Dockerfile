@@ -1,9 +1,9 @@
-# Docker image based on Centos 6.7 that includes:
+# Docker image based on Centos 6 that includes:
 # Oracle Java 8
 # Python 2.7 + a few common Python packages
 # Also includes common, non-site specific ESGF env variables (ESGF_HOME).
 
-FROM centos:centos6.7
+FROM centos:6
 
 MAINTAINER Luca Cinquini <luca.cinquini@jpl.nasa.gov>
 

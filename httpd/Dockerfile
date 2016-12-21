@@ -1,11 +1,13 @@
 # ESGF node with Apache httpd and mod_wsgi
 
-FROM esgfhub/esgf-node
+FROM esgfhub/esgf-node:1.0
 
 MAINTAINER Luca Cinquini <luca.cinquini@jpl.nasa.gov>
 
 # install latest apache httpd
-RUN yum install -y httpd httpd-devel mod_ssl
+RUN yum -y update \
+    && yum install -y httpd httpd-devel mod_ssl \
+    && yum clean all
 
 # install mod_wsgi
 RUN cd /tmp
