@@ -16,7 +16,7 @@ function build_and_push() {
   docker build --no-cache -t esgfhub/$img .
 
   # optionally push the module to Docker Hub
-  if [ $pushit == '--push' ]; then
+  if [[ $pushit == *"push"* ]]; then
        docker push esgfhub/$img
   fi
 
