@@ -1,5 +1,5 @@
 # ESGF node with CoG web application
-# When running a container, must have $ESGF_HOSTNAME ebv set,
+# When running a container, must have $ESGF_HOSTNAME env set,
 
 FROM esgfhub/esgf-node:1.0
 
@@ -85,4 +85,4 @@ COPY scripts/ /usr/local/bin/
 RUN chmod +x /usr/local/bin/*.sh
 
 ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
-CMD ["false", "true"]
+CMD ["my-node.esgf.org", "false", "true"]
