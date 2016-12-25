@@ -1,5 +1,8 @@
 #!/bin/sh
 # script to build (and optionally push) all ESGF Docker images
+# note: must define env variable ESGF_REPO to point to ESGF distribution repository
+# Example: export ESGF_REPO=http://distrib-coffee.ipsl.jussieu.fr/pub/esgf
+#
 # Usage:
 # docker_build_and_push_all.sh <version> [--pushit] 
 # Example:
@@ -13,7 +16,7 @@ function build_and_push() {
   echo "BUILDING MODULE=$img PUSH=$pushit\n"
 
   # build the module
-  docker build --no-cache -t esgfhub/$img .
+  docker build --no-cache --build-arg ESGF_REPO=$ESGF_REPO -t esgfhub/$img .
 
   # optionally push the module to Docker Hub
   if [[ $pushit == *"push"* ]]; then
