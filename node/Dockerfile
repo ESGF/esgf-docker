@@ -43,7 +43,7 @@ ENV JAVA_HOME /usr/java/latest
 
 # install Python 2.7
 # note: option "--enable-shared" is needed by mod_wsgi, will generate /usr/local/lib/libpython2.7.so.1.0
-ENV PYTHON_VERSION 2.7.9
+ENV PYTHON_VERSION 2.7.13
 RUN cd /tmp && \
     wget https://www.python.org/ftp/python/${PYTHON_VERSION}/Python-${PYTHON_VERSION}.tgz && \
     tar xvfz Python-${PYTHON_VERSION}.tgz && \
