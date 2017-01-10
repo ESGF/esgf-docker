@@ -28,6 +28,12 @@ COPY certs/ /esg/config/tomcat/
 # custom env variables for starting Tomcat
 COPY bin/setenv.sh $CATALINA_HOME/bin
 
+# create non-privilged user to run Tomcat
+RUN groupadd tomcat
+RUN useradd -s /sbin/nologin -g tomcat -d /usr/local/tomcat tomcat
+RUN chown -R tomcat:tomcat /usr/local/apache-tomcat-${TOMCAT_VERSION}
+RUN chmod 775 /usr/local/tomcat/webapps
+
 #VOLUME /esg/config
 #VOLUME /esg/content
 

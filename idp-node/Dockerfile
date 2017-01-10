@@ -9,7 +9,13 @@ MAINTAINER Luca Cinquini <luca.cinquini@jpl.nasa.gov>
 ARG ESGF_REPO=http://distrib-coffee.ipsl.jussieu.fr/pub/esgf
 
 # FIXME
-ADD $ESGF_REPO/dist/devel/esgf-idp/esgf-idp.war /usr/local/tomcat/webapps/
-#COPY esgf-idp.war /usr/local/tomcat/webapps
+ADD $ESGF_REPO/dist/devel/esgf-idp/esgf-idp.war /usr/local/tomcat/webapps/esgf-idp/
+#COPY esgf-idp.war /usr/local/tomcat/webapps/esgf-idp/
+RUN cd /usr/local/tomcat/webapps/esgf-idp/ && \
+    jar xvf esgf-idp.war && \
+    rm esgf-idp.war && \
+    chown -R tomcat:tomcat /usr/local/tomcat/webapps/esgf-idp
 
+# run Tomcat as non-privileged user
+USER tomcat
 ENTRYPOINT ["/usr/local/tomcat/bin/catalina.sh", "run"]

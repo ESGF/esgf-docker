@@ -32,6 +32,7 @@ services:
       - dbnetwork 
     volumes:
       - tds_data:/esg/content/thredds
+      - $ESGF_CONFIG/webapps/thredds/WEB-INF/web.xml:/usr/local/tomcat/webapps/thredds/WEB-INF/web.xml
     volumes_from:
       - esgf-config
     environment:
@@ -59,6 +60,7 @@ services:
 
   # data container holding site-specific ESGF configuration
   # this container stops after the volumes are initialized
+  # only include congiguration common to more than one container
   esgf-config:
     image: centos:6
     container_name: esgf-config
@@ -67,7 +69,6 @@ services:
      - $ESGF_CONFIG/httpd/conf/esgf-httpd.conf:/etc/httpd/conf.d/esgf-httpd.conf
      - $ESGF_CONFIG/grid-security/certificates/:/etc/grid-security/certificates/
      - $ESGF_CONFIG/esg/config/:/esg/config/
-     - $ESGF_CONFIG/webapps/thredds/WEB-INF/web.xml:/usr/local/tomcat/webapps/thredds/WEB-INF/web.xml
      - $ESGF_CONFIG/esg/config/tomcat/esg-truststore.ts:/usr/java/latest/jre/lib/security/jssecacerts
 
 

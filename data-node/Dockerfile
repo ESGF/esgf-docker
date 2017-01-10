@@ -16,7 +16,8 @@ RUN mkdir -p /usr/local/tomcat/webapps/esg-orp
 ADD $ESGF_REPO/dist/devel/esg-orp/esg-orp.war /usr/local/tomcat/webapps/esg-orp/
 RUN cd /usr/local/tomcat/webapps/esg-orp && \
     jar xvf esg-orp.war && \
-    rm esg-orp.war
+    rm esg-orp.war && \
+    chown -R tomcat:tomcat /usr/local/tomcat/webapps/esg-orp
 
 # properties to read the Tomcat kesytore, used to sign the authentication cookie
 # these values are the same for all ESGF nodes
@@ -28,7 +29,8 @@ RUN mkdir -p /usr/local/tomcat/webapps/thredds
 ADD $ESGF_REPO/dist/devel/thredds/5.0/5.0.0/thredds.war /usr/local/tomcat/webapps/thredds/
 RUN cd /usr/local/tomcat/webapps/thredds && \
     jar xvf thredds.war && \
-    rm thredds.war
+    rm thredds.war && \
+    chown -R tomcat:tomcat /usr/local/tomcat/webapps/thredds
 
 # TDS memory configuration
 COPY thredds/conf/threddsConfig.xml /esg/content/thredds/threddsConfig.xml
@@ -49,5 +51,9 @@ RUN chmod +x /usr/local/bin/change_data_node_password.sh
 # TDS test ESGF catalogs
 # COPY esgf-content/thredds/ /esg/content/thredds/
 
-# start container
+# change ownership of content directory
+RUN chown -R tomcat:tomcat /esg/content/thredds
+
+# start container as non-privilged user
+USER tomcat
 ENTRYPOINT ["/usr/local/tomcat/bin/catalina.sh", "run"]
