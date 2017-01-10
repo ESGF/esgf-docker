@@ -26,8 +26,16 @@ COPY scripts/add_shard.sh /usr/local/bin/add_shard.sh
 RUN /usr/local/bin/add_shard.sh master 8984
 RUN /usr/local/bin/add_shard.sh slave 8983
 
+# create non-privilged user to run Solr server
+RUN groupadd solr
+RUN useradd -s /sbin/nologin -g solr -d /usr/local/solr solr
+RUN chown -R solr:solr /usr/local/solr-${SOLR_VERSION}
+RUN chown -R solr:solr ${SOLR_HOME}
+RUN chown -R solr:solr ${SOLR_DATA_DIR}
+
 EXPOSE 8983
 EXPOSE 8984
 
 COPY scripts/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+USER solr
 ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]

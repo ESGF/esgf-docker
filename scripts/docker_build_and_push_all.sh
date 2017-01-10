@@ -16,7 +16,8 @@ function build_and_push() {
   echo "BUILDING MODULE=$img PUSH=$pushit\n"
 
   # build the module
-  docker build --no-cache --build-arg ESGF_REPO=$ESGF_REPO -t esgfhub/$img .
+  #docker build --no-cache --build-arg ESGF_REPO=$ESGF_REPO -t esgfhub/$img .
+  docker build --no-cache -t esgfhub/$img .
 
   # optionally push the module to Docker Hub
   if [[ $pushit == *"push"* ]]; then
