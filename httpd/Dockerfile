@@ -32,4 +32,9 @@ COPY html/ /var/www/html/
 EXPOSE 80 443
 
 ADD scripts/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+
+# start httpd server
+# parent process runs as 'root' to access port 80 and configuration files,
+# but it does NOT serve client requests
+# the child processes that serve user requests run as user 'apache'
 ENTRYPOINT ["apachectl", "-D", "FOREGROUND"]
