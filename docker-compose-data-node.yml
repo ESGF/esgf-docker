@@ -81,7 +81,9 @@ services:
    image: esgfhub/esgf-vsftp:${ESGF_VERSION}
    container_name: ftp
    ports:
+     - "20:20"
      - "21:21"
+     - "12020-12025:12020-12025"
    networks:
      - default
    volumes:
