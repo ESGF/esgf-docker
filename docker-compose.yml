@@ -33,12 +33,17 @@ services:
     volumes:
       - tds_data:/esg/content/thredds
       - $ESGF_CONFIG/webapps/thredds/WEB-INF/web.xml:/usr/local/tomcat/webapps/thredds/WEB-INF/web.xml
+      - $ESGF_DATA_DIR:/esg/data
+      - $ESGF_CONFIG/grid-security/certificates/:/etc/grid-security/certificates/
+      #- $ESGF_CONFIG/esg/config/esgcet:/esg/config/esgcet
+      - $ESGF_CONFIG/globus/certificate-file:/root/.globus/certificate-file
     volumes_from:
       - esgf-config
     environment:
      - ESGF_HOSTNAME
     depends_on:
       - esgf-postgres
+
 
   # ESGF Identity Provider
   esgf-idp-node:
@@ -60,7 +65,7 @@ services:
 
   # data container holding site-specific ESGF configuration
   # this container stops after the volumes are initialized
-  # only include congiguration common to more than one container
+  # only include configuration common to more than one container
   esgf-config:
     image: centos:6
     container_name: esgf-config
@@ -116,23 +121,6 @@ services:
        - dbnetwork
      volumes:
        - pg_data:/var/lib/pgsql/data
-
-  # ESGF publisher application
-  esgf-publisher:
-    image: esgfhub/esgf-publisher:${ESGF_VERSION}
-    container_name: publisher
-    depends_on:
-       - esgf-postgres
-    networks:
-       - default
-       - dbnetwork
-    volumes:
-      - $ESGF_DATA_DIR:/esg/data
-      - $ESGF_CONFIG/httpd/certs/:/etc/certs/
-      - $ESGF_CONFIG/grid-security/certificates/:/etc/grid-security/certificates/
-      - $ESGF_CONFIG/esg/config/esgf.properties:/esg/config/esgf.properties
-    volumes_from:
-      - esgf-data-node
 
   # data container to hold CoG source code and python virtual environment
   # this container stops after the volume 'cog_data' is initialized
