@@ -25,6 +25,8 @@ su --login - postgres --command "psql esgcet < /usr/local/bin/esgf_security.sql"
 su --login - postgres --command "psql esgcet < /usr/local/bin/esgf_security_data.sql"
 # list database users
 su --login - postgres --command "psql -c \"\du;\""
+# initialize migration table
+su --login - postgres --command "psql esgcet < /usr/local/bin/esgf_migrate_version.sql"
 }
 
 # Call functions

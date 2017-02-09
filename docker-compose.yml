@@ -103,7 +103,6 @@ services:
       - esgf-config
     networks:
       - default
-    #  - dbnetwork
 
   # ESGF postgres database
   esgf-postgres:
@@ -117,6 +116,23 @@ services:
        - dbnetwork
      volumes:
        - pg_data:/var/lib/pgsql/data
+
+  # ESGF publisher application
+  esgf-publisher:
+    image: esgfhub/esgf-publisher:${ESGF_VERSION}
+    container_name: publisher
+    depends_on:
+       - esgf-postgres
+    networks:
+       - default
+       - dbnetwork
+    volumes:
+      - $ESGF_DATA_DIR:/esg/data
+      - $ESGF_CONFIG/httpd/certs/:/etc/certs/
+      - $ESGF_CONFIG/grid-security/certificates/:/etc/grid-security/certificates/
+      - $ESGF_CONFIG/esg/config/esgf.properties:/esg/config/esgf.properties
+    volumes_from:
+      - esgf-data-node
 
   # data container to hold CoG source code and python virtual environment
   # this container stops after the volume 'cog_data' is initialized
@@ -141,7 +157,6 @@ services:
        - COG_DIR=/usr/local/cog
        - COG_INSTALL_DIR=/usr/local/cog/cog_install
        - COG_CONFIG_DIR=/usr/local/cog/cog_config
-
 
   esgf-httpd:
    image: esgfhub/esgf-httpd:${ESGF_VERSION}

@@ -32,6 +32,10 @@ RUN cd /usr/local/tomcat/webapps/thredds && \
     rm thredds.war && \
     chown -R tomcat:tomcat /usr/local/tomcat/webapps/thredds
 
+# TDS configuration root
+RUN mkdir /esg/content/thredds
+VOLUME /esg/content/thredds
+
 # TDS memory configuration
 COPY thredds/conf/threddsConfig.xml /esg/content/thredds/threddsConfig.xml
 
@@ -51,8 +55,11 @@ RUN chmod +x /usr/local/bin/change_data_node_password.sh
 # TDS test ESGF catalogs
 # COPY esgf-content/thredds/ /esg/content/thredds/
 
+# TDS catalogs location
+RUN mkdir -p /esg/content/thredds/esgcet
+
 # change ownership of content directory
-RUN chown -R tomcat:tomcat /esg/content/thredds
+RUN chown -R tomcat:tomcat  /esg/content/thredds/
 
 # start container as non-privilged user
 USER tomcat
