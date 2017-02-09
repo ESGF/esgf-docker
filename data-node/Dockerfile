@@ -88,6 +88,7 @@ COPY thredds/conf/threddsConfig.xml /esg/content/thredds/threddsConfig.xml
 
 # ESGF root catalog
 COPY thredds/conf/catalog.xml /esg/content/thredds/catalog.xml
+COPY thredds/conf/esgcet/catalog.xml /esg/content/thredds/esgcet/catalog.xml
 
 # TDS customized applicationContext.xml file with ESGF authorizer
 COPY thredds/conf/applicationContext.xml /usr/local/tomcat/webapps/thredds/WEB-INF/applicationContext.xml
@@ -106,7 +107,7 @@ RUN chmod +x /usr/local/bin/change_data_node_password.sh
 # COPY esgf-content/thredds/ /esg/content/thredds/
 
 # TDS catalogs location
-RUN mkdir -p /esg/content/thredds/esgcet
+#RUN mkdir -p /esg/content/thredds/esgcet
 
 # change ownership of content directory
 RUN chown -R tomcat:tomcat  /esg/content/thredds/

@@ -27,3 +27,6 @@ sed -i.back 's/my\.esgf\.node/'"${ESGF_HOSTNAME}"'/g' $ESGF_CONFIG/httpd/conf/es
 
 # change TDS access control filters
 sed -i.back 's/my\.esgf\.node/'"${ESGF_HOSTNAME}"'/g' $ESGF_CONFIG/webapps/thredds/WEB-INF/web.xml
+
+# change ESGF publisher configuration (esg.ini)
+sed -i.back 's/my\.esgf\.node/'"${ESGF_HOSTNAME}"'/g' $ESGF_CONFIG/esg/config/esgcet/esg.ini

@@ -14,5 +14,6 @@ echo "Setting digested password=$password_hash"
 # replace digested password in tomcat-users.xml
 sed -i -- 's/password=\"[^\"]*\"/password=\"'"${password_hash}"'\"/g' /esg/config/tomcat/tomcat-users.xml
 
-# replace clear-text password in esg.ini
-# TO DO
+# replace clear-text passwords in esg.ini
+sed -i -- 's/dbsuper:changeit/dbsuper:'"${ESGF_PASSWORD}"'/g' /esg/config/esgcet/esg.ini
+sed -i -- 's/thredds_password.*/thredds_password = '"${ESGF_PASSWORD}"'/g' /esg/config/esgcet/esg.ini
