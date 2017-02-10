@@ -1,6 +1,6 @@
 # ESGF index node:  esgf-search application running inside Tomcat
 
-FROM esgfhub/esgf-tomcat:1.0
+FROM esgfhub/esgf-tomcat:1.1
 
 MAINTAINER Luca Cinquini <luca.cinquini@jpl.nasa.gov>
 

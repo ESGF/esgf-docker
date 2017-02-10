@@ -1,7 +1,7 @@
 # ESGF node with CoG web application
 # When running a container, must have $ESGF_HOSTNAME env set,
 
-FROM esgfhub/esgf-node:1.0
+FROM esgfhub/esgf-node:1.1
 
 MAINTAINER Luca Cinquini <luca.cinquini@jpl.nasa.gov>
 

@@ -3,7 +3,7 @@
 # o ESGF publisher client (which needs access to the TDS file system)
 # o ORP
 
-FROM esgfhub/esgf-tomcat:1.0
+FROM esgfhub/esgf-tomcat:1.1
 
 MAINTAINER Luca Cinquini <luca.cinquini@jpl.nasa.gov>
 

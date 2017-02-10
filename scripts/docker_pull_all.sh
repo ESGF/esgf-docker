@@ -2,6 +2,7 @@
 # Script to pull the latest version of all ESGF Docker images
 # Usage:
 # ./docker_pull_all.sh [version]
+# Example: # ./docker_pull_all.sh 1.1
 
 # optional 'version' argument - defaults to 'latest'
 version=${1:-latest}
