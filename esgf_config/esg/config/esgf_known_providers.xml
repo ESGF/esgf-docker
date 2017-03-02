@@ -62,6 +62,10 @@
   <URL>https://esgf-data.dkrz.de/esgf-idp/openid/</URL>
  </OP>
  <OP>
+  <NAME>NASA Center for Climate Simulation (NCCS)</NAME>
+  <URL>https://esgf.nccs.nasa.gov/esgf-idp/openid/</URL>
+ </OP>
+ <OP>
   <NAME>National Computational Infrastructure (NCI)</NAME>
   <URL>https://esgf.nci.org.au/esgf-idp/openid/</URL>
  </OP>
@@ -69,11 +73,9 @@
   <NAME>NOAA Geophysical Fluid Dynamics Laboratory (GFDL)</NAME>
   <URL>https://esgdata.gfdl.noaa.gov/esgf-idp/openid/</URL>
  </OP>
- <!-- 
  <OP>
   <NAME>NOAA Enviromental System Research Laboratory (ESRL)</NAME>
-  <URL>https://hydra.fsl.noaa.gov/esgf-idp/openid/</URL>
+  <URL>https://esgf.esrl.noaa.gov/esgf-idp/openid/</URL>
  </OP>
- -->
 
 </OPS>
