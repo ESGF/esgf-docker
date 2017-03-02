@@ -86,9 +86,10 @@ RUN mkdir -p /esg/content/thredds
 # TDS memory configuration
 COPY thredds/conf/threddsConfig.xml  /esg/content/thredds/threddsConfig.xml
 
-# ESGF root catalog - will override TDS startup catalog with test data
-#COPY thredds/conf/catalog.xml /esg/content/thredds/catalog.xml
+# ESGF root catalog
+COPY thredds/conf/catalog.xml /esg/content/thredds/catalog.xml-esgcet
 #COPY thredds/conf/esgcet/catalog.xml /esg/content/thredds/esgcet/catalog.xml
+RUN mkdir -p /esg/content/thredds/esgcet
 
 # TDS customized applicationContext.xml file with ESGF authorizer
 COPY thredds/conf/applicationContext.xml /usr/local/tomcat/webapps/thredds/WEB-INF/applicationContext.xml
