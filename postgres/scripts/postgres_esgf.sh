@@ -21,6 +21,7 @@ su --login - postgres --command "psql -c \"CREATE DATABASE esgcet;\""
 su --login - postgres --command "psql esgcet < /usr/local/bin/esgf_esgcet.sql"
 su --login - postgres --command "psql esgcet < /usr/local/bin/esgf_node_manager.sql"
 su --login - postgres --command "psql esgcet < /usr/local/bin/esgf_security.sql"
+su --login - postgres --command "psql esgcet < /usr/local/bin/esgf_dashboard.sql"
 # load ESGF data
 su --login - postgres --command "psql esgcet < /usr/local/bin/esgf_security_data.sql"
 # list database users

@@ -6,7 +6,6 @@ MAINTAINER Luca Cinquini <luca.cinquini@jpl.nasa.gov>
 
 # install and configure postgres
 RUN yum -y update; yum clean all
-RUN yum -y install epel-release; yum clean all
 RUN yum -y install postgresql-server postgresql postgresql-contrib supervisor; yum clean all
 
 # postgres + ESGF scripts

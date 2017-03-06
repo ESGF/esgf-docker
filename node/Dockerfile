@@ -30,6 +30,9 @@ RUN yum -y update && \
     libjpeg-turbo-devel && \
     yum clean all
 
+# install additional epel repository
+RUN yum -y install epel-release; yum clean all
+
 # install Oracle Java 8
 ENV JAVA_VERSION 8u31
 ENV BUILD_VERSION b13

@@ -57,8 +57,8 @@ ENV ESGINI /esg/config/esgcet/esg.ini
 # ESGF ORP
 RUN mkdir -p /usr/local/tomcat/webapps/esg-orp
 
-#COPY esgf-orp/esg-orp.war /usr/local/tomcat/webapps/esg-orp/esg-orp.war
-ADD $ESGF_REPO/dist/devel/esg-orp/esg-orp.war /usr/local/tomcat/webapps/esg-orp/
+COPY esgf-orp/esg-orp.war /usr/local/tomcat/webapps/esg-orp/esg-orp.war
+#ADD $ESGF_REPO/dist/devel/esg-orp/esg-orp.war /usr/local/tomcat/webapps/esg-orp/
 RUN cd /usr/local/tomcat/webapps/esg-orp && \
     jar xvf esg-orp.war && \
     rm esg-orp.war && \
@@ -73,8 +73,8 @@ COPY esgf-orp/conf/esg-orp.properties /usr/local/tomcat/webapps/esg-orp/WEB-INF/
 # TDS
 
 RUN mkdir -p /usr/local/tomcat/webapps/thredds
-#COPY thredds/thredds.war /usr/local/tomcat/webapps/thredds/thredds.war
-ADD $ESGF_REPO/dist/devel/thredds/5.0/5.0.0/thredds.war /usr/local/tomcat/webapps/thredds/
+COPY thredds/thredds.war /usr/local/tomcat/webapps/thredds/thredds.war
+#ADD $ESGF_REPO/dist/devel/thredds/5.0/5.0.0/thredds.war /usr/local/tomcat/webapps/thredds/
 RUN cd /usr/local/tomcat/webapps/thredds && \
     jar xvf thredds.war && \
     rm thredds.war && \
@@ -112,6 +112,35 @@ RUN chmod +x /usr/local/bin/change_data_node_password.sh
 
 # change ownership of content directory
 RUN chown -R tomcat:tomcat  /esg/content/thredds/
+
+#===========================================
+
+# Dashboard
+
+# library dependencies
+RUN yum -y install epel-release
+RUN yum install -y curl-devel \
+                   GeoIP \
+                   GeoIP-devel
+
+# must write postgress password for batch access
+RUN echo 'esgf-postgres:5432:esgcet:dbsuper:changeit' >> /root/.pgpass \
+    && chmod 0600 /root/.pgpass
+
+# execute dashboard installation script
+COPY dashboard/dashboard.sh /usr/local/bin/dashboard.sh
+#RUN /usr/local/bin/dashboard.sh
+
+# install esgf-stats-api war file
+COPY dashboard/esgf-stats-api.war /usr/local/tomcat/webapps/esgf-stats-api/esgf-stats-api.war
+#ADD $ESGF_REPO/dist/devel/esgf-stats-api/esgf-stats-api.war /usr/local/tomcat/webapps/esgf-stats-api/esgf-stats-api.war
+RUN cd /usr/local/tomcat/webapps/esgf-stats-api && \
+    jar xvf esgf-stats-api.war && \
+    rm esgf-stats-api.war && \
+    chown -R tomcat:tomcat /usr/local/tomcat/webapps/esgf-stats-api
+
+
+#===========================================
 
 # start container as non-privilged user
 USER tomcat
