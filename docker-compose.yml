@@ -9,7 +9,7 @@
 # ESGF_VERSION: version of ESGF/Docker distribution
 #       example: export ESGF_VERSION=1.0
 
-version: '2'
+version: '2.1'
 
 networks:
   # network to keep postgres database isolated
@@ -144,6 +144,7 @@ services:
        - COG_DIR=/usr/local/cog
        - COG_INSTALL_DIR=/usr/local/cog/cog_install
        - COG_CONFIG_DIR=/usr/local/cog/cog_config
+       - ESGF_HOSTNAME
 
   esgf-httpd:
    image: esgfhub/esgf-httpd:${ESGF_VERSION}
@@ -157,11 +158,14 @@ services:
    environment:
      - SSL_CERT_DIR=/etc/grid-security/certificates
      - COG_CONFIG_DIR=/usr/local/cog/cog_config
+     - ESGF_HOSTNAME
    ports:
      - "80:80"
      - "443:443"
    depends_on:
      - esgf-cog
+   healthcheck:
+     test: 'curl --fail "https://${ESGF_HOSTNAME}/" || exit 1'
    # httpd URLs must use hostname=$ESGF_HOSTNAME
    networks:
      default:

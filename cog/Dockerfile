@@ -6,7 +6,7 @@ FROM esgfhub/esgf-node:1.1
 MAINTAINER Luca Cinquini <luca.cinquini@jpl.nasa.gov>
 
 # choose CoG version
-ENV COG_TAG=v3.8.0
+ENV COG_TAG=v3.9.0-RC3
 
 # setup CoG environment
 ENV COG_DIR=/usr/local/cog
@@ -25,8 +25,8 @@ RUN cd $COG_DIR && \
 RUN cd $COG_DIR && \
     git clone https://github.com/EarthSystemCoG/COG cog_install && \
     cd cog_install && \
-    git checkout -b devel origin/devel
-    #git checkout $COG_TAG
+    #git checkout -b devel origin/devel
+    git checkout $COG_TAG
 
 # install CoG dependencies
 RUN cd $COG_INSTALL_DIR && \
@@ -84,5 +84,7 @@ VOLUME $COG_INSTALL_DIR
 COPY scripts/ /usr/local/bin/
 RUN chmod +x /usr/local/bin/*.sh
 
+HEALTHCHECK CMD curl --fail "http://${ESGF_HOSTNAME}:8000/" || exit 1
+
 ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
-CMD ["my-node.esgf.org", "false", "true"]
+CMD ["$ESGF_HOSTNAME", "false", "true"]
