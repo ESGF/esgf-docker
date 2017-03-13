@@ -173,6 +173,28 @@ services:
          - "${ESGF_HOSTNAME}"
      dbnetwork: {}
 
+  esgf-node-manager:
+   image: esgfhub/esgf-node-manager:${ESGF_VERSION}
+   container_name: node-manager
+   entrypoint: /usr/local/bin/docker-entrypoint.sh
+   volumes_from:
+     - esgf-config
+   environment:
+     - SSL_CERT_DIR=/etc/grid-security/certificates
+     - ESGF_HOSTNAME
+   ports:
+     - "80:80"
+     - "443:443"
+   depends_on:
+     - esgf-postgres
+   # httpd URLs must use hostname=$ESGF_HOSTNAME
+   networks:
+     default:
+       aliases:
+         - "${ESGF_HOSTNAME}"
+     dbnetwork: {}
+
+
   # FTP server
   esgf-ftp:
    image: esgfhub/esgf-vsftp:${ESGF_VERSION}

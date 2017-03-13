@@ -1,0 +1,83 @@
+{
+    "create_timestamp": 1489424462.47994,
+    "links": [
+        {
+            "from": "1",
+            "speed": 0,
+            "status": "unverified",
+            "to": "2"
+        },
+        {
+            "from": "1",
+            "speed": 0,
+            "status": "unverified",
+            "to": "3"
+        },
+        {
+            "from": "1",
+            "speed": 0,
+            "status": "unverified",
+            "to": "4"
+        },
+        {
+            "from": "2",
+            "speed": 0,
+            "status": "unverified",
+            "to": "3"
+        },
+        {
+            "from": "2",
+            "speed": 0,
+            "status": "unverified",
+            "to": "4"
+        },
+        {
+            "from": "3",
+            "speed": 0,
+            "status": "unverified",
+            "to": "4"
+        }
+    ],
+    "membernodes": [
+        {
+            "members": [],
+            "supernode": "1"
+        },
+        {
+            "members": [],
+            "supernode": "2"
+        },
+        {
+            "members": [],
+            "supernode": "3"
+        },
+        {
+            "members": [],
+            "supernode": "4"
+        }
+    ],
+    "supernodes": [
+        {
+            "health": "new",
+            "hostname": "pcmdi11.llnl.gov",
+            "id": "1"
+        },
+        {
+            "health": "new",
+            "hostname": "esg-dev.ccs.ornl.gov",
+            "id": "2"
+        },
+        {
+            "health": "new",
+            "hostname": "vesgint-idx.ipsl.upmc.fr",
+            "id": "3"
+        },
+        {
+            "health": "new",
+            "hostname": "esgf-node.jpl.nasa.gov",
+            "id": "4"
+        }
+    ],
+    "total_membernodes": 0,
+    "total_supernodes": 4
+}

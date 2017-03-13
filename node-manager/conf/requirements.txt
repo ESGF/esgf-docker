@@ -1,0 +1,5 @@
+# Node Manager application dependencies
+django==1.10.3
+sqlalchemy
+psycopg2
+requests

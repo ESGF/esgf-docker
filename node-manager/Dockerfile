@@ -1,25 +1,99 @@
-# ESGF node manager running with Apache httpd and mod_wsgi
+# ESGF node manager running within Apache httpd and mod_wsgi
 
 FROM esgfhub/esgf-httpd:1.1
 
 MAINTAINER Luca Cinquini <luca.cinquini@jpl.nasa.gov>
 
-# use minimum esgf.properties file
-COPY conf/esgf.properties /esg/config/esgf.properties
+# install libs dependencies
+RUN yum -y update && \
+    yum -y install postgresql-devel postgresql postgresql-libs mod_ssl && \
+    yum clean all
 
-# apache configuration needed at installation
-COPY conf/esgf-httpd.conf /etc/httpd/conf/esgf-httpd.conf
+# create Python virtual environment
+RUN mkdir -p /opt/esgf/virtual && \
+    cd /opt/esgf/virtual && \
+    virtualenv python
+ENV PYTHON_VENV=/opt/esgf/virtual/python
 
-# postgres password
-COPY conf/esg_pg_pass /esg/config/.esg_pg_pass
-
-# error: /usr/local/bin/python: error while loading shared libraries: libpython2.7.so.1.0: cannot open shared object file: No such file or directory 
-ENV LD_LIBRARY_PATH /usr/local/lib:/usr/local/bin/python
-RUN ln -s /usr/local/lib/libpython2.7.so.1.0 /usr/lib/libpython2.7.so.1.0
+# install dependencies in Python virtual environment
+COPY conf/requirements.txt /tmp/.
+RUN cd /tmp && \
+    source $PYTHON_VENV/bin/activate && \
+    pip install -r requirements.txt
 
 # install node manager from GitHub repo
-RUN cd /tmp && \
-    git clone https://github.com/pchengi/nm-workspace && \
-    ./nm-installer.sh
+ENV INST_DIR /usr/local
+ENV NM_DIR $INST_DIR/esgf-node-manager/src
+
+RUN cd $INST_DIR && \
+    git clone https://github.com/ESGF/esgf-node-manager.git && \
+    cd esgf-node-manager && \
+    git checkout devel
+
+# custom configuration for node manager
+# FIXME: this must be done outside of image creation once the $ESGF_HOSTNAME has been set
+ENV ESGF_HOSTNAME my-node.esgf.org
+RUN cd $NM_DIR && \
+    d=`date` && \
+    sk=`echo $d $ESGF_HOSTNAME | sha256sum | awk '{print $1}'` && \
+    sed -i s/changeme1/$sk/ python/server/nodemgr/nodemgr/settings.py && \
+    sed -i s/changeme2/$ESGF_HOSTNAME/ python/server/nodemgr/nodemgr/settings.py
+
+# executables
+# NOTE: must replace LD_LIBRARY_PATH in esgfnmd (note use of sed with ':' delimiter)
+RUN cp $NM_DIR/scripts/esgf-nm-ctl $INST_DIR/bin/. && \
+    chmod u+x $INST_DIR/bin/esgf-nm-ctl $NM_DIR/scripts/esgfnmd && \
+    sed -i s:/opt/esgf/python/lib:/usr/local/lib: $NM_DIR/scripts/esgfnmd
+
+# set proper file permissions
+RUN adduser nodemgr && \
+    usermod -a -G apache nodemgr
+
+RUN mkdir -p /esg/log /esg/tasks /esg/config && \
+    touch /esg/log/django.log && \
+    touch /esg/log/esgf_nm.log && \
+    touch /esg/log/esgf_nm_dj.log && \
+    touch /esg/log/esgfnmd.out.log && \
+    touch /esg/log/esgfnmd.err.log && \
+    touch /esg/config/nm.properties && \
+    touch /esg/config/registration.xml
+
+# FED_NAME=esgf-test
+# get -O /esg/config/timestamp http://aims1.llnl.gov/nm-cfg/timestamp
+# wget -O /esg/config/esgf_supernodes_list.json http://aims1.llnl.gov/nm-cfg/$FED_NAME/esgf_supernodes_list.json
+#COPY conf/timestamp /esg/config/timestamp
+#COPY conf/esgf_supernodes_list.json /esg/config/esgf_supernodes_list.json
+
+RUN chown nodemgr:nodemgr /esg/log/esgf_nm.log && \
+    chown nodemgr:nodemgr /esg/log/esgfnmd.out.log && \
+    chown nodemgr:nodemgr /esg/log/esgfnmd.err.log && \
+    chown nodemgr:apache /esg/config/nm.properties && \
+    chown nodemgr:apache /esg/config/registration.xml && \
+    #chown nodemgr:nodemgr /esg/config/timestamp && \
+    #chown nodemgr:nodemgr /esg/config/esgf_supernodes_list.json && \
+    chmod 777 /esg/tasks && \
+    chown nodemgr:nodemgr $NM_DIR/scripts/esgfnmd && \
+    chown apache:apache /esg/log/esgf_nm_dj.log && \
+    chown apache:apache /esg/log/django.log
+
+# generate the nodemap
+# FIXME: do after image is created using site-specific value
+#RUN cd $NM_DIR/python/server && \
+#    python gen_nodemap.py $ESGF_HOSTNAME && \
+#    chmod 755 /esg/config/esgf_nodemgr_map.json && \
+#    chown nodemgr:nodemgr /esg/config/esgf_nodemgr_map.json && \
+#    chmod a+r /esg/config/esgf_nodemgr_map.json
+
+#COPY conf/esgf_nodemgr_map.json /esg/config/esgf_nodemgr_map.json
+#RUN chmod 755 /esg/config/esgf_nodemgr_map.json && \
+#    chown nodemgr:nodemgr /esg/config/esgf_nodemgr_map.json && \
+#    chmod a+r /esg/config/esgf_nodemgr_map.json
+
+# FIXME
+#COPY conf/config_type /esg/config/config_type
+
+# override httpd configuration to run the node manager application
+#COPY conf/esgf-httpd.conf /etc/httpd/conf.d/esgf-httpd.conf
 
 ENTRYPOINT ["apachectl", "-D", "FOREGROUND"]
+#ENTRYPOINT ["/bin/bash"]
