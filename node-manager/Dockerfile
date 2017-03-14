@@ -92,8 +92,8 @@ RUN chown nodemgr:nodemgr /esg/log/esgf_nm.log && \
 # FIXME
 #COPY conf/config_type /esg/config/config_type
 
-# override httpd configuration to run the node manager application
-#COPY conf/esgf-httpd.conf /etc/httpd/conf.d/esgf-httpd.conf
+# FIXME: fix the source code to NOT hard-wire postgres on localhost
+COPY src/python/server/query.py  /usr/local/esgf-node-manager/src/python/server/query.py
 
 # make Python installation available to Apache httpd + mod_wsgi
 VOLUME /opt/esgf/virtual/python
@@ -104,3 +104,4 @@ VOLUME /esg/log
 COPY scripts/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
 #ENTRYPOINT ["/bin/bash"]
+#ENTRYPOINT ["tail", "-f", "/dev/null"]
