@@ -190,7 +190,6 @@ services:
      default: {}
      dbnetwork: {}
 
-
   # FTP server
   esgf-ftp:
    image: esgfhub/esgf-vsftp:${ESGF_VERSION}

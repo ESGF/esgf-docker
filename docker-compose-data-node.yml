@@ -69,6 +69,7 @@ services:
    entrypoint: /usr/local/bin/docker-entrypoint.sh
    volumes_from:
      - esgf-config
+     - esgf-node-manager
    ports:
      - "80:80"
      - "443:443"
@@ -77,6 +78,21 @@ services:
      default:
        aliases:
          - "${ESGF_HOSTNAME}"
+     dbnetwork: {}
+
+  esgf-node-manager:
+   image: esgfhub/esgf-node-manager:${ESGF_VERSION}
+   container_name: node-manager
+   entrypoint: /usr/local/bin/docker-entrypoint.sh
+   volumes_from:
+     - esgf-config
+   environment:
+     - SSL_CERT_DIR=/etc/grid-security/certificates
+     - ESGF_HOSTNAME
+   depends_on:
+     - esgf-postgres
+   networks:
+     default: {}
      dbnetwork: {}
 
   # FTP server
