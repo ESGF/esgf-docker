@@ -76,10 +76,11 @@ RUN chown nodemgr:nodemgr /esg/log/esgf_nm.log && \
     chown apache:apache /esg/log/esgf_nm_dj.log && \
     chown apache:apache /esg/log/django.log
 
-# generate the nodemap
 # FIXME: do after image is created using site-specific value
+# generate the nodemap
+#COPY conf/esgf_supernodes_list.json /esg/config/esgf_supernodes_list.json
 #RUN cd $NM_DIR/python/server && \
-#    python gen_nodemap.py $ESGF_HOSTNAME && \
+#    python gen_nodemap.py INIT $ESGF_HOSTNAME && \
 #    chmod 755 /esg/config/esgf_nodemgr_map.json && \
 #    chown nodemgr:nodemgr /esg/config/esgf_nodemgr_map.json && \
 #    chmod a+r /esg/config/esgf_nodemgr_map.json
@@ -99,6 +100,7 @@ COPY src/python/server/query.py  /usr/local/esgf-node-manager/src/python/server/
 VOLUME /opt/esgf/virtual/python
 VOLUME /usr/local/esgf-node-manager
 VOLUME /esg/log
+VOLUME /esg/tasks
 
 # start Node Manager
 COPY scripts/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh

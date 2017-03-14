@@ -83,7 +83,6 @@ services:
   esgf-node-manager:
    image: esgfhub/esgf-node-manager:${ESGF_VERSION}
    container_name: node-manager
-   entrypoint: /usr/local/bin/docker-entrypoint.sh
    volumes_from:
      - esgf-config
    environment:
