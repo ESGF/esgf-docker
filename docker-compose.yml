@@ -155,6 +155,7 @@ services:
    volumes_from:
      - esgf-config
      - esgf-cog
+     - esgf-node-manager
    environment:
      - SSL_CERT_DIR=/etc/grid-security/certificates
      - COG_CONFIG_DIR=/usr/local/cog/cog_config
@@ -164,6 +165,7 @@ services:
      - "443:443"
    depends_on:
      - esgf-cog
+     - esgf-node-manager
    healthcheck:
      test: 'curl --fail "https://${ESGF_HOSTNAME}/" || exit 1'
    # httpd URLs must use hostname=$ESGF_HOSTNAME
@@ -182,16 +184,10 @@ services:
    environment:
      - SSL_CERT_DIR=/etc/grid-security/certificates
      - ESGF_HOSTNAME
-   ports:
-     - "80:80"
-     - "443:443"
    depends_on:
      - esgf-postgres
-   # httpd URLs must use hostname=$ESGF_HOSTNAME
    networks:
-     default:
-       aliases:
-         - "${ESGF_HOSTNAME}"
+     default: {}
      dbnetwork: {}
 
 

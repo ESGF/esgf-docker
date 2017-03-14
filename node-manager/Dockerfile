@@ -1,6 +1,6 @@
-# ESGF node manager running within Apache httpd and mod_wsgi
+# ESGF node manager
 
-FROM esgfhub/esgf-httpd:1.1
+FROM esgfhub/esgf-node:1.1
 
 MAINTAINER Luca Cinquini <luca.cinquini@jpl.nasa.gov>
 
@@ -95,5 +95,12 @@ RUN chown nodemgr:nodemgr /esg/log/esgf_nm.log && \
 # override httpd configuration to run the node manager application
 #COPY conf/esgf-httpd.conf /etc/httpd/conf.d/esgf-httpd.conf
 
-ENTRYPOINT ["apachectl", "-D", "FOREGROUND"]
+# make Python installation available to Apache httpd + mod_wsgi
+VOLUME /opt/esgf/virtual/python
+VOLUME /usr/local/esgf-node-manager
+VOLUME /esg/log
+
+# start Node Manager
+COPY scripts/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
 #ENTRYPOINT ["/bin/bash"]
