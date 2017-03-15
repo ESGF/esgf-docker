@@ -25,10 +25,11 @@ RUN cd /tmp && \
 ENV INST_DIR /usr/local
 ENV NM_DIR $INST_DIR/esgf-node-manager/src
 
+# FIXME: use 'master' branch
 RUN cd $INST_DIR && \
     git clone https://github.com/ESGF/esgf-node-manager.git && \
     cd esgf-node-manager && \
-    git checkout devel
+    git checkout docker
 
 # custom configuration for node manager
 # FIXME: this must be done outside of image creation once the $ESGF_HOSTNAME has been set
@@ -94,7 +95,10 @@ RUN chown nodemgr:nodemgr /esg/log/esgf_nm.log && \
 #COPY conf/config_type /esg/config/config_type
 
 # FIXME: fix the source code to NOT hard-wire postgres on localhost
-COPY src/python/server/query.py  /usr/local/esgf-node-manager/src/python/server/query.py
+#COPY src/python/server/query.py  /usr/local/esgf-node-manager/src/python/server/query.py
+#COPY src/python/server/nodemgr/nodemgr/nodemap.py /usr/local/esgf-node-manager/src/python/server/nodemgr/nodemgr/nodemap.py
+#COPY src/python/server/nodemgr/nodemgr/site_profile.py /usr/local/esgf-node-manager/src/python/server/nodemgr/nodemgr/site_profile.py
+#COPY src/python/server/supernode.py /usr/local/esgf-node-manager/src/python/server/supernode.py
 
 # make Python installation available to Apache httpd + mod_wsgi
 VOLUME /opt/esgf/virtual/python

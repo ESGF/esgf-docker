@@ -188,8 +188,6 @@ services:
    networks:
      default: {}
      dbnetwork: {}
-   depends_on:
-     - esgf-postgres
 
   # FTP server
   esgf-ftp:
