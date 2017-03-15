@@ -33,7 +33,7 @@ ENV PYTHON_VENV=/opt/esgf/virtual/python
 ENV INST_DIR /usr/local
 ENV NM_DIR $INST_DIR/esgf-node-manager/src
 
-# FIXME: use 'master' branch instead of 'docker'
+# FIXME: use 'master' branch instead of 'docker' branch
 RUN cd $INST_DIR && \
     git  clone https://github.com/ESGF/esgf-node-manager.git && \
     cd esgf-node-manager && \
@@ -48,29 +48,9 @@ RUN source $PYTHON_VENV/bin/activate && \
 RUN cp $NM_DIR/scripts/esgf-nm-ctl $INST_DIR/bin/. && \
     chmod u+x $INST_DIR/bin/esgf-nm-ctl $NM_DIR/scripts/esgfnmd 
 
-# set proper file permissions
+# add use to run the node manager as
 RUN adduser nodemgr && \
     usermod -a -G apache nodemgr
-
-#RUN mkdir -p /esg/log /esg/tasks /esg/config && \
-#    touch /esg/log/django.log && \
-#    touch /esg/log/esgf_nm.log && \
-#    touch /esg/log/esgf_nm_dj.log && \
-#    touch /esg/log/esgfnmd.out.log && \
-#    touch /esg/log/esgfnmd.err.log && \
-#    touch /esg/config/nm.properties && \
-#    touch /esg/config/registration.xml && \
-#    chown nodemgr:nodemgr /esg/log/esgf_nm.log && \
-#    chown nodemgr:nodemgr /esg/log/esgfnmd.out.log && \
-#    chown nodemgr:nodemgr /esg/log/esgfnmd.err.log && \
-#    chown nodemgr:apache /esg/config/nm.properties && \
-#    chown nodemgr:apache /esg/config/registration.xml && \
-#    #chown nodemgr:nodemgr /esg/config/timestamp && \
-#    #chown nodemgr:nodemgr /esg/config/esgf_supernodes_list.json && \
-#    chmod 777 /esg/tasks && \
-#    chown nodemgr:nodemgr $NM_DIR/scripts/esgfnmd && \
-#    chown apache:apache /esg/log/esgf_nm_dj.log && \
-#    chown apache:apache /esg/log/django.log
 
 # make Python installation available to Apache httpd + mod_wsgi
 VOLUME /opt/esgf/virtual/python
