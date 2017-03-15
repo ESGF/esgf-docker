@@ -6,6 +6,8 @@
 # /esg/config/esgf_supernodes_list.json : list of super nodes, 
 #                                         must be periodically updated to reflect the latest status of the federation
 # /esg/config/config_type : contains the encoded node type
+# 60 for a full node
+# 36 for a data node
 #
 # outout files:
 # /esg/config/registration.xml
