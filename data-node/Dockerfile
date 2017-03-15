@@ -127,10 +127,6 @@ RUN yum install -y curl-devel \
 RUN echo 'esgf-postgres:5432:esgcet:dbsuper:changeit' >> /root/.pgpass \
     && chmod 0600 /root/.pgpass
 
-# execute dashboard installation script
-COPY dashboard/dashboard.sh /usr/local/bin/dashboard.sh
-#RUN /usr/local/bin/dashboard.sh
-
 # install esgf-stats-api war file
 COPY dashboard/esgf-stats-api.war /usr/local/tomcat/webapps/esgf-stats-api/esgf-stats-api.war
 #ADD $ESGF_REPO/dist/devel/esgf-stats-api/esgf-stats-api.war /usr/local/tomcat/webapps/esgf-stats-api/esgf-stats-api.war
@@ -139,6 +135,9 @@ RUN cd /usr/local/tomcat/webapps/esgf-stats-api && \
     rm esgf-stats-api.war && \
     chown -R tomcat:tomcat /usr/local/tomcat/webapps/esgf-stats-api
 
+# execute dashboard installation script
+COPY dashboard/scripts/ /usr/local/bin/
+RUN /usr/local/bin/dashboard_ipservice.sh
 
 #===========================================
 

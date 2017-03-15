@@ -40,6 +40,8 @@ if [ "$3" != "" ]; then
         Fed=$3
 fi
 
+cd /usr/local
+
 git clone https://github.com/ESGF/esgf-dashboard.git
 
 cd esgf-dashboard/
@@ -55,24 +57,3 @@ make install
 
 cd -
 cd ..
-
-psql -h esgf-postgres -d esgcet -U dbsuper < esgf-dashboard/src/python/esgf/esgf-dashboard/schema_migration/versions/007_postgres_upgrade.sql
-psql -h esgf-postgres -d esgcet -U dbsuper < esgf-dashboard/src/python/esgf/esgf-dashboard/schema_migration/versions/008_postgres_upgrade.sql
-
-filename="/esg/config/esgf.properties"
-declare regex="esgf.host="
-while IFS='' read -r line || [[ -n "$line" ]]; do
-if [[ " $line " =~ $regex ]]
-    then
-        host=`echo $line | cut -d \= -f 2`
-        size=${#host}
-fi
-done < "$filename"
-
-sed "s/FQDN/$size/g" esgf-dashboard/src/python/esgf/esgf-dashboard/schema_migration/versions/009_postgres_upgrade.sql > esgf-dashboard/src/python/esgf/esgf-dashboard/schema_migration/versions/009_postgres_upgrade_new.sql
-
-mv esgf-dashboard/src/python/esgf/esgf-dashboard/schema_migration/versions/009_postgres_upgrade_new.sql esgf-dashboard/src/python/esgf/esgf-dashboard/schema_migration/versions/009_postgres_upgrade.sql
-
-psql -h esgf-postgres -d esgcet -U dbsuper < esgf-dashboard/src/python/esgf/esgf-dashboard/schema_migration/versions/009_postgres_upgrade.sql
-
-psql -h esgf-postgres -d esgcet -U dbsuper < esgf-dashboard/src/python/esgf/esgf-dashboard/schema_migration/versions/010_postgres_upgrade.sql
