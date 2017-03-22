@@ -127,6 +127,7 @@ RUN yum install -y curl-devel \
 RUN echo 'esgf-postgres:5432:esgcet:dbsuper:changeit' >> /root/.pgpass \
     && chmod 0600 /root/.pgpass
 
+
 # install esgf-stats-api war file
 COPY dashboard/esgf-stats-api.war /usr/local/tomcat/webapps/esgf-stats-api/esgf-stats-api.war
 #ADD $ESGF_REPO/dist/devel/esgf-stats-api/esgf-stats-api.war /usr/local/tomcat/webapps/esgf-stats-api/esgf-stats-api.war
@@ -138,6 +139,12 @@ RUN cd /usr/local/tomcat/webapps/esgf-stats-api && \
 # execute dashboard installation script
 COPY dashboard/scripts/ /usr/local/bin/
 RUN /usr/local/bin/dashboard_ipservice.sh
+
+# install additional GeoLiteCity database
+COPY dashboard/GeoLiteCity.dat.gz /tmp
+RUN mkdir -p /usr/local/geoip/share/GeoIP && \
+     cd /tmp && \
+     gunzip -c GeoLiteCity.dat.gz > /usr/local/geoip/share/GeoIP/GeoLiteCity.dat
 
 #===========================================
 
