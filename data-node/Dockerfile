@@ -116,6 +116,8 @@ RUN chown -R tomcat:tomcat  /esg/content/thredds/
 #===========================================
 
 # Dashboard
+# note: dashboard application accesses the postgres database via credentials 
+# stored in /esg/config/esg.ini and /esg/config/.esg_pg_pass
 
 # library dependencies
 RUN yum -y install epel-release

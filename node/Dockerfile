@@ -1,6 +1,7 @@
 # Docker image based on Centos 6 that includes:
 # Oracle Java 8
 # Python 2.7 + a few common Python packages
+# Supervisor
 # Also includes common, non-site specific ESGF env variables (ESGF_HOME).
 
 FROM centos:6
@@ -27,7 +28,7 @@ RUN yum -y update && \
     sqlite-devel \
     freetype-devel \
     postgresql-devel \
-    libjpeg-turbo-devel && \
+    libjpeg-turbo-devel \
     yum clean all
 
 # install additional epel repository
@@ -69,6 +70,14 @@ RUN pip install virtualenv
 RUN pip install wheel
 RUN pip install --use-wheel Pillow==${PILLOW_VERSION}
 
+# supervisor
+# executable: /usr/local/bin/supervisord
+# default supervisor configuration /etc/supervisord.conf :
+# will look for additional service configurations in /etc/supervisor/conf.d/
+RUN pip install supervisor
+COPY conf/supervisord.conf /etc/supervisord.conf
+RUN mkdir -p /etc/supervisor/conf.d/
+
 # common directories
 RUN mkdir -p /esg/config
 RUN mkdir -p /esg/content
@@ -76,3 +85,6 @@ RUN mkdir -p /esg/content
 # common environment variables
 # necessary to locate /esg/config/esgf.properties
 ENV ESGF_HOME /esg
+
+# start supervisor in non-daemon mode
+#ENTRYPOINT ["supervisord", "--nodaemon", "-c", "/etc/supervisord.conf"]

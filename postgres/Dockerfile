@@ -6,12 +6,11 @@ MAINTAINER Luca Cinquini <luca.cinquini@jpl.nasa.gov>
 
 # install and configure postgres
 RUN yum -y update; yum clean all
-RUN yum -y install postgresql-server postgresql postgresql-contrib supervisor; yum clean all
+RUN yum -y install postgresql-server postgresql postgresql-contrib; yum clean all
 
 # postgres + ESGF scripts
 ADD ./scripts/ /usr/local/bin/
 RUN chmod +x /usr/local/bin/postgresql-setup.sh
-RUN chmod +x /usr/local/bin/start_postgres.sh
 RUN chmod +x /usr/local/bin/postgres_esgf.sh
 RUN chmod +x /usr/local/bin/change_password.sh
 
@@ -24,7 +23,6 @@ RUN /usr/local/bin/postgresql-setup.sh initdb
 # configuration
 ADD ./conf/postgresql.conf /var/lib/pgsql/data/postgresql.conf
 RUN chown -v postgres.postgres /var/lib/pgsql/data/postgresql.conf
-ADD ./conf/supervisord.conf /etc/supervisord.conf
 RUN echo "host    all             all             0.0.0.0/0               md5" >> /var/lib/pgsql/data/pg_hba.conf
 
 # load ESGF schemas into postgres database
@@ -40,4 +38,6 @@ RUN chmod 0600 /root/.pgpass
 
 EXPOSE 5432
 
-CMD ["/bin/bash", "/usr/local/bin/start_postgres.sh"]
+# override deafult supervisor configuration
+ADD ./conf/supervisord.conf /etc/supervisord.conf
+ENTRYPOINT ["supervisord", "--nodaemon", "-c", "/etc/supervisord.conf"]
