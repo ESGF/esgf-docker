@@ -123,10 +123,11 @@ RUN yum install -y curl-devel \
                    GeoIP \
                    GeoIP-devel
 
-# must write postgress password for batch access
-RUN echo 'esgf-postgres:5432:esgcet:dbsuper:changeit' >> /root/.pgpass \
-    && chmod 0600 /root/.pgpass
-
+# install additional GeoLiteCity database
+COPY dashboard/GeoLiteCity.dat.gz /tmp
+RUN mkdir -p /usr/local/geoip/share/GeoIP && \
+     cd /tmp && \
+     gunzip -c GeoLiteCity.dat.gz > /usr/local/geoip/share/GeoIP/GeoLiteCity.dat
 
 # install esgf-stats-api war file
 COPY dashboard/esgf-stats-api.war /usr/local/tomcat/webapps/esgf-stats-api/esgf-stats-api.war
@@ -140,11 +141,11 @@ RUN cd /usr/local/tomcat/webapps/esgf-stats-api && \
 COPY dashboard/scripts/ /usr/local/bin/
 RUN /usr/local/bin/dashboard_ipservice.sh
 
-# install additional GeoLiteCity database
-COPY dashboard/GeoLiteCity.dat.gz /tmp
-RUN mkdir -p /usr/local/geoip/share/GeoIP && \
-     cd /tmp && \
-     gunzip -c GeoLiteCity.dat.gz > /usr/local/geoip/share/GeoIP/GeoLiteCity.dat
+# create non-privileged user to run the dashboard application
+RUN groupadd dashboard && \
+    useradd -s /sbin/nologin -g dashboard -d /usr/local/dashboard dashboard && \
+    chown -R dashboard:dashboard /usr/local/esgf-dashboard-ip
+RUN chmod a+w /var/run
 
 #===========================================
 
