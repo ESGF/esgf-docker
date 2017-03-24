@@ -119,6 +119,8 @@ RUN chown -R tomcat:tomcat  /esg/content/thredds/
 # note: dashboard application accesses the postgres database via credentials 
 # stored in /esg/config/esg.ini and /esg/config/.esg_pg_pass
 
+ENV DASHBOARD_HOME /usr/local/esgf-dashboard-ip
+
 # library dependencies
 RUN yum -y install epel-release
 RUN yum install -y curl-devel \
@@ -149,8 +151,13 @@ RUN groupadd dashboard && \
     chown -R dashboard:dashboard /usr/local/esgf-dashboard-ip
 RUN chmod a+w /var/run
 
+# install the supervisor configuration for the dashboard
+# problem: dashboard starts as daemon, supervisor cannot control...
+#ADD  dashboard/conf/supervisord.dashboard.conf /etc/supervisor/conf.d/supervisord.dashboard.conf 
+#RUN mkdir -p $DASHBOARD_HOME/logs
+
 #===========================================
 
-# start container as non-privilged user
-USER tomcat
-ENTRYPOINT ["/usr/local/tomcat/bin/catalina.sh", "run"]
+# start supervisor in non-daemon mode
+# same as esgf-tomcat ENTRYPOINT
+ENTRYPOINT ["supervisord", "--nodaemon", "-c", "/etc/supervisord.conf"]
