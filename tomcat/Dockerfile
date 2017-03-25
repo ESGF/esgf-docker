@@ -26,7 +26,7 @@ RUN cd /usr/local/tomcat/webapps && \
 COPY conf/server.xml /usr/local/tomcat/conf/server.xml
 COPY conf/context.xml /usr/local/tomcat/conf/context.xml
 COPY certs/ /esg/config/tomcat/
-COPY conf/supervisor.tomcat.conf /etc/supervisor/conf.d/supervisor.tomcat.conf
+COPY conf/supervisord.tomcat.conf /etc/supervisor/conf.d/supervisord.tomcat.conf
 
 # custom env variables for starting Tomcat
 COPY bin/setenv.sh $CATALINA_HOME/bin

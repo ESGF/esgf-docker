@@ -141,7 +141,7 @@ RUN cd /usr/local/tomcat/webapps/esgf-stats-api && \
     rm esgf-stats-api.war && \
     chown -R tomcat:tomcat /usr/local/tomcat/webapps/esgf-stats-api
 
-# execute dashboard installation script
+# execute dashboard installation script (without the postgres schema)
 COPY dashboard/scripts/ /usr/local/bin/
 RUN /usr/local/bin/dashboard_ipservice.sh
 
@@ -152,9 +152,10 @@ RUN groupadd dashboard && \
 RUN chmod a+w /var/run
 
 # install the supervisor configuration for the dashboard
-# problem: dashboard starts as daemon, supervisor cannot control...
-#ADD  dashboard/conf/supervisord.dashboard.conf /etc/supervisor/conf.d/supervisord.dashboard.conf 
-#RUN mkdir -p $DASHBOARD_HOME/logs
+# must start esgf-dashboard-ip in the foreground as non-daemon (no '&' to background the process)
+ADD dashboard/scripts/ip.service $DASHBOARD_HOME/bin/ip.service
+ADD dashboard/conf/supervisord.dashboard.conf /etc/supervisor/conf.d/supervisord.dashboard.conf 
+RUN mkdir -p $DASHBOARD_HOME/logs
 
 #===========================================
 
