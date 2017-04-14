@@ -1,0 +1,207 @@
+#####
+## This file contains variable definitions for a full production deployment with
+## the Waitress WSGI server proxied by Nginx
+#####
+
+#####
+## Server variables
+
+# The name of the server
+#   This should be the domain name by which the machine will be accessed over HTTP
+# server_name: ${SERVER_FQDN}
+
+# The email address to use for emails sent by the application
+server_email: no-reply@{{ server_name }}
+
+#####
+## Python installation
+
+# Distribution for IUS community repository (required for Python 2.7 installation)
+#   Valid values are 'rhel6', 'centos6'
+ius_distro: centos6
+
+# To use an existing Python 2.7 installation, set this variable instead
+#  virtualenv_command: /path/to/virtualenv-2.7
+
+#####
+## Nginx installation
+
+# If true, configure nginx proxy
+#   The Nginx proxy assumes it can find a WSGI server internally on port 5000
+#   This can be either Waitress or the Django development server
+use_nginx_proxy: true
+
+# Distribution for the Nginx repository
+#   Valid values are 'rhel' or 'centos'
+nginx_distro: centos
+
+# If true, generate and use a self-signed SSL certificate for Nginx
+#   Only used if use_nginx_proxy = true
+use_self_signed_ssl_cert: true
+
+# The subject of the self-signed certificate
+#   Only used if use_self_signed_ssl_cert = true
+ssl_cert_subject: /O=ESGF/CN={{ server_name }}
+
+# These variables are required if use_self_signed_ssl_cert = false
+# The variable ssl_certificate should contain any intermediate and root certificates
+# as well as the server certificate
+# ssl_certificate: |
+#   -----BEGIN CERTIFICATE-----
+#   MIIDejCCAmKgAwIBAgIBATANBgkqhkiG9w0BAQUFADA3MREwDwYDVQQLDAhTZWN1
+#   cml0eTEUMBIGA1UEAwwLTkRHIFRlc3QgQ0ExDDAKBgNVBAoMA05ERzAeFw0xNTAx
+#   MjExNDQ1MDFaFw0xODAxMjAxNDQ1MDFaMDUxDDAKBgNVBAoTA05ERzERMA8GA1UE
+#   CxMIU2VjdXJpdHkxEjAQBgNVBAMTCWxvY2FsaG9zdDCCASIwDQYJKoZIhvcNAQEB
+#   BQADggEPADCCAQoCggEBAOMpRfxWLaIhtknGau+z7dMyR3fZhe/lattwi11BTbV2
+#   9ZZCWveCpbuz4fmsxrdxYfRN3Sj2se9l3FqMR7EXOOGKX0Cwu6CHYady+MGhXzv3
+#   lLXLw1CE76gT1JL/rzrRMUKQS1hMhEemOqM9wZpDPBD2irWXEbd0qzKSvpr8715F
+#   eDBhZxBjCe9htxxHzGnJ5yePTZczWTO4R4mGTM2kOHzQYO5SyOEq8Tub6XzVr4gz
+#   kZwQY4kBA/smXj9hw7Tw+x+t6NJJji8Wgbuc1qVIkVh9rKwsAory9CKAH4wyW7V3
+#   0DbpJ5qfMWfVTjKNz85z74iG6TxT5glVAiuGfZGN+1MCAwEAAaOBkjCBjzAJBgNV
+#   HRMEAjAAMCwGCWCGSAGG+EIBDQQfFh1PcGVuU1NMIEdlbmVyYXRlZCBDZXJ0aWZp
+#   Y2F0ZTAdBgNVHQ4EFgQUo3cjtRyYhchtMUAcLyBXzck2dBswHwYDVR0jBBgwFoAU
+#   kEvQjGOPOj5DZEvsm96AdiiFXWgwFAYDVR0RBA0wC4IJbG9jYWxob3N0MA0GCSqG
+#   SIb3DQEBBQUAA4IBAQAztIcOLHGIbavMFMg/Ho3l7SZruHaTKbELxedBbxRij+GB
+#   uwITXLI0t5TyfR7+54kLLlYwWOuQ1AVbGNnFaGHA9vcaDxTYiY7u7Fm4SJZYMy6Y
+#   lVbDAumTzT9MDbW1tm5vlV9l6xrOViDictT3WF/Ae0lfrGsBe8jwExkD3U4FVfkx
+#   UupF61S5S6I/IscRR4qUtOmewAmWcma6AdPzAG4kyqltjn8LoP35yU86NgfHSsfH
+#   H8fgLcMh0ERogTivzss4vtsCPbpiAEOUIsjXQ83bcyOdKKrWTAhFj7UdBMcrjiIS
+#   5q/NnBPbyXb0DBAl+lxGd33l7ha08SSUIgaFQAxf
+#   -----END CERTIFICATE-----
+# ssl_private_key: |
+#   -----BEGIN RSA PRIVATE KEY-----
+#   MIIEpAIBAAKCAQEA4ylF/FYtoiG2ScZq77Pt0zJHd9mF7+Vq23CLXUFNtXb1lkJa
+#   94Klu7Ph+azGt3Fh9E3dKPax72XcWoxHsRc44YpfQLC7oIdhp3L4waFfO/eUtcvD
+#   UITvqBPUkv+vOtExQpBLWEyER6Y6oz3BmkM8EPaKtZcRt3SrMpK+mvzvXkV4MGFn
+#   EGMJ72G3HEfMacnnJ49NlzNZM7hHiYZMzaQ4fNBg7lLI4SrxO5vpfNWviDORnBBj
+#   iQED+yZeP2HDtPD7H63o0kmOLxaBu5zWpUiRWH2srCwCivL0IoAfjDJbtXfQNukn
+#   mp8xZ9VOMo3PznPviIbpPFPmCVUCK4Z9kY37UwIDAQABAoIBAF29Fmg+l64kAzkG
+#   a/JmaWmRgfRvCton7aSIGLpuzEZpxIYw86DXhNSkMkf5iDcCzs0lpHHW+y4y9m9X
+#   G+50CsDnfM8RHxvrQdz7kLM2iDoSvIcYgoyjjtHo/Pt8Dy9SS+WP7ceOK7f1XJUo
+#   Us/5lrvZQPwWTvVJa6v+6jDC13Qqp34qNXCBZvU2WJpjM8Yau3C6ixP2ifJMmoOV
+#   5BT7bUPwn9QT49PFDLSbKKUnvr8ClhXF2hF2B4ztm3SIjhMe7kwuU+i8yWlFiGT+
+#   RzSvKGGA7QtDeww5vrMEpaudQaU0MvcKbsolk/MDh0Kcy3fKKz1OSZEvvZ1hCzlr
+#   4flLOOECgYEA+YG32ohJ5QZnaQ+DXOl/QSzAlL5ZZeSSny25tkJetLKthTcSfHNH
+#   +gWRFujONATuA7EmgkzNC+d+3JjYJIcVODb/22yoAVQFVXvz+Ihe5UyM14r/ZV/b
+#   4w/dLvLpWnw17BaqDwl216xnNXa/Y4IzTXwgw2G8noTKlby6You0NMcCgYEA6RKu
+#   95+y1xMIVdfMEExRcwUDFxFA9f1WFArq2D/GYiJhOQtjXJm5nQpsiczcF0xHvXjA
+#   6YiwFBF8L6d77ZlYb1AoKeE2me/wtRqaZtAGqnzqS7fx06hgFD8FAGxtHYXW2Ozj
+#   rKYEb3Xqkpko+XzuLIXaXSP/TcE2PuWMRa9IIRUCgYBNYx2KS3FX9seGP4iH/eg5
+#   Z88Hk46Y2u9bLcyHKkjDlRPa2L0EGqF9e9KHn4etfMXyITUHfxiuE4w2kbWghsFf
+#   ITf0b9wgJVZOMFb4hBui1T5t8C/M2pGR+K6qzC7yoMn8wv7WESJqPI/6di1giNau
+#   tsxWrW7aX+eRz+qjfB9VqwKBgQCOfEaMyYuqok8JM7jkCdQNTfYapwigmbSC4j25
+#   4BsmqT/ogMbIuI3ZrKK4B45Ri+ebtHOzEUYbrqjN9UT09zcyLb2wBKe9qgrsnIvh
+#   6LD6jw0pJxXmwFukZPZo0OBQGR9EVGXHiWLSxTKXVpzPEQoGG/pn0HbmkQTZpLmB
+#   bGvbFQKBgQDKNboMRllLx6adl5vI8aEvX5M4BI/6RIFuMI+6glO8mf2MrC46w0a7
+#   jo/Z5G2GLfAZ2GXUW3PoWxWYGjxyX12LvOg+R137uzD/itqij9IRgv91X+Go27Co
+#   ch20cYyr3Sblp2hMH9gDL+4fvtKGZKc1Bm+uI3wO61RRBl0JEYT3Ww==
+#   -----END RSA PRIVATE KEY-----
+
+#####
+## Waitress and supervisord installation
+
+# If true, use the Waitress WSGI server to run the Django app
+#   The Waitress processes are managed using supervisord
+use_waitress_wsgi: true
+
+# The number of Waitress workers to run
+#   These are used by Nginx using round-robin scheduling
+waitress_instances: 2
+
+#####
+## Application installation
+
+# The user to install and run the application as
+#   This should be an unpriveleged user
+#   If the user doesn't exist, they will be created
+# application_user: waitress
+
+# The directory in which to install application code
+#   If not given, this defaults to the home directory of the application_user
+#   Must be readable and writable by the application_user
+# application_home: /path/to/application/home
+
+# The installation mode
+#   Valid values are 'production' and 'development'
+#   Development mode assumes the esgf-slcs-server code is available at
+#   /code/esgf-slcs-server, and is designed primarily for use with the Vagrant box
+install_mode: production
+
+# The ESGF SLCS server version to install
+#   Only used in production
+#   Can be any valid branch, tag or commit hash from https://github.com/cedadev/esgf-slcs-server
+esgf_slcs_server_version: master
+
+#####
+## Database setup and configuration
+
+# If true, configure a new local database for the SLCS Django app and optionally
+#   configure a dummy ESGF user database (see use_dummy_userdb below)
+# If false, esgf_slcsdb and esgf_userdb dictionaries must be manually configured
+configure_databases: true
+
+# Required if configure_databases = false
+# Configures access to a database that the ESGF SLCS service can use
+# This is in addition to existing ESGF databases, and managed with Django migrations
+#  esgf_slcsdb:
+#    engine: 'django.db.backends.postgresql'
+#    name: 'esgf_slcs_db_name'
+#    host: my-db-host.example.com
+#    port: 5432
+#    user: db_user
+#    password: db_password
+
+# Only used if configure_databases = true
+# If true, install and populate a dummy ESGF user database
+use_dummy_userdb: false
+
+# Required if configure_databases = false or use_dummy_userdb = false
+# Configures access to the database containing the ESGF user table
+# Only read-only access is required
+esgf_userdb:
+  engine: 'django.db.backends.postgresql'
+  name: {{ esgf_slcsdb.name }}
+  host: localhost
+  port: 5432
+  user: db_user
+  password: db_password
+
+#####
+## CA setup and configuration
+
+# If true, install the test CA
+install_test_ca: false
+
+# If install_test_ca = false, the following variables must be set
+#   They should point to the same CA used for myproxy for consistency, and must
+#   be readable by the application_user
+onlineca_cert_file: /usr/local/esgf-slcs-server/ca/cert.pem
+onlineca_key_file: /usr/local/esgf-slcs-server/ca/private.key
+onlineca_trustroots_dir: /usr/local/esgf-slcs-server/ca/trustroots
+
+# Template for the subject of certificates issued by the SLCS server
+#   $OPENID is replaced with the user's OpenID
+onlineca_cert_subject_template: "/DC=esgf/CN=$OPENID"
+
+#####
+## Application configuration
+
+# If true, run Django in debug mode
+#   Should (obviously!) be false in production
+django_debug_mode: false
+
+# A list of people to receive emails when errors happen
+#   Used to populate the Django ADMINS setting - see
+#   https://docs.djangoproject.com/en/1.10/ref/settings/#admins
+application_admins: []
+
+# The location where static files should be collected
+static_root: /var/www/static
+
+# The username in the ESGF user table of the user that should be the Django superuser
+#   This user gets full access to the Django admin
+django_superuser: another
+
+# The IP range that is allowed access to the Django admin
+#   Filtering is done with Nginx, so this is only used if Nginx is enabled
+admin_ip_range: all

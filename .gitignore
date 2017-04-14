@@ -1,5 +1,1 @@
-**/*.war
-**/*.tar
-**/*.tgz
-**/*.swp
-**/*.jar
+.DS_Store
