@@ -10,7 +10,7 @@ d=`date`
 sk=`echo $d $ESGF_HOSTNAME | sha256sum | awk '{print $1}'`
 sed -i s/changeme1/$sk/ $django_settings_file
 
-# b) ALLOWED_HOSTS will be replace each time with the latest version of $ESGF_HOSTNAME
+# b) ALLOWED_HOSTS will be replaced each time with the latest version of $ESGF_HOSTNAME
 #sed -i s/changeme2/$ESGF_HOSTNAME/ $django_settings_file
 sed -i 's/ALLOWED_HOSTS = .*/ALLOWED_HOSTS = [\"'"${ESGF_HOSTNAME}"'\"]/g' $django_settings_file
 

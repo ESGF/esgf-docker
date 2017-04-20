@@ -39,7 +39,8 @@ ENV NM_DIR $INST_DIR/esgf-node-manager/src
 RUN cd $INST_DIR && \
     git  clone https://github.com/ESGF/esgf-node-manager.git && \
     cd esgf-node-manager && \
-    git checkout docker
+    git checkout devel
+#   git checkout docker
 
 # install dependencies in Python virtual environment
 RUN source $PYTHON_VENV/bin/activate && \ 
@@ -50,9 +51,12 @@ RUN source $PYTHON_VENV/bin/activate && \
 RUN cp $NM_DIR/scripts/esgf-nm-ctl $INST_DIR/bin/. && \
     chmod u+x $INST_DIR/bin/esgf-nm-ctl $NM_DIR/scripts/esgfnmd 
 
-# add use to run the node manager as
+# add user to run the node manager as
 RUN adduser nodemgr && \
     usermod -a -G apache nodemgr
+
+# other needed directories
+RUN mkdir /esg/log /esg/tasks
 
 # make Python installation available to Apache httpd + mod_wsgi
 VOLUME /opt/esgf/virtual/python
