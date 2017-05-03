@@ -49,6 +49,7 @@ RUN alternatives --install /usr/bin/java jar /usr/java/latest/bin/java 200000
 RUN alternatives --install /usr/bin/javaws javaws /usr/java/latest/bin/javaws 200000
 RUN alternatives --install /usr/bin/javac javac /usr/java/latest/bin/javac 200000
 ENV JAVA_HOME /usr/java/latest
+ENV PATH=${JAVA_HOME}/bin:$PATH
 
 # install Python 2.7
 # note: option "--enable-shared" is needed by mod_wsgi, will generate /usr/local/lib/libpython2.7.so.1.0
