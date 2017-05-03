@@ -1,13 +1,15 @@
-# required env variables:
+# Docker Compose file to start a full ESGF node.
+#
+# Required env variables:
 #
 # ESGF_CONFIG : points to the root ESGF configuration directory
 #       example: export ESGF_CONFIG=/Users/cinquini/ESGF_CONFIG
 # ESGF_HOSTNAME: HostName or IP address for apache httpd front-end server
 #       example: export ESGF_HOSTNAME=my.esgf.node
 #       example: export ESGF_HOSTNAME=`docker-machine ip`
-# ESGF_DATA_DIR: root of ESGF data directories
 # ESGF_VERSION: version of ESGF/Docker distribution
 #       example: export ESGF_VERSION=1.0
+# ESGF_DATA_DIR: root of ESGF data directories
 
 version: '2.1'
 
@@ -16,51 +18,6 @@ networks:
   dbnetwork:
 
 services:
-
-  # ESGF Data Node
-  esgf-data-node:
-    image: esgfhub/esgf-data-node:${ESGF_VERSION}
-    container_name: data-node
-    expose:
-      - "8080"
-      - "8443"
-    ports:
-      - "8080:8080"
-      - "8443:8443"
-    networks:
-      - default
-      - dbnetwork 
-    volumes:
-      - tds_data:/esg/content/thredds
-      - $ESGF_CONFIG/webapps/thredds/WEB-INF/web.xml:/usr/local/tomcat/webapps/thredds/WEB-INF/web.xml
-      - $ESGF_DATA_DIR:/esg/data
-      - $ESGF_CONFIG/grid-security/certificates/:/etc/grid-security/certificates/
-      - $ESGF_CONFIG/globus/certificate-file:/root/.globus/certificate-file
-    volumes_from:
-      - esgf-config
-    environment:
-     - ESGF_HOSTNAME
-    depends_on:
-      - esgf-postgres
-
-
-  # ESGF Identity Provider
-  esgf-idp-node:
-    image: esgfhub/esgf-idp-node:${ESGF_VERSION}
-    container_name: idp-node
-    expose:
-      - "8080"
-      - "8443"
-    ports:
-      - "8082:8080"
-      - "8445:8443"
-    networks:
-      - default
-      - dbnetwork
-    volumes_from:
-      - esgf-config
-    depends_on:
-      - esgf-postgres
 
   # data container holding site-specific ESGF configuration
   # this container stops after the volumes are initialized
@@ -75,39 +32,6 @@ services:
      - $ESGF_CONFIG/esg/config/:/esg/config/
      - $ESGF_CONFIG/esg/config/tomcat/esg-truststore.ts:/usr/java/latest/jre/lib/security/jssecacerts
 
-
-  # Solr engine running within Jetty
-  esgf-solr:
-    image: esgfhub/esgf-solr:${ESGF_VERSION}
-    container_name: solr
-    expose:
-      - "8983"
-      - "8984"
-    ports:
-      - "8983:8983"
-      - "8984:8984" 
-    volumes:
-     - solr_data:/esg/solr-index
-    networks:
-      - default
-
-  # ESGF Index Node
-  esgf-index-node:
-    image: esgfhub/esgf-index-node:${ESGF_VERSION}
-    container_name: index-node
-    expose:
-      - "8080"
-      - "8443"
-    ports:
-      - "8081:8080"
-      - "8444:8443"
-    depends_on:
-      - esgf-solr
-    volumes_from:
-      - esgf-config
-    networks:
-      - default
-
   # ESGF postgres database
   esgf-postgres:
      image: esgfhub/esgf-postgres:${ESGF_VERSION}
@@ -121,6 +45,84 @@ services:
      volumes:
        - pg_data:/var/lib/pgsql/data
 
+  # ESGF Data Node
+  #esgf-data-node:
+  #  image: esgfhub/esgf-data-node:${ESGF_VERSION}
+  #  container_name: data-node
+  #  expose:
+  #    - "8080"
+  #    - "8443"
+  #  ports:
+  #    - "8080:8080"
+  #    - "8443:8443"
+  #  networks:
+  #    - default
+  #    - dbnetwork 
+  #  volumes:
+  #    - tds_data:/esg/content/thredds
+  #    - $ESGF_CONFIG/webapps/thredds/WEB-INF/web.xml:/usr/local/tomcat/webapps/thredds/WEB-INF/web.xml
+  #    - $ESGF_DATA_DIR:/esg/data
+  #    - $ESGF_CONFIG/grid-security/certificates/:/etc/grid-security/certificates/
+  #    - $ESGF_CONFIG/globus/certificate-file:/root/.globus/certificate-file
+  #  volumes_from:
+  #    - esgf-config
+  #  environment:
+  #   - ESGF_HOSTNAME
+  #  depends_on:
+  #    - esgf-postgres
+
+
+  # ESGF Identity Provider
+  #esgf-idp-node:
+  #  image: esgfhub/esgf-idp-node:${ESGF_VERSION}
+  #  container_name: idp-node
+  #  expose:
+  #    - "8080"
+  #    - "8443"
+  #  ports:
+  #    - "8082:8080"
+  #    - "8445:8443"
+  #  networks:
+  #    - default
+  #    - dbnetwork
+  #  volumes_from:
+  #    - esgf-config
+  #  depends_on:
+  #    - esgf-postgres
+
+  # Solr engine running within Jetty
+  #esgf-solr:
+  #  image: esgfhub/esgf-solr:${ESGF_VERSION}
+  #  container_name: solr
+  #  expose:
+  #    - "8983"
+  #    - "8984"
+  #  ports:
+  #    - "8983:8983"
+  #    - "8984:8984" 
+  #  volumes:
+  #   - solr_data:/esg/solr-index
+  #  networks:
+  #    - default
+
+  # ESGF Index Node
+  #esgf-index-node:
+  #  image: esgfhub/esgf-index-node:${ESGF_VERSION}
+  #  container_name: index-node
+  #  expose:
+  #    - "8080"
+  #    - "8443"
+  #  ports:
+  #    - "8081:8080"
+  #    - "8444:8443"
+  #  depends_on:
+  #    - esgf-solr
+  #  volumes_from:
+  #    - esgf-config
+  #  networks:
+  #    - default
+
+  # CoG
   # data container to hold CoG source code and python virtual environment
   # this container stops after the volume 'cog_data' is initialized
   esgf-cog:
@@ -134,8 +136,8 @@ services:
        - cog_data:/usr/local/cog/cog_config
      volumes_from:
       - esgf-config
-     #command: $ESGF_HOSTNAME true true # keep django runnining on port 8000
-     command: $ESGF_HOSTNAME true false
+     #command: $ESGF_HOSTNAME true true # ESGF=true, keep django server runnining on port 8000
+     command: $ESGF_HOSTNAME true false # ESGF=false, django server running on port 8000 = false
      depends_on:
        - esgf-postgres
      networks:
@@ -155,7 +157,7 @@ services:
    volumes_from:
      - esgf-config
      - esgf-cog
-     - esgf-node-manager
+   # - esgf-node-manager
    environment:
      - SSL_CERT_DIR=/etc/grid-security/certificates
      - COG_CONFIG_DIR=/usr/local/cog/cog_config
@@ -165,7 +167,7 @@ services:
      - "443:443"
    depends_on:
      - esgf-cog
-     - esgf-node-manager
+   #  - esgf-node-manager
    healthcheck:
      test: 'curl --fail "https://${ESGF_HOSTNAME}/" || exit 1'
    # httpd URLs must use hostname=$ESGF_HOSTNAME
@@ -175,32 +177,32 @@ services:
          - "${ESGF_HOSTNAME}"
      dbnetwork: {}
 
-  esgf-node-manager:
-   image: esgfhub/esgf-node-manager:${ESGF_VERSION}
-   container_name: node-manager
-   volumes_from:
-     - esgf-config
-   environment:
-     - SSL_CERT_DIR=/etc/grid-security/certificates
-     - ESGF_HOSTNAME
-   depends_on:
-     - esgf-postgres
-   networks:
-     default: {}
-     dbnetwork: {}
+  #esgf-node-manager:
+  # image: esgfhub/esgf-node-manager:${ESGF_VERSION}
+  # container_name: node-manager
+  # volumes_from:
+  #   - esgf-config
+  # environment:
+  #   - SSL_CERT_DIR=/etc/grid-security/certificates
+  #   - ESGF_HOSTNAME
+  # depends_on:
+  #   - esgf-postgres
+  # networks:
+  #   default: {}
+  #   dbnetwork: {}
 
   # FTP server
-  esgf-ftp:
-   image: esgfhub/esgf-vsftp:${ESGF_VERSION}
-   container_name: ftp 
-   ports:
-     - "20:20"
-     - "21:21"
-     - "12020-12025:12020-12025" 
-   networks:
-     - default
-   volumes:
-     - $ESGF_DATA_DIR:/var/ftp/pub
+  #esgf-ftp:
+  # image: esgfhub/esgf-vsftp:${ESGF_VERSION}
+  # container_name: ftp 
+  # ports:
+  #   - "20:20"
+  #   - "21:21"
+  #   - "12020-12025:12020-12025" 
+  # networks:
+  #   - default
+  # volumes:
+  #   - $ESGF_DATA_DIR:/var/ftp/pub
    
 
 # use Docker volumes to store persistent data
