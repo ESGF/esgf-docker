@@ -1,6 +1,6 @@
 # ESGF node with Apache httpd and mod_wsgi
 
-FROM esgfhub/esgf-node:1.1
+FROM esgfhub/esgf-node:1.2
 
 MAINTAINER Luca Cinquini <luca.cinquini@jpl.nasa.gov>
 
@@ -26,7 +26,7 @@ RUN mkdir -p /var/www/.python-eggs && \
 # configuration for standalone service
 # (overridden by ESGF settings when running with docker-compose from parent directory)
 COPY certs/ /etc/certs/
-COPY conf.d/ /etc/httpd/conf.d/
+COPY conf/ /etc/httpd/conf.d/
 COPY html/ /var/www/html/
 
 EXPOSE 80 443
