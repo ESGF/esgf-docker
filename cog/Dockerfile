@@ -1,12 +1,18 @@
 # ESGF node with CoG web application
-# When running a container, must have $ESGF_HOSTNAME env set,
+#
+# To run on localhost:
+# docker run -ti -p 8000:8000 --name cog esgfhub/esgf-cog:${ESGF_VERSION}
+# To run with a specific hostname:
+# docker run -ti -p 8000:8000 --name cog -e ESGF_HOSTNAME=${ESGF_HOSTNAME} esgfhub/esgf-cog:${ESGF_VERSION} ${ESGF_HOSTNAME} false true
+# To map the local source directory:
+# docker run -ti -p 8000:8000 --name cog -v /Users/cinquini/Documents/workspace/cog:/usr/local/cog/cog_install esgfhub/esgf-cog:${ESGF_VERSION}
 
-FROM esgfhub/esgf-node:1.1
+FROM esgfhub/esgf-node:1.2
 
 MAINTAINER Luca Cinquini <luca.cinquini@jpl.nasa.gov>
 
 # choose CoG version
-ENV COG_TAG=v3.9.0-RC3
+ENV COG_TAG=v3.9.1
 
 # setup CoG environment
 ENV COG_DIR=/usr/local/cog
@@ -82,9 +88,9 @@ VOLUME $COG_INSTALL_DIR
 
 # scripts
 COPY scripts/ /usr/local/bin/
-RUN chmod +x /usr/local/bin/*.sh
 
 HEALTHCHECK CMD curl --fail "http://${ESGF_HOSTNAME}:8000/" || exit 1
 
 ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
-CMD ["$ESGF_HOSTNAME", "false", "true"]
+# override CMD options at run time
+CMD ["localhost", "false", "true"]
