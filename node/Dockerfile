@@ -35,9 +35,14 @@ RUN yum -y update && \
 RUN yum -y install epel-release; yum clean all
 
 # install Oracle Java 8
-ENV JAVA_VERSION 8u31
-ENV BUILD_VERSION b13
-RUN wget --no-cookies --no-check-certificate --header "Cookie: oraclelicense=accept-securebackup-cookie" "http://download.oracle.com/otn-pub/java/jdk/$JAVA_VERSION-$BUILD_VERSION/jdk-$JAVA_VERSION-linux-x64.rpm" -O /tmp/jdk-8-linux-x64.rpm
+ENV JAVA_VERSION 8u131
+ENV JAVA_BUILD_VERSION b11
+
+
+RUN wget --no-cookies --no-check-certificate --header "Cookie: oraclelicense=accept-securebackup-cookie" \
+    -O /tmp/jdk-8-linux-x64.rpm \
+    "http://download.oracle.com/otn-pub/java/jdk/${JAVA_VERSION}-${JAVA_BUILD_VERSION}/d54c1d3a095b4ff2b6607d096fa80163/jdk-${JAVA_VERSION}-linux-x64.rpm"
+
 RUN yum -y install /tmp/jdk-8-linux-x64.rpm && \
     rm /tmp/jdk-8-linux-x64.rpm
 RUN alternatives --install /usr/bin/java jar /usr/java/latest/bin/java 200000
