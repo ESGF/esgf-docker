@@ -106,21 +106,23 @@ services:
       - default
 
   # ESGF Index Node
-  #esgf-index-node:
-  #  image: esgfhub/esgf-index-node:${ESGF_VERSION}
-  #  container_name: index-node
-  #  expose:
-  #    - "8080"
-  #    - "8443"
-  #  ports:
-  #    - "8081:8080"
-  #    - "8444:8443"
-  #  depends_on:
-  #    - esgf-solr
-  #  volumes_from:
-  #    - esgf-config
-  #  networks:
-  #    - default
+  # note the non-standard ports used on the host
+  # (since the standard ports are used by the data-node service)
+  esgf-index-node:
+    image: esgfhub/esgf-index-node:${ESGF_VERSION}
+    container_name: index-node
+    expose:
+      - "8080"
+      - "8443"
+    ports:
+      - "8081:8080"
+      - "8444:8443"
+    depends_on:
+      - esgf-solr
+    volumes_from:
+      - esgf-config
+    networks:
+      - default
 
   # CoG
   # data container to hold CoG source code and python virtual environment
