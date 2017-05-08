@@ -53,7 +53,7 @@
                 "name": "solr_data"
             }
         ], 
-        "taskDefinitionArn": "arn:aws:ecs:us-west-2:031003439974:task-definition/EsgfMasterNodeTask:23", 
+        "taskDefinitionArn": "arn:aws:ecs:us-west-2:031003439974:task-definition/EsgfMasterNodeTask:27", 
         "containerDefinitions": [
             {
                 "environment": [], 
@@ -77,7 +77,7 @@
                     }, 
                     {
                         "sourceVolume": "esgf_tomcat_config", 
-                        "containerPath": "/usr/local/tomcat/conf"
+                        "containerPath": "/esg/config/tomcat"
                     }
                 ], 
                 "image": "centos:6", 
@@ -179,7 +179,8 @@
                 "name": "httpd", 
                 "links": [
                     "postgres:esgf-postgres", 
-                    "solr:esgf-solr"
+                    "solr:esgf-solr", 
+                    "index-node:esgf-index-node"
                 ], 
                 "mountPoints": [
                     {
@@ -241,8 +242,38 @@
                 "memory": 4096, 
                 "essential": true, 
                 "volumesFrom": []
+            }, 
+            {
+                "environment": [], 
+                "name": "index-node", 
+                "links": [
+                    "solr:esgf-solr"
+                ], 
+                "mountPoints": [], 
+                "image": "esgfhub/esgf-index-node:1.2", 
+                "essential": true, 
+                "portMappings": [
+                    {
+                        "protocol": "tcp", 
+                        "containerPort": 8080, 
+                        "hostPort": 8081
+                    }, 
+                    {
+                        "protocol": "tcp", 
+                        "containerPort": 8443, 
+                        "hostPort": 8444
+                    }
+                ], 
+                "entryPoint": [], 
+                "memory": 2048, 
+                "cpu": 0, 
+                "volumesFrom": [
+                    {
+                        "sourceContainer": "config"
+                    }
+                ]
             }
         ], 
-        "revision": 23
+        "revision": 27
     }
 }
