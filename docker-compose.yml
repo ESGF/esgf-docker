@@ -91,19 +91,19 @@ services:
   #    - esgf-postgres
 
   # Solr engine running within Jetty
-  #esgf-solr:
-  #  image: esgfhub/esgf-solr:${ESGF_VERSION}
-  #  container_name: solr
-  #  expose:
-  #    - "8983"
-  #    - "8984"
-  #  ports:
-  #    - "8983:8983"
-  #    - "8984:8984" 
-  #  volumes:
-  #   - solr_data:/esg/solr-index
-  #  networks:
-  #    - default
+  esgf-solr:
+    image: esgfhub/esgf-solr:${ESGF_VERSION}
+    container_name: solr
+    expose:
+      - "8983"
+      - "8984"
+    ports:
+      - "8983:8983"
+      - "8984:8984" 
+    volumes:
+     - solr_data:/esg/solr-index
+    networks:
+      - default
 
   # ESGF Index Node
   #esgf-index-node:
