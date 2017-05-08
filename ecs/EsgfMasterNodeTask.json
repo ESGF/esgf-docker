@@ -1,299 +1,248 @@
-
-Amazon ECS
-Clusters
-Task Definitions
-Repositories
-Task Definitions  EsgfMasterNodeTask  14
-Task Definition: EsgfMasterNodeTask:14
-View detailed information for your task definition. To modify the task definition, you need to create a new revision and then make the required changes to the task definition
-Create new revision 
-Actions
-Builder
-JSON
- 
 {
-  "requiresAttributes": [],
-  "taskDefinitionArn": "arn:aws:ecs:us-west-2:031003439974:task-definition/EsgfMasterNodeTask:14",
-  "networkMode": "bridge",
-  "status": "ACTIVE",
-  "revision": 14,
-  "taskRoleArn": null,
-  "containerDefinitions": [
-    {
-      "volumesFrom": [],
-      "memory": 128,
-      "extraHosts": null,
-      "dnsServers": null,
-      "disableNetworking": null,
-      "dnsSearchDomains": null,
-      "portMappings": [],
-      "hostname": null,
-      "essential": false,
-      "entryPoint": [
-        "tail",
-        "-f",
-        "/dev/null"
-      ],
-      "mountPoints": [
-        {
-          "containerPath": "/etc/certs",
-          "sourceVolume": "esgf_certs",
-          "readOnly": null
-        },
-        {
-          "containerPath": "/etc/httpd/conf.d",
-          "sourceVolume": "esgf_httpd_conf",
-          "readOnly": null
-        },
-        {
-          "containerPath": "/etc/grid-security/certificates",
-          "sourceVolume": "esgf_grid_security_certs",
-          "readOnly": null
-        },
-        {
-          "containerPath": "/esg/config",
-          "sourceVolume": "esgf_config",
-          "readOnly": null
-        },
-        {
-          "containerPath": "/usr/local/tomcat/conf",
-          "sourceVolume": "esgf_tomcat_config",
-          "readOnly": null
-        }
-      ],
-      "name": "config",
-      "ulimits": null,
-      "dockerSecurityOptions": null,
-      "environment": [],
-      "links": null,
-      "workingDirectory": null,
-      "readonlyRootFilesystem": null,
-      "image": "centos:6",
-      "command": [],
-      "user": null,
-      "dockerLabels": null,
-      "logConfiguration": null,
-      "cpu": 0,
-      "privileged": null,
-      "memoryReservation": null
-    },
-    {
-      "volumesFrom": [
-        {
-          "readOnly": null,
-          "sourceContainer": "config"
-        }
-      ],
-      "memory": 1024,
-      "extraHosts": null,
-      "dnsServers": null,
-      "disableNetworking": null,
-      "dnsSearchDomains": null,
-      "portMappings": [
-        {
-          "hostPort": 8000,
-          "containerPort": 8000,
-          "protocol": "tcp"
-        }
-      ],
-      "hostname": null,
-      "essential": false,
-      "entryPoint": null,
-      "mountPoints": [
-        {
-          "containerPath": "/usr/local/cog/cog_config",
-          "sourceVolume": "cog_data",
-          "readOnly": null
-        }
-      ],
-      "name": "cog",
-      "ulimits": null,
-      "dockerSecurityOptions": null,
-      "environment": [
-        {
-          "name": "COG_CONFIG_DIR",
-          "value": "/usr/local/cog/cog_config"
-        },
-        {
-          "name": "COG_DIR",
-          "value": "/usr/local/cog"
-        },
-        {
-          "name": "COG_INSTALL_DIR",
-          "value": "/usr/local/cog/cog_install"
-        },
-        {
-          "name": "ESGF_HOSTNAME",
-          "value": "ip-172-20-8-124.us-west-2.compute.internal"
-        }
-      ],
-      "links": [
-        "postgres:esgf-postgres"
-      ],
-      "workingDirectory": null,
-      "readonlyRootFilesystem": null,
-      "image": "esgfhub/esgf-cog:1.2",
-      "command": [
-        "ip-172-20-8-124.us-west-2.compute.internal",
-        "true",
-        "false"
-      ],
-      "user": null,
-      "dockerLabels": null,
-      "logConfiguration": null,
-      "cpu": 0,
-      "privileged": null,
-      "memoryReservation": null
-    },
-    {
-      "volumesFrom": [],
-      "memory": 512,
-      "extraHosts": null,
-      "dnsServers": null,
-      "disableNetworking": null,
-      "dnsSearchDomains": null,
-      "portMappings": [
-        {
-          "hostPort": 5432,
-          "containerPort": 5432,
-          "protocol": "tcp"
-        }
-      ],
-      "hostname": null,
-      "essential": true,
-      "entryPoint": null,
-      "mountPoints": [],
-      "name": "postgres",
-      "ulimits": null,
-      "dockerSecurityOptions": null,
-      "environment": [],
-      "links": null,
-      "workingDirectory": null,
-      "readonlyRootFilesystem": null,
-      "image": "esgfhub/esgf-postgres:1.2",
-      "command": null,
-      "user": null,
-      "dockerLabels": null,
-      "logConfiguration": null,
-      "cpu": 0,
-      "privileged": null,
-      "memoryReservation": null
-    },
-    {
-      "volumesFrom": [
-        {
-          "readOnly": null,
-          "sourceContainer": "cog"
-        },
-        {
-          "readOnly": null,
-          "sourceContainer": "config"
-        }
-      ],
-      "memory": 2048,
-      "extraHosts": null,
-      "dnsServers": null,
-      "disableNetworking": null,
-      "dnsSearchDomains": null,
-      "portMappings": [
-        {
-          "hostPort": 80,
-          "containerPort": 80,
-          "protocol": "tcp"
-        },
-        {
-          "hostPort": 443,
-          "containerPort": 443,
-          "protocol": "tcp"
-        }
-      ],
-      "hostname": null,
-      "essential": true,
-      "entryPoint": [
-        "/usr/local/bin/docker-entrypoint.sh"
-      ],
-      "mountPoints": [
-        {
-          "containerPath": "/usr/local/cog/cog_config",
-          "sourceVolume": "cog_data",
-          "readOnly": null
-        }
-      ],
-      "name": "httpd",
-      "ulimits": null,
-      "dockerSecurityOptions": null,
-      "environment": [
-        {
-          "name": "COG_CONFIG_DIR",
-          "value": "/usr/local/cog/cog_config"
-        },
-        {
-          "name": "ESGF_HOSTNAME",
-          "value": "ip-172-20-8-124.us-west-2.compute.internal"
-        },
-        {
-          "name": "SSL_CERT_DIR",
-          "value": "/etc/grid-security/certificates"
-        }
-      ],
-      "links": [
-        "postgres:esgf-postgres"
-      ],
-      "workingDirectory": null,
-      "readonlyRootFilesystem": null,
-      "image": "esgfhub/esgf-httpd:1.2",
-      "command": null,
-      "user": null,
-      "dockerLabels": null,
-      "logConfiguration": null,
-      "cpu": 0,
-      "privileged": null,
-      "memoryReservation": null
+    "taskDefinition": {
+        "status": "ACTIVE", 
+        "networkMode": "bridge", 
+        "family": "EsgfMasterNodeTask", 
+        "placementConstraints": [
+            {
+                "expression": "attribute:esgf_type == master_node", 
+                "type": "memberOf"
+            }
+        ], 
+        "volumes": [
+            {
+                "host": {
+                    "sourcePath": "/home/ec2-user/esgf_config/httpd/certs"
+                }, 
+                "name": "esgf_certs"
+            }, 
+            {
+                "host": {
+                    "sourcePath": "/home/ec2-user/esgf_config/grid-security/certificates"
+                }, 
+                "name": "esgf_grid_security_certs"
+            }, 
+            {
+                "host": {
+                    "sourcePath": "/home/ec2-user/esgf_config/esg/config"
+                }, 
+                "name": "esgf_config"
+            }, 
+            {
+                "host": {
+                    "sourcePath": "/home/ec2-user/esgf_config/httpd/conf"
+                }, 
+                "name": "esgf_httpd_conf"
+            }, 
+            {
+                "host": {
+                    "sourcePath": "/home/ec2-user/esgf_config/esg/config/tomcat"
+                }, 
+                "name": "esgf_tomcat_config"
+            }, 
+            {
+                "host": {
+                    "sourcePath": "/esgf_data/cog_data"
+                }, 
+                "name": "cog_data"
+            }, 
+            {
+                "host": {
+                    "sourcePath": "/esgf_data/solr_data"
+                }, 
+                "name": "solr_data"
+            }
+        ], 
+        "taskDefinitionArn": "arn:aws:ecs:us-west-2:031003439974:task-definition/EsgfMasterNodeTask:23", 
+        "containerDefinitions": [
+            {
+                "environment": [], 
+                "name": "config", 
+                "mountPoints": [
+                    {
+                        "sourceVolume": "esgf_certs", 
+                        "containerPath": "/etc/certs"
+                    }, 
+                    {
+                        "sourceVolume": "esgf_httpd_conf", 
+                        "containerPath": "/etc/httpd/conf.d"
+                    }, 
+                    {
+                        "sourceVolume": "esgf_grid_security_certs", 
+                        "containerPath": "/etc/grid-security/certificates"
+                    }, 
+                    {
+                        "sourceVolume": "esgf_config", 
+                        "containerPath": "/esg/config"
+                    }, 
+                    {
+                        "sourceVolume": "esgf_tomcat_config", 
+                        "containerPath": "/usr/local/tomcat/conf"
+                    }
+                ], 
+                "image": "centos:6", 
+                "cpu": 0, 
+                "portMappings": [], 
+                "entryPoint": [], 
+                "memory": 128, 
+                "command": [
+                    "tail", 
+                    "-f", 
+                    "/dev/null"
+                ], 
+                "essential": true, 
+                "volumesFrom": []
+            }, 
+            {
+                "environment": [
+                    {
+                        "name": "COG_DIR", 
+                        "value": "/usr/local/cog"
+                    }, 
+                    {
+                        "name": "ESGF_HOSTNAME", 
+                        "value": "ip-172-20-8-124.us-west-2.compute.internal"
+                    }, 
+                    {
+                        "name": "COG_INSTALL_DIR", 
+                        "value": "/usr/local/cog/cog_install"
+                    }, 
+                    {
+                        "name": "COG_CONFIG_DIR", 
+                        "value": "/usr/local/cog/cog_config"
+                    }
+                ], 
+                "name": "cog", 
+                "links": [
+                    "postgres:esgf-postgres"
+                ], 
+                "mountPoints": [
+                    {
+                        "sourceVolume": "cog_data", 
+                        "containerPath": "/usr/local/cog/cog_config"
+                    }
+                ], 
+                "image": "esgfhub/esgf-cog:1.2", 
+                "essential": false, 
+                "portMappings": [
+                    {
+                        "protocol": "tcp", 
+                        "containerPort": 8000, 
+                        "hostPort": 8000
+                    }
+                ], 
+                "command": [
+                    "ip-172-20-8-124.us-west-2.compute.internal", 
+                    "true", 
+                    "false"
+                ], 
+                "memory": 1024, 
+                "cpu": 0, 
+                "volumesFrom": [
+                    {
+                        "sourceContainer": "config"
+                    }
+                ]
+            }, 
+            {
+                "environment": [], 
+                "name": "postgres", 
+                "mountPoints": [], 
+                "image": "esgfhub/esgf-postgres:1.2", 
+                "cpu": 0, 
+                "portMappings": [
+                    {
+                        "protocol": "tcp", 
+                        "containerPort": 5432, 
+                        "hostPort": 5432
+                    }
+                ], 
+                "memory": 512, 
+                "essential": true, 
+                "volumesFrom": []
+            }, 
+            {
+                "environment": [
+                    {
+                        "name": "ESGF_HOSTNAME", 
+                        "value": "ip-172-20-8-124.us-west-2.compute.internal"
+                    }, 
+                    {
+                        "name": "SSL_CERT_DIR", 
+                        "value": "/etc/grid-security/certificates"
+                    }, 
+                    {
+                        "name": "COG_CONFIG_DIR", 
+                        "value": "/usr/local/cog/cog_config"
+                    }
+                ], 
+                "name": "httpd", 
+                "links": [
+                    "postgres:esgf-postgres", 
+                    "solr:esgf-solr"
+                ], 
+                "mountPoints": [
+                    {
+                        "sourceVolume": "cog_data", 
+                        "containerPath": "/usr/local/cog/cog_config"
+                    }
+                ], 
+                "image": "esgfhub/esgf-httpd:1.2", 
+                "essential": true, 
+                "portMappings": [
+                    {
+                        "protocol": "tcp", 
+                        "containerPort": 80, 
+                        "hostPort": 80
+                    }, 
+                    {
+                        "protocol": "tcp", 
+                        "containerPort": 443, 
+                        "hostPort": 443
+                    }
+                ], 
+                "entryPoint": [
+                    "/usr/local/bin/docker-entrypoint.sh"
+                ], 
+                "memory": 2048, 
+                "cpu": 0, 
+                "volumesFrom": [
+                    {
+                        "sourceContainer": "cog"
+                    }, 
+                    {
+                        "sourceContainer": "config"
+                    }
+                ]
+            }, 
+            {
+                "environment": [], 
+                "name": "solr", 
+                "mountPoints": [
+                    {
+                        "sourceVolume": "solr_data", 
+                        "containerPath": "/esg/solr-index"
+                    }
+                ], 
+                "image": "esgfhub/esgf-solr:1.2", 
+                "cpu": 0, 
+                "portMappings": [
+                    {
+                        "protocol": "tcp", 
+                        "containerPort": 8983, 
+                        "hostPort": 8983
+                    }, 
+                    {
+                        "protocol": "tcp", 
+                        "containerPort": 8984, 
+                        "hostPort": 8984
+                    }
+                ], 
+                "memory": 4096, 
+                "essential": true, 
+                "volumesFrom": []
+            }
+        ], 
+        "revision": 23
     }
-  ],
-  "placementConstraints": [
-    {
-      "expression": "attribute:esgf_type == master_node",
-      "type": "memberOf"
-    }
-  ],
-  "volumes": [
-    {
-      "host": {
-        "sourcePath": "/home/ec2-user/esgf_config/httpd/certs"
-      },
-      "name": "esgf_certs"
-    },
-    {
-      "host": {
-        "sourcePath": "/home/ec2-user/esgf_config/grid-security/certificates"
-      },
-      "name": "esgf_grid_security_certs"
-    },
-    {
-      "host": {
-        "sourcePath": "/home/ec2-user/esgf_config/esg/config"
-      },
-      "name": "esgf_config"
-    },
-    {
-      "host": {
-        "sourcePath": "/home/ec2-user/esgf_config/httpd/conf"
-      },
-      "name": "esgf_httpd_conf"
-    },
-    {
-      "host": {
-        "sourcePath": "/home/ec2-user/esgf_config/esg/config/tomcat"
-      },
-      "name": "esgf_tomcat_config"
-    },
-    {
-      "host": {
-        "sourcePath": "/esgf_data/cog_data"
-      },
-      "name": "cog_data"
-    }
-  ],
-  "family": "EsgfMasterNodeTask"
 }
