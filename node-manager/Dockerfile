@@ -9,14 +9,14 @@
 # 60 for a full node
 # 36 for a data node
 #
-# outout files:
+# output files:
 # /esg/config/registration.xml
 # /esg/log : contains log files
 # /esg/tasks : contains update task files in jsoon format
 # /esg/config/nm.properties 
 # /esg/config/esgf_nodemgr_map.json : periodically updated to reflect nodes status
 
-FROM esgfhub/esgf-node:1.1
+FROM esgfhub/esgf-node:1.2
 
 MAINTAINER Luca Cinquini <luca.cinquini@jpl.nasa.gov>
 
@@ -40,7 +40,6 @@ RUN cd $INST_DIR && \
     git  clone https://github.com/ESGF/esgf-node-manager.git && \
     cd esgf-node-manager && \
     git checkout devel
-#   git checkout docker
 
 # install dependencies in Python virtual environment
 RUN source $PYTHON_VENV/bin/activate && \ 
