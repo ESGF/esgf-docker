@@ -73,22 +73,22 @@ services:
 
 
   # ESGF Identity Provider
-  #esgf-idp-node:
-  #  image: esgfhub/esgf-idp-node:${ESGF_VERSION}
-  #  container_name: idp-node
-  #  expose:
-  #    - "8080"
-  #    - "8443"
-  #  ports:
-  #    - "8082:8080"
-  #    - "8445:8443"
-  #  networks:
-  #    - default
-  #    - dbnetwork
-  #  volumes_from:
-  #    - esgf-config
-  #  depends_on:
-  #    - esgf-postgres
+  esgf-idp-node:
+    image: esgfhub/esgf-idp-node:${ESGF_VERSION}
+    container_name: idp-node
+    expose:
+      - "8080"
+      - "8443"
+    ports:
+      - "8082:8080"
+      - "8445:8443"
+    networks:
+      - default
+      - dbnetwork
+    volumes_from:
+      - esgf-config
+    depends_on:
+      - esgf-postgres
 
   # Solr engine running within Jetty
   esgf-solr:
