@@ -38,8 +38,8 @@ RUN source ${CDAT_HOME}/bin/activate esgf-pub && \
     pip install esgprep
 
 # install ESGF publisher
-# location: /usr/local/conda/lib/python2.7/site-packages/esgcet-3.0.1-py2.7.egg
-ENV ESG_PUBLISHER_VERSION=v3.0.1
+# location: /usr/local/conda/envs/esgf-pub/
+ENV ESG_PUBLISHER_VERSION=v3.2.2
 RUN source ${CDAT_HOME}/bin/activate esgf-pub && \
     cd /tmp && \
     git clone https://github.com/ESGF/esg-publisher.git && \
@@ -148,6 +148,8 @@ COPY scripts/ /usr/local/bin/
 
 # change ownership of content directory
 RUN chown -R tomcat:tomcat  /esg/content/thredds/
+# change ownership of source directory
+RUN chown -R tomcat:tomcat $CATALINA_HOME/webapps/thredds
 
 # cleanup
 RUN rm -rf /usr/local/tomcat/webapps/esgf-node-manager/
