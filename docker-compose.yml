@@ -62,8 +62,8 @@ services:
       - tds_data:/esg/content/thredds
       - $ESGF_CONFIG/webapps/thredds/WEB-INF/web.xml:/usr/local/tomcat/webapps/thredds/WEB-INF/web.xml
       - $ESGF_DATA_DIR:/esg/data
-      - $ESGF_CONFIG/grid-security/certificates/:/etc/grid-security/certificates/
-      - $ESGF_CONFIG/globus/certificate-file:/root/.globus/certificate-file
+      #- $ESGF_CONFIG/grid-security/certificates/:/etc/grid-security/certificates/
+      #- $ESGF_CONFIG/globus/certificate-file:/root/.globus/certificate-file
     volumes_from:
       - esgf-config
     environment:
