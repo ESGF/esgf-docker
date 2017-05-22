@@ -19,7 +19,7 @@ docker stop postgres
 # change password in common ESGF configuration files under $ESGF_CONFIG/esg/config
 echo ${ESGF_PASSWORD} > ${ESGF_CONFIG}/esg/config/.esg_pg_pass
 echo ${ESGF_PASSWORD} > ${ESGF_CONFIG}/esg/config/.esgf_pass
-sed -i.back 's/db.password=.*/db.password='"${ESGF_PASSWORD}"'/g' ${ESGF_CONFIG}/esg/config/esgf.properties
+#sed -i.back 's/db.password=.*/db.password='"${ESGF_PASSWORD}"'/g' ${ESGF_CONFIG}/esg/config/esgf.properties
 
 # change password to access the postgres databases in CoG settings file
 # from within the running cog container
