@@ -51,9 +51,27 @@
                     "sourcePath": "/esgf_data/solr_data"
                 }, 
                 "name": "solr_data"
+            }, 
+            {
+                "host": {
+                    "sourcePath": "/esgf_data/tds_data"
+                }, 
+                "name": "tds_data"
+            }, 
+            {
+                "host": {
+                    "sourcePath": "/esgf_data/esgf_data"
+                }, 
+                "name": "esgf_data"
+            }, 
+            {
+                "host": {
+                    "sourcePath": "/home/ec2-user/esgf_config/webapps/thredds/WEB-INF/web.xml"
+                }, 
+                "name": "tds_web_xml"
             }
         ], 
-        "taskDefinitionArn": "arn:aws:ecs:us-west-2:031003439974:task-definition/EsgfMasterNodeTask:27", 
+        "taskDefinitionArn": "arn:aws:ecs:us-west-2:031003439974:task-definition/EsgfMasterNodeTask:37", 
         "containerDefinitions": [
             {
                 "environment": [], 
@@ -101,7 +119,7 @@
                     }, 
                     {
                         "name": "ESGF_HOSTNAME", 
-                        "value": "ip-172-20-8-124.us-west-2.compute.internal"
+                        "value": "airborne-elb1.dyndns.org"
                     }, 
                     {
                         "name": "COG_INSTALL_DIR", 
@@ -132,7 +150,7 @@
                     }
                 ], 
                 "command": [
-                    "ip-172-20-8-124.us-west-2.compute.internal", 
+                    "airborne-elb1.dyndns.org", 
                     "true", 
                     "false"
                 ], 
@@ -165,7 +183,7 @@
                 "environment": [
                     {
                         "name": "ESGF_HOSTNAME", 
-                        "value": "ip-172-20-8-124.us-west-2.compute.internal"
+                        "value": "airborne-elb1.dyndns.org"
                     }, 
                     {
                         "name": "SSL_CERT_DIR", 
@@ -180,7 +198,9 @@
                 "links": [
                     "postgres:esgf-postgres", 
                     "solr:esgf-solr", 
-                    "index-node:esgf-index-node"
+                    "index-node:esgf-index-node", 
+                    "data-node:esgf-data-node", 
+                    "idp-node:esgf-idp-node"
                 ], 
                 "mountPoints": [
                     {
@@ -272,8 +292,84 @@
                         "sourceContainer": "config"
                     }
                 ]
+            }, 
+            {
+                "environment": [
+                    {
+                        "name": "ESGF_HOSTNAME", 
+                        "value": "airborne-elb1.dyndns.org"
+                    }
+                ], 
+                "name": "data-node", 
+                "links": [
+                    "postgres:esgf-postgres"
+                ], 
+                "mountPoints": [
+                    {
+                        "sourceVolume": "tds_data", 
+                        "containerPath": "/esg/content/thredds"
+                    }, 
+                    {
+                        "sourceVolume": "esgf_data", 
+                        "containerPath": "/esg/data"
+                    }, 
+                    {
+                        "sourceVolume": "tds_web_xml", 
+                        "containerPath": "/usr/local/tomcat/webapps/thredds/WEB-INF/web.xml"
+                    }
+                ], 
+                "image": "esgfhub/esgf-data-node:1.2", 
+                "essential": true, 
+                "portMappings": [
+                    {
+                        "protocol": "tcp", 
+                        "containerPort": 8080, 
+                        "hostPort": 8080
+                    }, 
+                    {
+                        "protocol": "tcp", 
+                        "containerPort": 8443, 
+                        "hostPort": 8443
+                    }
+                ], 
+                "memory": 2048, 
+                "cpu": 0, 
+                "volumesFrom": [
+                    {
+                        "sourceContainer": "config"
+                    }
+                ]
+            }, 
+            {
+                "environment": [], 
+                "name": "idp-node", 
+                "links": [
+                    "postgres:esgf-postgres"
+                ], 
+                "mountPoints": [], 
+                "image": "esgfhub/esgf-idp-node:1.2", 
+                "essential": true, 
+                "portMappings": [
+                    {
+                        "protocol": "tcp", 
+                        "containerPort": 8080, 
+                        "hostPort": 8082
+                    }, 
+                    {
+                        "protocol": "tcp", 
+                        "containerPort": 8443, 
+                        "hostPort": 8445
+                    }
+                ], 
+                "memory": 1024, 
+                "cpu": 0, 
+                "volumesFrom": [
+                    {
+                        "sourceContainer": "config"
+                    }
+                ]
             }
         ], 
-        "revision": 27
+        "revision": 37
     }
 }
