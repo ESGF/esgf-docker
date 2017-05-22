@@ -35,6 +35,6 @@ RUN chmod 0600 /root/.pgpass
 
 EXPOSE 5432
 
-# override deafult supervisor configuration
-ADD ./conf/supervisord.conf /etc/supervisord.conf
+# add supervisor configuration for postgers service
+ADD ./conf/postgres.conf /etc/supervisor/conf.d/postgresql.conf
 ENTRYPOINT ["supervisord", "--nodaemon", "-c", "/etc/supervisord.conf"]
