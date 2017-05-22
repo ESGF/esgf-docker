@@ -3,10 +3,16 @@
     "serviceName": "EsgfMasterNodeService", 
     "taskDefinition": "EsgfMasterNodeTask", 
     "loadBalancers": [
-    ], 
+        {
+            "targetGroupArn": "",
+            "loadBalancerName": "EsgfClassicLoadBalancer",
+            "containerName": "httpd",
+            "containerPort": 80
+        }
+    ],
     "desiredCount": 1, 
     "clientToken": "", 
-    "role": "", 
+    "role": "ecsServiceRole",
     "deploymentConfiguration": {
         "maximumPercent": 200, 
         "minimumHealthyPercent": 50
