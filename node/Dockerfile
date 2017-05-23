@@ -80,6 +80,7 @@ RUN pip install --use-wheel Pillow==${PILLOW_VERSION}
 # executable: /usr/local/bin/supervisord
 # default supervisor configuration /etc/supervisord.conf :
 # will look for additional service configurations in /etc/supervisor/conf.d/
+# log file (from configuration): /tmp/supervisord.log
 RUN pip install supervisor
 COPY conf/supervisord.conf /etc/supervisord.conf
 RUN mkdir -p /etc/supervisor/conf.d/
@@ -92,5 +93,6 @@ RUN mkdir -p /esg/content
 # necessary to locate /esg/config/esgf.properties
 ENV ESGF_HOME /esg
 
-# start supervisor in non-daemon mode
-#ENTRYPOINT ["supervisord", "--nodaemon", "-c", "/etc/supervisord.conf"]
+# default entrypoint starts supervisor in non-daemon mode
+# to be overridden by child images
+ENTRYPOINT ["supervisord", "--nodaemon", "-c", "/etc/supervisord.conf"]

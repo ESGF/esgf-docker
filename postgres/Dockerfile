@@ -18,6 +18,7 @@ ADD ./sqldata/ /usr/local/bin/
 RUN /usr/local/bin/postgres_setup.sh initdb
 
 # configuration
+# log file: /var/lib/pgsql/data/pg_log/postgres.log
 ADD ./conf/postgresql.conf /var/lib/pgsql/data/postgresql.conf
 RUN chown -v postgres.postgres /var/lib/pgsql/data/postgresql.conf
 RUN echo "host    all             all             0.0.0.0/0               md5" >> /var/lib/pgsql/data/pg_hba.conf
@@ -35,6 +36,6 @@ RUN chmod 0600 /root/.pgpass
 
 EXPOSE 5432
 
-# add supervisor configuration for postgers service
+# add supervisor configuration for postgres service
 ADD ./conf/postgres.conf /etc/supervisor/conf.d/postgresql.conf
-ENTRYPOINT ["supervisord", "--nodaemon", "-c", "/etc/supervisord.conf"]
+ENTRYPOINT /usr/local/bin/docker-entrypoint.sh

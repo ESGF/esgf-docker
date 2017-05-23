@@ -26,15 +26,18 @@ RUN mkdir -p /var/www/.python-eggs && \
 # configuration for standalone service
 # (overridden by ESGF settings when running with docker-compose from parent directory)
 COPY certs/ /etc/certs/
-COPY conf/ /etc/httpd/conf.d/
 COPY html/ /var/www/html/
+COPY conf/httpd.conf /etc/httpd/conf.d/httpd.conf
+COPY conf/ssl.conf /etc/httpd/conf.d/ssl.conf
 
 EXPOSE 80 443
 
+# startup configuration
+ADD conf/apache.conf /etc/supervisor/conf.d/apache.conf
 ADD scripts/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 
 # start httpd server
 # parent process runs as 'root' to access port 80 and configuration files,
 # but it does NOT serve client requests
 # the child processes that serve user requests run as user 'apache'
-ENTRYPOINT ["apachectl", "-D", "FOREGROUND"]
+ENTRYPOINT /usr/local/bin/docker-entrypoint.sh
