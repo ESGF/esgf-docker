@@ -14,6 +14,4 @@ RUN cd /usr/local/tomcat/webapps/esg-search/ && \
     rm esg-search.war && \
     chown -R tomcat:tomcat /usr/local/tomcat/webapps/esg-search
 
-# run Tomcat as non-root user
-USER tomcat
-ENTRYPOINT ["/usr/local/tomcat/bin/catalina.sh", "run"]
+# index node startup inherited from esgf-tomcat image
