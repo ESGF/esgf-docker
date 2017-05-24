@@ -15,8 +15,4 @@ RUN cd /usr/local/tomcat/webapps/esgf-idp/ && \
     rm esgf-idp.war && \
     chown -R tomcat:tomcat /usr/local/tomcat/webapps/esgf-idp
 
-# run Tomcat as non-privileged user
-USER tomcat
-COPY scripts/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
-ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
-#ENTRYPOINT ["/usr/local/tomcat/bin/catalina.sh", "run"]
+# Note: Tomcat startup configuration is inherited from esgf-tomcat container
