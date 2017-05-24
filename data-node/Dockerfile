@@ -2,6 +2,7 @@
 # o TDS customized with ESGF access control filters
 # o ESGF publisher client (which needs access to the TDS file system)
 # o ORP
+# o Dashboard
 
 FROM esgfhub/esgf-tomcat:1.2
 
@@ -200,6 +201,4 @@ RUN mkdir -p $DASHBOARD_HOME/logs
 
 #===========================================
 
-# start supervisor in non-daemon mode
-# same as esgf-tomcat ENTRYPOINT
-ENTRYPOINT ["supervisord", "--nodaemon", "-c", "/etc/supervisord.conf"]
+# startup configuration and entry-point inherited from esgf-tomcat image

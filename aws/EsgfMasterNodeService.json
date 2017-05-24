@@ -1,0 +1,36 @@
+{
+    "cluster": "EsgfCluster", 
+    "serviceName": "EsgfMasterNodeService", 
+    "taskDefinition": "EsgfMasterNodeTask", 
+    "loadBalancers": [
+        {
+            "targetGroupArn": "",
+            "loadBalancerName": "EsgfClassicLoadBalancer",
+            "containerName": "httpd",
+            "containerPort": 80
+        }
+    ],
+    "desiredCount": 1, 
+    "clientToken": "", 
+    "role": "ecsServiceRole",
+    "deploymentConfiguration": {
+        "maximumPercent": 200, 
+        "minimumHealthyPercent": 50
+    }, 
+    "placementConstraints": [
+        {
+            "type": "memberOf", 
+            "expression": "attribute:esgf_type==master_node"
+        }
+    ], 
+    "placementStrategy": [
+        {
+            "field": "attribute:ecs.availability-zone",
+            "type": "spread"
+        },
+        {
+             "field": "instanceId",
+             "type": "spread"
+        }
+    ]
+}
