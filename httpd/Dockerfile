@@ -32,12 +32,10 @@ COPY conf/ssl.conf /etc/httpd/conf.d/ssl.conf
 
 EXPOSE 80 443
 
-# startup configuration
-ADD conf/apache.conf /etc/supervisor/conf.d/apache.conf
-ADD scripts/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
-
 # start httpd server
 # parent process runs as 'root' to access port 80 and configuration files,
 # but it does NOT serve client requests
 # the child processes that serve user requests run as user 'apache'
+ADD conf/supervisord.httpd.conf /etc/supervisor/conf.d/supervisord.httpd.conf
+ADD scripts/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 ENTRYPOINT /usr/local/bin/docker-entrypoint.sh

@@ -86,9 +86,9 @@ RUN chown -R cogadmin:cogadmin $COG_DIR
 VOLUME $COG_DIR/venv
 VOLUME $COG_INSTALL_DIR
 
-# scripts
+# startup
 COPY scripts/ /usr/local/bin/
-COPY conf/cog.conf /etc/supervisor/conf.d/cog.conf
+COPY conf/supervisord.cog.conf /etc/supervisor/conf.d/supervisord.cog.conf
 ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
 # override CMD options at run time
 CMD ["localhost", "false", "true"]

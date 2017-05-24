@@ -37,5 +37,5 @@ RUN chmod 0600 /root/.pgpass
 EXPOSE 5432
 
 # add supervisor configuration for postgres service
-ADD ./conf/postgres.conf /etc/supervisor/conf.d/postgresql.conf
+ADD ./conf/supervisord.postgres.conf /etc/supervisor/conf.d/supervisord.postgres.conf
 ENTRYPOINT /usr/local/bin/docker-entrypoint.sh
