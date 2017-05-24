@@ -84,8 +84,8 @@ services:
       - "8983"
       - "8984"
     ports:
-      - "8983:8983"
-      - "8984:8984" 
+      - "8985:8983"
+      - "8986:8984" 
     volumes:
      - solr_data:/esg/solr-index
     networks:

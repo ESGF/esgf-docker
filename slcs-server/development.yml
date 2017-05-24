@@ -1,0 +1,114 @@
+#####
+## This file contains variable definitions for a development install
+## Because OAuth expects to run over HTTP, this still uses Nginx, but expects
+## the Django development server to be started on port 5000
+#####
+
+#####
+## Server variables
+
+# The name of the server
+#   This should be the domain name by which the machine will be accessed over HTTP
+server_name: 172.28.128.7
+
+# The email address to use for emails sent by the application
+server_email: no-reply@{{ server_name }}
+
+#####
+## Python installation
+
+# Distribution for IUS community repository (required for Python 2.7 installation)
+#   Valid values are 'rhel6', 'centos6'
+ius_distro: centos6
+
+# To use an existing Python 2.7 installation, set this variable instead
+#  virtualenv_command: /path/to/virtualenv-2.7
+
+#####
+## Nginx installation
+
+# If true, configure nginx proxy
+#   The Nginx proxy assumes it can find a WSGI server internally on port 5000
+#   This can be either Waitress or the Django development server
+use_nginx_proxy: true
+
+# Distribution for the Nginx repository
+#   Valid values are 'rhel' or 'centos'
+nginx_distro: centos
+
+# If true, generate and use a self-signed SSL certificate for Nginx
+#   Only used if use_nginx_proxy = true
+use_self_signed_ssl_cert: true
+
+# The subject of the self-signed certificate
+#   Only used if use_self_signed_ssl_cert = true
+ssl_cert_subject: /O=ESGF/CN={{ server_name }}
+
+#####
+## Waitress and supervisord installation
+
+# If true, use the Waitress WSGI server to run the Django app
+#   The Waitress processes are managed using supervisord
+use_waitress_wsgi: false
+
+# NOTE: Set this to 1 so Nginx still looks for a worker
+waitress_instances: 1
+
+#####
+## Application installation
+
+# The user to install and run the application as
+#   This should be an unpriveleged user
+#   If the user doesn't exist, they will be created
+application_user: vagrant
+
+# The directory in which to install application code
+#   If not given, this defaults to the home directory of the application_user
+#   Must be readable and writable by the application_user
+# application_home: /path/to/application/home
+
+# The installation mode
+#   Valid values are 'production' and 'development'
+#   Development mode assumes the esgf-slcs-server code is available at
+#   /code/esgf-slcs-server, and is designed primarily for use with the Vagrant box
+install_mode: development
+
+#####
+## Database setup and configuration
+
+# If true, configure a new local database for the SLCS Django app and optionally
+#   configure a dummy ESGF user database (see use_dummy_userdb below)
+# If false, esgf_slcsdb and esgf_userdb dictionaries must be manually configured
+configure_databases: true
+
+# Only used if configure_databases = true
+# If true, install and populate a dummy ESGF user database
+use_dummy_userdb: true
+
+#####
+## CA setup and configuration
+
+# If true, install the test CA
+install_test_ca: true
+
+# Template for the subject of certificates issued by the SLCS server
+#   $OPENID is replaced with the user's OpenID
+onlineca_cert_subject_template: "/DC=esgf/CN=$OPENID"
+
+#####
+## Application configuration
+
+# If true, run Django in debug mode
+#   Should (obviously!) be false in production
+django_debug_mode: true
+
+# The location where static files should be collected
+static_root: /var/www/static
+
+# The username in the ESGF user table of the user that should be the Django superuser
+#   This user gets full access to the Django admin
+django_superuser: another
+
+# The IP range that is allowed access to the Django admin
+#   Filtering is done with Nginx, so this is only used if Nginx is enabled
+admin_ip_range: all
