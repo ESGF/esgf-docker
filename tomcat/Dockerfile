@@ -7,7 +7,7 @@ FROM esgfhub/esgf-node:1.2
 MAINTAINER Luca Cinquini <luca.cinquini@jpl.nasa.gov>
 
 # Tomcat 8
-ENV TOMCAT_VERSION 8.5.14
+ENV TOMCAT_VERSION 8.5.15
 
 RUN wget -O /tmp/apache-tomcat-${TOMCAT_VERSION}.tar.gz http://mirror.reverse.net/pub/apache/tomcat/tomcat-8/v${TOMCAT_VERSION}/bin/apache-tomcat-${TOMCAT_VERSION}.tar.gz && \
     cd /usr/local && tar xzf /tmp/apache-tomcat-${TOMCAT_VERSION}.tar.gz && \
@@ -22,11 +22,9 @@ RUN cd /usr/local/tomcat/webapps && \
 # copy custom configuration
 # server.xml: includes references to keystore, truststore in /esg/config/tomcat
 # context.xml: increases the Tomcat cache to avoid flood of warning messages
-# supervisor.tomcat.conf: supervisor configuration to run the Tomcat application
 COPY conf/server.xml /usr/local/tomcat/conf/server.xml
 COPY conf/context.xml /usr/local/tomcat/conf/context.xml
 COPY certs/ /esg/config/tomcat/
-COPY conf/supervisord.tomcat.conf /etc/supervisor/conf.d/supervisord.tomcat.conf
 
 # custom env variables for starting Tomcat
 COPY bin/setenv.sh $CATALINA_HOME/bin
@@ -37,11 +35,10 @@ RUN useradd -s /sbin/nologin -g tomcat -d /usr/local/tomcat tomcat
 RUN chown -R tomcat:tomcat /usr/local/apache-tomcat-${TOMCAT_VERSION}
 RUN chmod 775 /usr/local/tomcat/webapps
 
-#VOLUME /esg/config
-#VOLUME /esg/content
-
 EXPOSE 8080
-EXPOSE 8009
 EXPOSE 8443
 
-ENTRYPOINT ["supervisord", "--nodaemon", "-c", "/etc/supervisord.conf"]
+# startup
+COPY conf/supervisord.tomcat.conf /etc/supervisor/conf.d/supervisord.tomcat.conf
+COPY scripts/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
