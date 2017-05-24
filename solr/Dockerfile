@@ -9,6 +9,7 @@ ENV SOLR_VERSION 5.5.3
 ENV SOLR_INSTALL_DIR /usr/local/solr
 ENV SOLR_HOME /usr/local/solr-home
 ENV SOLR_DATA_DIR /esg/solr-index
+ENV SOLR_INCLUDE=${SOLR_HOME}/solr.in.sh
 
 RUN wget -O /tmp/solr-${SOLR_VERSION}.tgz http://archive.apache.org/dist/lucene/solr/${SOLR_VERSION}/solr-${SOLR_VERSION}.tgz
 RUN cd /usr/local && \
@@ -36,6 +37,7 @@ RUN chown -R solr:solr ${SOLR_DATA_DIR}
 EXPOSE 8983
 EXPOSE 8984
 
+# startup
+COPY conf/ /etc/supervisor/conf.d/
 COPY scripts/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
-USER solr
 ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
