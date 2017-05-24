@@ -88,9 +88,7 @@ VOLUME $COG_INSTALL_DIR
 
 # scripts
 COPY scripts/ /usr/local/bin/
-
-HEALTHCHECK CMD curl --fail "http://${ESGF_HOSTNAME}:8000/" || exit 1
-
+COPY conf/cog.conf /etc/supervisor/conf.d/cog.conf
 ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
 # override CMD options at run time
 CMD ["localhost", "false", "true"]
