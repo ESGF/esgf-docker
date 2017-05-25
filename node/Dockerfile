@@ -93,6 +93,7 @@ RUN mkdir -p /esg/content
 # necessary to locate /esg/config/esgf.properties
 ENV ESGF_HOME /esg
 
-# default entrypoint starts supervisor in non-daemon mode
+# default command starts supervisor in non-daemon mode
 # to be overridden by child images
-ENTRYPOINT ["supervisord", "--nodaemon", "-c", "/etc/supervisord.conf"]
+# NOTE: do not use ENTTRYPOINT as it would interfere with arguments to certificate generation
+CMD ["supervisord", "--nodaemon", "-c", "/etc/supervisord.conf"]
