@@ -15,6 +15,16 @@ RUN cd /usr/local/tomcat/webapps/esg-search/ && \
     rm esg-search.war && \
     chown -R tomcat:tomcat /usr/local/tomcat/webapps/esg-search
 
+COPY setenv.sh $CATALINA_HOME/bin
+
+# Allow root group rwx permissions for tomcat
+RUN chgrp -R 0 /usr/local/tomcat \
+  && chmod -R g+rwX /usr/local/tomcat \
+  && chgrp -R 0 /usr/local/apache-tomcat-${TOMCAT_VERSION} \
+  && chmod -R g+rwX /usr/local/apache-tomcat-${TOMCAT_VERSION}
+  
+COPY config /esg/config
+      
 # run Tomcat as non-root user
 USER tomcat
 ENTRYPOINT ["/usr/local/tomcat/bin/catalina.sh", "run"]

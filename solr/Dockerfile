@@ -37,5 +37,14 @@ EXPOSE 8983
 EXPOSE 8984
 
 COPY scripts/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+
+# Allow root group rwx permissions for solr
+RUN chgrp -R 0 /usr/local/solr-${SOLR_VERSION} \
+  && chmod -R g+rwX /usr/local/solr-${SOLR_VERSION} \
+  && chgrp -R 0 ${SOLR_HOME} \
+  && chmod -R g+rwX ${SOLR_HOME} \
+  && chgrp -R 0 ${SOLR_DATA_DIR} \
+  && chmod -R g+rwX ${SOLR_DATA_DIR}
+
 USER solr
 ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
