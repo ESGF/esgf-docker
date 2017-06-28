@@ -1,8 +1,9 @@
 #!/usr/bin/python2.7
 import argparse
 import os
+import socket
 import subprocess
-import shutil
+import time
 
 
 def parse_args():
@@ -138,6 +139,24 @@ def replace_in_file(file_path, replacements):
             outfile.write(line)
 
 
+def wait_for_db(db_host, db_port):
+    attempts = 20
+    sleep = 0.25
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    while True:
+        try:
+            if attempts >= 0:
+                s.connect((db_host, db_port))
+                s.close()
+                break
+            else:
+                raise IOError(
+                    "Timed out waiting to connect to {}:{}. Is the database available?".format(db_host, db_port))
+        except socket.error:
+            attempts -= 1
+            time.sleep(sleep)
+
+
 the_args = parse_args()
 
 os.environ['SLCS_SERVER_NAME'] = the_args.server_name
@@ -161,6 +180,10 @@ os.environ['SLCS_DJANGO_DEBUG_MODE'] = str(the_args.django_debug)
 os.environ['SLCS_SERVER_EMAIL'] = the_args.server_email
 os.environ['SLCS_ADMINS'] = ';'.join(the_args.django_admin)
 os.environ['SLCS_SERVER_ROOT'] = "https://{0}".format(the_args.server_name)
+
+# Make sure we can reach the DBs
+wait_for_db(the_args.slcs_database_host, the_args.slcs_database_port)
+wait_for_db(the_args.user_database_host, the_args.user_database_port)
 
 APPLICATION_HOME = os.environ['APPLICATION_HOME']
 
@@ -210,9 +233,6 @@ except subprocess.CalledProcessError as cpe:
         raise IOError("Error creating django superuser\n{0}".format(cpe.output))
 
 subprocess.check_call(
-    ["/usr/bin/python2.7", "{0}/manage.py".format(os.environ['CODE_LOCATION']), "collectstatic", "--noinput",
-     "--clear"])
-
-subprocess.call(['chmod', '-R', '777', os.environ['SLCS_STATIC_ROOT']])
+    ["/usr/bin/python2.7", "{0}/manage.py".format(os.environ['CODE_LOCATION']), "collectstatic", "--noinput"])
 
 subprocess.check_call(["waitress-serve", "--listen=*:5000", "esgf_slcs_server.wsgi:application"])
