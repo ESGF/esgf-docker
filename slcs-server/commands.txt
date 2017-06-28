@@ -29,3 +29,16 @@ Application: esgf-slcs-client-example
 User: another
 Client id: i1qx9KmQuIj8rWhrmSlR5wJQOkyU0c4HD0OQsm0R
 Client secret: Qme5lP8zpbZ2pHR73GnEBSmW0nktPzUCZCKNZclfQdok6sdIMI9yMgE3vrJeZLH7b5FrY4uI2yf5Tv95tliZ5ASxncbUbHZRWL4CBJUBXXrTvpfEt2fIqTbc2ggZrOgS
+
+
+
+docker run -it --rm --name slcs-server -v slcs-static-web:/var/www/static -v /Users/greguska/esgf_config/slcs/conf/db/:/usr/local/esgf-slcs-server/conf/db/ -v /Users/greguska/esgf_config/slcs/conf/ca/:/usr/local/esgf-slcs-server/conf/ca --network esgfdocker_dbnetwork -p 5000:5000 slcs-server -sn slcs-server -ds rootAdmin -sdn slcs -sdh slcs-postgres -sdu dbsuper -udn esgcet -udh postgres -udu dbsuper --static-url https://my-node.esgf.org/slcs/
+
+docker run -it --rm --name slcs-server -v slcs-static-web:/var/www/static -v /Users/greguska/esgf_config/slcs/conf/db/:/usr/local/esgf-slcs-server/conf/db/ -v /Users/greguska/esgf_config/slcs/conf/ca/:/usr/local/esgf-slcs-server/conf/ca --network esgfdocker_dbnetwork -p 5000:5000 --entrypoint /bin/bash slcs-server
+
+
+pip2.7 install --upgrade --force-reinstall --no-deps .
+
+
+
+docker run -it --rm --name slcs-postgres --network esgfdocker_dbnetwork -e POSTGRES_PASSWORD=changeit -e POSTGRES_USER=dbsuper -e POSTGRES_DB=slcs -e POSTGRES_INITDB_ARGS=--encoding=UTF-8 postgres
