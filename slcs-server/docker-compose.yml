@@ -1,14 +1,16 @@
---- 
+version: "3.0"
+
+volumes: 
+  slcs-static-web: 
+
 networks: 
   dbnetwork: 
     external: 
       name: esgfdocker_dbnetwork
-secrets: 
-  slcsdb_passwd: 
-    file: $ESGF_CONFIG/slcs/conf/db/slcsdb_passwd.txt
+
 services: 
   slcs: 
-    command: "-sn $ESGF_HOSTNAME -ds rootAdmin -sdn slcs -sdh slcs-postgres -sdu dbsuper -udn esgcet -udh postgres -udu dbsuper --static-url https://$ESGF_HOSTNAME/slcs/"
+    command: ["-sn", "$ESGF_HOSTNAME", "-ds", "rootAdmin", "-sdn", "slcs", "-sdh", "slcs-postgres", "-sdu", "dbsuper", "-udn", "esgcet", "-udh", "postgres", "-udu", "dbsuper", "--static-url", "https://$ESGF_HOSTNAME/slcs/"]
     container_name: slcs
     depends_on: 
       - slcs-postgres
@@ -24,6 +26,7 @@ services:
       - "slcs-static-web:/var/www/static"
       - "$ESGF_CONFIG/slcs/conf/db/:/usr/local/esgf-slcs-server/conf/db"
       - "$ESGF_CONFIG/slcs/conf/ca/:/usr/local/esgf-slcs-server/conf/ca"
+  
   slcs-nginx: 
     container_name: slcs-nginx
     depends_on: 
@@ -37,6 +40,7 @@ services:
       - dbnetwork
     volumes: 
       - "slcs-static-web:/usr/share/nginx/html:ro"
+  
   slcs-postgres: 
     container_name: slcs-postgres
     environment: 
@@ -50,6 +54,3 @@ services:
     networks: 
       - default
       - dbnetwork
-version: "3.2"
-volumes: 
-  slcs-static-web: 
