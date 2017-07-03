@@ -11,8 +11,8 @@ ENV SOLR_HOME /usr/local/solr-home
 ENV SOLR_DATA_DIR /esg/solr-index
 ENV SOLR_INCLUDE=${SOLR_HOME}/solr.in.sh
 
-RUN wget -O /tmp/solr-${SOLR_VERSION}.tgz http://archive.apache.org/dist/lucene/solr/${SOLR_VERSION}/solr-${SOLR_VERSION}.tgz
-RUN cd /usr/local && \
+RUN wget -O /tmp/solr-${SOLR_VERSION}.tgz http://archive.apache.org/dist/lucene/solr/${SOLR_VERSION}/solr-${SOLR_VERSION}.tgz && \
+    cd /usr/local && \
     tar xzf /tmp/solr-${SOLR_VERSION}.tgz && \
     rm /tmp/solr-${SOLR_VERSION}.tgz && \
     ln -s ./solr-${SOLR_VERSION} ./solr
