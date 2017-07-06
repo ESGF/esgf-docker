@@ -10,7 +10,7 @@ networks:
 
 services: 
   slcs: 
-    command: ["-sn", "slcs-server", "-ds", "rootAdmin", "-sdn", "slcs", "-sdh", "slcs-postgres", "-sdu", "dbsuper", "-udn", "esgcet", "-udh", "postgres", "-udu", "dbsuper", "--static-url", "https://$ESGF_HOSTNAME/slcs/"]
+    command: ["-sn", "slcs-server", "-ds", "rootAdmin", "-sdn", "slcs", "-sdh", "slcs-postgres", "-sdu", "dbsuper", "-udn", "esgcet", "-udh", "postgres", "-udu", "dbsuper", "--static-url", "https://$ESGF_HOSTNAME/slcs/", "--url-prefix", "slcs-admin"]
     container_name: slcs-server
     depends_on: 
       - slcs-postgres

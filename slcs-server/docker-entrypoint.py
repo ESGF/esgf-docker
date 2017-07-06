@@ -25,6 +25,15 @@ def parse_args():
                         required=True,
                         metavar='http://my-cdn.esgf.org/slcs-static/')
 
+    parser.add_argument('-up', '--url-prefix',
+                        help='Should be set when slcs is behind a proxy where all requests are being forwarded from '
+                             'the proxy to slcs. For example, if httpd is being used to proxy all requests for '
+                             'https://my-node.esgf.org/slcs-admin to the slcs application, then this option should be '
+                             'set to \'slcs-admin\'. '
+                             'See https://docs.pylonsproject.org/projects/waitress/en/latest/#using-url-prefix-to-influence-script-name-and-path-info.',
+                        required=False,
+                        metavar='slcs-admin')
+
     slcs_db_group = parser.add_argument_group(title='SLCS Database Settings',
                                               description='Settings used for connecting to the SLCS database.')
     slcs_db_group.add_argument('-sdn', '--slcs-database-name',
@@ -235,4 +244,5 @@ except subprocess.CalledProcessError as cpe:
 subprocess.check_call(
     ["/usr/bin/python2.7", "{0}/manage.py".format(os.environ['CODE_LOCATION']), "collectstatic", "--noinput"])
 
-subprocess.check_call(["waitress-serve", "--listen=*:5000", "esgf_slcs_server.wsgi:application"])
+subprocess.check_call(["waitress-serve", "--listen=*:5000", "--url-prefix={}".format(the_args.url_prefix),
+                       "esgf_slcs_server.wsgi:application"])
