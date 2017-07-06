@@ -25,14 +25,22 @@ def parse_args():
                         required=True,
                         metavar='http://my-cdn.esgf.org/slcs-static/')
 
-    parser.add_argument('-up', '--url-prefix',
-                        help='Should be set when slcs is behind a proxy where all requests are being forwarded from '
-                             'the proxy to slcs. For example, if httpd is being used to proxy all requests for '
-                             'https://my-node.esgf.org/slcs-admin to the slcs application, then this option should be '
-                             'set to \'slcs-admin\'. '
-                             'See https://docs.pylonsproject.org/projects/waitress/en/latest/#using-url-prefix-to-influence-script-name-and-path-info.',
-                        required=False,
-                        metavar='slcs-admin')
+    proxy_settings_group = parser.add_argument_group(title='Proxy Settings',
+                                                     description='Settings used when SLCS is operating behind a proxy.')
+    proxy_settings_group.add_argument('-up', '--url-prefix',
+                                      help='Should be set when slcs is behind a proxy where all requests are being forwarded from '
+                                           'the proxy to slcs. For example, if httpd is being used to proxy all requests for '
+                                           'https://my-node.esgf.org/slcs-admin to the slcs application, then this option should be '
+                                           'set to \'slcs-admin\'. '
+                                           'See https://docs.pylonsproject.org/projects/waitress/en/latest/#using-url-prefix-to-influence-script-name-and-path-info.',
+                                      required=False,
+                                      metavar='slcs-admin')
+    proxy_settings_group.add_argument('-xf', '--use-x-forwarded-host',
+                                      help='Enables ALLOWED_HOSTS to match against the X_FORWARDED_HOST HTTP header '
+                                           'instead of the HTTP HOST header. '
+                                           'See https://docs.djangoproject.com/en/1.9/ref/settings/#use-x-forwarded-host',
+                                      required=False,
+                                      action='store_true')
 
     slcs_db_group = parser.add_argument_group(title='SLCS Database Settings',
                                               description='Settings used for connecting to the SLCS database.')
@@ -169,7 +177,12 @@ def wait_for_db(db_host, db_port):
 the_args = parse_args()
 
 os.environ['SLCS_SERVER_NAME'] = the_args.server_name
+os.environ['SLCS_USE_X_FORWARDED_HOST'] = str(the_args.use_x_forwarded_host)
 os.environ['SLCS_STATIC_URL'] = the_args.static_url
+if the_args.url_prefix:
+    os.environ['SLCS_SERVER_ROOT'] = "https://{0}/{1}".format(the_args.server_name, the_args.url_prefix)
+else:
+    os.environ['SLCS_SERVER_ROOT'] = "https://{0}".format(the_args.server_name)
 
 os.environ['SLCS_DB_SLCS_ENGINE'] = the_args.slcs_database_engine
 os.environ['SLCS_DB_SLCS_NAME'] = the_args.slcs_database_name
@@ -188,7 +201,6 @@ os.environ['SLCS_DB_USER_SCHEMA'] = the_args.user_database_schema
 os.environ['SLCS_DJANGO_DEBUG_MODE'] = str(the_args.django_debug)
 os.environ['SLCS_SERVER_EMAIL'] = the_args.server_email
 os.environ['SLCS_ADMINS'] = ';'.join(the_args.django_admin)
-os.environ['SLCS_SERVER_ROOT'] = "https://{0}".format(the_args.server_name)
 
 # Make sure we can reach the DBs
 wait_for_db(the_args.slcs_database_host, the_args.slcs_database_port)

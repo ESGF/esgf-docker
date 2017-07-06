@@ -11,6 +11,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 APPLICATION_HOME = os.environ['SLCS_APPLICATION_HOME']
 
 ALLOWED_HOSTS = ['localhost', '127.0.0.1', os.environ['SLCS_SERVER_NAME']]
+USE_X_FORWARDED_HOST = "true" == str(os.getenv('SLCS_USE_X_FORWARDED_HOST')).lower()
 
 DEBUG = "true" == str(os.getenv('SLCS_DJANGO_DEBUG_MODE')).lower()
 
