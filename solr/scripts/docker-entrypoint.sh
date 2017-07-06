@@ -5,7 +5,11 @@
 # start supervisor --> solr shards
 supervisord -c /etc/supervisord.conf
 
-# print out log file
-sleep 2
-#tail -f $SOLR_INSTALL_DIR/server/logs/solr.log
-tail -f /dev/null
+# print out log file, once it's available
+while true
+do
+  [ -f $SOLR_INSTALL_DIR/server/logs/solr.log ] && break
+  sleep 1
+done
+sleep 1
+tail -f $SOLR_INSTALL_DIR/server/logs/solr.log
