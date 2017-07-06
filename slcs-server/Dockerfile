@@ -41,7 +41,7 @@ RUN mkdir -p $CODE_LOCATION && \
 USER slcs
 WORKDIR $CODE_LOCATION
 ARG ESGF_SLCS_SERVER_VERSION=master
-ENV START_HERE=yes
+ENV START_HERE=no
 RUN git init && \
     git pull https://github.com/fgreg/esgf-slcs-server $ESGF_SLCS_SERVER_VERSION && \
     pip2.7 install -r requirements.txt && \
@@ -73,7 +73,8 @@ RUN chown slcs:slcs $APPLICATION_CONF_DIR/onlineca.ini && \
     chmod 644 $APPLICATION_CONF_DIR/onlineca.ini && \
     mkdir -p $SLCS_STATIC_ROOT && \
     chown -R slcs:slcs $SLCS_STATIC_ROOT && \
-    chmod -R 744 $SLCS_STATIC_ROOT && \
+    find $SLCS_STATIC_ROOT -type d -exec chmod 755 {} \; && \
+    find $SLCS_STATIC_ROOT -type f -exec chmod 644 {} \; && \
     chown slcs:slcs /usr/local/bin/docker-entrypoint.py && \
     chmod 744 /usr/local/bin/docker-entrypoint.py
 USER slcs
