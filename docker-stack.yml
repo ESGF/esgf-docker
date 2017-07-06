@@ -1,0 +1,107 @@
+# required env variables:
+#
+# ESGF_CONFIG : points to the root ESGF configuration directory
+#       example: export ESGF_CONFIG=/Users/cinquini/ESGF_CONFIG
+# ESGF_HOSTNAME: HostName or IP address for apache httpd front-end server
+#       example: export ESGF_HOSTNAME=my.esgf.node
+#       example: export ESGF_HOSTNAME=`docker-machine ip`
+# ESGF_VERSION: version of ESGF/Docker distribution
+#       example: export ESGF_VERSION=1.0
+
+version: '3'
+
+services:
+
+  # data container holding site-specific ESGF configuration
+  #esgf-config:
+  #  image: centos:6
+  #  container_name: esgf-config
+  #  volumes:
+  #   - $ESGF_CONFIG/httpd/certs/:/etc/certs/
+  #   - $ESGF_CONFIG/httpd/conf/esgf-httpd.conf:/etc/httpd/conf.d/esgf-httpd.conf
+  #   - $ESGF_CONFIG/grid-security/certificates/:/etc/grid-security/certificates/
+  #   - $ESGF_CONFIG/esg/config/:/esg/config/
+  #   - $ESGF_CONFIG/esg/config/tomcat/esg-truststore.ts:/usr/java/latest/jre/lib/security/jssecacerts
+
+  esgf-solr:
+    image: esgfhub/esgf-solr:${ESGF_VERSION}
+    #container_name: solr
+    #expose:
+    #  - "8983"
+    #  - "8984"
+    ports:
+      - "8983:8983"
+      - "8984:8984" 
+    volumes:
+     # use solr index on Docker volume
+      - solr_data:/esg/solr-index
+     # use solr index from existing local directory
+     #- /Users/cinquini/tmp/solr-index:/esg/solr-index
+    networks:
+      - default
+    deploy:
+      mode: replicated
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+        delay: 10s
+        max_attempts: 3
+        window: 120s
+      placement:
+        constraints: [node.labels.esgf_type == index_node]
+
+  esgf-index-node:
+    image: esgfhub/esgf-index-node:${ESGF_VERSION}
+    #container_name: index-node
+    #expose:
+    #  - "8080"
+    #  - "8443"
+    ports:
+      - "8080:8080"
+      - "8443:8443"
+    depends_on:
+      - esgf-solr
+    volumes:
+     - $ESGF_CONFIG/httpd/certs/:/etc/certs/
+     - $ESGF_CONFIG/httpd/conf/esgf-httpd.conf:/etc/httpd/conf.d/esgf-httpd.conf
+     - $ESGF_CONFIG/grid-security/certificates/:/etc/grid-security/certificates/
+     - $ESGF_CONFIG/esg/config/:/esg/config/
+     - $ESGF_CONFIG/esg/config/tomcat/esg-truststore.ts:/usr/java/latest/jre/lib/security/jssecacerts
+    networks:
+      - default
+
+  esgf-httpd:
+   image: esgfhub/esgf-httpd:${ESGF_VERSION}
+   #container_name: httpd
+   entrypoint: /usr/local/bin/docker-entrypoint.sh
+   volumes:
+     - $ESGF_CONFIG/httpd/certs/:/etc/certs/
+     - $ESGF_CONFIG/httpd/conf/esgf-httpd.conf:/etc/httpd/conf.d/esgf-httpd.conf
+     - $ESGF_CONFIG/grid-security/certificates/:/etc/grid-security/certificates/
+     - $ESGF_CONFIG/esg/config/:/esg/config/
+     - $ESGF_CONFIG/esg/config/tomcat/esg-truststore.ts:/usr/java/latest/jre/lib/security/jssecacerts
+   ports:
+     - "80:80"
+     - "443:443"
+   # httpd URLs must use hostname=$ESGF_HOSTNAME
+   networks:
+     default:
+       aliases:
+         - "${ESGF_HOSTNAME}"
+
+  visualizer:
+    image: dockersamples/visualizer:stable
+    ports:
+      - "9080:8080"
+    stop_grace_period: 1m30s
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
+    deploy:
+      placement:
+        constraints: [node.role == manager]
+
+# use Docker volumes to store persistent data
+# (which survives when the containers are removed)
+volumes:
+  # contains Solr index data
+  solr_data:

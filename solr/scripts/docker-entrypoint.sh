@@ -7,4 +7,5 @@ supervisord -c /etc/supervisord.conf
 
 # print out log file
 sleep 2
-tail -f $SOLR_INSTALL_DIR/server/logs/solr.log
+#tail -f $SOLR_INSTALL_DIR/server/logs/solr.log
+tail -f /dev/null
