@@ -25,16 +25,12 @@ services:
 
   esgf-solr:
     image: esgfhub/esgf-solr:${ESGF_VERSION}
-    #container_name: solr
-    #expose:
-    #  - "8983"
-    #  - "8984"
     ports:
       - "8983:8983"
       - "8984:8984" 
     volumes:
      # use solr index on Docker volume
-      - solr_data:/esg/solr-index
+     - solr_data:/esg/solr-index
      # use solr index from existing local directory
      #- /Users/cinquini/tmp/solr-index:/esg/solr-index
     networks:
@@ -48,38 +44,38 @@ services:
         max_attempts: 3
         window: 120s
       placement:
-        constraints: [node.labels.esgf_type == index_node]
+        constraints: [node.labels.esgf_type == solr_node]
 
   esgf-index-node:
     image: esgfhub/esgf-index-node:${ESGF_VERSION}
-    #container_name: index-node
-    #expose:
-    #  - "8080"
-    #  - "8443"
     ports:
       - "8080:8080"
       - "8443:8443"
     depends_on:
       - esgf-solr
     volumes:
-     - $ESGF_CONFIG/httpd/certs/:/etc/certs/
-     - $ESGF_CONFIG/httpd/conf/esgf-httpd.conf:/etc/httpd/conf.d/esgf-httpd.conf
-     - $ESGF_CONFIG/grid-security/certificates/:/etc/grid-security/certificates/
+    # - $ESGF_CONFIG/httpd/certs/:/etc/certs/
+    # - $ESGF_CONFIG/httpd/conf/esgf-httpd.conf:/etc/httpd/conf.d/esgf-httpd.conf
+    # - $ESGF_CONFIG/grid-security/certificates/:/etc/grid-security/certificates/
      - $ESGF_CONFIG/esg/config/:/esg/config/
      - $ESGF_CONFIG/esg/config/tomcat/esg-truststore.ts:/usr/java/latest/jre/lib/security/jssecacerts
     networks:
       - default
+    deploy:
+      replicas: 1
+      placement:
+        constraints: [node.labels.esgf_type == index_node]
+
 
   esgf-httpd:
    image: esgfhub/esgf-httpd:${ESGF_VERSION}
-   #container_name: httpd
    entrypoint: /usr/local/bin/docker-entrypoint.sh
    volumes:
      - $ESGF_CONFIG/httpd/certs/:/etc/certs/
      - $ESGF_CONFIG/httpd/conf/esgf-httpd.conf:/etc/httpd/conf.d/esgf-httpd.conf
      - $ESGF_CONFIG/grid-security/certificates/:/etc/grid-security/certificates/
-     - $ESGF_CONFIG/esg/config/:/esg/config/
-     - $ESGF_CONFIG/esg/config/tomcat/esg-truststore.ts:/usr/java/latest/jre/lib/security/jssecacerts
+   #  - $ESGF_CONFIG/esg/config/:/esg/config/
+   #  - $ESGF_CONFIG/esg/config/tomcat/esg-truststore.ts:/usr/java/latest/jre/lib/security/jssecacerts
    ports:
      - "80:80"
      - "443:443"
@@ -88,6 +84,10 @@ services:
      default:
        aliases:
          - "${ESGF_HOSTNAME}"
+   deploy:
+      replicas: 1
+      placement:
+        constraints: [node.labels.esgf_type == front_node]
 
   visualizer:
     image: dockersamples/visualizer:stable
