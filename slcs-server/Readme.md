@@ -30,7 +30,7 @@ Name: esgf-slcs-client-example
 Click save.
 
 
-Clone the (esgf-slcs-client-example)[https://github.com/cedadev/esgf-slcs-client-example] repository locally.
+Clone the [esgf-slcs-client-example](https://github.com/cedadev/esgf-slcs-client-example) repository locally.
 
 Modify the settings on lines 17-19 in `esgf_slcs_client_example.py` to match the settings for your installation. For example:
 
