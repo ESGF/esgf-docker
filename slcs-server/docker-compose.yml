@@ -40,7 +40,6 @@ services:
     volumes: 
       - "slcs_static_web:/usr/share/nginx/html"
       - "$ESGF_CONFIG/slcs/conf/nginx/nginx.conf:/etc/nginx/conf.d/default.conf"
-      - "$ESGF_CONFIG/slcs/conf/nginx/nginx-start.sh:/usr/bin/start-nginx.sh"
   
   slcs-postgres: 
     container_name: slcs-postgres
