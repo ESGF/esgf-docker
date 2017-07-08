@@ -30,7 +30,7 @@ sed -i 's/PRODUCTION_SERVER = True/PRODUCTION_SERVER = False/g' $COG_CONFIG_DIR/
 
 # start django server in virtual environment
 # or keep the container running
-if [ $RUNSERVER ]; then
+if [ $RUNSERVER == "true" ]; then
    # start supervisor --> cog
    supervisord -c /etc/supervisord.conf
    sleep 2
