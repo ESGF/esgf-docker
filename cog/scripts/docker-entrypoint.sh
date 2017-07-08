@@ -31,10 +31,9 @@ sed -i 's/PRODUCTION_SERVER = True/PRODUCTION_SERVER = False/g' $COG_CONFIG_DIR/
 # start django server in virtual environment
 # or keep the container running
 if [ $RUNSERVER == "true" ]; then
+   echo "Starting CoG server through supervisor daemon"
    # start supervisor --> cog
    supervisord -c /etc/supervisord.conf
    sleep 2
    tail -f /tmp/cog.log
-else
-   tail -f /dev/null
 fi

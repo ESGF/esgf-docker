@@ -87,8 +87,8 @@ VOLUME $COG_DIR/venv
 VOLUME $COG_INSTALL_DIR
 
 # startup
-COPY scripts/ /usr/local/bin/
+COPY  scripts/ /usr/local/bin/
 COPY conf/supervisord.cog.conf /etc/supervisor/conf.d/supervisord.cog.conf
 ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
-# override CMD options at run time
+# will override these CMD options at run time
 CMD ["localhost", "false", "true"]

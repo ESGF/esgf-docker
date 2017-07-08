@@ -63,6 +63,11 @@ services:
       - COG_CONFIG_DIR=/usr/local/cog/cog_config
       - ESGF_HOSTNAME
     deploy:
+      mode: replicated
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+        max_attempts: 0
       placement:
         constraints: [node.labels.esgf_type == front_node]
 
