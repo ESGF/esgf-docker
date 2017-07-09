@@ -61,6 +61,15 @@ RUN cd $COG_DIR && \
     make  && \
     cp mkproxy $COG_DIR/venv/lib/python2.7/site-packages/globusonline/transfer/api_client/x509_proxy/.
 
+# collect static files to ./static directory
+# must use a minimal settings file (configured with sqllite3 database)
+COPY conf/cog_settings.cfg /usr/local/cog/cog_config/cog_settings.cfg
+RUN cd $COG_INSTALL_DIR && \
+    source $COG_DIR/venv/bin/activate && \
+    #python setup.py -q setup_cog --esgf=false
+    python manage.py collectstatic --no-input && \
+    rm /usr/local/cog/cog_config/cog_settings.cfg
+
 # for some unknown reason, must reinstall captcha
 #RUN source $COG_DIR/venv/bin/activate && \
 #    pip uninstall -y django-simple-captcha && \
