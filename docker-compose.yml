@@ -1,21 +1,49 @@
-# required env variables:
+# Docker Compose file to start a full ESGF node.
+#
+# Required env variables:
 #
 # ESGF_CONFIG : points to the root ESGF configuration directory
 #       example: export ESGF_CONFIG=/Users/cinquini/ESGF_CONFIG
 # ESGF_HOSTNAME: HostName or IP address for apache httpd front-end server
 #       example: export ESGF_HOSTNAME=my.esgf.node
 #       example: export ESGF_HOSTNAME=`docker-machine ip`
-# ESGF_DATA_DIR: root of ESGF data directories
 # ESGF_VERSION: version of ESGF/Docker distribution
 #       example: export ESGF_VERSION=1.0
+# ESGF_DATA_DIR: root of ESGF data directories
 
-version: '2'
+version: '2.1'
 
 networks:
   # network to keep postgres database isolated
   dbnetwork:
 
 services:
+
+  # data container holding site-specific ESGF configuration
+  # this container stops after the volumes are initialized
+  # only include configuration common to more than one container
+  esgf-config:
+    image: centos:6
+    container_name: esgf-config
+    volumes:
+     - $ESGF_CONFIG/httpd/certs/:/etc/certs/
+     - $ESGF_CONFIG/httpd/conf/esgf-httpd.conf:/etc/httpd/conf.d/esgf-httpd.conf
+     - $ESGF_CONFIG/grid-security/certificates/:/etc/grid-security/certificates/
+     - $ESGF_CONFIG/esg/config/:/esg/config/
+     - $ESGF_CONFIG/esg/config/tomcat/esg-truststore.ts:/usr/java/latest/jre/lib/security/jssecacerts
+
+  # ESGF postgres database
+  esgf-postgres:
+     image: esgfhub/esgf-postgres:${ESGF_VERSION}
+     expose:
+       - "5432"
+     ports:
+       - "5432:5432"
+     container_name: postgres
+     networks:
+       - dbnetwork
+     volumes:
+       - pg_data:/var/lib/pgsql/data
 
   # ESGF Data Node
   esgf-data-node:
@@ -34,8 +62,8 @@ services:
       - tds_data:/esg/content/thredds
       - $ESGF_CONFIG/webapps/thredds/WEB-INF/web.xml:/usr/local/tomcat/webapps/thredds/WEB-INF/web.xml
       - $ESGF_DATA_DIR:/esg/data
-      - $ESGF_CONFIG/grid-security/certificates/:/etc/grid-security/certificates/
-      - $ESGF_CONFIG/globus/certificate-file:/root/.globus/certificate-file
+      #- $ESGF_CONFIG/grid-security/certificates/:/etc/grid-security/certificates/
+      #- $ESGF_CONFIG/globus/certificate-file:/root/.globus/certificate-file
     volumes_from:
       - esgf-config
     environment:
@@ -62,20 +90,6 @@ services:
     depends_on:
       - esgf-postgres
 
-  # data container holding site-specific ESGF configuration
-  # this container stops after the volumes are initialized
-  # only include configuration common to more than one container
-  esgf-config:
-    image: centos:6
-    container_name: esgf-config
-    volumes:
-     - $ESGF_CONFIG/httpd/certs/:/etc/certs/
-     - $ESGF_CONFIG/httpd/conf/esgf-httpd.conf:/etc/httpd/conf.d/esgf-httpd.conf
-     - $ESGF_CONFIG/grid-security/certificates/:/etc/grid-security/certificates/
-     - $ESGF_CONFIG/esg/config/:/esg/config/
-     - $ESGF_CONFIG/esg/config/tomcat/esg-truststore.ts:/usr/java/latest/jre/lib/security/jssecacerts
-
-
   # Solr engine running within Jetty
   esgf-solr:
     image: esgfhub/esgf-solr:${ESGF_VERSION}
@@ -92,6 +106,8 @@ services:
       - default
 
   # ESGF Index Node
+  # note the non-standard ports used on the host
+  # (since the standard ports are used by the data-node service)
   esgf-index-node:
     image: esgfhub/esgf-index-node:${ESGF_VERSION}
     container_name: index-node
@@ -108,19 +124,7 @@ services:
     networks:
       - default
 
-  # ESGF postgres database
-  esgf-postgres:
-     image: esgfhub/esgf-postgres:${ESGF_VERSION}
-     expose:
-       - "5432"
-     ports:
-       - "5432:5432"
-     container_name: postgres
-     networks:
-       - dbnetwork
-     volumes:
-       - pg_data:/var/lib/pgsql/data
-
+  # CoG
   # data container to hold CoG source code and python virtual environment
   # this container stops after the volume 'cog_data' is initialized
   esgf-cog:
@@ -134,8 +138,8 @@ services:
        - cog_data:/usr/local/cog/cog_config
      volumes_from:
       - esgf-config
-     #command: $ESGF_HOSTNAME true true # keep django runnining on port 8000
-     command: $ESGF_HOSTNAME true false
+     #command: $ESGF_HOSTNAME true true # ESGF=true, keep django server runnining on port 8000
+     command: $ESGF_HOSTNAME true false # ESGF=false, django server running on port 8000 = false
      depends_on:
        - esgf-postgres
      networks:
@@ -144,6 +148,7 @@ services:
        - COG_DIR=/usr/local/cog
        - COG_INSTALL_DIR=/usr/local/cog/cog_install
        - COG_CONFIG_DIR=/usr/local/cog/cog_config
+       - ESGF_HOSTNAME
 
   esgf-httpd:
    image: esgfhub/esgf-httpd:${ESGF_VERSION}
@@ -154,14 +159,19 @@ services:
    volumes_from:
      - esgf-config
      - esgf-cog
+   # - esgf-node-manager
    environment:
      - SSL_CERT_DIR=/etc/grid-security/certificates
      - COG_CONFIG_DIR=/usr/local/cog/cog_config
+     - ESGF_HOSTNAME
    ports:
      - "80:80"
      - "443:443"
    depends_on:
      - esgf-cog
+   #  - esgf-node-manager
+   healthcheck:
+     test: 'curl --fail "https://${ESGF_HOSTNAME}/" || exit 1'
    # httpd URLs must use hostname=$ESGF_HOSTNAME
    networks:
      default:
@@ -169,18 +179,32 @@ services:
          - "${ESGF_HOSTNAME}"
      dbnetwork: {}
 
-  # FTP server
-  esgf-ftp:
-   image: esgfhub/esgf-vsftp:${ESGF_VERSION}
-   container_name: ftp 
-   ports:
-     - "20:20"
-     - "21:21"
-     - "12020-12025:12020-12025" 
+  esgf-node-manager:
+   image: esgfhub/esgf-node-manager:${ESGF_VERSION}
+   container_name: node-manager
+   volumes_from:
+     - esgf-config
+   environment:
+     - SSL_CERT_DIR=/etc/grid-security/certificates
+     - ESGF_HOSTNAME
+   depends_on:
+     - esgf-postgres
    networks:
-     - default
-   volumes:
-     - $ESGF_DATA_DIR:/var/ftp/pub
+     default: {}
+     dbnetwork: {}
+
+  # FTP server
+  #esgf-ftp:
+  # image: esgfhub/esgf-vsftp:${ESGF_VERSION}
+  # container_name: ftp 
+  # ports:
+  #   - "20:20"
+  #   - "21:21"
+  #   - "12020-12025:12020-12025" 
+  # networks:
+  #   - default
+  # volumes:
+  #   - $ESGF_DATA_DIR:/var/ftp/pub
    
 
 # use Docker volumes to store persistent data

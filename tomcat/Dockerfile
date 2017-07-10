@@ -2,12 +2,12 @@
 # o Tomcat keystore, truststore files located in /esg/config/tomcat
 # o startup with ESGF specific env variables defined in bin/setenv.sh
 
-FROM esgfhub/esgf-node:1.1
+FROM esgfhub/esgf-node:1.2
 
 MAINTAINER Luca Cinquini <luca.cinquini@jpl.nasa.gov>
 
 # Tomcat 8
-ENV TOMCAT_VERSION 8.5.11
+ENV TOMCAT_VERSION 8.5.15
 
 RUN wget -O /tmp/apache-tomcat-${TOMCAT_VERSION}.tar.gz http://mirror.reverse.net/pub/apache/tomcat/tomcat-8/v${TOMCAT_VERSION}/bin/apache-tomcat-${TOMCAT_VERSION}.tar.gz && \
     cd /usr/local && tar xzf /tmp/apache-tomcat-${TOMCAT_VERSION}.tar.gz && \
@@ -20,9 +20,10 @@ RUN cd /usr/local/tomcat/webapps && \
     rm -rf docs examples host-manager manager
 
 # copy custom configuration
-# server.xml: includes keystore, truststore
+# server.xml: includes references to keystore, truststore in /esg/config/tomcat
 # context.xml: increases the Tomcat cache to avoid flood of warning messages
-COPY conf/ /usr/local/tomcat/conf/
+COPY conf/server.xml /usr/local/tomcat/conf/server.xml
+COPY conf/context.xml /usr/local/tomcat/conf/context.xml
 COPY certs/ /esg/config/tomcat/
 
 # custom env variables for starting Tomcat
@@ -34,11 +35,10 @@ RUN useradd -s /sbin/nologin -g tomcat -d /usr/local/tomcat tomcat
 RUN chown -R tomcat:tomcat /usr/local/apache-tomcat-${TOMCAT_VERSION}
 RUN chmod 775 /usr/local/tomcat/webapps
 
-#VOLUME /esg/config
-#VOLUME /esg/content
-
 EXPOSE 8080
-EXPOSE 8009
 EXPOSE 8443
 
-ENTRYPOINT ["/usr/local/tomcat/bin/catalina.sh", "run"]
+# startup
+COPY conf/supervisord.tomcat.conf /etc/supervisor/conf.d/supervisord.tomcat.conf
+COPY scripts/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]

@@ -1,6 +1,6 @@
 # ESGF node with Apache httpd and mod_wsgi
 
-FROM esgfhub/esgf-node:1.1
+FROM esgfhub/esgf-node:1.2
 
 MAINTAINER Luca Cinquini <luca.cinquini@jpl.nasa.gov>
 
@@ -26,15 +26,16 @@ RUN mkdir -p /var/www/.python-eggs && \
 # configuration for standalone service
 # (overridden by ESGF settings when running with docker-compose from parent directory)
 COPY certs/ /etc/certs/
-COPY conf.d/ /etc/httpd/conf.d/
 COPY html/ /var/www/html/
+COPY conf/httpd.conf /etc/httpd/conf.d/httpd.conf
+COPY conf/ssl.conf /etc/httpd/conf.d/ssl.conf
 
 EXPOSE 80 443
-
-ADD scripts/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 
 # start httpd server
 # parent process runs as 'root' to access port 80 and configuration files,
 # but it does NOT serve client requests
 # the child processes that serve user requests run as user 'apache'
-ENTRYPOINT ["apachectl", "-D", "FOREGROUND"]
+ADD conf/supervisord.httpd.conf /etc/supervisor/conf.d/supervisord.httpd.conf
+ADD scripts/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+ENTRYPOINT /usr/local/bin/docker-entrypoint.sh

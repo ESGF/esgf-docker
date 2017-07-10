@@ -1,12 +1,18 @@
 # ESGF node with CoG web application
-# When running a container, must have $ESGF_HOSTNAME env set,
+#
+# To run on localhost:
+# docker run -ti -p 8000:8000 --name cog esgfhub/esgf-cog:${ESGF_VERSION}
+# To run with a specific hostname:
+# docker run -ti -p 8000:8000 --name cog -e ESGF_HOSTNAME=${ESGF_HOSTNAME} esgfhub/esgf-cog:${ESGF_VERSION} ${ESGF_HOSTNAME} false true
+# To map the local source directory:
+# docker run -ti -p 8000:8000 --name cog -v /Users/cinquini/Documents/workspace/cog:/usr/local/cog/cog_install esgfhub/esgf-cog:${ESGF_VERSION}
 
-FROM esgfhub/esgf-node:1.1
+FROM esgfhub/esgf-node:1.2
 
 MAINTAINER Luca Cinquini <luca.cinquini@jpl.nasa.gov>
 
 # choose CoG version
-ENV COG_TAG=v3.8.0
+ENV COG_TAG=v3.9.1
 
 # setup CoG environment
 ENV COG_DIR=/usr/local/cog
@@ -25,8 +31,8 @@ RUN cd $COG_DIR && \
 RUN cd $COG_DIR && \
     git clone https://github.com/EarthSystemCoG/COG cog_install && \
     cd cog_install && \
-    git checkout -b devel origin/devel
-    #git checkout $COG_TAG
+    #git checkout -b devel origin/devel
+    git checkout $COG_TAG
 
 # install CoG dependencies
 RUN cd $COG_INSTALL_DIR && \
@@ -55,6 +61,15 @@ RUN cd $COG_DIR && \
     make  && \
     cp mkproxy $COG_DIR/venv/lib/python2.7/site-packages/globusonline/transfer/api_client/x509_proxy/.
 
+# collect static files to ./static directory
+# must use a minimal settings file (configured with sqllite3 database)
+COPY conf/cog_settings.cfg /usr/local/cog/cog_config/cog_settings.cfg
+RUN cd $COG_INSTALL_DIR && \
+    source $COG_DIR/venv/bin/activate && \
+    #python setup.py -q setup_cog --esgf=false
+    python manage.py collectstatic --no-input && \
+    rm /usr/local/cog/cog_config/cog_settings.cfg
+
 # for some unknown reason, must reinstall captcha
 #RUN source $COG_DIR/venv/bin/activate && \
 #    pip uninstall -y django-simple-captcha && \
@@ -80,9 +95,9 @@ RUN chown -R cogadmin:cogadmin $COG_DIR
 VOLUME $COG_DIR/venv
 VOLUME $COG_INSTALL_DIR
 
-# scripts
-COPY scripts/ /usr/local/bin/
-RUN chmod +x /usr/local/bin/*.sh
-
+# startup
+COPY  scripts/ /usr/local/bin/
+COPY conf/supervisord.cog.conf /etc/supervisor/conf.d/supervisord.cog.conf
 ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
-CMD ["my-node.esgf.org", "false", "true"]
+# will override these CMD options at run time
+CMD ["localhost", "false", "true"]

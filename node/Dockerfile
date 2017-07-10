@@ -1,6 +1,7 @@
 # Docker image based on Centos 6 that includes:
 # Oracle Java 8
 # Python 2.7 + a few common Python packages
+# Supervisor
 # Also includes common, non-site specific ESGF env variables (ESGF_HOME).
 
 FROM centos:6
@@ -27,19 +28,28 @@ RUN yum -y update && \
     sqlite-devel \
     freetype-devel \
     postgresql-devel \
-    libjpeg-turbo-devel && \
+    libjpeg-turbo-devel \
     yum clean all
 
+# install additional epel repository
+RUN yum -y install epel-release; yum clean all
+
 # install Oracle Java 8
-ENV JAVA_VERSION 8u31
-ENV BUILD_VERSION b13
-RUN wget --no-cookies --no-check-certificate --header "Cookie: oraclelicense=accept-securebackup-cookie" "http://download.oracle.com/otn-pub/java/jdk/$JAVA_VERSION-$BUILD_VERSION/jdk-$JAVA_VERSION-linux-x64.rpm" -O /tmp/jdk-8-linux-x64.rpm
+ENV JAVA_VERSION 8u131
+ENV JAVA_BUILD_VERSION b11
+
+
+RUN wget --no-cookies --no-check-certificate --header "Cookie: oraclelicense=accept-securebackup-cookie" \
+    -O /tmp/jdk-8-linux-x64.rpm \
+    "http://download.oracle.com/otn-pub/java/jdk/${JAVA_VERSION}-${JAVA_BUILD_VERSION}/d54c1d3a095b4ff2b6607d096fa80163/jdk-${JAVA_VERSION}-linux-x64.rpm"
+
 RUN yum -y install /tmp/jdk-8-linux-x64.rpm && \
     rm /tmp/jdk-8-linux-x64.rpm
 RUN alternatives --install /usr/bin/java jar /usr/java/latest/bin/java 200000
 RUN alternatives --install /usr/bin/javaws javaws /usr/java/latest/bin/javaws 200000
 RUN alternatives --install /usr/bin/javac javac /usr/java/latest/bin/javac 200000
 ENV JAVA_HOME /usr/java/latest
+ENV PATH=${JAVA_HOME}/bin:$PATH
 
 # install Python 2.7
 # note: option "--enable-shared" is needed by mod_wsgi, will generate /usr/local/lib/libpython2.7.so.1.0
@@ -66,6 +76,15 @@ RUN pip install virtualenv
 RUN pip install wheel
 RUN pip install --use-wheel Pillow==${PILLOW_VERSION}
 
+# supervisor
+# executable: /usr/local/bin/supervisord
+# default supervisor configuration /etc/supervisord.conf :
+# will look for additional service configurations in /etc/supervisor/conf.d/
+# log file (from configuration): /tmp/supervisord.log
+RUN pip install supervisor
+COPY conf/supervisord.conf /etc/supervisord.conf
+RUN mkdir -p /etc/supervisor/conf.d/
+
 # common directories
 RUN mkdir -p /esg/config
 RUN mkdir -p /esg/content
@@ -73,3 +92,8 @@ RUN mkdir -p /esg/content
 # common environment variables
 # necessary to locate /esg/config/esgf.properties
 ENV ESGF_HOME /esg
+
+# default command starts supervisor in non-daemon mode
+# to be overridden by child images
+# NOTE: do not use ENTTRYPOINT as it would interfere with arguments to certificate generation
+CMD ["supervisord", "--nodaemon", "-c", "/etc/supervisord.conf"]

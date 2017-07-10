@@ -2,8 +2,9 @@
 # o TDS customized with ESGF access control filters
 # o ESGF publisher client (which needs access to the TDS file system)
 # o ORP
+# o Dashboard
 
-FROM esgfhub/esgf-tomcat:1.1
+FROM esgfhub/esgf-tomcat:1.2
 
 MAINTAINER Luca Cinquini <luca.cinquini@jpl.nasa.gov>
 
@@ -38,8 +39,8 @@ RUN source ${CDAT_HOME}/bin/activate esgf-pub && \
     pip install esgprep
 
 # install ESGF publisher
-# location: /usr/local/conda/lib/python2.7/site-packages/esgcet-3.0.1-py2.7.egg
-ENV ESG_PUBLISHER_VERSION=v3.0.1
+# location: /usr/local/conda/envs/esgf-pub/
+ENV ESG_PUBLISHER_VERSION=v3.2.2
 RUN source ${CDAT_HOME}/bin/activate esgf-pub && \
     cd /tmp && \
     git clone https://github.com/ESGF/esg-publisher.git && \
@@ -70,11 +71,20 @@ COPY esgf-orp/conf/esg-orp.properties /usr/local/tomcat/webapps/esg-orp/WEB-INF/
 
 #=============================================
 
+# ESGF OLD NODE MANAGER
+# uset to extract dependency jars
+RUN mkdir -p /usr/local/tomcat/webapps/esgf-node-manager
+ADD $ESGF_REPO/dist/devel/esgf-node-manager/esgf-node-manager.war /usr/local/tomcat/webapps/esgf-node-manager/
+RUN cd /usr/local/tomcat/webapps/esgf-node-manager/ && \
+    jar xvf esgf-node-manager.war
+
+#============================================
+
 # TDS
 
 RUN mkdir -p /usr/local/tomcat/webapps/thredds
 #COPY thredds/thredds.war /usr/local/tomcat/webapps/thredds/thredds.war
-ADD $ESGF_REPO/dist/devel/thredds/5.0/5.0.0/thredds.war /usr/local/tomcat/webapps/thredds/
+ADD $ESGF_REPO/dist/devel/thredds/5.0/5.0.1/thredds.war /usr/local/tomcat/webapps/thredds/
 RUN cd /usr/local/tomcat/webapps/thredds && \
     jar xvf thredds.war && \
     rm thredds.war && \
@@ -86,22 +96,50 @@ RUN mkdir -p /esg/content/thredds
 # TDS memory configuration
 COPY thredds/conf/threddsConfig.xml  /esg/content/thredds/threddsConfig.xml
 
-# ESGF root catalog - will override TDS startup catalog with test data
-#COPY thredds/conf/catalog.xml /esg/content/thredds/catalog.xml
+# ESGF root catalog
+COPY thredds/conf/catalog.xml /esg/content/thredds/catalog.xml-esgcet
 #COPY thredds/conf/esgcet/catalog.xml /esg/content/thredds/esgcet/catalog.xml
+RUN mkdir -p /esg/content/thredds/esgcet
 
 # TDS customized applicationContext.xml file with ESGF authorizer
 COPY thredds/conf/applicationContext.xml /usr/local/tomcat/webapps/thredds/WEB-INF/applicationContext.xml
 
 # TDS jars necessary to support ESGF security filters
-COPY  thredds/jars/*  $CATALINA_HOME/webapps/thredds/WEB-INF/lib/
+# some jars are retrieved from the ESGF repository
+# other jars are copied from the unpacked ORP or NM distributions
+#COPY  thredds/jars/*  $CATALINA_HOME/webapps/thredds/WEB-INF/lib/
+
+ADD $ESGF_REPO/dist/devel/filters/XSGroupRole-1.0.0.jar $CATALINA_HOME/webapps/thredds/WEB-INF/lib/XSGroupRole-1.0.0.jar
+ADD $ESGF_REPO/dist/devel/filters/commons-httpclient-3.1.jar $CATALINA_HOME/webapps/thredds/WEB-INF/lib/commons-httpclient-3.1.jar
+ADD $ESGF_REPO/dist/devel/filters/commons-lang-2.6.jar $CATALINA_HOME/webapps/thredds/WEB-INF/lib/commons-lang-2.6.jar
+ADD $ESGF_REPO/dist/devel/esg-orp/esg-orp-2.9.3.jar $CATALINA_HOME/webapps/thredds/WEB-INF/lib/esg-orp-2.9.3.jar
+ADD $ESGF_REPO/dist/devel/esgf-node-manager/esgf-node-manager-common-1.0.0.jar $CATALINA_HOME/webapps/thredds/WEB-INF/lib/esgf-node-manager-common-1.0.0.jar
+ADD $ESGF_REPO/dist/devel/esgf-node-manager/esgf-node-manager-filters-1.0.0.jar $CATALINA_HOME/webapps/thredds/WEB-INF/lib/esgf-node-manager-filters-1.0.0.jar
+ADD $ESGF_REPO/dist/devel/esgf-security/esgf-security-2.7.10.jar $CATALINA_HOME/webapps/thredds/WEB-INF/lib/esgf-security-2.7.10.jar
+ADD $ESGF_REPO/dist/devel/filters/jdom-legacy-1.1.3.jar $CATALINA_HOME/webapps/thredds/WEB-INF/lib/jdom-legacy-1.1.3.jar
+ADD $ESGF_REPO/dist/devel/filters/opensaml-2.3.2.jar $CATALINA_HOME/webapps/thredds/WEB-INF/lib/opensaml-2.3.2.jar
+ADD $ESGF_REPO/dist/devel/filters/openws-1.3.1.jar $CATALINA_HOME/webapps/thredds/WEB-INF/lib/openws-1.3.1.jar
+ADD $ESGF_REPO/dist/devel/filters/xmltooling-1.2.2.jar $CATALINA_HOME/webapps/thredds/WEB-INF/lib/xmltooling-1.2.2.jar
+
+RUN cp /usr/local/tomcat/webapps/esg-orp/WEB-INF/lib/serializer-2.9.1.jar $CATALINA_HOME/webapps/thredds/WEB-INF/lib/serializer-2.9.1.jar
+RUN cp /usr/local/tomcat/webapps/esg-orp/WEB-INF/lib/velocity-1.5.jar $CATALINA_HOME/webapps/thredds/WEB-INF/lib/velocity-1.5.jar
+RUN cp /usr/local/tomcat/webapps/esg-orp/WEB-INF/lib/xalan-2.7.2.jar $CATALINA_HOME/webapps/thredds/WEB-INF/lib/xalan-2.7.2.jar
+RUN cp /usr/local/tomcat/webapps/esg-orp/WEB-INF/lib/xercesImpl-2.10.0.jar $CATALINA_HOME/webapps/thredds/WEB-INF/lib/xercesImpl-2.10.0.jar
+RUN cp /usr/local/tomcat/webapps/esg-orp/WEB-INF/lib/xml-apis-1.4.01.jar $CATALINA_HOME/webapps/thredds/WEB-INF/lib/xml-apis-1.4.01.jar
+RUN cp /usr/local/tomcat/webapps/esg-orp/WEB-INF/lib/xmlsec-1.4.2.jar $CATALINA_HOME/webapps/thredds/WEB-INF/lib/xmlsec-1.4.2.jar
+RUN cp /usr/local/tomcat/webapps/esg-orp/WEB-INF/lib/log4j-1.2.17.jar $CATALINA_HOME/webapps/thredds/WEB-INF/lib/log4j-1.2.17.jar
+RUN cp /usr/local/tomcat/webapps/esg-orp/WEB-INF/lib/commons-io-2.4.jar $CATALINA_HOME/webapps/thredds/WEB-INF/lib/commons-io-2.4.jar
+
+RUN cp /usr/local/tomcat/webapps/esgf-node-manager/WEB-INF/lib/commons-dbcp-1.4.jar $CATALINA_HOME/webapps/thredds/WEB-INF/lib/commons-dbcp-1.4.jar
+RUN cp /usr/local/tomcat/webapps/esgf-node-manager/WEB-INF/lib/commons-dbutils-1.3.jar $CATALINA_HOME/webapps/thredds/WEB-INF/lib/commons-dbutils-1.3.jar
+RUN cp /usr/local/tomcat/webapps/esgf-node-manager/WEB-INF/lib/commons-pool-1.5.4.jar $CATALINA_HOME/webapps/thredds/WEB-INF/lib/commons-pool-1.5.4.jar
+RUN cp /usr/local/tomcat/webapps/esgf-node-manager/WEB-INF/lib/postgresql-8.4-703.jdbc3.jar $CATALINA_HOME/webapps/thredds/WEB-INF/lib/postgresql-8.4-703.jdbc3.jar
 
 # TDS customized logging (uses DEBUG)
 COPY thredds/conf/log4j2.xml /usr/local/tomcat/webapps/thredds/WEB-INF/classes/log4j2.xml
 
 # data node scripts
 COPY scripts/ /usr/local/bin/
-RUN chmod +x /usr/local/bin/change_data_node_password.sh
 
 # TDS test ESGF catalogs
 # COPY esgf-content/thredds/ /esg/content/thredds/
@@ -111,7 +149,56 @@ RUN chmod +x /usr/local/bin/change_data_node_password.sh
 
 # change ownership of content directory
 RUN chown -R tomcat:tomcat  /esg/content/thredds/
+# change ownership of source directory
+RUN chown -R tomcat:tomcat $CATALINA_HOME/webapps/thredds
 
-# start container as non-privilged user
-USER tomcat
-ENTRYPOINT ["/usr/local/tomcat/bin/catalina.sh", "run"]
+# cleanup
+RUN rm -rf /usr/local/tomcat/webapps/esgf-node-manager/
+
+#===========================================
+
+# Dashboard
+# note: dashboard application accesses the postgres database via credentials 
+# stored in /esg/config/esg.ini and /esg/config/.esg_pg_pass
+
+ENV DASHBOARD_HOME /usr/local/esgf-dashboard-ip
+
+# library dependencies
+RUN yum -y install epel-release
+RUN yum install -y curl-devel \
+                   GeoIP \
+                   GeoIP-devel
+
+# install additional GeoLiteCity database
+COPY dashboard/GeoLiteCity.dat.gz /tmp
+RUN mkdir -p /usr/local/geoip/share/GeoIP && \
+     cd /tmp && \
+     gunzip -c GeoLiteCity.dat.gz > /usr/local/geoip/share/GeoIP/GeoLiteCity.dat
+
+# install esgf-stats-api war file
+#COPY dashboard/esgf-stats-api.war /usr/local/tomcat/webapps/esgf-stats-api/esgf-stats-api.war
+ADD $ESGF_REPO/dist/devel/esgf-stats-api/esgf-stats-api.war /usr/local/tomcat/webapps/esgf-stats-api/esgf-stats-api.war
+RUN cd /usr/local/tomcat/webapps/esgf-stats-api && \
+    jar xvf esgf-stats-api.war && \
+    rm esgf-stats-api.war && \
+    chown -R tomcat:tomcat /usr/local/tomcat/webapps/esgf-stats-api
+
+# execute dashboard installation script (without the postgres schema)
+COPY dashboard/scripts/ /usr/local/bin/
+RUN /usr/local/bin/dashboard_ipservice.sh
+
+# create non-privileged user to run the dashboard application
+RUN groupadd dashboard && \
+    useradd -s /sbin/nologin -g dashboard -d /usr/local/dashboard dashboard && \
+    chown -R dashboard:dashboard /usr/local/esgf-dashboard-ip
+RUN chmod a+w /var/run
+
+# install the supervisor configuration for the dashboard
+# must start esgf-dashboard-ip in the foreground as non-daemon (no '&' to background the process)
+ADD dashboard/scripts/ip.service $DASHBOARD_HOME/bin/ip.service
+ADD dashboard/conf/supervisord.dashboard.conf /etc/supervisor/conf.d/supervisord.dashboard.conf 
+RUN mkdir -p $DASHBOARD_HOME/logs
+
+#===========================================
+
+# startup configuration and entry-point inherited from esgf-tomcat image
