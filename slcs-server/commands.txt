@@ -1,0 +1,44 @@
+docker run -it --rm -p 5000:5000 -p 5001:5001 slcs-server
+git clone https://github.com/cedadev/esgf-slcs-server-playbook.git
+ansible-playbook -i esgf-slcs-server-playbook/playbook/inventories/localhost -e "@/usr/local/esgf-slcs-server/development.yml" esgf-slcs-server-playbook/playbook/playbook.yml
+su - vagrant
+venv/bin/python /code/esgf-slcs-server/manage.py runserver 0.0.0.0:5000
+
+
+
+
+docker run -it --rm --network container:pensive_fermat centos
+yum upgrade -y
+yum install -y epel-release
+yum install -y python34 python34-devel python34-pip openssl openssl-devel gcc git
+pip3 install install flask requests-oauthlib pyopenssl
+mkdir /usr/local/esgf
+cd /usr/local/esgf
+git clone https://github.com/cedadev/esgf-slcs-client-example.git
+vi esgf_slcs_client_example.py
+    esgf_slcs_server = 'http://127.0.0.1:5000'
+    client_id = "i1qx9KmQuIj8rWhrmSlR5wJQOkyU0c4HD0OQsm0R"
+    client_secret = "Qme5lP8zpbZ2pHR73GnEBSmW0nktPzUCZCKNZclfQdok6sdIMI9yMgE3vrJeZLH7b5FrY4uI2yf5Tv95tliZ5ASxncbUbHZRWL4CBJUBXXrTvpfEt2fIqTbc2ggZrOgS"
+    scope = ['https://172.28.128.7/oauth/certificate/']
+    redirect_uri = 'http://127.0.0.1:5001/oauth_callback'
+    app.run(debug = True, port=5001, host='0.0.0.0')
+
+
+
+Application: esgf-slcs-client-example
+User: another
+Client id: i1qx9KmQuIj8rWhrmSlR5wJQOkyU0c4HD0OQsm0R
+Client secret: Qme5lP8zpbZ2pHR73GnEBSmW0nktPzUCZCKNZclfQdok6sdIMI9yMgE3vrJeZLH7b5FrY4uI2yf5Tv95tliZ5ASxncbUbHZRWL4CBJUBXXrTvpfEt2fIqTbc2ggZrOgS
+
+
+
+docker run -it --rm --name slcs-server -v slcs-static-web:/var/www/static -v /Users/greguska/esgf_config/slcs/conf/db/:/usr/local/esgf-slcs-server/conf/db/ -v /Users/greguska/esgf_config/slcs/conf/ca/:/usr/local/esgf-slcs-server/conf/ca --network esgfdocker_dbnetwork -p 5000:5000 slcs-server -sn slcs-server -ds rootAdmin -sdn slcs -sdh slcs-postgres -sdu dbsuper -udn esgcet -udh postgres -udu dbsuper --static-url https://my-node.esgf.org/slcs/
+
+docker run -it --rm --name slcs-server -v slcs-static-web:/var/www/static -v /Users/greguska/esgf_config/slcs/conf/db/:/usr/local/esgf-slcs-server/conf/db/ -v /Users/greguska/esgf_config/slcs/conf/ca/:/usr/local/esgf-slcs-server/conf/ca --network esgfdocker_dbnetwork -p 5000:5000 --entrypoint /bin/bash slcs-server
+
+
+pip2.7 install --upgrade --force-reinstall --no-deps .
+
+
+
+docker run -it --rm --name slcs-postgres --network esgfdocker_dbnetwork -e POSTGRES_PASSWORD=changeit -e POSTGRES_USER=dbsuper -e POSTGRES_DB=slcs -e POSTGRES_INITDB_ARGS=--encoding=UTF-8 postgres
