@@ -1,3 +1,13 @@
+# Required env variables:
+#
+# ESGF_CONFIG : points to the root ESGF configuration directory
+#       example: export ESGF_CONFIG=/Users/cinquini/ESGF_CONFIG
+# ESGF_HOSTNAME: HostName or IP address for apache httpd front-end server
+#       example: export ESGF_HOSTNAME=my.esgf.node
+#       example: export ESGF_HOSTNAME=`docker-machine ip`
+# ESGF_VERSION: version of ESGF/Docker distribution
+#       example: export ESGF_VERSION=1.0
+
 version: "3.0"
 
 volumes: 
@@ -17,7 +27,7 @@ services:
       - slcs-nginx
     expose: 
       - "5000"
-    image: esgfhub/slcs-server
+    image: esgfhub/slcs-server:${ESGF_VERSION}
     networks: 
       - default
       - dbnetwork
