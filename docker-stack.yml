@@ -14,8 +14,7 @@
 # Services deployment:
 # - front_node: httpd daemon, cog (for data initialization) and visualizer
 # - db_node: postgres
-# - index_node: esgf-search web application runnning within Tomcat
-# - solr_node: solr search engine running within Jetty
+# - index_node: esgf-search web application runnning within Tomcat, solr search engine running within Jetty
 
 version: '3'
 
@@ -91,7 +90,7 @@ services:
     deploy:
       replicas: 1
       placement:
-        constraints: [node.labels.esgf_type == solr_node]
+        constraints: [node.labels.esgf_type == index_node]
 
 
   esgf-index-node:
