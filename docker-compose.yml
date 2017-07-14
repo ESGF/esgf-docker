@@ -149,6 +149,7 @@ services:
        - COG_INSTALL_DIR=/usr/local/cog/cog_install
        - COG_CONFIG_DIR=/usr/local/cog/cog_config
        - ESGF_HOSTNAME
+       - ${INIT:-true}
 
   esgf-httpd:
    image: esgfhub/esgf-httpd:${ESGF_VERSION}
