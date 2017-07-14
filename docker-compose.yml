@@ -149,6 +149,7 @@ services:
        - COG_INSTALL_DIR=/usr/local/cog/cog_install
        - COG_CONFIG_DIR=/usr/local/cog/cog_config
        - ESGF_HOSTNAME
+       # flag to execute CoG initialization, defaults to true, may be overridden from shell environment before starting docker-compose
        - ${INIT:-true}
 
   esgf-httpd:
