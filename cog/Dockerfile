@@ -1,8 +1,8 @@
 # ESGF node with CoG web application
 #
-# To run on localhost:
+# To run CoG standalone on localhost:
 # docker run -ti -p 8000:8000 --name cog esgfhub/esgf-cog:${ESGF_VERSION}
-# To run with a specific hostname:
+# To run CoG standalone with a specific hostname:
 # docker run -ti -p 8000:8000 --name cog -e ESGF_HOSTNAME=${ESGF_HOSTNAME} esgfhub/esgf-cog:${ESGF_VERSION} ${ESGF_HOSTNAME} false true
 # To map the local source directory:
 # docker run -ti -p 8000:8000 --name cog -v /Users/cinquini/Documents/workspace/cog:/usr/local/cog/cog_install esgfhub/esgf-cog:${ESGF_VERSION}
@@ -12,7 +12,11 @@ FROM esgfhub/esgf-node:1.2
 MAINTAINER Luca Cinquini <luca.cinquini@jpl.nasa.gov>
 
 # choose CoG version
-ENV COG_TAG=v3.9.1
+ENV COG_TAG=v3.9.2
+
+# env variable to execute CoG initialization
+# may be overridden from command line after first container startup
+ENV INIT=true
 
 # setup CoG environment
 ENV COG_DIR=/usr/local/cog
