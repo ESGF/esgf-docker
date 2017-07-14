@@ -21,11 +21,14 @@ if [ $INIT == "true" ]; then
    $scriptdir/docker-init.sh $ESGF_HOSTNAME $ESGF_FLAG
 fi
 
-# start django server in virtual environment
+# start django server in virtual environment on port 8000
 if [ $RUNSERVER == "true" ]; then
    echo "Starting CoG server through supervisor daemon"
    # start supervisor --> cog
    supervisord -c /etc/supervisord.conf
    sleep 2
    tail -f /tmp/cog.log
+# or keep the container running by starting supervisor without including sub-processes
+else
+   supervisord --nodaemon -c /etc/supervisord_noothers.conf
 fi

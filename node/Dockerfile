@@ -83,6 +83,7 @@ RUN pip install --use-wheel Pillow==${PILLOW_VERSION}
 # log file (from configuration): /tmp/supervisord.log
 RUN pip install supervisor
 COPY conf/supervisord.conf /etc/supervisord.conf
+COPY conf/supervisord_noothers.conf /etc/supervisord_noothers.conf
 RUN mkdir -p /etc/supervisor/conf.d/
 
 # common directories
