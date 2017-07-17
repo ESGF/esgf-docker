@@ -27,7 +27,7 @@ services:
       - ${SOLR_DATA:-~/solr-index}
     volumes:
      # use solr index on Docker volume
-     - solr_data:/esg/solr-index
+     #- solr_data:/esg/solr-index
      # use Solr index on shared partition
      - $SOLR_DATA:/esg/solr-index
      # use solr index from existing local directory
@@ -96,6 +96,6 @@ services:
 
 # use Docker volumes to store persistent data
 # (which survives when the containers are removed)
-volumes:
+#volumes:
   # contains Solr index data
-  solr_data:
+  #solr_data:
