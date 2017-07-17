@@ -13,12 +13,15 @@
 #       example: export SOLR_DATA=/esg/solr-index
 # COG_DATA: location of CoG site data
 #       example: export COG_DATA=/usr/local/cog/cog_config
+# TDS_DATA: location of TDS catalogs
+#       example: export TDS_DATA=/esg/content/thredds
 
 #
 # Services deployment:
 # - front_node: httpd daemon, cog, and visualizer
 # - db_node: postgres
 # - index_node: esgf-search web application runnning within Tomcat, solr search engine running within Jetty
+# - idp_node: esgf-idp web application running within Tomcat
 
 version: '3'
 
@@ -109,6 +112,20 @@ services:
       replicas: 1
       placement:
         constraints: [node.labels.esgf_type == index_node]
+
+  esgf-idp-node:
+    image: esgfhub/esgf-idp-node:${ESGF_VERSION}
+    ports:
+      - "8082:8080"
+      - "8445:8443"
+    networks:
+      - default
+      - dbnetwork
+    volumes_from:
+     - $ESGF_CONFIG/esg/config/:/esg/config/
+     - $ESGF_CONFIG/esg/config/tomcat/esg-truststore.ts:/usr/java/latest/jre/lib/security/jssecacerts
+    depends_on:
+      - esgf-postgres
 
 
   esgf-httpd:
