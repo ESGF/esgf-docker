@@ -134,12 +134,11 @@ services:
     depends_on:
       - esgf-postgres
 
-
   esgf-data-node:
     image: esgfhub/esgf-data-node:${ESGF_VERSION}
     ports:
-      - "8080:8080"
-      - "8443:8443"
+      - "8083:8080"
+      - "8446:8443"
     networks:
       - default
       - dbnetwork
@@ -192,7 +191,7 @@ services:
   visualizer:
     image: dockersamples/visualizer:stable
     ports:
-      - "9080:8080"
+      - "8080:8080"
     stop_grace_period: 1m30s
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock"
