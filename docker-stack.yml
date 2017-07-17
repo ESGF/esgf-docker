@@ -1,4 +1,4 @@
-# Docker compose file to start a full ESGF node as a distrubuted stack
+# Docker compose file to start a full ESGF node as a distributed stack
 
 # Required env variables:
 #
@@ -22,6 +22,7 @@
 # - db_node: postgres
 # - index_node: esgf-search web application runnning within Tomcat, solr search engine running within Jetty
 # - idp_node: esgf-idp web application running within Tomcat
+# - data_node: TDS and esg-orp applications running within Tomcat
 
 version: '3'
 
@@ -124,6 +125,26 @@ services:
     volumes:
      - $ESGF_CONFIG/esg/config/:/esg/config/
      - $ESGF_CONFIG/esg/config/tomcat/esg-truststore.ts:/usr/java/latest/jre/lib/security/jssecacerts
+    depends_on:
+      - esgf-postgres
+
+
+  esgf-data-node:
+    image: esgfhub/esgf-data-node:${ESGF_VERSION}
+    ports:
+      - "8080:8080"
+      - "8443:8443"
+    networks:
+      - default
+      - dbnetwork
+    volumes:
+      - $TDS_DATA:/esg/content/thredds
+      - $ESGF_CONFIG/esg/config/:/esg/config/
+      - $ESGF_CONFIG/webapps/thredds/WEB-INF/web.xml:/usr/local/tomcat/webapps/thredds/WEB-INF/web.xml
+      - $ESGF_CONFIG/esg/config/tomcat/esg-truststore.ts:/usr/java/latest/jre/lib/security/jssecacerts
+      - $ESGF_DATA_ARCHIVE:/esg/data_archive
+    environment:
+     - ESGF_HOSTNAME
     depends_on:
       - esgf-postgres
 
