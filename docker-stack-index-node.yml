@@ -7,6 +7,8 @@
 #       example: export ESGF_HOSTNAME=`docker-machine ip`
 # ESGF_VERSION: version of ESGF/Docker distribution
 #       example: export ESGF_VERSION=1.0
+# SOLR_DATA: location of Solr index
+#       example: export SOLR_DATA=/esg/solr-index
 
 # service stack:
 # - front_node: httpd daemon (and container visualizer)
@@ -22,16 +24,11 @@ services:
     ports:
       - "8983:8983"
       - "8984:8984" 
-    environment:
-      # use SOLR_DATA location from environment, or default to solr_index/ under user home directory
-      - ${SOLR_DATA:-~/solr-index}
     volumes:
      # use solr index on Docker volume
      #- solr_data:/esg/solr-index
-     # use Solr index on shared partition
+     # use Solr index on host partition
      - $SOLR_DATA:/esg/solr-index
-     # use solr index from existing local directory
-     #- /Users/cinquini/tmp/solr-index:/esg/solr-index
     networks:
       - default
     deploy:
@@ -61,7 +58,6 @@ services:
       replicas: 1
       placement:
         constraints: [node.labels.esgf_type == index_node]
-
 
   esgf-httpd:
    image: esgfhub/esgf-httpd:${ESGF_VERSION}
