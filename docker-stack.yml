@@ -121,7 +121,7 @@ services:
     networks:
       - default
       - dbnetwork
-    volumes_from:
+    volumes:
      - $ESGF_CONFIG/esg/config/:/esg/config/
      - $ESGF_CONFIG/esg/config/tomcat/esg-truststore.ts:/usr/java/latest/jre/lib/security/jssecacerts
     depends_on:
