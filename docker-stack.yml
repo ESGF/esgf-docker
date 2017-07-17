@@ -100,8 +100,8 @@ services:
   esgf-index-node:
     image: esgfhub/esgf-index-node:${ESGF_VERSION}
     ports:
-      - "8080:8080"
-      - "8443:8443"
+      - "8081:8080"
+      - "8444:8443"
     depends_on:
       - esgf-solr
     volumes:
