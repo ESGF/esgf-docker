@@ -45,7 +45,8 @@ services:
     networks:
       - dbnetwork
     volumes:
-      - $PG_DATA:/var/lib/pgsql/data
+      #- $PG_DATA:/var/lib/pgsql/data
+      - pg_data:/var/lib/pgsql/data
     deploy:
       placement:
         constraints: [node.labels.esgf_type == db_node]
@@ -209,3 +210,5 @@ volumes:
   cog_install_dir:
   # cog venv directory
   cog_venv:
+  # postgres database
+  pg_data:
