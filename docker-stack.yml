@@ -9,12 +9,17 @@
 #       example: export ESGF_HOSTNAME=`docker-machine ip`
 # ESGF_VERSION: version of ESGF/Docker distribution
 #       example: export ESGF_VERSION=1.0
+
 # SOLR_DATA: location of Solr index
 #       example: export SOLR_DATA=/esg/solr-index
 # COG_DATA: location of CoG site data
 #       example: export COG_DATA=/usr/local/cog/cog_config
 # TDS_DATA: location of TDS catalogs
 #       example: export TDS_DATA=/esg/content/thredds
+# PG_DATA: location od postgres database and configuration
+#       example: export PG_DATA=/var/lib/pgsql/data
+# ESGF_DATA_ARCHIVE: location of science data
+#       example: export ESGF_DATA_ARCHIVE=/esgf/data_archive
 
 #
 # Services deployment:
@@ -40,7 +45,7 @@ services:
     networks:
       - dbnetwork
     volumes:
-      - pg_data:/var/lib/pgsql/data
+      - $PG_DATA:/var/lib/pgsql/data
     deploy:
       placement:
         constraints: [node.labels.esgf_type == db_node]
@@ -195,20 +200,12 @@ services:
         constraints: [node.role == manager]
 
 # Use Docker volumes to store persistent data
-# (which survives when the containers are removed)
+# that needs to be shared across services
+# (which must be co-located on the same node).
 # When services are first started, 
 # volumes are initialized with content from directory in container
 volumes:
-  # postgres data and configuration
-  pg_data:
-  # cog data directory
-  #cog_data:
   # cog source directory
   cog_install_dir:
   # cog venv directory
   cog_venv:
-  # contains Solr index data
-  #solr_data:
-  # contains TDS configuration, catalogs, cache, and logs
-  # (directory below -Dtds.content.root.path=/esg/content)
-  #tds_data:
