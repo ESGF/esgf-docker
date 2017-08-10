@@ -132,6 +132,10 @@ services:
      - $ESGF_CONFIG/esg/config/tomcat/esg-truststore.ts:/usr/java/latest/jre/lib/security/jssecacerts
     depends_on:
       - esgf-postgres
+    deploy:
+      replicas: 1
+      placement:
+        constraints: [node.labels.esgf_type == idp_node]
 
   esgf-data-node:
     image: esgfhub/esgf-data-node:${ESGF_VERSION}
@@ -151,7 +155,10 @@ services:
      - ESGF_HOSTNAME
     depends_on:
       - esgf-postgres
-
+    deploy:
+      replicas: 1
+      placement:
+        constraints: [node.labels.esgf_type == data_node]
 
   esgf-httpd:
     image: esgfhub/esgf-httpd:${ESGF_VERSION}
