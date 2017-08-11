@@ -77,8 +77,14 @@ RUN chown slcs:slcs $APPLICATION_CONF_DIR/onlineca.ini && \
     find $SLCS_STATIC_ROOT -type f -exec chmod 644 {} \; && \
     chown slcs:slcs /usr/local/bin/docker-entrypoint.py && \
     chmod 744 /usr/local/bin/docker-entrypoint.py
+
+# install OnlineCA client
+RUN pip2.7 install ContrailOnlineCAClient
+RUN cd /usr/local && \
+    git clone https://github.com/cedadev/online_ca_client.git
+# must override onlineca-get-cert.sh script to use --insecure option
+COPY scripts/onlineca-get-cert.sh /usr/local/online_ca_client/contrail/security/onlineca/client/sh/onlineca-get-cert.sh
+
 USER slcs
-
-
 ENTRYPOINT ["/usr/local/bin/docker-entrypoint.py"]
 CMD ["--help"]
