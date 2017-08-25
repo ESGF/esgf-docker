@@ -101,7 +101,9 @@ services:
       - "8985:8983"
       - "8986:8984" 
     volumes:
-     - solr_data:/esg/solr-index
+      - solr_data:/esg/solr-index
+    volumes_from:
+      - esgf-config
     networks:
       - default
 

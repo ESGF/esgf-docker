@@ -94,6 +94,7 @@ services:
       - "8984:8984"
     volumes:
       - solr_data:/esg/solr-index
+      - $ESGF_CONFIG/esg/config/esgf_shards_static.xml:/esg/config/esgf_shards_static.xml
     networks:
       - default
     deploy:
