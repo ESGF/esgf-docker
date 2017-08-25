@@ -30,6 +30,9 @@ COPY scripts/add_shard.sh /usr/local/bin/add_shard.sh
 RUN /usr/local/bin/add_shard.sh master 8984
 RUN /usr/local/bin/add_shard.sh slave 8983
 
+# custom logging properties
+COPY conf/log4j.properties ${SOLR_INSTALL_DIR}/server/resources/log4j.properties
+
 # create non-privilged user to run Solr server
 RUN groupadd solr
 RUN useradd -s /sbin/nologin -g solr -d /usr/local/solr solr
