@@ -30,6 +30,7 @@ if [ ! -d "$SOLR_HOME/${shard}" ]; then
     cp -R /usr/local/src/solr-home/mycore $SOLR_HOME/${shard}/${core}
     sed -i 's/@mycore@/'${core}'/g' $SOLR_HOME/$shard/$core/core.properties && \
     sed -i 's/@solr_config_type@-@solr_server_port@/'${shard}'/g' $SOLR_HOME/${shard}/${core}/core.properties
+    sed -i '/masterUrl/ s/localhost:8984/'${shard_name}':'${shard_port}'/' $SOLR_HOME/${shard}/${core}/conf/solrconfig.xml
   done
   chown -R solr:solr $SOLR_HOME/${shard}
 
@@ -62,9 +63,11 @@ if [ ! -f "${supervisord_config}" ]; then
 
 fi
 
-# add shard to list queried by ESGF search application
-shards_file="/esg/config/esgf_shards_static.xml"
-if ! grep -q ${shard_port} ${shards_file} ; then
-   echo "Adding shard to ${shards_file}"
-   sed -i 's/<\/shards>/    <value>localhost:'${shard_port}'\/solr<\/value>\n<\/shards>/g' ${shards_file}
+# add shard to list queried by ESGF search application (unless shard = 'master' or 'slave')
+if ! [[ $shard_name == 'master' || $shard_name == 'slave' ]]; then
+  shards_file="/esg/config/esgf_shards_static.xml"
+  if ! grep -q ${shard_port} ${shards_file} ; then
+    echo "Adding shard to ${shards_file}"
+    sed -i 's/<\/shards>/    <value>localhost:'${shard_port}'\/solr<\/value>\n<\/shards>/g' ${shards_file}
+  fi
 fi

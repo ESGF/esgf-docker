@@ -36,6 +36,7 @@ RUN chown -R solr:solr ${SOLR_DATA_DIR}
 COPY conf/supervisord.solr.conf /etc/supervisor/conf.d/supervisord.solr.conf
 COPY conf/supervisord.solr_HOST_PORT.conf-TEMPLATE /usr/local/src/supervisord.solr_HOST_PORT.conf-TEMPLATE
 COPY scripts/add_shard.sh /usr/local/bin/add_shard.sh
+COPY scripts/remove_shard.sh /usr/local/bin/remove_shard.sh
 RUN /usr/local/bin/add_shard.sh master 8984
 RUN /usr/local/bin/add_shard.sh slave 8983
 
