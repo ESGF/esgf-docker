@@ -50,7 +50,7 @@ services:
       - pg_data:/var/lib/pgsql/data
     deploy:
       placement:
-        constraints: [node.labels.esgf_type == db_node]
+        constraints: [node.labels.esgf_db_node == true]
 
   # CoG
   # data container to hold CoG source code and python virtual environment
@@ -84,7 +84,7 @@ services:
       mode: replicated
       replicas: 1
       placement:
-        constraints: [node.labels.esgf_type == front_node]
+        constraints: [node.labels.esgf_front_node == true]
 
 
   esgf-solr:
@@ -99,7 +99,7 @@ services:
     deploy:
       replicas: 1
       placement:
-        constraints: [node.labels.esgf_type == solr_node]
+        constraints: [node.labels.esgf_solr_node == true]
 
 
   esgf-index-node:
@@ -117,7 +117,7 @@ services:
     deploy:
       replicas: 1
       placement:
-        constraints: [node.labels.esgf_type == index_node]
+        constraints: [node.labels.esgf_index_node == true]
 
   esgf-idp-node:
     image: esgfhub/esgf-idp-node:${ESGF_VERSION}
@@ -135,7 +135,7 @@ services:
     deploy:
       replicas: 1
       placement:
-        constraints: [node.labels.esgf_type == idp_node]
+        constraints: [node.labels.esgf_idp_node == true]
 
   esgf-data-node:
     image: esgfhub/esgf-data-node:${ESGF_VERSION}
@@ -158,7 +158,7 @@ services:
     deploy:
       replicas: 1
       placement:
-        constraints: [node.labels.esgf_type == data_node]
+        constraints: [node.labels.esgf_data_node == true]
 
   esgf-httpd:
     image: esgfhub/esgf-httpd:${ESGF_VERSION}
@@ -191,7 +191,7 @@ services:
     deploy:
       replicas: 1
       placement:
-        constraints: [node.labels.esgf_type == front_node]
+        constraints: [node.labels.esgf_front_node == true]
 
   esgf-slcs:
     command: ["-sn", "$ESGF_HOSTNAME", "-ds", "rootAdmin", "-sdn", "slcs", "-sdh", "slcs-postgres", "-sdu", "dbsuper", "-udn", "esgcet", "-udh", "esgf-postgres", "-udu", "dbsuper", "--static-url", "https://$ESGF_HOSTNAME/slcs-static/", "--url-prefix", "slcs", "--use-x-forwarded-host"]
@@ -212,7 +212,7 @@ services:
       mode: replicated
       replicas: 1
       placement:
-        constraints: [node.labels.esgf_type == idp_node]
+        constraints: [node.labels.esgf_idp_node == true]
 
   slcs-nginx:
     image: nginx
@@ -226,7 +226,7 @@ services:
       mode: replicated
       replicas: 1
       placement:
-        constraints: [node.labels.esgf_type == idp_node]
+        constraints: [node.labels.esgf_idp_node == true]
 
   slcs-postgres:
     environment:
@@ -242,7 +242,7 @@ services:
       mode: replicated
       replicas: 1
       placement:
-        constraints: [node.labels.esgf_type == idp_node]
+        constraints: [node.labels.esgf_idp_node == true]
 
   # useful visualizer container, not really needed
   visualizer:
