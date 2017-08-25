@@ -25,14 +25,6 @@ RUN cd /usr/local/src && \
     tar xvf /usr/local/src/solr-home.tar
 RUN mkdir -p $SOLR_HOME
 
-# add shards
-COPY scripts/add_shard.sh /usr/local/bin/add_shard.sh
-RUN /usr/local/bin/add_shard.sh master 8984
-RUN /usr/local/bin/add_shard.sh slave 8983
-
-# custom logging properties
-COPY conf/log4j.properties ${SOLR_INSTALL_DIR}/server/resources/log4j.properties
-
 # create non-privilged user to run Solr server
 RUN groupadd solr
 RUN useradd -s /sbin/nologin -g solr -d /usr/local/solr solr
@@ -40,9 +32,18 @@ RUN chown -R solr:solr /usr/local/solr-${SOLR_VERSION}
 RUN chown -R solr:solr ${SOLR_HOME}
 RUN chown -R solr:solr ${SOLR_DATA_DIR}
 
+# add shards
+COPY conf/supervisord.solr.conf /etc/supervisor/conf.d/supervisord.solr.conf
+COPY conf/supervisord.solr_HOST_PORT.conf-TEMPLATE /usr/local/src/supervisord.solr_HOST_PORT.conf-TEMPLATE
+COPY scripts/add_shard.sh /usr/local/bin/add_shard.sh
+RUN /usr/local/bin/add_shard.sh master 8984
+RUN /usr/local/bin/add_shard.sh slave 8983
+
+# custom logging properties
+COPY conf/log4j.properties ${SOLR_INSTALL_DIR}/server/resources/log4j.properties
+
 EXPOSE 8983
 EXPOSE 8984
 
 # startup
-COPY conf/ /etc/supervisor/conf.d/
 CMD ["/usr/local/bin/supervisord", "--nodaemon", "-c", "/etc/supervisord.conf"]

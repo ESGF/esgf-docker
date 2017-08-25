@@ -1,0 +1,8 @@
+[program:@host@_@port@]
+user=solr
+command=%(ENV_SOLR_INSTALL_DIR)s/bin/solr start -f -d %(ENV_SOLR_INSTALL_DIR)s/server -s %(ENV_SOLR_HOME)s/@host@-@port@ -p @port@ -a '@master_slave@' -m 512m
+environment = SOLR_INCLUDE=%(ENV_SOLR_HOME)s/@host@-@port@/solr.in.sh
+stdout_logfile = /dev/stdout
+stdout_logfile_maxbytes = 0
+stdout_capture_maxbytes = 0
+redirect_stderr=true
