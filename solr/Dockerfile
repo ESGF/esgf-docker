@@ -17,8 +17,11 @@ RUN wget -O /tmp/solr-${SOLR_VERSION}.tgz http://archive.apache.org/dist/lucene/
     rm /tmp/solr-${SOLR_VERSION}.tgz && \
     ln -s ./solr-${SOLR_VERSION} ./solr
 RUN mkdir -p $SOLR_DATA_DIR
+
+# download template directory structure for shards home
+ARG ESGF_REPO=http://distrib-coffee.ipsl.jussieu.fr/pub/esgf
 RUN cd /usr/local/src && \
-    wget -O solr-home.tar http://distrib-coffee.ipsl.jussieu.fr/pub/esgf/dist/esg-search/solr-home.tar && \
+    wget -O solr-home.tar $ESGF_REPO/dist/esg-search/solr-home.tar && \
     tar xvf /usr/local/src/solr-home.tar
 RUN mkdir -p $SOLR_HOME
 
@@ -39,5 +42,4 @@ EXPOSE 8984
 
 # startup
 COPY conf/ /etc/supervisor/conf.d/
-COPY scripts/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
-ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
+CMD ["/usr/local/bin/supervisord", "--nodaemon", "-c", "/etc/supervisord.conf"]
