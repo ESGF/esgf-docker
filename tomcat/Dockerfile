@@ -7,7 +7,7 @@ FROM esgfhub/esgf-node:1.2
 MAINTAINER Luca Cinquini <luca.cinquini@jpl.nasa.gov>
 
 # Tomcat 8
-ENV TOMCAT_VERSION 8.5.16
+ENV TOMCAT_VERSION 8.5.20
 
 RUN wget -O /tmp/apache-tomcat-${TOMCAT_VERSION}.tar.gz http://mirror.reverse.net/pub/apache/tomcat/tomcat-8/v${TOMCAT_VERSION}/bin/apache-tomcat-${TOMCAT_VERSION}.tar.gz && \
     cd /usr/local && tar xzf /tmp/apache-tomcat-${TOMCAT_VERSION}.tar.gz && \
@@ -40,5 +40,4 @@ EXPOSE 8443
 
 # startup
 COPY conf/supervisord.tomcat.conf /etc/supervisor/conf.d/supervisord.tomcat.conf
-COPY scripts/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
-ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
+CMD ["supervisord", "--nodaemon", "-c", "/etc/supervisord.conf"]

@@ -15,4 +15,6 @@ RUN cd /usr/local/tomcat/webapps/esgf-idp/ && \
     rm esgf-idp.war && \
     chown -R tomcat:tomcat /usr/local/tomcat/webapps/esgf-idp
 
-# Note: Tomcat startup configuration is inherited from esgf-tomcat container
+# Override Tomcat startup to wait for Postgred connection to be ready
+COPY scripts/wait_for_postgres.sh /usr/local/bin/wait_for_postgres.sh
+COPY conf/supervisord.tomcat.conf /etc/supervisor/conf.d/supervisord.tomcat.conf 
