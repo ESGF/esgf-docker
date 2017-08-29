@@ -9,8 +9,4 @@ rm -f /etc/httpd/conf.d/ssl.conf
 rm -f /etc/httpd/conf.d/welcome.conf
 
 # start supervisor --> httpd service
-supervisord -c /etc/supervisord.conf
-
-# keep container running by printing log to standard out
-sleep 2
-tail -f /etc/httpd/logs/error_log
+supervisord --nodaemon -c /etc/supervisord.conf

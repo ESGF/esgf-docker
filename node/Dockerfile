@@ -96,5 +96,5 @@ ENV ESGF_HOME /esg
 
 # default command starts supervisor in non-daemon mode
 # to be overridden by child images
-# NOTE: do not use ENTTRYPOINT as it would interfere with arguments to certificate generation
+# NOTE: do not use ENTRYPOINT as it would interfere with arguments to certificate generation
 CMD ["supervisord", "--nodaemon", "-c", "/etc/supervisord.conf"]

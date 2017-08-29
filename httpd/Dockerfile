@@ -1,6 +1,6 @@
 # ESGF node with Apache httpd and mod_wsgi
 
-FROM esgfhub/esgf-node:1.2
+FROM esgfhub/esgf-node:devel
 
 MAINTAINER Luca Cinquini <luca.cinquini@jpl.nasa.gov>
 

@@ -7,7 +7,7 @@
 # To map the local source directory:
 # docker run -ti -p 8000:8000 --name cog -v /Users/cinquini/Documents/workspace/cog:/usr/local/cog/cog_install esgfhub/esgf-cog:${ESGF_VERSION}
 
-FROM esgfhub/esgf-node:1.2
+FROM esgfhub/esgf-node:devel
 
 MAINTAINER Luca Cinquini <luca.cinquini@jpl.nasa.gov>
 
@@ -92,7 +92,7 @@ RUN groupadd -r cogadmin && \
 RUN echo 'export PS1="[\u@\h]\$ "' >> ~cogadmin/.bashrc
 
 # change ownership of application directories
-RUN chown -R cogadmin:cogadmin $COG_DIR
+#RUN chown -R cogadmin:cogadmin $COG_DIR
 
 # expose software installation directories
 # needed by apache httpd running cog through mod_wsgi

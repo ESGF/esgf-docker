@@ -1,7 +1,7 @@
 # ESGF Identity Provider node
 # Implemented as Java web servlet application running inside Tomcat container.
 
-FROM esgfhub/esgf-tomcat:1.2
+FROM esgfhub/esgf-tomcat:devel
 
 MAINTAINER Luca Cinquini <luca.cinquini@jpl.nasa.gov>
 
@@ -18,3 +18,4 @@ RUN cd /usr/local/tomcat/webapps/esgf-idp/ && \
 # Override Tomcat startup to wait for Postgred connection to be ready
 COPY scripts/wait_for_postgres.sh /usr/local/bin/wait_for_postgres.sh
 COPY conf/supervisord.tomcat.conf /etc/supervisor/conf.d/supervisord.tomcat.conf 
+CMD ["supervisord", "--nodaemon", "-c", "/etc/supervisord.conf"]

@@ -1,6 +1,6 @@
 # ESGF node with postgres database
 
-FROM esgfhub/esgf-node:1.2
+FROM esgfhub/esgf-node:devel
 
 MAINTAINER Luca Cinquini <luca.cinquini@jpl.nasa.gov>
 
@@ -38,4 +38,4 @@ EXPOSE 5432
 
 # add supervisor configuration for postgres service
 ADD ./conf/supervisord.postgres.conf /etc/supervisor/conf.d/supervisord.postgres.conf
-ENTRYPOINT /usr/local/bin/docker-entrypoint.sh
+CMD ["supervisord", "--nodaemon", "-c", "/etc/supervisord.conf"]

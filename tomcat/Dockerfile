@@ -2,7 +2,7 @@
 # o Tomcat keystore, truststore files located in /esg/config/tomcat
 # o startup with ESGF specific env variables defined in bin/setenv.sh
 
-FROM esgfhub/esgf-node:1.2
+FROM esgfhub/esgf-node:devel
 
 MAINTAINER Luca Cinquini <luca.cinquini@jpl.nasa.gov>
 
