@@ -67,7 +67,8 @@ fi
 if ! [[ $shard_name == 'master' || $shard_name == 'slave' ]]; then
   shards_file="/esg/config/esgf_shards_static.xml"
   if ! grep -q ${shard_port} ${shards_file} ; then
-    #echo "Adding shard to ${shards_file}"
+    echo "Adding shard to ${shards_file}"
+    # following not currently working on distributed nodes
     #sed -i 's/<\/shards>/    <value>localhost:'${shard_port}'\/solr<\/value>\n<\/shards>/g' ${shards_file}
   fi
 fi

@@ -43,7 +43,7 @@ if ! [[ $shard_name == 'master' || $shard_name == 'slave' ]]; then
   shards_file="/esg/config/esgf_shards_static.xml"
   if grep -q ${shard_port} ${shards_file} ; then
     echo "Removing shard from ${shards_file}"
-    sed -i '/localhost:'${shard_port}'/d' ${shards_file}
+    #sed -i '/localhost:'${shard_port}'/d' ${shards_file}
   fi
 
 fi
