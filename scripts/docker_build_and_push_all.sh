@@ -36,7 +36,7 @@ pushit=${2:-false}
 wrkdir=`pwd`
 
 # loop over ordered list of ESGF images
-subdirs=('node' 'postgres' 'tomcat' 'solr' 'httpd' 'cog' 'data-node' 'idp-node' 'index-node' 'vsftp' 'solr-cloud')
+subdirs=('node' 'postgres' 'tomcat' 'solr' 'httpd' 'cog' 'data-node' 'idp-node' 'index-node' 'slcs-server' 'node-manager' 'vsftp' 'solr-cloud')
 
 for subdir in ${subdirs[*]}; do
    # cd to parallel directory

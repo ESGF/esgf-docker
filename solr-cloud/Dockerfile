@@ -1,6 +1,6 @@
 # Solr-Cloud installation configured for ESGF data
 
-FROM esgfhub/esgf-node:1.1
+FROM esgfhub/esgf-node:devel
 
 MAINTAINER Luca Cinquini <luca.cinquini@jpl.nasa.gov>
 
@@ -39,3 +39,6 @@ RUN cd $SRC_DIR && \
 COPY scripts/ /usr/local/bin/
 
 EXPOSE 8983 8984 8985
+
+# startup
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
