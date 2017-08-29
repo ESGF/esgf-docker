@@ -1,6 +1,6 @@
 # ESGF node with Solr engine configured to serve ESGF shards
 
-FROM esgfhub/esgf-node:1.2
+FROM esgfhub/esgf-node:devel
 
 MAINTAINER Luca Cinquini <luca.cinquini@jpl.nasa.gov>
 

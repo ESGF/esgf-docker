@@ -4,7 +4,7 @@
 # o ORP
 # o Dashboard
 
-FROM esgfhub/esgf-tomcat:1.2
+FROM esgfhub/esgf-tomcat:devel
 
 MAINTAINER Luca Cinquini <luca.cinquini@jpl.nasa.gov>
 
@@ -201,4 +201,5 @@ RUN mkdir -p $DASHBOARD_HOME/logs
 
 #===========================================
 
-# startup configuration and entry-point inherited from esgf-tomcat image
+# startup configuration inherited from esgf-tomcat image
+CMD ["supervisord", "--nodaemon", "-c", "/etc/supervisord.conf"]

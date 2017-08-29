@@ -1,6 +1,6 @@
 # ESGF index node:  esgf-search application running inside Tomcat
 
-FROM esgfhub/esgf-tomcat:1.2
+FROM esgfhub/esgf-tomcat:devel
 
 MAINTAINER Luca Cinquini <luca.cinquini@jpl.nasa.gov>
 
@@ -14,4 +14,5 @@ RUN cd /usr/local/tomcat/webapps/esg-search/ && \
     rm esg-search.war && \
     chown -R tomcat:tomcat /usr/local/tomcat/webapps/esg-search
 
-# index node startup inherited from esgf-tomcat image
+# index node startup configuration inherited from esgf-tomcat image
+CMD ["supervisord", "--nodaemon", "-c", "/etc/supervisord.conf"]
