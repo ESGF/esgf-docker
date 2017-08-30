@@ -1,3 +1,4 @@
 theme: jekyll-theme-cayman
 name: Hank Quinlan, Horrible Cop
 markdown: kramdown
+permalink: /esgf-docker/:year/:month/:day/:title
