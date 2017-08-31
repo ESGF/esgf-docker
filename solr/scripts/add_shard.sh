@@ -68,7 +68,9 @@ if ! [[ $shard_name == 'master' || $shard_name == 'slave' ]]; then
   shards_file="/esg/config/esgf_shards_static.xml"
   if ! grep -q ${shard_port} ${shards_file} ; then
     echo "Adding shard to ${shards_file}"
-    # following not currently working on distributed nodes
-    #sed -i 's/<\/shards>/    <value>localhost:'${shard_port}'\/solr<\/value>\n<\/shards>/g' ${shards_file}
+    # note: must work around the error: "sed: cannot rename /esg/config/sedFvmijX: Device or resource busy"
+    sed 's/<\/shards>/    <value>localhost:'${shard_port}'\/solr<\/value>\n<\/shards>/g' ${shards_file} > ${shards_file}.new
+    # call "/bin/cp" since for root cp is aliased to "cp -i" (which asks for confirmation)
+    /bin/cp -f ${shards_file}.new ${shards_file}
   fi
 fi

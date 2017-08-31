@@ -43,7 +43,10 @@ if ! [[ $shard_name == 'master' || $shard_name == 'slave' ]]; then
   shards_file="/esg/config/esgf_shards_static.xml"
   if grep -q ${shard_port} ${shards_file} ; then
     echo "Removing shard from ${shards_file}"
-    #sed -i '/localhost:'${shard_port}'/d' ${shards_file}
+    # note: must work around the error: "sed: cannot rename /esg/config/sedFvmijX: Device or resource busy"
+    sed '/localhost:'${shard_port}'/d' ${shards_file} > ${shards_file}.new
+    # call "/bin/cp" since for root cp is aliased to "cp -i" (which asks for confirmation)
+    /bin/cp -f ${shards_file}.new ${shards_file}
   fi
 
 fi
