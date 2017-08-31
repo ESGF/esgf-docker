@@ -27,7 +27,7 @@ COPY conf/context.xml /usr/local/tomcat/conf/context.xml
 COPY certs/ /esg/config/tomcat/
 
 # custom env variables for starting Tomcat
-COPY bin/setenv.sh $CATALINA_HOME/bin
+COPY conf/setenv.sh $CATALINA_HOME/bin
 
 # create non-privilged user to run Tomcat
 RUN groupadd tomcat
