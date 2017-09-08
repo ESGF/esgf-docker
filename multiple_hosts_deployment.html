@@ -1,0 +1,146 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Multiple Hosts Deployment &mdash; ESGF-Docker Documentation 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/haiku.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="ESGF-Docker Documentation 1.0 documentation" href="index.html" />
+    <link rel="next" title="Data Publishing" href="data_publishing.html" />
+    <link rel="prev" title="Single Host Deployment" href="single_host_deployment.html" /> 
+  </head>
+  <body role="document">
+      <div class="header" role="banner"><h1 class="heading"><a href="index.html">
+          <span>ESGF-Docker Documentation 1.0 documentation</span></a></h1>
+        <h2 class="heading"><span>Multiple Hosts Deployment</span></h2>
+      </div>
+      <div class="topnav" role="navigation" aria-label="top navigation">
+      
+        <p>
+        «&#160;&#160;<a href="single_host_deployment.html">Single Host Deployment</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="data_publishing.html">Data Publishing</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <div class="section" id="multiple-hosts-deployment">
+<h1>Multiple Hosts Deployment<a class="headerlink" href="#multiple-hosts-deployment" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="abstract">
+<h2>Abstract<a class="headerlink" href="#abstract" title="Permalink to this headline">¶</a></h2>
+<p>These instructions explain how to deploy the ESGF software stack as a
+set of interacting Docker containers deployed on a cluster of Swarm
+nodes. Which ESGF services/containers are deployed onto which nodes is
+determined by placement constraints defined by node metadata tags. A
+single physical node can host services of one or more types, if the
+appropriate metadata tags are set for that node.</p>
+</div>
+<div class="section" id="version">
+<h2>Version<a class="headerlink" href="#version" title="Permalink to this headline">¶</a></h2>
+<p>These instructions were tested with ESGF_VERSION=1.2</p>
+</div>
+<div class="section" id="pre-requisites">
+<h2>Pre-Requisites<a class="headerlink" href="#pre-requisites" title="Permalink to this headline">¶</a></h2>
+<p>A Docker Swarm composed of 1 or more nodes. See specific instructions on
+how to set this up on a single MacOSX laptop, on the Amazon Cloud, or an
+internal Linux cluster.</p>
+</div>
+<div class="section" id="setup">
+<h2>Setup<a class="headerlink" href="#setup" title="Permalink to this headline">¶</a></h2>
+<p>Follow the same setup steps as for the single host deployment, namely:</p>
+<ul class="simple">
+<li>Checkout the source code from this GitHub repository, on some
+location on the Swarm manager node.</li>
+<li>Define the environmental variables ESGF_HOSTNAME, ESGF_CONFIG,
+ESGF_VERSION and ESGF_DATA_DIR.</li>
+<li>Initialize the ESGF node configuration: ./esgf_node_init.sh</li>
+</ul>
+<p>Note that in this particular architecture, even if the ESGF services are
+deployed across multiple hosts, they all share the same SSL certificate
+(cross-mounted from a shared volume), and they are all reachable at the
+hostname $ESGF_HOSTNAME: this is because the Docker Swarm routing mesh
+always directs client requests sent to $ESGF_HOSTNAME to the proper
+container(s) where the specific services are deployed.</p>
+</div>
+<div class="section" id="execution">
+<h2>Execution<a class="headerlink" href="#execution" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Assign metadata tags to the Swarm nodes to define where the specific
+ESGF services will be deployed. For example, on a Swarm cluster of 3
+nodes, the following tags could be assigned:</li>
+<li>docker node update &#8211;label-add esgf_front_node=true node1</li>
+<li>docker node update &#8211;label-add esgf_db_node=true node1</li>
+<li>docker node update &#8211;label-add esgf_idp_node=true node1</li>
+<li>docker node update &#8211;label-add esgf_index_node=true node2</li>
+<li>docker node update &#8211;label-add esgf_solr_node=true node2</li>
+<li>docker node update &#8211;label-add esgf_data_node=true node3</li>
+<li>From the source code directory on the Swarm manager node, issue the
+following command to deploy the stack of ESGF services, then wait for
+the services to be ready (which the first time might take several
+minutes, since several large images need to be downloaded to the
+various nodes in the Swarm):</li>
+<li>docker stack deploy -c docker-stack.yml esgf-stack</li>
+<li>docker service ls</li>
+<li>When all services are deployed, test the following URLs, replacing
+&#8220;my-node.esgf.org&#8221; with your value of $ESGF_HOSTNAME:</li>
+<li>Docker visualizer tool: <a class="reference external" href="http://my-node.esgf.org:8080/">http://my-node.esgf.org:8080/</a></li>
+<li>Solr admin interface: <a class="reference external" href="https://my-node.esgf.org/solr/#/">https://my-node.esgf.org/solr/#/</a></li>
+<li>ESGF search API: <a class="reference external" href="http://my-node.esgf.org/esg-search/search">http://my-node.esgf.org/esg-search/search</a></li>
+<li>ESGF IdP: <a class="reference external" href="https://my-node.esgf.org/esgf-idp/">https://my-node.esgf.org/esgf-idp/</a></li>
+<li>CoG home project: <a class="reference external" href="https://my-node.esgf.org/projects/testproject/">https://my-node.esgf.org/projects/testproject/</a><ul>
+<li>The first time, login with
+openid=https://my-node.esgf.org/esgf-idp/openid/rootAdmin and
+password=changeit</li>
+</ul>
+</li>
+<li>TDS: <a class="reference external" href="https://my-node.esgf.org/thredds">https://my-node.esgf.org/thredds</a></li>
+<li>ORP: <a class="reference external" href="https://my-node.esgf.org/esg-orp/">https://my-node.esgf.org/esg-orp/</a></li>
+<li>SLCS: <a class="reference external" href="https://my-node.esgf.org/slcs/admin/">https://my-node.esgf.org/slcs/admin/</a></li>
+<li>Clean up: remove the full ESGF stack from the Swarm:</li>
+<li>docker stack rm esgf-stack</li>
+</ul>
+</div>
+</div>
+
+
+      </div>
+      <div class="bottomnav" role="navigation" aria-label="bottom navigation">
+      
+        <p>
+        «&#160;&#160;<a href="single_host_deployment.html">Single Host Deployment</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="data_publishing.html">Data Publishing</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2017, ESGF.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3b2.
+    </div>
+  </body>
+</html>

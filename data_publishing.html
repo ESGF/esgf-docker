@@ -1,0 +1,166 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Data Publishing &mdash; ESGF-Docker Documentation 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/haiku.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="ESGF-Docker Documentation 1.0 documentation" href="index.html" />
+    <link rel="next" title="Architecture and Development Guidelines" href="architecture_and_development_guidelines.html" />
+    <link rel="prev" title="Multiple Hosts Deployment" href="multiple_hosts_deployment.html" /> 
+  </head>
+  <body role="document">
+      <div class="header" role="banner"><h1 class="heading"><a href="index.html">
+          <span>ESGF-Docker Documentation 1.0 documentation</span></a></h1>
+        <h2 class="heading"><span>Data Publishing</span></h2>
+      </div>
+      <div class="topnav" role="navigation" aria-label="top navigation">
+      
+        <p>
+        «&#160;&#160;<a href="multiple_hosts_deployment.html">Multiple Hosts Deployment</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="architecture_and_development_guidelines.html">Architecture and Development Guidelines</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <div class="section" id="data-publishing">
+<h1>Data Publishing<a class="headerlink" href="#data-publishing" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="description">
+<h2>Description<a class="headerlink" href="#description" title="Permalink to this headline">¶</a></h2>
+<p>This page instructs on how to use the esgf-publisher Python client to
+publish a sample dataset and file to the ESGF data node running as a
+Docker container. These instructions are meant to be executed inside the
+data node container: * docker-compose up * docker exec -it -u 0
+data-node /bin/bash</p>
+</div>
+<div class="section" id="one-time-setup">
+<h2>One-Time Setup<a class="headerlink" href="#one-time-setup" title="Permalink to this headline">¶</a></h2>
+<p>When it is first initialized, the TDS main catalog contains references
+to its internal test datasets. This catalog must be replaced with the
+standard ESGF main catalog (which is mounted onto the container as part
+of the Docker distribution): * <code class="docutils literal"><span class="pre">cd</span> <span class="pre">/esg/content/thredds</span></code> *
+<code class="docutils literal"><span class="pre">mv</span> <span class="pre">catalog.xml-esgcet</span> <span class="pre">catalog.xml</span></code></p>
+<p>Also, the postgres database must be initialized with the list of models,
+experiments found in the file esgcet_models_table.xml: *
+<code class="docutils literal"><span class="pre">cd</span> <span class="pre">/esg/config/esgcet</span></code> *
+<code class="docutils literal"><span class="pre">source</span> <span class="pre">${CDAT_HOME}/bin/activate</span> <span class="pre">esgf-pub</span></code> * <code class="docutils literal"><span class="pre">esginitialize</span> <span class="pre">-c</span></code></p>
+<p>(this step must actually be repeated any time that file changes).</p>
+<p>The test file to be published should already be present at the location:
+/esg/data/test/sftlf.nc. If not, it can be downloaded as: *
+<code class="docutils literal"><span class="pre">mkdir</span> <span class="pre">-p</span> <span class="pre">/esg/data/test</span></code> * <code class="docutils literal"><span class="pre">cd</span> <span class="pre">/esg/data/test</span></code> *
+<code class="docutils literal"><span class="pre">wget</span> <span class="pre">-O</span> <span class="pre">sftlf.nc</span> <span class="pre">http://distrib-coffee.ipsl.jussieu.fr/pub/esgf/dist/externals/sftlf.nc</span></code></p>
+</div>
+<div class="section" id="step-1">
+<h2>Step 1<a class="headerlink" href="#step-1" title="Permalink to this headline">¶</a></h2>
+<p>Generate the mapfile listing the dataset and files to be published: *
+<strong>cd /esg/config/esgcet</strong> * <strong>source ${CDAT_HOME}/bin/activate
+esgf-pub</strong> * <strong>esgprep mapfile &#8211;project test /esg/data/test</strong> * ls -l
+test.test.map</p>
+</div>
+<div class="section" id="step-2">
+<h2>Step 2<a class="headerlink" href="#step-2" title="Permalink to this headline">¶</a></h2>
+<p>Publish to the postgres database: * <strong>esgpublish &#8211;project test &#8211;map
+test.test.map &#8211;service fileservice</strong> * esglist_datasets test</p>
+</div>
+<div class="section" id="step-3">
+<h2>Step 3<a class="headerlink" href="#step-3" title="Permalink to this headline">¶</a></h2>
+<p>Publish to the TDS: * <strong>esgpublish &#8211;project test &#8211;map test.test.map
+&#8211;service fileservice &#8211;noscan &#8211;thredds</strong></p>
+<p>Note: this operation will use the credentials contained in the esg.ini
+file to invoke the TDS re-initialization URL: *
+<a class="reference external" href="https://my-node.esgf.org:8443/thredds/admin/debug?Catalogs/reinit">https://my-node.esgf.org:8443/thredds/admin/debug?Catalogs/reinit</a></p>
+<p>After the operation completes, the file should be accessible starting
+from the TDS main catalog page: *
+<a class="reference external" href="http://my-node.esgf.org/thredds/catalog/catalog.html">http://my-node.esgf.org/thredds/catalog/catalog.html</a></p>
+<p>and downloadable using any openid, password combination that is trusted
+by the data-node. The authorization required for downloading the file is
+specified in the access policy file:</p>
+<ul class="simple">
+<li>/esg/config/esgf_policies_local.xml</li>
+</ul>
+<p>as an XML statement of the form:</p>
+<ul class="simple">
+<li>policy resource=&#8221;.<em>test.</em>&#8221; attribute_type=&#8221;AUTH_ONLY&#8221;
+attribute_value=&#8221;&#8221; action=&#8221;Read&#8221;</li>
+</ul>
+</div>
+<div class="section" id="step-4">
+<h2>Step 4<a class="headerlink" href="#step-4" title="Permalink to this headline">¶</a></h2>
+<p>Publish to Solr. Note: this step cannot be properly completed until the
+ESGF/Docker data stack contains a MyProxy server (or other substitute)
+that is able to issue short term X509 certificates for users managed by
+the identity provider container. In the meantime, the following
+workarounds can be adopted.</p>
+<p>Obtain a short-term X509 certificate from any other trusted ESGF
+identity provider, and copy into the data-node container in the location
+referenced by the file esg.ini: * cp certificate-file
+/root/.globus/certificate-file</p>
+<p>Disable specific authorization for publishing test data, requiring only
+the availability of an X509 certificate. Edit the file: *
+/esg/config/esgf_policies_local.xml</p>
+<p>and insert the following policy statement (as XML):</p>
+<ul class="simple">
+<li><code class="docutils literal"><span class="pre">&lt;policy</span> <span class="pre">resource=&quot;.*test.*&quot;</span> <span class="pre">attribute_type=&quot;ANY&quot;</span> <span class="pre">attribute_value=&quot;&quot;</span> <span class="pre">action=&quot;Write&quot;/&gt;</span></code></li>
+</ul>
+<p>At this point, you can issue the publishing command:</p>
+<ul class="simple">
+<li><strong>esgpublish &#8211;project test &#8211;map test.test.map &#8211;service fileservice
+&#8211;noscan &#8211;publish</strong></li>
+</ul>
+<p>After about a minute, the dataset and file should be returned when
+querying the &#8220;slave&#8221; Solr index:</p>
+<ul class="simple">
+<li><a class="reference external" href="http://my-node.esgf.org/solr/#/datasets/query">http://my-node.esgf.org/solr/#/datasets/query</a></li>
+<li><a class="reference external" href="http://my-node.esgf.org/solr/#/files/query">http://my-node.esgf.org/solr/#/files/query</a></li>
+</ul>
+<p>Additionally, they should be returned when initiating a search from the
+CoG user interface, if the project has searching enabled:</p>
+<ul class="simple">
+<li><a class="reference external" href="https://my-node.esgf.org/search/testproject/">https://my-node.esgf.org/search/testproject/</a></li>
+</ul>
+</div>
+</div>
+
+
+      </div>
+      <div class="bottomnav" role="navigation" aria-label="bottom navigation">
+      
+        <p>
+        «&#160;&#160;<a href="multiple_hosts_deployment.html">Multiple Hosts Deployment</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="architecture_and_development_guidelines.html">Architecture and Development Guidelines</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2017, ESGF.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3b2.
+    </div>
+  </body>
+</html>

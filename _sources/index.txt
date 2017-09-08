@@ -1,22 +1,23 @@
-.. ESGF-Docker Documentation documentation master file, created by
-   sphinx-quickstart on Fri Sep  8 10:37:43 2017.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
+*****************************
+ESGF-Containers documentation
+*****************************
 
-Welcome to ESGF-Docker Documentation's documentation!
-=====================================================
+This repository contains instructions on how to run ESGF services as containers.
 
-Contents:
+* Source code is hosted on GitHub: https://github.com/ESGF/esgf-docker
+
+* Docker images are hosted on DockerHub: https://hub.docker.com/u/esgfhub/dashboard/
+
+
+==================
+Table of Contents:
+==================
 
 .. toctree::
    :maxdepth: 2
 
-
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
-
+   single_host_deployment.rst
+   multiple_hosts_deployment.rst
+   data_publishing.rst
+   architecture_and_development_guidelines.rst
+   docker_swarm_setup_on_macosx.rst

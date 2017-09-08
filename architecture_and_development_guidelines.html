@@ -1,0 +1,175 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Architecture and Development Guidelines &mdash; ESGF-Docker Documentation 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/haiku.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="ESGF-Docker Documentation 1.0 documentation" href="index.html" />
+    <link rel="next" title="Docker Swam Setup on MacOSX" href="docker_swarm_setup_on_macosx.html" />
+    <link rel="prev" title="Data Publishing" href="data_publishing.html" /> 
+  </head>
+  <body role="document">
+      <div class="header" role="banner"><h1 class="heading"><a href="index.html">
+          <span>ESGF-Docker Documentation 1.0 documentation</span></a></h1>
+        <h2 class="heading"><span>Architecture and Development Guidelines</span></h2>
+      </div>
+      <div class="topnav" role="navigation" aria-label="top navigation">
+      
+        <p>
+        «&#160;&#160;<a href="data_publishing.html">Data Publishing</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="docker_swarm_setup_on_macosx.html">Docker Swam Setup on MacOSX</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <div class="section" id="architecture-and-development-guidelines">
+<h1>Architecture and Development Guidelines<a class="headerlink" href="#architecture-and-development-guidelines" title="Permalink to this headline">¶</a></h1>
+<p>The design and development of the ESGF/Docker services should conform
+(whenever possible) to the following guidelines.</p>
+<div class="section" id="image-hierarchy">
+<h2>Image Hierarchy<a class="headerlink" href="#image-hierarchy" title="Permalink to this headline">¶</a></h2>
+<p>ESGF images are built in a hierarchy structure where common libraries,
+tools and functionality are factored in a parent image, from which more
+specific images are derived. This design has several benefits: * All
+images run the same version of the core OS, libraries and engines such
+as Centos, Java, Python, SSL, Tomcat, etc. * It&#8217;s easy to propagate
+updates of any of these components to all images. * Common building
+instructions are not repeated, in different form, in different
+Dockerfiles.</p>
+<p>The current version of the ESGF image hierarchy is shown in the figure
+below.</p>
+</div>
+<div class="section" id="image-content">
+<h2>Image Content<a class="headerlink" href="#image-content" title="Permalink to this headline">¶</a></h2>
+<p>For maximum flexibility, and conforming to the &#8220;micro-services&#8221;
+architecture, each ESGF image should contain only one service,
+interacting with the other ESGF services through publicly exposed
+endpoints. In some cases though a set of services must be co-located as
+they cannot function without each other, in which case they should be
+built into the same image (see for example the esgf-data-node image).</p>
+</div>
+<div class="section" id="image-versioning">
+<h2>Image Versioning<a class="headerlink" href="#image-versioning" title="Permalink to this headline">¶</a></h2>
+<p>Each ESGF/Docker release must consist of images with the same version.
+The following conventions are observed: * Development occurs in custom
+branches, which build images with the same name as the branch. For
+example, &#8220;esgf-data-node:devel-lc&#8221;, or &#8220;esgf-data-node:new-tds&#8221; * The
+&#8220;devel&#8221; branch (and &#8221;:devel&#8221; images) is reserved for integration
+testing, at any time during the development process * The &#8220;master&#8221;
+branch (which builds &#8221;:latest&#8221; images) is reserved for deployment
+testing before a release takes place * When a release is finalized,
+fully tested and ready for deployment at all operational sites, a new
+branch is created with the name of the release, from which the final
+images for that release are built (for example, &#8221;:v1.3&#8221;). Once the
+images are built, this branch should never be changed again. If a bug
+needs to be fixed, a new branch (for example, &#8221;:v1.3.1&#8221;) should be
+created from the previous one.</p>
+<p>Note: for example, the following one-line command can be used on Mac OSX
+to change the image version in all Dockerfiles from &#8220;devel&#8221; to &#8220;1.2&#8221;: *
+sed -i &#8216;&#8217; &#8216;s/:devel/:1.2/g&#8217; */Dockerfile</p>
+</div>
+<div class="section" id="directory-structure">
+<h2>Directory Structure<a class="headerlink" href="#directory-structure" title="Permalink to this headline">¶</a></h2>
+<p>In order to promote conformity and easy of development, each ESGF/Docker
+image should be built from a directory that conforms to the following
+directory structure:</p>
+<ul class="simple">
+<li>Dockerfile : Docker build file</li>
+<li>conf/ : image configuration files (for supervisor or the application)</li>
+<li>scripts/ : scripts necessary to perform initialization of other
+application tasks (for example, create a Solr shard)</li>
+</ul>
+<p>Deployment files that span several services, such as docker-compose and
+docker-stack files, are (for now) stored in the top-level directory of
+this repository.</p>
+</div>
+<div class="section" id="supervisor">
+<h2>Supervisor<a class="headerlink" href="#supervisor" title="Permalink to this headline">¶</a></h2>
+<p>ESGF images should use the Python program &#8220;Supervisor&#8221; to start and
+monitor services inside a Docker container. Benefits of using Supervisor
+include: * Common instructions for starting/stopping/restarting each
+service from inside each container. * Ability to add services to the
+startup pool by simply dropping configuration files in a standard
+location. * Ability to start/stop/restart entire group of services (for
+example, all Solr shards at once). * Ability to start services as
+non-privileged users such as &#8220;tomcat&#8221;, &#8220;apache&#8221;, etc.</p>
+</div>
+<div class="section" id="container-initialization">
+<h2>Container Initialization<a class="headerlink" href="#container-initialization" title="Permalink to this headline">¶</a></h2>
+<p>In some cases, it is necessary to execute some initialization tasks when
+a container first start, or when it is re-started. In this case, the
+container services should be started through a docker-entrypoint.sh
+script which: * First performs all required initialization. * The
+starts Supervisor in non-daemion mode (to keep the container running).</p>
+</div>
+<div class="section" id="site-specific-configuration">
+<h2>Site-Specific Configuration<a class="headerlink" href="#site-specific-configuration" title="Permalink to this headline">¶</a></h2>
+<p>ESGF/Docker images must not contain any site-specific files or
+configuration, such as SSL certificates, hostnames, passwords etc. At
+this time, all site-specific configuration is stored in a directory tree
+rooted at $ESGF_CONFIG/, which is cross-mounted as a shared volume on
+on all containers. In the future, the site-specific configuration might
+be &#8220;pushed&#8221; to the containers via other means.</p>
+</div>
+<div class="section" id="persistent-data">
+<h2>Persistent Data<a class="headerlink" href="#persistent-data" title="Permalink to this headline">¶</a></h2>
+<p>ESGF services access data that must be persisted across container
+restarts or upgrades. Examples of these data include:</p>
+<ul class="simple">
+<li>Postgres database content</li>
+<li>TDS catalogs</li>
+<li>Solr indexes</li>
+<li>CoG site media</li>
+</ul>
+<p>These data must either be located on shared host directories that are
+cross-mounted to all containers, or inside named data volumes (which are
+managed by Docker outside of the container lifecycle). The can not be
+located inside the Docker containers as they would be lost during
+upgrades.</p>
+</div>
+</div>
+
+
+      </div>
+      <div class="bottomnav" role="navigation" aria-label="bottom navigation">
+      
+        <p>
+        «&#160;&#160;<a href="data_publishing.html">Data Publishing</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="docker_swarm_setup_on_macosx.html">Docker Swam Setup on MacOSX</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2017, ESGF.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3b2.
+    </div>
+  </body>
+</html>

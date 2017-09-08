@@ -1,0 +1,126 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Docker Swam Setup on MacOSX &mdash; ESGF-Docker Documentation 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/haiku.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="ESGF-Docker Documentation 1.0 documentation" href="index.html" />
+    <link rel="prev" title="Architecture and Development Guidelines" href="architecture_and_development_guidelines.html" /> 
+  </head>
+  <body role="document">
+      <div class="header" role="banner"><h1 class="heading"><a href="index.html">
+          <span>ESGF-Docker Documentation 1.0 documentation</span></a></h1>
+        <h2 class="heading"><span>Docker Swam Setup on MacOSX</span></h2>
+      </div>
+      <div class="topnav" role="navigation" aria-label="top navigation">
+      
+        <p>
+        «&#160;&#160;<a href="architecture_and_development_guidelines.html">Architecture and Development Guidelines</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="index.html">Contents</a>
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <div class="section" id="docker-swam-setup-on-macosx">
+<h1>Docker Swam Setup on MacOSX<a class="headerlink" href="#docker-swam-setup-on-macosx" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="abstract">
+<h2>Abstract<a class="headerlink" href="#abstract" title="Permalink to this headline">¶</a></h2>
+<p>This page instructs on how to setup a Docker Swarm on a single MacOSX
+system. This Swarm can be effectively used as a test environment for
+deploying ESGF software stack on a multiple-host cluster.</p>
+</div>
+<div class="section" id="execution">
+<h2>Execution<a class="headerlink" href="#execution" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Use Docker to create a cluster of N Virtual Machines, for example
+N=6:</li>
+<li>docker-machine create &#8211;driver virtualbox node1</li>
+<li>docker-machine create &#8211;driver virtualbox node2</li>
+<li>docker-machine create &#8211;driver virtualbox node3</li>
+<li>docker-machine create &#8211;driver virtualbox node4</li>
+<li>docker-machine create &#8211;driver virtualbox node5</li>
+<li>docker-machine create &#8211;driver virtualbox node6</li>
+<li>List the VMs to identify their IP addresses:</li>
+<li>docker-machine ls</li>
+<li>Select one of the nodes to be the Swarm leader, &#8220;connect&#8221; to it, and
+initialize the Swarm, using its IP address (in what follows, we use
+IP_MANAGER_ADDRESS=192.168.99.100). Save the output of the last
+command, since it will be needed on the other nodes to join the
+swarm.</li>
+<li>eval $(docker-machine env node1)</li>
+<li>docker swarm init &#8211;advertise-addr 192.168.99.100</li>
+<li>Make the other VMs join the swarm, one at a time. For example, on
+node2:</li>
+<li>eval $(docker-machine env node2)</li>
+<li>docker swarm join &#8211;token
+SWMTKN-1-0di7dn7qutbknirl9zrx2dodxwz7mj7ax708cf6fjtslorsypb-3fp4nrsg79ufrcxna93yk4l8o
+192.168.99.100:2377</li>
+</ul>
+<p>Replace the last command with the output from the &#8220;docker swarm init...&#8221;
+command issued on the Swarm manager. Repeat this process on Worker nodes
+in the Swarm. Finally, list all nodes in the Swarm: * docker node ls</p>
+<ul class="simple">
+<li>Back on the Swarm manager, assign metadata tags to all nodes in the
+Swarm to define where the different ESGF container/services will be
+placed. For example, on a 6-nodes Swarm:</li>
+<li>eval $(docker-machine env node1)</li>
+<li>docker node update &#8211;label-add esgf_front_node=true node1</li>
+<li>docker node update &#8211;label-add esgf_db_node=true node2</li>
+<li>docker node update &#8211;label-add esgf_index_node=true node3</li>
+<li>docker node update &#8211;label-add esgf_idp_node=true node4</li>
+<li>docker node update &#8211;label-add esgf_data_node=true node5</li>
+<li>docker node update &#8211;label-add esgf_solr_node=true node6</li>
+<li>Associate the IP address of the Swarm manager node to the hostname
+you intend to use to access the ESGF services (for example,
+ESGF_HOSTNAME=my-node.esgf.org):</li>
+<li>sudo vi /private/etc/hosts</li>
+<li>192.168.99.100 my-node.esgf.org</li>
+</ul>
+<p>Note that because of the Docker Swarm routing mesh capability, the IP
+address above can be that of any node in the Swarm, and that URLs
+starting with http(s)://my-node.esgf.org/... can be used to access any
+of the ESGF services in the stack, no matter on which node they are
+deployed.</p>
+</div>
+</div>
+
+
+      </div>
+      <div class="bottomnav" role="navigation" aria-label="bottom navigation">
+      
+        <p>
+        «&#160;&#160;<a href="architecture_and_development_guidelines.html">Architecture and Development Guidelines</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="index.html">Contents</a>
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2017, ESGF.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3b2.
+    </div>
+  </body>
+</html>
