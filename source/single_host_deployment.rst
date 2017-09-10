@@ -40,11 +40,11 @@ Setup
 
    *  **ESGF_HOSTNAME** must reference the Fully Qualified Domain Name of the host where the containers will be running:
 
-     * on linux, use the actual server host name::
+     * On linux, use the actual server host name::
 
         export ESGF_HOSTNAME=`hostname`
 
-     * on mac, choose a custom host name, and bind it to the current IP address of the Mac, for example::
+     * On mac, choose a custom host name, and bind it to the current IP address of the Mac, for example::
 
           export ESGF_HOSTNAME=my-node.esgf.org
 
@@ -55,7 +55,7 @@ Setup
           ...
           192.168.0.5 my-node.esgf.org
 
-     *  on mac using docker-machine:
+     *  On mac using docker-machine:
      
         * set ESGF_HOSTNAME, for example::
          
