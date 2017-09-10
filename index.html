@@ -6,9 +6,9 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>ESGF-Containers documentation &mdash; ESGF-Docker Documentation 1.0 documentation</title>
+    <title>Table of Contents: &mdash; ESGF-Docker Documentation</title>
     
-    <link rel="stylesheet" href="_static/haiku.css" type="text/css" />
+    <link rel="stylesheet" href="_static/nature.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     
     <script type="text/javascript">
@@ -23,94 +23,91 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="ESGF-Docker Documentation 1.0 documentation" href="#" />
+    <link rel="top" title="ESGF-Docker Documentation" href="#" />
     <link rel="next" title="Single Host Deployment" href="single_host_deployment.html" /> 
   </head>
   <body role="document">
-      <div class="header" role="banner"><h1 class="heading"><a href="#">
-          <span>ESGF-Docker Documentation 1.0 documentation</span></a></h1>
-        <h2 class="heading"><span>ESGF-Containers documentation</span></h2>
-      </div>
-      <div class="topnav" role="navigation" aria-label="top navigation">
-      
-        <p>
-        <a class="uplink" href="#">Contents</a>
-        &#160;&#160;::&#160;&#160;
-        <a href="single_host_deployment.html">Single Host Deployment</a>&#160;&#160;»
-        </p>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="single_host_deployment.html" title="Single Host Deployment"
+             accesskey="N">next</a> |</li>
+        <li><a href="#">ESGF-Docker Documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
 
-      </div>
-      <div class="content">
-        
-        
-  <div class="section" id="esgf-containers-documentation">
-<h1>ESGF-Containers documentation<a class="headerlink" href="#esgf-containers-documentation" title="Permalink to this headline">¶</a></h1>
-<p>This repository contains instructions on how to run ESGF services as containers.</p>
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <p>This repository contains instructions on how to run ESGF services as Docker containers.</p>
 <ul class="simple">
 <li>Source code is hosted on GitHub: <a class="reference external" href="https://github.com/ESGF/esgf-docker">https://github.com/ESGF/esgf-docker</a></li>
 <li>Docker images are hosted on DockerHub: <a class="reference external" href="https://hub.docker.com/u/esgfhub/dashboard/">https://hub.docker.com/u/esgfhub/dashboard/</a></li>
 </ul>
 <div class="section" id="table-of-contents">
-<h2>Table of Contents:<a class="headerlink" href="#table-of-contents" title="Permalink to this headline">¶</a></h2>
+<h1>Table of Contents:<a class="headerlink" href="#table-of-contents" title="Permalink to this headline">¶</a></h1>
 <div class="toctree-wrapper compound">
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="single_host_deployment.html">Single Host Deployment</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="single_host_deployment.html#abstract">Abstract</a></li>
-<li class="toctree-l2"><a class="reference internal" href="single_host_deployment.html#pre-requisites">Pre-Requisites</a></li>
-<li class="toctree-l2"><a class="reference internal" href="single_host_deployment.html#setup">Setup</a></li>
-<li class="toctree-l2"><a class="reference internal" href="single_host_deployment.html#execution">Execution</a></li>
+<li class="toctree-l1"><a class="reference internal" href="single_host_deployment.html">Single Host Deployment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="multiple_hosts_deployment.html">Multiple Hosts Deployment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="data_publishing.html">Data Publishing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="architecture_and_development_guidelines.html">Architecture and Development Guidelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="docker_swarm_setup_on_macosx.html">Docker Swam Setup on MacOSX</a></li>
 </ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="multiple_hosts_deployment.html">Multiple Hosts Deployment</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="multiple_hosts_deployment.html#abstract">Abstract</a></li>
-<li class="toctree-l2"><a class="reference internal" href="multiple_hosts_deployment.html#version">Version</a></li>
-<li class="toctree-l2"><a class="reference internal" href="multiple_hosts_deployment.html#pre-requisites">Pre-Requisites</a></li>
-<li class="toctree-l2"><a class="reference internal" href="multiple_hosts_deployment.html#setup">Setup</a></li>
-<li class="toctree-l2"><a class="reference internal" href="multiple_hosts_deployment.html#execution">Execution</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="data_publishing.html">Data Publishing</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="data_publishing.html#description">Description</a></li>
-<li class="toctree-l2"><a class="reference internal" href="data_publishing.html#one-time-setup">One-Time Setup</a></li>
-<li class="toctree-l2"><a class="reference internal" href="data_publishing.html#step-1">Step 1</a></li>
-<li class="toctree-l2"><a class="reference internal" href="data_publishing.html#step-2">Step 2</a></li>
-<li class="toctree-l2"><a class="reference internal" href="data_publishing.html#step-3">Step 3</a></li>
-<li class="toctree-l2"><a class="reference internal" href="data_publishing.html#step-4">Step 4</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="architecture_and_development_guidelines.html">Architecture and Development Guidelines</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="architecture_and_development_guidelines.html#image-hierarchy">Image Hierarchy</a></li>
-<li class="toctree-l2"><a class="reference internal" href="architecture_and_development_guidelines.html#image-content">Image Content</a></li>
-<li class="toctree-l2"><a class="reference internal" href="architecture_and_development_guidelines.html#image-versioning">Image Versioning</a></li>
-<li class="toctree-l2"><a class="reference internal" href="architecture_and_development_guidelines.html#directory-structure">Directory Structure</a></li>
-<li class="toctree-l2"><a class="reference internal" href="architecture_and_development_guidelines.html#supervisor">Supervisor</a></li>
-<li class="toctree-l2"><a class="reference internal" href="architecture_and_development_guidelines.html#container-initialization">Container Initialization</a></li>
-<li class="toctree-l2"><a class="reference internal" href="architecture_and_development_guidelines.html#site-specific-configuration">Site-Specific Configuration</a></li>
-<li class="toctree-l2"><a class="reference internal" href="architecture_and_development_guidelines.html#persistent-data">Persistent Data</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="docker_swarm_setup_on_macosx.html">Docker Swam Setup on MacOSX</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="docker_swarm_setup_on_macosx.html#abstract">Abstract</a></li>
-<li class="toctree-l2"><a class="reference internal" href="docker_swarm_setup_on_macosx.html#execution">Execution</a></li>
-</ul>
-</li>
-</ul>
-</div>
 </div>
 </div>
 
 
+          </div>
+        </div>
       </div>
-      <div class="bottomnav" role="navigation" aria-label="bottom navigation">
-      
-        <p>
-        <a class="uplink" href="#">Contents</a>
-        &#160;&#160;::&#160;&#160;
-        <a href="single_host_deployment.html">Single Host Deployment</a>&#160;&#160;»
-        </p>
-
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Next topic</h4>
+  <p class="topless"><a href="single_host_deployment.html"
+                        title="next chapter">Single Host Deployment</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/index.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
       </div>
-
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="single_host_deployment.html" title="Single Host Deployment"
+             >next</a> |</li>
+        <li><a href="#">ESGF-Docker Documentation</a> &raquo;</li> 
+      </ul>
+    </div>
     <div class="footer" role="contentinfo">
         &copy; Copyright 2017, ESGF.
       Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3b2.

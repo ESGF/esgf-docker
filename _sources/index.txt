@@ -1,8 +1,5 @@
-*****************************
-ESGF-Containers documentation
-*****************************
 
-This repository contains instructions on how to run ESGF services as containers.
+This repository contains instructions on how to run ESGF services as Docker containers.
 
 * Source code is hosted on GitHub: https://github.com/ESGF/esgf-docker
 
@@ -14,7 +11,7 @@ Table of Contents:
 ==================
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
 
    single_host_deployment.rst
    multiple_hosts_deployment.rst
