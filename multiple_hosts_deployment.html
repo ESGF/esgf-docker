@@ -59,10 +59,7 @@ nodes. Which ESGF services/containers are deployed onto which nodes is
 determined by placement constraints defined by node metadata tags. A
 single physical node can host services of one or more types, if the
 appropriate metadata tags are set for that node.</p>
-</div>
-<div class="section" id="version">
-<h2>Version<a class="headerlink" href="#version" title="Permalink to this headline">¶</a></h2>
-<p>These instructions were tested with ESGF_VERSION=1.2</p>
+<p><em>Tested with $ESGF_VERSION=1.2</em>.</p>
 </div>
 <div class="section" id="pre-requisites">
 <h2>Pre-Requisites<a class="headerlink" href="#pre-requisites" title="Permalink to this headline">¶</a></h2>
@@ -72,12 +69,12 @@ internal Linux cluster.</p>
 </div>
 <div class="section" id="setup">
 <h2>Setup<a class="headerlink" href="#setup" title="Permalink to this headline">¶</a></h2>
-<p>Follow the same setup steps as for the single host deployment, namely:</p>
+<p>Follow the same setup steps as for the <a class="reference internal" href="single_host_deployment.html#single-host-deployment"><em>Single Host Deployment</em></a>, namely:</p>
 <ul class="simple">
 <li>Checkout the source code from this GitHub repository, on some
 location on the Swarm manager node.</li>
-<li>Define the environmental variables ESGF_HOSTNAME, ESGF_CONFIG,
-ESGF_VERSION and ESGF_DATA_DIR.</li>
+<li>Define the environmental variables $ESGF_HOSTNAME, $ESGF_CONFIG,
+$ESGF_VERSION and $ESGF_DATA_DIR.</li>
 <li>Initialize the ESGF node configuration: ./esgf_node_init.sh</li>
 </ul>
 <p>Note that in this particular architecture, even if the ESGF services are
@@ -89,40 +86,51 @@ container(s) where the specific services are deployed.</p>
 </div>
 <div class="section" id="execution">
 <h2>Execution<a class="headerlink" href="#execution" title="Permalink to this headline">¶</a></h2>
-<ul class="simple">
-<li>Assign metadata tags to the Swarm nodes to define where the specific
+<ul>
+<li><p class="first">Assign metadata tags to the Swarm nodes to define where the specific
 ESGF services will be deployed. For example, on a Swarm cluster of 3
-nodes, the following tags could be assigned:</li>
-<li>docker node update &#8211;label-add esgf_front_node=true node1</li>
-<li>docker node update &#8211;label-add esgf_db_node=true node1</li>
-<li>docker node update &#8211;label-add esgf_idp_node=true node1</li>
-<li>docker node update &#8211;label-add esgf_index_node=true node2</li>
-<li>docker node update &#8211;label-add esgf_solr_node=true node2</li>
-<li>docker node update &#8211;label-add esgf_data_node=true node3</li>
-<li>From the source code directory on the Swarm manager node, issue the
+nodes, the following tags could be assigned:</p>
+<div class="highlight-python"><div class="highlight"><pre>docker node update --label-add esgf_front_node=true node1
+docker node update --label-add esgf_db_node=true node1
+docker node update --label-add esgf_idp_node=true node1
+docker node update --label-add esgf_index_node=true node2
+docker node update --label-add esgf_solr_node=true node2
+docker node update --label-add esgf_data_node=true node3
+</pre></div>
+</div>
+</li>
+<li><p class="first">From the source code directory on the Swarm manager node, issue the
 following command to deploy the stack of ESGF services, then wait for
 the services to be ready (which the first time might take several
 minutes, since several large images need to be downloaded to the
-various nodes in the Swarm):</li>
-<li>docker stack deploy -c docker-stack.yml esgf-stack</li>
-<li>docker service ls</li>
-<li>When all services are deployed, test the following URLs, replacing
-&#8220;my-node.esgf.org&#8221; with your value of $ESGF_HOSTNAME:</li>
+various nodes in the Swarm):</p>
+<div class="highlight-python"><div class="highlight"><pre>docker stack deploy -c docker-stack.yml esgf-stack
+docker service ls
+</pre></div>
+</div>
+</li>
+<li><p class="first">When all services are deployed, test the following URLs, replacing
+&#8220;my-node.esgf.org&#8221; with your value of $ESGF_HOSTNAME:</p>
+<ul class="simple">
 <li>Docker visualizer tool: <a class="reference external" href="http://my-node.esgf.org:8080/">http://my-node.esgf.org:8080/</a></li>
 <li>Solr admin interface: <a class="reference external" href="https://my-node.esgf.org/solr/#/">https://my-node.esgf.org/solr/#/</a></li>
 <li>ESGF search API: <a class="reference external" href="http://my-node.esgf.org/esg-search/search">http://my-node.esgf.org/esg-search/search</a></li>
 <li>ESGF IdP: <a class="reference external" href="https://my-node.esgf.org/esgf-idp/">https://my-node.esgf.org/esgf-idp/</a></li>
-<li>CoG home project: <a class="reference external" href="https://my-node.esgf.org/projects/testproject/">https://my-node.esgf.org/projects/testproject/</a><ul>
-<li>The first time, login with
-openid=https://my-node.esgf.org/esgf-idp/openid/rootAdmin and
-password=changeit</li>
+<li>CoG home project: <a class="reference external" href="https://my-node.esgf.org/projects/testproject/">https://my-node.esgf.org/projects/testproject/</a>. The first time, login with:<ul>
+<li>openid=https://my-node.esgf.org/esgf-idp/openid/rootAdmin and</li>
+<li>password=changeit</li>
 </ul>
 </li>
 <li>TDS: <a class="reference external" href="https://my-node.esgf.org/thredds">https://my-node.esgf.org/thredds</a></li>
 <li>ORP: <a class="reference external" href="https://my-node.esgf.org/esg-orp/">https://my-node.esgf.org/esg-orp/</a></li>
 <li>SLCS: <a class="reference external" href="https://my-node.esgf.org/slcs/admin/">https://my-node.esgf.org/slcs/admin/</a></li>
-<li>Clean up: remove the full ESGF stack from the Swarm:</li>
-<li>docker stack rm esgf-stack</li>
+</ul>
+</li>
+<li><p class="first">Clean up: remove the full ESGF stack from the Swarm:</p>
+<div class="highlight-python"><div class="highlight"><pre>docker stack rm esgf-stack
+</pre></div>
+</div>
+</li>
 </ul>
 </div>
 </div>
@@ -137,7 +145,6 @@ password=changeit</li>
   <ul>
 <li><a class="reference internal" href="#">Multiple Hosts Deployment</a><ul>
 <li><a class="reference internal" href="#abstract">Abstract</a></li>
-<li><a class="reference internal" href="#version">Version</a></li>
 <li><a class="reference internal" href="#pre-requisites">Pre-Requisites</a></li>
 <li><a class="reference internal" href="#setup">Setup</a></li>
 <li><a class="reference internal" href="#execution">Execution</a></li>

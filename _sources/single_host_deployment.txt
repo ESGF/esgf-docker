@@ -1,3 +1,5 @@
+.. _single_host_deployment:
+
 **********************
 Single Host Deployment
 **********************
