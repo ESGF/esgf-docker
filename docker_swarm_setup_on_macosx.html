@@ -46,7 +46,7 @@
           <div class="body" role="main">
             
   <div class="section" id="docker-swam-setup-on-macosx">
-<h1>Docker Swam Setup on MacOSX<a class="headerlink" href="#docker-swam-setup-on-macosx" title="Permalink to this headline">¶</a></h1>
+<span id="docker-swarm-setup-on-macosx"></span><h1>Docker Swam Setup on MacOSX<a class="headerlink" href="#docker-swam-setup-on-macosx" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="abstract">
 <h2>Abstract<a class="headerlink" href="#abstract" title="Permalink to this headline">¶</a></h2>
 <p>This page instructs on how to setup a Docker Swarm on a single MacOSX
@@ -55,56 +55,70 @@ deploying ESGF software stack on a multiple-host cluster.</p>
 </div>
 <div class="section" id="execution">
 <h2>Execution<a class="headerlink" href="#execution" title="Permalink to this headline">¶</a></h2>
-<ul class="simple">
-<li>Use Docker to create a cluster of N Virtual Machines, for example
-N=6:</li>
-<li>docker-machine create &#8211;driver virtualbox node1</li>
-<li>docker-machine create &#8211;driver virtualbox node2</li>
-<li>docker-machine create &#8211;driver virtualbox node3</li>
-<li>docker-machine create &#8211;driver virtualbox node4</li>
-<li>docker-machine create &#8211;driver virtualbox node5</li>
-<li>docker-machine create &#8211;driver virtualbox node6</li>
-<li>List the VMs to identify their IP addresses:</li>
-<li>docker-machine ls</li>
-<li>Select one of the nodes to be the Swarm leader, &#8220;connect&#8221; to it, and
+<ul>
+<li><p class="first">Use Docker to create a cluster of N Virtual Machines, for example N=6:</p>
+<div class="highlight-python"><div class="highlight"><pre>docker-machine create --driver virtualbox node1
+docker-machine create --driver virtualbox node2
+docker-machine create --driver virtualbox node3
+docker-machine create --driver virtualbox node4
+docker-machine create --driver virtualbox node5
+docker-machine create --driver virtualbox node6
+</pre></div>
+</div>
+</li>
+<li><p class="first">List the VMs to identify their IP addresses:</p>
+<div class="highlight-python"><div class="highlight"><pre>docker-machine ls
+</pre></div>
+</div>
+</li>
+<li><p class="first">Select one of the nodes to be the Swarm leader, &#8220;connect&#8221; to it, and
 initialize the Swarm, using its IP address (in what follows, we use
-IP_MANAGER_ADDRESS=192.168.99.100). Save the output of the last
-command, since it will be needed on the other nodes to join the
-swarm.</li>
-<li>eval $(docker-machine env node1)</li>
-<li>docker swarm init &#8211;advertise-addr 192.168.99.100</li>
-<li>Make the other VMs join the swarm, one at a time. For example, on
-node2:</li>
-<li>eval $(docker-machine env node2)</li>
-<li>docker swarm join &#8211;token
-SWMTKN-1-0di7dn7qutbknirl9zrx2dodxwz7mj7ax708cf6fjtslorsypb-3fp4nrsg79ufrcxna93yk4l8o
-192.168.99.100:2377</li>
-</ul>
+$IP_MANAGER_ADDRESS=192.168.99.100). Save the output of the last
+command, since it will be needed on the other nodes to join the swarm.:</p>
+<div class="highlight-python"><div class="highlight"><pre>eval $(docker-machine env node1)
+docker swarm init --advertise-addr 192.168.99.100
+</pre></div>
+</div>
+</li>
+<li><p class="first">Make the other VMs join the swarm, one at a time. For example, on node2 (using the worker token from the previous command):</p>
+<div class="highlight-python"><div class="highlight"><pre>eval $(docker-machine env node2)
+docker swarm join --token \
+   SWMTKN-1-0di7dn7qutbknirl9zrx2dodxwz7mj7ax708cf6fjtslorsypb-3fp4nrsg79ufrcxna93yk4l8o \
+   192.168.99.100:2377
+</pre></div>
+</div>
 <p>Replace the last command with the output from the &#8220;docker swarm init...&#8221;
-command issued on the Swarm manager. Repeat this process on Worker nodes
-in the Swarm. Finally, list all nodes in the Swarm: * docker node ls</p>
-<ul class="simple">
-<li>Back on the Swarm manager, assign metadata tags to all nodes in the
+command issued on the Swarm manager. Repeat this process on all worker nodes
+in the Swarm. Finally, list all nodes in the Swarm:</p>
+<div class="highlight-python"><div class="highlight"><pre>docker node ls
+</pre></div>
+</div>
+</li>
+<li><p class="first">Back on the Swarm manager, assign metadata tags to all nodes in the
 Swarm to define where the different ESGF container/services will be
-placed. For example, on a 6-nodes Swarm:</li>
-<li>eval $(docker-machine env node1)</li>
-<li>docker node update &#8211;label-add esgf_front_node=true node1</li>
-<li>docker node update &#8211;label-add esgf_db_node=true node2</li>
-<li>docker node update &#8211;label-add esgf_index_node=true node3</li>
-<li>docker node update &#8211;label-add esgf_idp_node=true node4</li>
-<li>docker node update &#8211;label-add esgf_data_node=true node5</li>
-<li>docker node update &#8211;label-add esgf_solr_node=true node6</li>
-<li>Associate the IP address of the Swarm manager node to the hostname
-you intend to use to access the ESGF services (for example,
-ESGF_HOSTNAME=my-node.esgf.org):</li>
-<li>sudo vi /private/etc/hosts</li>
-<li>192.168.99.100 my-node.esgf.org</li>
-</ul>
+placed. For example, on a 6-nodes Swarm:</p>
+<div class="highlight-python"><div class="highlight"><pre>eval $(docker-machine env node1)
+docker node update --label-add esgf_front_node=true node1
+docker node update --label-add esgf_db_node=true node2
+docker node update --label-add esgf_index_node=true node3
+docker node update --label-add esgf_idp_node=true node4
+docker node update --label-add esgf_data_node=true node5
+docker node update --label-add esgf_solr_node=true node6
+</pre></div>
+</div>
+</li>
+<li><p class="first">Associate the IP address of the Swarm manager node to the hostname
+you intend to use to access the ESGF services. For example if $ESGF_HOSTNAME=my-node.esgf.org:</p>
+<div class="highlight-python"><div class="highlight"><pre>sudo vi /private/etc/hosts
+192.168.99.100 my-node.esgf.org
+</pre></div>
+</div>
 <p>Note that because of the Docker Swarm routing mesh capability, the IP
 address above can be that of any node in the Swarm, and that URLs
 starting with http(s)://my-node.esgf.org/... can be used to access any
-of the ESGF services in the stack, no matter on which node they are
-deployed.</p>
+of the ESGF services in the stack, no matter on which node they are deployed.</p>
+</li>
+</ul>
 </div>
 </div>
 

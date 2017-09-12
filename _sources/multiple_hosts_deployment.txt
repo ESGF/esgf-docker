@@ -18,7 +18,7 @@ Pre-Requisites
 ==============
 
 A Docker Swarm composed of 1 or more nodes. See specific instructions on
-how to set this up on a single MacOSX laptop, on the Amazon Cloud, or an
+how to set this up on :ref:`a single MacOSX laptop <docker_swarm_setup_on_macosx>`, on the Amazon Cloud, or an
 internal Linux cluster.
 
 Setup
