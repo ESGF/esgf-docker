@@ -57,14 +57,14 @@
 <h2>Image Hierarchy<a class="headerlink" href="#image-hierarchy" title="Permalink to this headline">¶</a></h2>
 <p>ESGF images are built in a hierarchy structure where common libraries,
 tools and functionality are factored in a parent image, from which more
-specific images are derived. This design has several benefits: * All
-images run the same version of the core OS, libraries and engines such
-as Centos, Java, Python, SSL, Tomcat, etc. * It&#8217;s easy to propagate
-updates of any of these components to all images. * Common building
-instructions are not repeated, in different form, in different
-Dockerfiles.</p>
-<p>The current version of the ESGF image hierarchy is shown in the figure
-below.</p>
+specific images are derived. This design has several benefits:</p>
+<ul class="simple">
+<li>All images run the same version of the core OS, libraries and engines such
+as Centos, Java, Python, SSL, Tomcat, etc.</li>
+<li>It&#8217;s easy to propagate updates of any of these components to all images.</li>
+<li>Common building instructions are not repeated, in different form, in different Dockerfiles.</li>
+</ul>
+<p>The current version of the ESGF image hierarchy is shown in the figure below.</p>
 </div>
 <div class="section" id="image-content">
 <h2>Image Content<a class="headerlink" href="#image-content" title="Permalink to this headline">¶</a></h2>
@@ -77,23 +77,7 @@ built into the same image (see for example the esgf-data-node image).</p>
 </div>
 <div class="section" id="image-versioning">
 <h2>Image Versioning<a class="headerlink" href="#image-versioning" title="Permalink to this headline">¶</a></h2>
-<p>Each ESGF/Docker release must consist of images with the same version.
-The following conventions are observed: * Development occurs in custom
-branches, which build images with the same name as the branch. For
-example, &#8220;esgf-data-node:devel-lc&#8221;, or &#8220;esgf-data-node:new-tds&#8221; * The
-&#8220;devel&#8221; branch (and &#8221;:devel&#8221; images) is reserved for integration
-testing, at any time during the development process * The &#8220;master&#8221;
-branch (which builds &#8221;:latest&#8221; images) is reserved for deployment
-testing before a release takes place * When a release is finalized,
-fully tested and ready for deployment at all operational sites, a new
-branch is created with the name of the release, from which the final
-images for that release are built (for example, &#8221;:v1.3&#8221;). Once the
-images are built, this branch should never be changed again. If a bug
-needs to be fixed, a new branch (for example, &#8221;:v1.3.1&#8221;) should be
-created from the previous one.</p>
-<p>Note: for example, the following one-line command can be used on Mac OSX
-to change the image version in all Dockerfiles from &#8220;devel&#8221; to &#8220;1.2&#8221;: *
-sed -i &#8216;&#8217; &#8216;s/:devel/:1.2/g&#8217; */Dockerfile</p>
+<p><em>Insert content from Sebastien G. proposal.</em></p>
 </div>
 <div class="section" id="directory-structure">
 <h2>Directory Structure<a class="headerlink" href="#directory-structure" title="Permalink to this headline">¶</a></h2>
@@ -101,9 +85,9 @@ sed -i &#8216;&#8217; &#8216;s/:devel/:1.2/g&#8217; */Dockerfile</p>
 image should be built from a directory that conforms to the following
 directory structure:</p>
 <ul class="simple">
-<li>Dockerfile : Docker build file</li>
-<li>conf/ : image configuration files (for supervisor or the application)</li>
-<li>scripts/ : scripts necessary to perform initialization of other
+<li><em>Dockerfile</em> : Docker build file</li>
+<li><em>conf/</em> : image configuration files (for supervisor or the application)</li>
+<li><em>scripts/</em> : scripts necessary to perform initialization of other
 application tasks (for example, create a Solr shard)</li>
 </ul>
 <p>Deployment files that span several services, such as docker-compose and
@@ -114,20 +98,26 @@ this repository.</p>
 <h2>Supervisor<a class="headerlink" href="#supervisor" title="Permalink to this headline">¶</a></h2>
 <p>ESGF images should use the Python program &#8220;Supervisor&#8221; to start and
 monitor services inside a Docker container. Benefits of using Supervisor
-include: * Common instructions for starting/stopping/restarting each
-service from inside each container. * Ability to add services to the
-startup pool by simply dropping configuration files in a standard
-location. * Ability to start/stop/restart entire group of services (for
-example, all Solr shards at once). * Ability to start services as
-non-privileged users such as &#8220;tomcat&#8221;, &#8220;apache&#8221;, etc.</p>
+include:</p>
+<ul class="simple">
+<li>Common instructions for starting/stopping/restarting each
+service from inside each container.</li>
+<li>Ability to add services to the
+startup pool by simply dropping configuration files in a standard location.</li>
+<li>Ability to start/stop/restart entire group of services (for example, all Solr shards at once).</li>
+<li>Ability to start services as non-privileged users such as &#8220;tomcat&#8221;, &#8220;apache&#8221;, etc.</li>
+</ul>
 </div>
 <div class="section" id="container-initialization">
 <h2>Container Initialization<a class="headerlink" href="#container-initialization" title="Permalink to this headline">¶</a></h2>
 <p>In some cases, it is necessary to execute some initialization tasks when
 a container first start, or when it is re-started. In this case, the
 container services should be started through a docker-entrypoint.sh
-script which: * First performs all required initialization. * The
-starts Supervisor in non-daemion mode (to keep the container running).</p>
+script which:</p>
+<ul class="simple">
+<li>First performs all required initialization.</li>
+<li>Then starts Supervisor in non-daemon mode (to keep the container running).</li>
+</ul>
 </div>
 <div class="section" id="site-specific-configuration">
 <h2>Site-Specific Configuration<a class="headerlink" href="#site-specific-configuration" title="Permalink to this headline">¶</a></h2>
@@ -150,7 +140,7 @@ restarts or upgrades. Examples of these data include:</p>
 </ul>
 <p>These data must either be located on shared host directories that are
 cross-mounted to all containers, or inside named data volumes (which are
-managed by Docker outside of the container lifecycle). The can not be
+managed by Docker outside of the container lifecycle). They can not be
 located inside the Docker containers as they would be lost during
 upgrades.</p>
 </div>
