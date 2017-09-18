@@ -1,0 +1,17 @@
+############################# BASIC SETTINGS ###################################
+
+readonly BASE_DIR_PATH="$(pwd)"
+SCRIPT_DIR_PATH="$(dirname $0)"; cd "${SCRIPT_DIR_PATH}"
+readonly SCRIPT_DIR_PATH="$(pwd)" ; cd "${BASE_DIR_PATH}"
+
+readonly SCRIPT_NAME="$(basename ${0})"
+
+readonly FALSE='false'
+readonly TRUE='true'
+
+### Return codes
+
+readonly SUCCESS_CODE=0
+readonly SETTINGS_ERROR=1
+
+################################ FUNCTIONS #####################################
