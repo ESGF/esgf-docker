@@ -15,7 +15,8 @@ function usage
 {
   echo -e "usage:\n\
   \n$(basename "$0")\
-  \n-d | --driver the virtual infrastructure driver name\
+  \n-d | --driver NAME the virtual infrastructure driver name\
+  \n-n | --num-node INT the number of nodes (>0)\
   \n-h | --help : print usage"
 }
 
