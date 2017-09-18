@@ -27,7 +27,7 @@ Setup
 Follow the same setup steps as for the :ref:`single_host_deployment`, namely:
 
 *  Checkout the source code from this GitHub repository, on some
-   location on the Swarm manager node.
+   location on the Swarm manager node. Use the *master* branch.
 *  Define the environmental variables $ESGF_HOSTNAME, $ESGF_CONFIG,
    $ESGF_VERSION and $ESGF_DATA_DIR.
 *  Initialize the ESGF node configuration: ./esgf_node_init.sh
@@ -52,6 +52,9 @@ Execution
       docker node update --label-add esgf_index_node=true node2
       docker node update --label-add esgf_solr_node=true node2
       docker node update --label-add esgf_data_node=true node3
+
+   Or, on a Swarm of 6 nodes, each label can be assigned to a different node 
+   (as shown in the :ref:`single MacOSX laptop instructions <docker_swarm_setup_on_macosx>` ).
 
 *  From the source code directory on the Swarm manager node, issue the
    following command to deploy the stack of ESGF services, then wait for
