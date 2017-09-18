@@ -74,7 +74,7 @@ docker-machine create --driver virtualbox node6
 <li><p class="first">Select one of the nodes to be the Swarm leader, &#8220;connect&#8221; to it, and
 initialize the Swarm, using its IP address (in what follows, we use
 $IP_MANAGER_ADDRESS=192.168.99.100). Save the output of the last
-command, since it will be needed on the other nodes to join the swarm.:</p>
+command, since it will be needed on the other nodes to join the swarm.</p>
 <div class="highlight-python"><div class="highlight"><pre>eval $(docker-machine env node1)
 docker swarm init --advertise-addr 192.168.99.100
 </pre></div>

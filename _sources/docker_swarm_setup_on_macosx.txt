@@ -30,7 +30,7 @@ Execution
 *  Select one of the nodes to be the Swarm leader, "connect" to it, and
    initialize the Swarm, using its IP address (in what follows, we use
    $IP_MANAGER_ADDRESS=192.168.99.100). Save the output of the last
-   command, since it will be needed on the other nodes to join the swarm.::
+   command, since it will be needed on the other nodes to join the swarm. ::
 
       eval $(docker-machine env node1)
       docker swarm init --advertise-addr 192.168.99.100
