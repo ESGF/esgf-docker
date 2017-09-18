@@ -1,20 +1,26 @@
 #!/bin/bash
 
-source common
-
 ################################# SETTINGS #####################################
+
+readonly BASE_DIR_PATH="$(pwd)"
+SCRIPT_PARENT_DIR_PATH="$(dirname $0)"; cd "${SCRIPT_PARENT_DIR_PATH}"
+readonly SCRIPT_PARENT_DIR_PATH="$(pwd)" ; cd "${BASE_DIR_PATH}"
+
+source "${SCRIPT_PARENT_DIR_PATH}/common"
 
 readonly DEFAULT_NB_NODES=2
 readonly NODE_NAME_PREFIX='node'
 readonly DEFAULT_VM_DRIVER='virtualbox'
 readonly DEFAULT_SWARM_PORT=2377
 
+set -u
+
 ################################ FUNCTIONS #####################################
 
 function usage
 {
   echo -e "usage:\n\
-  \n$(basename "$0")\
+  \n${SCRIPT_NAME}\
   \n-d | --driver NAME the virtual infrastructure driver name\
   \n-n | --num-node INT the number of nodes (>0)\
   \n-h | --help : print usage"
