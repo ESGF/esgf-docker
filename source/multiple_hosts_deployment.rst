@@ -12,7 +12,7 @@ determined by placement constraints defined by node metadata tags. A
 single physical node can host services of one or more types, if the
 appropriate metadata tags are set for that node.
 
-*Tested with $ESGF_VERSION=1.2*.
+*Tested with $ESGF_VERSION=devel*.
 
 Pre-Requisites
 ==============
@@ -54,13 +54,13 @@ Execution
       docker node update --label-add esgf_data_node=true node3
 
    Or, on a Swarm of 6 nodes, each label can be assigned to a different node 
-   (as shown in the :ref:`single MacOSX laptop instructions <docker_swarm_setup_on_macosx>` ).
+   (as shown in the :ref:`single MacOSX laptop instructions <docker_swarm_setup_on_macosx>`).
 
 *  From the source code directory on the Swarm manager node, issue the
    following command to deploy the stack of ESGF services, then wait for
-   the services to be ready (which the first time might take several
-   minutes, since several large images need to be downloaded to the
-   various nodes in the Swarm)::
+   the services to be ready (which the first time might take up to 20
+   minutes, depending on your internet connection speed, 
+   since several large images need to be downloaded to the various nodes in the Swarm)::
 
       docker stack deploy -c docker-stack.yml esgf-stack
       docker service ls
