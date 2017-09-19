@@ -1,0 +1,248 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Versioning Guideline &#8212; ESGF-Docker Documentation</title>
+    
+    <link rel="stylesheet" href="_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="nav-item nav-item-0"><a href="index.html">ESGF-Docker Documentation</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="versioning-guideline">
+<h1>Versioning Guideline<a class="headerlink" href="#versioning-guideline" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="tldr">
+<h2>TLDR<a class="headerlink" href="#tldr" title="Permalink to this headline">¶</a></h2>
+<p>This document is a proposal that describes the syntax of the version name of any kind of ESGF stack component.</p>
+<p>X ; Y ; Z ; N  are zero or positive integers
+v ; a ; b ; rc are just symbols:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">vX</span><span class="o">.</span><span class="n">Y</span>   <span class="n">aN</span>   <span class="n">syntax</span> <span class="k">for</span> <span class="n">alpha</span> <span class="n">releases</span>
+ <span class="o">^</span> <span class="o">^</span>   <span class="n">bN</span>   <span class="n">syntax</span> <span class="k">for</span> <span class="n">beta</span> <span class="n">releases</span>
+ <span class="o">|</span> <span class="o">|</span>   <span class="n">rcN</span>  <span class="n">syntax</span> <span class="k">for</span> <span class="n">release</span> <span class="n">candidates</span>
+ <span class="o">|</span> <span class="o">|</span>   <span class="o">.</span><span class="n">Z</span>   <span class="n">syntax</span> <span class="k">for</span> <span class="n">production</span><span class="o">/</span><span class="n">maintenance</span> <span class="n">releases</span>
+ <span class="o">|</span> <span class="o">|</span>
+ <span class="o">|</span> <span class="o">|</span><span class="n">____</span> <span class="n">minor</span> <span class="n">version</span>
+ <span class="o">|</span>
+ <span class="o">|</span><span class="n">____major</span> <span class="n">version</span>
+</pre></div>
+</div>
+<p>X.Y.0 is the first production release of the X.Y version family.
+X.Y.Z where Z &gt; 0, are maintenance releases of the X.Y version family.</p>
+</div>
+<div class="section" id="introduction">
+<h2>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h2>
+<p>Software versioning is a process that aims to assign unique identity tag to a
+unique state of a software. This process is very important as the actors of
+a software development can rely on these tags so as to debug, add new features, etc.</p>
+<p>This document is a proposal, a starting material for  discussion that will hopefully produce a guideline for the ESGF versioning.</p>
+<p>At first, this document presents a simplified development/release cycle as
+a guiding thread for the versioning syntax. The last section gives some
+recommendations about the git workflow.</p>
+</div>
+<div class="section" id="release-steps">
+<h2>Release steps<a class="headerlink" href="#release-steps" title="Permalink to this headline">¶</a></h2>
+<p>An example of release cycle (ascending order):</p>
+<ol class="arabic simple">
+<li>untag/unreleased version of ESGF stack (but versioned in a branch of the
+git repository)</li>
+<li>alpha releases (optional, at the developer&#8217;s discretion, to be tested by friendly users)</li>
+<li>beta releases (optional, at the developer&#8217;s discretion, can be tested by users knowing bugs will remain)</li>
+<li>release candidates (rc)</li>
+<li>production releases (first production version followed by maintenance versions)</li>
+</ol>
+</div>
+<div class="section" id="syntax-of-production-release">
+<h2>Syntax of production release<a class="headerlink" href="#syntax-of-production-release" title="Permalink to this headline">¶</a></h2>
+<p><strong>vX.Y.Z</strong></p>
+<p>X ; Y ; Z: zero or positive integer values (can take more than one character ; start at zero).
+ex: v2.5.0</p>
+<p>Note: of course, we can add another level (we have just to describe the
+semantic of the level).</p>
+<div class="section" id="x-major-release">
+<h3>X: major release<a class="headerlink" href="#x-major-release" title="Permalink to this headline">¶</a></h3>
+<p>This value reflects the familly of the version - major version -</p>
+<p>This value should be incremented only when the ESGF stack is substantially
+modified. For example when:</p>
+<ul class="simple">
+<li>the backward compatibility is not supported with the second to last release</li>
+<li>the software architecture is refactored.</li>
+<li>core functionalities are refactored.</li>
+<li>etc.</li>
+</ul>
+</div>
+<div class="section" id="y-minor-release">
+<h3>Y: minor release<a class="headerlink" href="#y-minor-release" title="Permalink to this headline">¶</a></h3>
+<p>This value reflects minor changes within the same version family
+- minor version -
+This value should be incremented when the modifications of the
+ESGF stack are between maintenance patches and deep modifications.
+Typically when:</p>
+<ul class="simple">
+<li>adding a new feature</li>
+<li>substantial ui modifications</li>
+<li>substantial installation procedure modifications</li>
+<li>substantial bug fix</li>
+<li>etc.</li>
+</ul>
+</div>
+<div class="section" id="z-maintenance-release">
+<h3>Z: maintenance release<a class="headerlink" href="#z-maintenance-release" title="Permalink to this headline">¶</a></h3>
+<p>This value reflects a batch of bug fixes or cosmetic modifications.
+In fact, these little modifications should have been implemented at the
+release candidate step... but they have been discovered afterward.</p>
+<p>X.Y.0 is the first production release of the X.Y version family.
+X.Y.Z where Z &gt; 0, are maintenance releases of the X.Y version family
+(successors of the X.Y.0)</p>
+<p>Maintenance release (X.Y.Z) should not have alpha/beta or rc version
+(e.g. 2.5.10rc9) :
+maintenance releases are just production release with lightweight modifications
+or simple bug fixes. However if an important bug has been discovered, the
+development team should start a new release cycle: increment the Y number and release (alpha/beta and) rc versions of the fixed stack.</p>
+</div>
+</div>
+<div class="section" id="syntax-of-alpha-beta-release">
+<h2>Syntax of alpha/beta release<a class="headerlink" href="#syntax-of-alpha-beta-release" title="Permalink to this headline">¶</a></h2>
+<p>Alpha and beta releases are usually for development purposes.
+They are hardly ever distributed to users.
+These versions are associated to the version currently in development.</p>
+<ul class="simple">
+<li>Alpha syntax: <strong>vX.YaN</strong> where X ; Y are like the syntax of the production
+release and N is also a zero or positive integer that refers to a specific alpha version.</li>
+<li>Beta syntax: <strong>vX.YbN</strong> where X ; Y ; N like alpha version but refers to a
+specific beta version.</li>
+</ul>
+<p>Examples: v2.5a10 and v2.5b9 are, respectively, an alpha and an beta version
+of the version v2.5 currently being in development.</p>
+</div>
+<div class="section" id="syntax-of-release-candidate">
+<h2>Syntax of release candidate<a class="headerlink" href="#syntax-of-release-candidate" title="Permalink to this headline">¶</a></h2>
+<p>Release candidates (RC) are versions of ESGF stack for real world testing.
+They are distributed to users so as to get feedback and fix the last bugs, just
+before the release of the production version.
+The other rcs must not be distributed when the production release comes out.</p>
+<p>RC syntax: <strong>vX.YrcN</strong> , where X ; Y are like the syntax of the production release
+and N is also a zero or positive integer that refers to a specific release candidate.</p>
+<p>Example: v2.5rc9 is a release candidate of the version v2.5 currently being
+in development.</p>
+</div>
+<div class="section" id="rejected-forms-of-syntax">
+<h2>Rejected forms of syntax<a class="headerlink" href="#rejected-forms-of-syntax" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>vX.Y.aN|bN|rcN (e.g. v2.5.rc9): a dot symbol should not be placed between minor
+version and development version tag. Development versions are associated to a
+X.Y family. They are not a subfamily on their own.</li>
+<li>v2.5rc09 : Zeros should not be added, the number of characters of X, Y, Z and
+N is not limited.</li>
+<li>v2.5.9-master : Git branch information should also not be indicated, since v2.5.9 is
+enough to describe that this version is the maintenance version 9 of the 2.5
+family.</li>
+</ul>
+</div>
+<div class="section" id="transition-from-development-to-production-version">
+<h2>Transition from development to production version<a class="headerlink" href="#transition-from-development-to-production-version" title="Permalink to this headline">¶</a></h2>
+<p>the latest development versions (alpha, beta or rc) are usually production
+releases. They normally refer to the same state of the ESGF stack.
+So the transition from the last development version to the production version
+is pretty simple: create the git tag of the production release from the same set of source files of the last development version.</p>
+<p>For example if v2.5rc10 is the version to be used as the first
+production version (v2.5.0) of the v2.5 family. So v2.5rc10 and v2.5.0 refer to
+the same state of the git repository.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Versioning Guideline</a><ul>
+<li><a class="reference internal" href="#tldr">TLDR</a></li>
+<li><a class="reference internal" href="#introduction">Introduction</a></li>
+<li><a class="reference internal" href="#release-steps">Release steps</a></li>
+<li><a class="reference internal" href="#syntax-of-production-release">Syntax of production release</a><ul>
+<li><a class="reference internal" href="#x-major-release">X: major release</a></li>
+<li><a class="reference internal" href="#y-minor-release">Y: minor release</a></li>
+<li><a class="reference internal" href="#z-maintenance-release">Z: maintenance release</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#syntax-of-alpha-beta-release">Syntax of alpha/beta release</a></li>
+<li><a class="reference internal" href="#syntax-of-release-candidate">Syntax of release candidate</a></li>
+<li><a class="reference internal" href="#rejected-forms-of-syntax">Rejected forms of syntax</a></li>
+<li><a class="reference internal" href="#transition-from-development-to-production-version">Transition from development to production version</a></li>
+</ul>
+</li>
+</ul>
+
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/versioning_guideline.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="nav-item nav-item-0"><a href="index.html">ESGF-Docker Documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017, ESGF.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.6.
+    </div>
+  </body>
+</html>
