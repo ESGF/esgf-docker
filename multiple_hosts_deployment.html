@@ -77,7 +77,9 @@ location on the Swarm manager node. Use the <em>master</em> branch.</li>
 $ESGF_VERSION and $ESGF_DATA_DIR.</li>
 <li>Initialize the ESGF node configuration: ./esgf_node_init.sh</li>
 </ul>
-<p>Note that in this particular architecture, even if the ESGF services are
+<p>Please note that at this time, the $ESGF_CONFIG directory tree containing the site specific configuration
+needs to be available to <strong>all</strong> swarm nodes - either cross mounted from a shared disk, or pushed to all VMs.</p>
+<p>Note also that in this particular architecture, even if the ESGF services are
 deployed across multiple hosts, they all share the same SSL certificate
 (cross-mounted from a shared volume), and they are all reachable at the
 hostname $ESGF_HOSTNAME: this is because the Docker Swarm routing mesh

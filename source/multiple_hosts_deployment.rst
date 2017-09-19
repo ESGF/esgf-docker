@@ -29,10 +29,13 @@ Follow the same setup steps as for the :ref:`single_host_deployment`, namely:
 *  Checkout the source code from this GitHub repository, on some
    location on the Swarm manager node. Use the *master* branch.
 *  Define the environmental variables $ESGF_HOSTNAME, $ESGF_CONFIG,
-   $ESGF_VERSION and $ESGF_DATA_DIR.
+   $ESGF_VERSION and $ESGF_DATA_DIR. 
 *  Initialize the ESGF node configuration: ./esgf_node_init.sh
 
-Note that in this particular architecture, even if the ESGF services are
+Please note that at this time, the $ESGF_CONFIG directory tree containing the site specific configuration
+needs to be available to **all** swarm nodes - either cross mounted from a shared disk, or pushed to all VMs.
+
+Note also that in this particular architecture, even if the ESGF services are
 deployed across multiple hosts, they all share the same SSL certificate
 (cross-mounted from a shared volume), and they are all reachable at the
 hostname $ESGF_HOSTNAME: this is because the Docker Swarm routing mesh
