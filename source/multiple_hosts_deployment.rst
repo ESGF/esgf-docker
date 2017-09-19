@@ -12,7 +12,7 @@ determined by placement constraints defined by node metadata tags. A
 single physical node can host services of one or more types, if the
 appropriate metadata tags are set for that node.
 
-*Tested with $ESGF_VERSION=devel*.
+*Tested with $ESGF_VERSION=1.3*.
 
 Pre-Requisites
 ==============
