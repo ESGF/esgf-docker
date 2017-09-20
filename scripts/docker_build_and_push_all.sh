@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # script to build (and optionally push) all ESGF Docker images
 # note: must define env variable ESGF_REPO to point to ESGF distribution repository
 # Example: export ESGF_REPO=http://distrib-coffee.ipsl.jussieu.fr/pub/esgf
