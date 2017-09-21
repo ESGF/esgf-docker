@@ -104,12 +104,25 @@ services:
     configs:
       - source: httpd_esgf-httpd_conf
         target: /etc/httpd/conf.d/esgf-httpd.conf
+    secrets:
+      - source: httpd_cachain_pem
+        target: /etc/certs/cachain.pem
+      - source: httpd_esgf-ca-bundle_crt
+        target: /etc/certs/esgf-ca-bundle.crt
+      - source: httpd_esgf-ca-bundle_crt-orig
+        target: /etc/certs/esgf-ca-bundle.crt-orig
+      - source: httpd_hostcert_pem
+        target: /etc/certs/hostcert.pem
+      - source: httpd_hostcert_pkcs12
+        target: /etc/certs/hostcert.pkcs12
+      - source: httpd_hostkey_pem
+        target: /etc/certs/hostkey.pem
     volumes:
       - cog_install_dir:/usr/local/cog/cog_install
       - cog_venv:/usr/local/cog/venv
       #- $COG_DATA:/usr/local/cog/cog_config
       - cog_data:/usr/local/cog/cog_config
-      - $ESGF_CONFIG/httpd/certs/:/etc/certs/ # TODO: secret
+      #- $ESGF_CONFIG/httpd/certs/:/etc/certs/ # TODO: secret
       - $ESGF_CONFIG/grid-security/certificates/:/etc/grid-security/certificates/ # TODO: secret
       - $ESGF_CONFIG/esg/config/:/esg/config/ # TODO: secret&config
     #command: $ESGF_HOSTNAME true true # ESGF=true, keep django server runnining on port 8000
