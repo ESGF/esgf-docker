@@ -9,5 +9,27 @@ readonly TRUE='true'
 
 readonly SUCCESS_CODE=0
 readonly SETTINGS_ERROR=1
+readonly CANCEL_CODE=2
 
 ################################ FUNCTIONS #####################################
+
+# return 0 if user answer yes, return 1 otherwise.
+function ask_binary_question
+{
+  while true
+  do
+    echo -n "${1} (y[es]/n[o]): "
+    read reply
+  
+    case $(echo $reply | tr '[A-Z]' '[a-z]') in
+      y|yes)
+        return 0
+        ;;
+      n|no)
+        return 1
+        ;;
+      *) echo "just y[es] or n[o] !"
+         ;;  
+    esac
+  done
+}

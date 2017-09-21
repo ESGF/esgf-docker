@@ -4,7 +4,10 @@
 # o ORP
 # o Dashboard
 
-FROM esgfhub/esgf-tomcat:devel
+ARG ESGF_IMAGES_HUB=esgf
+ARG ESGF_VERSION=devel
+
+FROM $ESGF_IMAGES_HUB/esgf-tomcat:$ESGF_VERSION
 
 MAINTAINER Luca Cinquini <luca.cinquini@jpl.nasa.gov>
 

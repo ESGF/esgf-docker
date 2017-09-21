@@ -1,13 +1,16 @@
 # ESGF node with CoG web application
 #
 # To run CoG standalone on localhost:
-# docker run -ti -p 8000:8000 --name cog esgfhub/esgf-cog:${ESGF_VERSION}
+# docker run -ti -p 8000:8000 --name cog $ESGF_IMAGES_HUB/esgf-cog:${ESGF_VERSION}
 # To run CoG standalone with a specific hostname:
-# docker run -ti -p 8000:8000 --name cog -e ESGF_HOSTNAME=${ESGF_HOSTNAME} esgfhub/esgf-cog:${ESGF_VERSION} ${ESGF_HOSTNAME} false true
+# docker run -ti -p 8000:8000 --name cog -e ESGF_HOSTNAME=${ESGF_HOSTNAME} $ESGF_IMAGES_HUB/esgf-cog:${ESGF_VERSION} ${ESGF_HOSTNAME} false true
 # To map the local source directory:
-# docker run -ti -p 8000:8000 --name cog -v /Users/cinquini/Documents/workspace/cog:/usr/local/cog/cog_install esgfhub/esgf-cog:${ESGF_VERSION}
+# docker run -ti -p 8000:8000 --name cog -v /Users/cinquini/Documents/workspace/cog:/usr/local/cog/cog_install $ESGF_IMAGES_HUB/esgf-cog:${ESGF_VERSION}
 
-FROM esgfhub/esgf-node:devel
+ARG ESGF_IMAGES_HUB=esgf
+ARG ESGF_VERSION=devel
+
+FROM $ESGF_IMAGES_HUB/esgf-node:$ESGF_VERSION
 
 MAINTAINER Luca Cinquini <luca.cinquini@jpl.nasa.gov>
 
