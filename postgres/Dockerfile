@@ -1,6 +1,9 @@
 # ESGF node with postgres database
 
-FROM esgfhub/esgf-node:devel
+ARG ESGF_IMAGES_HUB=esgf
+ARG ESGF_VERSION=devel
+
+FROM $ESGF_IMAGES_HUB/esgf-node:$ESGF_VERSION
 
 MAINTAINER Luca Cinquini <luca.cinquini@jpl.nasa.gov>
 
