@@ -19,6 +19,7 @@ readonly SCRIPT_PARENT_DIR_PATH="$(pwd)" ; cd "${BASE_DIR_PATH}"
 
 source "${SCRIPT_PARENT_DIR_PATH}/common"
 
+readonly DEFAULT_VERSION=${ESGF_VERSION-devel}
 readonly GEOLITECITY_PARENT_DIR_PATH="${SCRIPT_PARENT_DIR_PATH}/../data-node/dashboard"
 readonly GEOLITECITY_FILE_PATH="${GEOLITECITY_PARENT_DIR_PATH}/GeoLiteCity.dat.gz"
 

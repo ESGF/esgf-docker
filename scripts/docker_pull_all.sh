@@ -11,7 +11,7 @@ readonly SCRIPT_PARENT_DIR_PATH="$(pwd)" ; cd "${BASE_DIR_PATH}"
 source "${SCRIPT_PARENT_DIR_PATH}/common"
 
 # optional 'version' argument - defaults to 'latest'
-version="${DEFAULT_VERSION}"
+version="${ESGF_VERSION-latest}"
 
 if [[ -n "${1}" ]]; then
   version="${1}"
