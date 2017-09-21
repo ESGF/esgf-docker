@@ -19,11 +19,6 @@ fi
 
 images_hub="${DEFAULT_IMAGES_HUB}"
 
-echo $version
-echo $images_hub
-
-exit 0
-
 # loop over ordered list of ESGF images
 images=('node' 'postgres' 'tomcat' 'solr' 'httpd' 'cog' 'data-node' 'idp-node' 'index-node' 'vsftp' 'solr-cloud')
 
