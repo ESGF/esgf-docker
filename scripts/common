@@ -1,0 +1,13 @@
+############################# BASIC SETTINGS ###################################
+
+readonly SCRIPT_NAME="$(basename ${0})"
+
+readonly FALSE='false'
+readonly TRUE='true'
+
+### Return codes
+
+readonly SUCCESS_CODE=0
+readonly SETTINGS_ERROR=1
+
+################################ FUNCTIONS #####################################
