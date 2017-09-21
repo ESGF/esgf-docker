@@ -3,7 +3,7 @@
 # All certificates are generated in the directory $ESGF_CONFIG/esgfcerts, then moved to the proper location under $ESGF_CONFIG
 
 # verify env variables are set
-if [ "${ESGF_HOSTNAME}" = "" ] || [ "${ESGF_CONFIG}" = "" ] || [ "${ESGF_VERSION}" = "" ];
+if [ "${ESGF_HOSTNAME}" = "" ] || [ "${ESGF_CONFIG}" = "" ] || [ "${ESGF_VERSION}" = "" ] || [ "${ESGF_IMAGES_HUB}" = "" ];
 then
    echo "All env variables: ESGF_HOSTNAME, ESGF_CONFIG, ESGF_VERSION must be set  "
    exit -1
@@ -11,6 +11,7 @@ else
    echo "Using ESGF_HOSTNAME=$ESGF_HOSTNAME"
    echo "Using ESGF_CONFIG=$ESGF_CONFIG"
    echo "Using ESGF_VERSION=$ESGF_VERSION"
+   echo "Using ESGF_IMAGES_HUB=$ESGF_IMAGES_HUB"
 fi
 
 # working directory
@@ -46,7 +47,7 @@ cat hostcert.pem >> esgf-ca-bundle.crt
 echo ""
 echo "Generating certificate hash"
 
-cert_hash=`docker run -ti --rm -v $ESGF_CONFIG/esgfcerts/:/tmp/certs/ esgfhub/esgf-node:$ESGF_VERSION openssl x509 -noout -hash -in /tmp/certs/hostcert.pem`
+cert_hash=`docker run -ti --rm -v $ESGF_CONFIG/esgfcerts/:/tmp/certs/ $ESGF_IMAGES_HUB/esgf-node:$ESGF_VERSION openssl x509 -noout -hash -in /tmp/certs/hostcert.pem`
 #cert_hash=`openssl x509 -noout -hash -in hostcert.pem`
 # must remove the trailing white space i.e. end of line
 cert_hash=${cert_hash%%[[:space:]]}
@@ -72,4 +73,3 @@ cp ${cert_hash}.0 $ESGF_CONFIG/grid-security/certificates/${cert_hash}.0
 # tomcat
 cp esg-truststore.ts $ESGF_CONFIG/esg/config/tomcat/esg-truststore.ts
 cp hostcert.jks $ESGF_CONFIG/esg/config/tomcat/keystore-tomcat
-

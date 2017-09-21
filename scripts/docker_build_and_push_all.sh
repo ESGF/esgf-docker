@@ -19,10 +19,6 @@ readonly SCRIPT_PARENT_DIR_PATH="$(pwd)" ; cd "${BASE_DIR_PATH}"
 
 source "${SCRIPT_PARENT_DIR_PATH}/common"
 
-readonly DEFAULT_VERSION=${ESGF_VERSION-devel}
-readonly DEFAULT_IMAGES_HUB=${ESGF_IMAGES_HUB-esgf}
-readonly DEFAULT_PACKAGE_REPO=${ESGF_REPO-"http://distrib-coffee.ipsl.jussieu.fr/pub/esgf"}
-
 readonly GEOLITECITY_PARENT_DIR_PATH="${SCRIPT_PARENT_DIR_PATH}/../data-node/dashboard"
 readonly GEOLITECITY_FILE_PATH="${GEOLITECITY_PARENT_DIR_PATH}/GeoLiteCity.dat.gz"
 
@@ -36,6 +32,8 @@ version="${DEFAULT_VERSION}"
 # optional 'push' argument
 pushit="${FALSE}"
 
+has_only_push="${FALSE}"
+
 # images hub
 images_hub="${DEFAULT_IMAGES_HUB}"
 
@@ -48,15 +46,18 @@ assumeyes="${FALSE}"
 function build_and_push() {
   # function parameters
   img="esgf-$1:${version}"
-  echo -e "***** BUILDING MODULE=$img\n"
-
-  # build the module
-  docker build --no-cache --build-arg "ESGF_REPO=${packages_repo}" \
-                          --build-arg "ESGF_IMAGES_HUB=${images_hub}" \
-                          --build-arg "ESGF_VERSION=${version}" \
-                          -t ${images_hub}/$img .
   
-  #docker build --no-cache -t $images_hub/$img .
+  if [[ "${has_only_push}" = "${FALSE}" ]]; then
+    echo -e "***** BUILDING MODULE $img\n"
+
+    # build the module
+    docker build --no-cache --build-arg "ESGF_REPO=${packages_repo}" \
+                            --build-arg "ESGF_IMAGES_HUB=${images_hub}" \
+                            --build-arg "ESGF_VERSION=${version}" \
+                            -t ${images_hub}/$img .
+  
+    #docker build --no-cache -t $images_hub/$img .
+  fi
 
   # optionally push the module to Docker Hub
   if [[ $pushit == "${TRUE}" ]]; then
@@ -72,6 +73,7 @@ function usage
   \n-i | --images-hub <name> the name of the images hub\
   \n-r | --package-repo <url> the name of the packages repository\
   \n-p | --push-it push the images to the hub\
+  \n-P | --only-push push the images already built to the hub\  
   \n-y | --assumeyes answer yes to all questions\
   \n-h | --help : print usage\
 \n\
@@ -84,7 +86,7 @@ You may override default settings by exporting the following environment variabl
 
 ################################## MAIN ########################################
 
-params="$(getopt -o v:i:r:pyh -l version:,images-hub:,packages-repo:,push-it,assumeyes,help --name "$(basename "$0")" -- "$@")"
+params="$(getopt -o v:i:r:pPyh -l version:,images-hub:,packages-repo:,push-it,only-push,assumeyes,help --name "$(basename "$0")" -- "$@")"
 
 if [ ${?} -ne 0 ]
 then
@@ -118,6 +120,10 @@ while true; do
       ;;
     -p|--push-it)
       pushit="${TRUE}" 
+      shift 1 ;;
+    -P|--only-push)
+      pushit="${TRUE}"
+      has_only_push="${TRUE}"
       shift 1 ;;
     -y|--assumeyes)
       assumeyes="${TRUE}" 

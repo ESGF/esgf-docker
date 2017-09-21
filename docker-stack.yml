@@ -9,7 +9,8 @@
 #       example: export ESGF_HOSTNAME=`docker-machine ip`
 # ESGF_VERSION: version of ESGF/Docker distribution
 #       example: export ESGF_VERSION=1.2
-
+# ESGF_IMAGES_HUB: the repository of the esgf components images
+#       example: export ESGF_IMAGES_HUB=esgfhub
 # SOLR_DATA: location of Solr index
 #       example: export SOLR_DATA=/esg/solr-index
 # COG_DATA: location of CoG site data
@@ -83,7 +84,7 @@ services:
 
   # ESGF postgres database
   esgf-postgres:
-    image: esgfhub/esgf-postgres:${ESGF_VERSION}
+    image: ${ESGF_IMAGES_HUB}/esgf-postgres:${ESGF_VERSION}
     ports:
       - "5432:5432"
     networks:
@@ -98,7 +99,7 @@ services:
   # CoG
   # data container to hold CoG source code and python virtual environment
   esgf-cog:
-    image: esgfhub/esgf-cog:${ESGF_VERSION}
+    image: ${ESGF_IMAGES_HUB}/esgf-cog:${ESGF_VERSION}
     ports:
       - "8000:8000"
     configs:
@@ -146,7 +147,7 @@ services:
 
 
   esgf-solr:
-    image: esgfhub/esgf-solr:${ESGF_VERSION}
+    image: ${ESGF_IMAGES_HUB}/esgf-solr:${ESGF_VERSION}
     ports:
       - "8983:8983"
       - "8984:8984"
@@ -164,7 +165,7 @@ services:
 
 
   esgf-index-node:
-    image: esgfhub/esgf-index-node:${ESGF_VERSION}
+    image: ${ESGF_IMAGES_HUB}/esgf-index-node:${ESGF_VERSION}
     ports:
       - "8081:8080"
       - "8444:8443"
@@ -183,7 +184,7 @@ services:
         constraints: [node.labels.esgf_index_node == true]
 
   esgf-idp-node:
-    image: esgfhub/esgf-idp-node:${ESGF_VERSION}
+    image: ${ESGF_IMAGES_HUB}/esgf-idp-node:${ESGF_VERSION}
     ports:
       - "8082:8080"
       - "8445:8443"
@@ -203,7 +204,7 @@ services:
         constraints: [node.labels.esgf_idp_node == true]
 
   esgf-data-node:
-    image: esgfhub/esgf-data-node:${ESGF_VERSION}
+    image: ${ESGF_IMAGES_HUB}/esgf-data-node:${ESGF_VERSION}
     ports:
       - "8083:8080"
       - "8446:8443"
@@ -230,7 +231,7 @@ services:
         constraints: [node.labels.esgf_data_node == true]
 
   esgf-httpd:
-    image: esgfhub/esgf-httpd:${ESGF_VERSION}
+    image: ${ESGF_IMAGES_HUB}/esgf-httpd:${ESGF_VERSION}
     entrypoint: /usr/local/bin/docker-entrypoint.sh
     configs:
       - source: httpd_esgf-httpd_conf
@@ -281,7 +282,7 @@ services:
     depends_on:
       - slcs-postgres
       - slcs-nginx
-    image: esgfhub/esgf-slcs:${ESGF_VERSION}
+    image: ${ESGF_IMAGES_HUB}/esgf-slcs:${ESGF_VERSION}
     networks:
       - default
       - dbnetwork

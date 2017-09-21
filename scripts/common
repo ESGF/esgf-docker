@@ -11,6 +11,10 @@ readonly SUCCESS_CODE=0
 readonly SETTINGS_ERROR=1
 readonly CANCEL_CODE=2
 
+readonly DEFAULT_VERSION=${ESGF_VERSION-latest}
+readonly DEFAULT_IMAGES_HUB=${ESGF_IMAGES_HUB-esgfhub}
+readonly DEFAULT_PACKAGE_REPO=${ESGF_REPO-"http://distrib-coffee.ipsl.jussieu.fr/pub/esgf"}
+
 ################################ FUNCTIONS #####################################
 
 # return 0 if user answer yes, return 1 otherwise.
