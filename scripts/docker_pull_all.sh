@@ -20,8 +20,6 @@ fi
 images_hub="${DEFAULT_IMAGES_HUB}"
 
 # loop over ordered list of ESGF images
-images=('node' 'postgres' 'tomcat' 'solr' 'httpd' 'cog' 'data-node' 'idp-node' 'index-node' 'vsftp' 'solr-cloud')
-
-for img in ${images[*]}; do
+for img in ${ESGF_IMAGE_DIR_NAMES[*]}; do
    docker pull $images_hub/esgf-$img:$version
 done
