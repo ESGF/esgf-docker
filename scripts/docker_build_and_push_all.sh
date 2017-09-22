@@ -165,9 +165,7 @@ wget -N -nv "${packages_repo}/dist/devel/geoip/GeoLiteCity.dat.gz"
 popd > /dev/null
 
 # loop over ordered list of ESGF images
-subdirs=('node' 'postgres' 'tomcat' 'solr' 'httpd' 'cog' 'data-node' 'idp-node' 'index-node' 'slcs' 'node-manager' 'vsftp' 'solr-cloud')
-
-for subdir in ${subdirs[*]}; do
+for subdir in ${ESGF_IMAGE_DIR_NAMES[*]}; do
    # cd to parallel directory
    cd "${SCRIPT_PARENT_DIR_PATH}/../$subdir"
    build_and_push $subdir
