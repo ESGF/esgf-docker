@@ -14,16 +14,23 @@ readonly BASE_DIR_PATH="$(pwd)"
 SCRIPT_PARENT_DIR_PATH="$(dirname $0)"; cd "${SCRIPT_PARENT_DIR_PATH}"
 readonly SCRIPT_PARENT_DIR_PATH="$(pwd)" ; cd "${BASE_DIR_PATH}"
 
+source "${SCRIPT_PARENT_DIR_PATH}/common"
+
+readonly DEFAULT_VERSION=${ESGF_VERSION-latest}
+
+images_hub="${DEFAULT_IMAGES_HUB}"
+esgf_ver="${DEFAULT_VERSION}"
+
 # verify env variables are set
-if [ "${ESGF_HOSTNAME}" = "" ] || [ "${ESGF_CONFIG}" = "" ] || [ "${ESGF_VERSION}" = "" ] || [ "${ESGF_IMAGES_HUB}" = "" ];
+if [ "${ESGF_HOSTNAME}" = "" ] || [ "${ESGF_CONFIG}" = "" ];
 then
-   echo "All env variables: ESGF_HOSTNAME, ESGF_CONFIG, ESGF_VERSION must be set  "
+   echo "All env variables: ESGF_HOSTNAME and ESGF_CONFIG must be set  "
    exit -1
 else
    echo "Using ESGF_HOSTNAME=$ESGF_HOSTNAME"
    echo "Using ESGF_CONFIG=$ESGF_CONFIG"
-   echo "Using ESGF_VERSION=$ESGF_VERSION"
-   echo "Using ESGF_IMAGES_HUB=$ESGF_IMAGES_HUB"
+   echo "Using ESGF_VERSION=$esgf_ver"
+   echo "Using ESGF_IMAGES_HUB=$images_hub"
 fi
 
 # initialize the node configuration directory

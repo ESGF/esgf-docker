@@ -11,15 +11,11 @@ readonly SCRIPT_PARENT_DIR_PATH="$(pwd)" ; cd "${BASE_DIR_PATH}"
 source "${SCRIPT_PARENT_DIR_PATH}/common"
 
 # optional 'version' argument - defaults to 'latest'
-version="${ESGF_VERSION-latest}"
-
-if [[ -n "${1}" ]]; then
-  version="${1}"
-fi
+esgf_ver="${1-latest}"
 
 images_hub="${DEFAULT_IMAGES_HUB}"
 
 # loop over ordered list of ESGF images
 for img in ${ESGF_IMAGE_DIR_NAMES[*]}; do
-   docker pull $images_hub/esgf-$img:$version
+   docker pull $images_hub/esgf-$img:$esgf_ver
 done

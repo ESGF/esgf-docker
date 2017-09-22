@@ -20,6 +20,7 @@ readonly SCRIPT_PARENT_DIR_PATH="$(pwd)" ; cd "${BASE_DIR_PATH}"
 source "${SCRIPT_PARENT_DIR_PATH}/common"
 
 readonly DEFAULT_VERSION=${ESGF_VERSION-devel}
+
 readonly GEOLITECITY_PARENT_DIR_PATH="${SCRIPT_PARENT_DIR_PATH}/../data-node/dashboard"
 readonly GEOLITECITY_FILE_PATH="${GEOLITECITY_PARENT_DIR_PATH}/GeoLiteCity.dat.gz"
 
@@ -28,7 +29,7 @@ set -u
 ############################ CONTROL VARIABLES #################################
 
 # required version
-version="${DEFAULT_VERSION}"
+esgf_ver="${DEFAULT_VERSION}"
 
 # optional 'push' argument
 pushit="${FALSE}"
@@ -46,7 +47,7 @@ assumeyes="${FALSE}"
 
 function build_and_push() {
   # function parameters
-  img="esgf-$1:${version}"
+  img="esgf-$1:${esgf_ver}"
   
   if [[ "${has_only_push}" = "${FALSE}" ]]; then
     echo -e "***** BUILDING MODULE $img\n"
@@ -54,7 +55,7 @@ function build_and_push() {
     # build the module
     docker build --no-cache --build-arg "ESGF_REPO=${packages_repo}" \
                             --build-arg "ESGF_IMAGES_HUB=${images_hub}" \
-                            --build-arg "ESGF_VERSION=${version}" \
+                            --build-arg "ESGF_VERSION=${esgf_ver}" \
                             -t ${images_hub}/$img .
   
     #docker build --no-cache -t $images_hub/$img .
@@ -103,7 +104,7 @@ while true; do
     -v|--version)
       case "${2}" in
         "") echo "#### missing value. Abort ####"; exit ${SETTINGS_ERROR} ;;
-        *)  version="${2}" ; shift 2 ;;
+        *)  esgf_ver="${2}" ; shift 2 ;;
       esac ;;
     -i|--images-hub)
       case "${2}" in
@@ -141,7 +142,7 @@ while true; do
   esac
 done
 
-echo -e "building all the images with VERSION=$version PUSH=$pushit HUB=$images_hub REPO=$packages_repo\n"
+echo -e "building all the images with VERSION=$esgf_ver PUSH=$pushit HUB=$images_hub REPO=$packages_repo\n"
 
 if [[ "${assumeyes}" = "${FALSE}" ]]; then
   ask_binary_question "Do you want to continue ?"

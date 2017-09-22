@@ -1,17 +1,28 @@
-#!/bin/bash
+  #!/bin/bash
 # Script to generate certificates needed for an ESGF node with a given $ESGF_HOSTNAME
 # All certificates are generated in the directory $ESGF_CONFIG/esgfcerts, then moved to the proper location under $ESGF_CONFIG
 
+readonly BASE_DIR_PATH="$(pwd)"
+SCRIPT_PARENT_DIR_PATH="$(dirname $0)"; cd "${SCRIPT_PARENT_DIR_PATH}"
+readonly SCRIPT_PARENT_DIR_PATH="$(pwd)" ; cd "${BASE_DIR_PATH}"
+
+source "${SCRIPT_PARENT_DIR_PATH}/common"
+
+readonly DEFAULT_VERSION=${ESGF_VERSION-latest}
+
+images_hub="${DEFAULT_IMAGES_HUB}"
+esgf_ver="${DEFAULT_VERSION}"
+
 # verify env variables are set
-if [ "${ESGF_HOSTNAME}" = "" ] || [ "${ESGF_CONFIG}" = "" ] || [ "${ESGF_VERSION}" = "" ] || [ "${ESGF_IMAGES_HUB}" = "" ];
+if [ "${ESGF_HOSTNAME}" = "" ] || [ "${ESGF_CONFIG}" = "" ];
 then
-   echo "All env variables: ESGF_HOSTNAME, ESGF_CONFIG, ESGF_VERSION must be set  "
+   echo "All env variables: ESGF_HOSTNAME and ESGF_CONFIG must be set  "
    exit -1
 else
    echo "Using ESGF_HOSTNAME=$ESGF_HOSTNAME"
    echo "Using ESGF_CONFIG=$ESGF_CONFIG"
-   echo "Using ESGF_VERSION=$ESGF_VERSION"
-   echo "Using ESGF_IMAGES_HUB=$ESGF_IMAGES_HUB"
+   echo "Using ESGF_VERSION=$esgf_ver"
+   echo "Using ESGF_IMAGES_HUB=$images_hub"
 fi
 
 # working directory
@@ -47,7 +58,7 @@ cat hostcert.pem >> esgf-ca-bundle.crt
 echo ""
 echo "Generating certificate hash"
 
-cert_hash=`docker run -ti --rm -v $ESGF_CONFIG/esgfcerts/:/tmp/certs/ $ESGF_IMAGES_HUB/esgf-node:$ESGF_VERSION openssl x509 -noout -hash -in /tmp/certs/hostcert.pem`
+cert_hash=`docker run -ti --rm -v $ESGF_CONFIG/esgfcerts/:/tmp/certs/ $images_hub/esgf-node:$esgf_ver openssl x509 -noout -hash -in /tmp/certs/hostcert.pem`
 #cert_hash=`openssl x509 -noout -hash -in hostcert.pem`
 # must remove the trailing white space i.e. end of line
 cert_hash=${cert_hash%%[[:space:]]}
