@@ -7,23 +7,13 @@
 # ESGF_HOSTNAME: HostName or IP address for apache httpd front-end server
 #       example: export ESGF_HOSTNAME=my-node.esgf.org
 #       example: export ESGF_HOSTNAME=`docker-machine ip`
-# SOLR_DATA: location of Solr index
-#       example: export SOLR_DATA=/esg/solr-index
-# COG_DATA: location of CoG site data
-#       example: export COG_DATA=/usr/local/cog/cog_config
-# TDS_DATA: location of TDS catalogs
-#       example: export TDS_DATA=/esg/content/thredds
-# PG_DATA: location od postgres database and configuration
-#       example: export PG_DATA=/var/lib/pgsql/data
-# ESGF_DATA_ARCHIVE: location of science data
-#       example: export ESGF_DATA_ARCHIVE=/esgf/data_archive
-
+#
 # Optional env variables:
 # ESGF_VERSION: version of ESGF/Docker distribution
 #       example: export ESGF_VERSION=latest
 # ESGF_IMAGES_HUB: the repository of the esgf components images
 #       example: export ESGF_IMAGES_HUB=esgfhub
-
+#
 # Services deployment:
 # - front_node: httpd daemon, cog, and visualizer
 # - db_node: postgres
@@ -91,7 +81,6 @@ services:
     networks:
       - dbnetwork
     volumes:
-      #- $PG_DATA:/var/lib/pgsql/data
       - pg_data:/var/lib/pgsql/data
     deploy:
       placement:
@@ -122,9 +111,7 @@ services:
     volumes:
       - cog_install_dir:/usr/local/cog/cog_install
       - cog_venv:/usr/local/cog/venv
-      #- $COG_DATA:/usr/local/cog/cog_config
       - cog_data:/usr/local/cog/cog_config
-      #- $ESGF_CONFIG/httpd/certs/:/etc/certs/ # TODO: secret
       - $ESGF_CONFIG/grid-security/certificates/:/etc/grid-security/certificates/ # TODO: secret
       - $ESGF_CONFIG/esg/config/:/esg/config/ # TODO: secret&config
     #command: $ESGF_HOSTNAME true true # ESGF=true, keep django server runnining on port 8000
@@ -221,7 +208,6 @@ services:
     volumes:
       - tds_data:/esg/content/thredds
       - $ESGF_CONFIG/esg/config/:/esg/config/ # TODO: secret&config
-      #- $ESGF_DATA_ARCHIVE:/esg/data_archive
     environment:
      - ESGF_HOSTNAME
     depends_on:
