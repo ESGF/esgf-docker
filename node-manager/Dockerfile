@@ -16,7 +16,7 @@
 # /esg/config/nm.properties 
 # /esg/config/esgf_nodemgr_map.json : periodically updated to reflect nodes status
 
-ARG ESGF_IMAGES_HUB=esgf
+ARG ESGF_IMAGES_HUB=esgfhub
 ARG ESGF_VERSION=devel
 
 FROM $ESGF_IMAGES_HUB/esgf-node:$ESGF_VERSION

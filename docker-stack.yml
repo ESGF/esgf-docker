@@ -70,7 +70,9 @@ secrets:
     file: $ESGF_CONFIG/slcs/conf/ca/onlineca.crt
   slcs_onlineca_key:
     file: $ESGF_CONFIG/slcs/conf/ca/onlineca.key 
-
+          ##################### GRID SECRETS ##################
+  grid_certificates:
+    file: $ESGF_CONFIG/archives/grid_security_certs.tar.xz
 services:
 
   # ESGF postgres database
@@ -108,11 +110,17 @@ services:
         target: /etc/certs/hostcert.pkcs12
       - source: httpd_hostkey_pem
         target: /etc/certs/hostkey.pem
+      - source: grid_certificates
+        target: /root/archives/grid_security_certs.tar.xz
     volumes:
       - cog_install_dir:/usr/local/cog/cog_install
       - cog_venv:/usr/local/cog/venv
       - cog_data:/usr/local/cog/cog_config
-      - $ESGF_CONFIG/grid-security/certificates/:/etc/grid-security/certificates/ # TODO: secret
+
+      #- $ESGF_CONFIG/grid-security/certificates/:/etc/grid-security/certificates/ # TODO: secret
+
+
+
       - $ESGF_CONFIG/esg/config/:/esg/config/ # TODO: secret&config
     #command: $ESGF_HOSTNAME true true # ESGF=true, keep django server runnining on port 8000
     command: $ESGF_HOSTNAME true false # ESGF=true, django server running on port 8000 = false

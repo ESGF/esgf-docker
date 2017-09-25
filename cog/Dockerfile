@@ -7,7 +7,7 @@
 # To map the local source directory:
 # docker run -ti -p 8000:8000 --name cog -v /Users/cinquini/Documents/workspace/cog:/usr/local/cog/cog_install $ESGF_IMAGES_HUB/esgf-cog:${ESGF_VERSION}
 
-ARG ESGF_IMAGES_HUB=esgf
+ARG ESGF_IMAGES_HUB=esgfhub
 ARG ESGF_VERSION=devel
 
 FROM $ESGF_IMAGES_HUB/esgf-node:$ESGF_VERSION

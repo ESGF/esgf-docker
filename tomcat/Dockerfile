@@ -2,7 +2,7 @@
 # o Tomcat keystore, truststore files located in /esg/config/tomcat
 # o startup with ESGF specific env variables defined in bin/setenv.sh
 
-ARG ESGF_IMAGES_HUB=esgf
+ARG ESGF_IMAGES_HUB=esgfhub
 ARG ESGF_VERSION=devel
 
 FROM $ESGF_IMAGES_HUB/esgf-node:$ESGF_VERSION

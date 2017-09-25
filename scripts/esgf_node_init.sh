@@ -57,4 +57,8 @@ echo ""
 echo "Changing configuration for hostname=$ESGF_HOSTNAME..."
 $SCRIPT_PARENT_DIR_PATH/change_hostname.sh
 
+echo ""
+echo "Creating archives"
+$SCRIPT_PARENT_DIR_PATH/manage_archives.sh
+
 echo "... ESGF node initialization completed."

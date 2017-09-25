@@ -1,6 +1,6 @@
 # Solr-Cloud installation configured for ESGF data
 
-ARG ESGF_IMAGES_HUB=esgf
+ARG ESGF_IMAGES_HUB=esgfhub
 ARG ESGF_VERSION=devel
 
 FROM $ESGF_IMAGES_HUB/esgf-node:$ESGF_VERSION

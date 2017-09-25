@@ -1,7 +1,7 @@
 # ESGF Identity Provider node
 # Implemented as Java web servlet application running inside Tomcat container.
 
-ARG ESGF_IMAGES_HUB=esgf
+ARG ESGF_IMAGES_HUB=esgfhub
 ARG ESGF_VERSION=devel
 
 FROM $ESGF_IMAGES_HUB/esgf-tomcat:$ESGF_VERSION
