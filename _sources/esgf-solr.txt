@@ -1,0 +1,18 @@
+***************
+esgf-solr Image
+***************
+
+This document contains miscellaneous details on how esgf-solr Docker container is configured and operated.
+
+Starting the container
+======================
+
+To start the container standalone::
+
+  docker-compose -f docker-stack.yml up esgf-solr
+
+or you can start the container as part of the whole ESGF stack::
+
+  docker stack -c docker-stack.yml esgf-stack
+
+

@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Table of Contents: &mdash; ESGF-Docker Documentation</title>
+    <title>esgf-solr Image &mdash; ESGF-Docker Documentation</title>
     
     <link rel="stylesheet" href="_static/nature.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -23,8 +23,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="ESGF-Docker Documentation" href="#" />
-    <link rel="next" title="Single Host Deployment" href="single_host_deployment.html" /> 
+    <link rel="top" title="ESGF-Docker Documentation" href="index.html" /> 
   </head>
   <body role="document">
     <div class="related" role="navigation" aria-label="related navigation">
@@ -33,10 +32,7 @@
         <li class="right" style="margin-right: 10px">
           <a href="genindex.html" title="General Index"
              accesskey="I">index</a></li>
-        <li class="right" >
-          <a href="single_host_deployment.html" title="Single Host Deployment"
-             accesskey="N">next</a> |</li>
-        <li><a href="#">ESGF-Docker Documentation</a> &raquo;</li> 
+        <li><a href="index.html">ESGF-Docker Documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -45,24 +41,19 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <p>This repository contains instructions on how to run ESGF services as Docker containers.</p>
-<ul class="simple">
-<li>Source code is hosted on GitHub: <a class="reference external" href="https://github.com/ESGF/esgf-docker">https://github.com/ESGF/esgf-docker</a></li>
-<li>Docker images are hosted on DockerHub: <a class="reference external" href="https://hub.docker.com/u/esgfhub/dashboard/">https://hub.docker.com/u/esgfhub/dashboard/</a></li>
-</ul>
-<div class="section" id="table-of-contents">
-<h1>Table of Contents:<a class="headerlink" href="#table-of-contents" title="Permalink to this headline">¶</a></h1>
-<div class="toctree-wrapper compound">
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="single_host_deployment.html">Single Host Deployment</a></li>
-<li class="toctree-l1"><a class="reference internal" href="multiple_hosts_deployment.html">Multiple Hosts Deployment</a></li>
-<li class="toctree-l1"><a class="reference internal" href="data_publishing.html">Data Publishing</a></li>
-<li class="toctree-l1"><a class="reference internal" href="architecture_and_development_guidelines.html">Architecture and Development Guidelines</a></li>
-<li class="toctree-l1"><a class="reference internal" href="docker_swarm_setup_on_macosx.html">Docker Swam Setup on MacOSX</a></li>
-<li class="toctree-l1"><a class="reference internal" href="versioning_guideline.html">Versioning Guideline</a></li>
-<li class="toctree-l1"><a class="reference internal" href="git_workflow.html">Git Workflow</a></li>
-<li class="toctree-l1"><a class="reference internal" href="esgf_solr.html">esgf-solr Image</a></li>
-</ul>
+  <div class="section" id="esgf-solr-image">
+<h1>esgf-solr Image<a class="headerlink" href="#esgf-solr-image" title="Permalink to this headline">¶</a></h1>
+<p>This document contains miscellaneous details on how esgf-solr Docker container is configured and operated.</p>
+<div class="section" id="starting-the-container">
+<h2>Starting the container<a class="headerlink" href="#starting-the-container" title="Permalink to this headline">¶</a></h2>
+<p>To start the container standalone:</p>
+<div class="highlight-python"><div class="highlight"><pre>docker-compose -f docker-stack.yml up esgf-solr
+</pre></div>
+</div>
+<p>or you can start the container as part of the whole ESGF stack:</p>
+<div class="highlight-python"><div class="highlight"><pre>docker stack -c docker-stack.yml esgf-stack
+</pre></div>
+</div>
 </div>
 </div>
 
@@ -72,13 +63,18 @@
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
-  <h4>Next topic</h4>
-  <p class="topless"><a href="single_host_deployment.html"
-                        title="next chapter">Single Host Deployment</a></p>
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">esgf-solr Image</a><ul>
+<li><a class="reference internal" href="#starting-the-container">Starting the container</a></li>
+</ul>
+</li>
+</ul>
+
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
-      <li><a href="_sources/index.txt"
+      <li><a href="_sources/esgf-solr.txt"
             rel="nofollow">Show Source</a></li>
     </ul>
    </div>
@@ -105,10 +101,7 @@
         <li class="right" style="margin-right: 10px">
           <a href="genindex.html" title="General Index"
              >index</a></li>
-        <li class="right" >
-          <a href="single_host_deployment.html" title="Single Host Deployment"
-             >next</a> |</li>
-        <li><a href="#">ESGF-Docker Documentation</a> &raquo;</li> 
+        <li><a href="index.html">ESGF-Docker Documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">

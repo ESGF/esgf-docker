@@ -1,0 +1,216 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>esgf-solr Image &mdash; ESGF-Docker Documentation</title>
+    
+    <link rel="stylesheet" href="_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="ESGF-Docker Documentation" href="index.html" />
+    <link rel="prev" title="Git Workflow" href="git_workflow.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="git_workflow.html" title="Git Workflow"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">ESGF-Docker Documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="esgf-solr-image">
+<h1>esgf-solr Image<a class="headerlink" href="#esgf-solr-image" title="Permalink to this headline">¶</a></h1>
+<p>This document contains miscellaneous details on how the <em>esgf-solr</em> Docker container is configured and operated.</p>
+<div class="section" id="starting-the-container">
+<h2>Starting the container<a class="headerlink" href="#starting-the-container" title="Permalink to this headline">¶</a></h2>
+<p>To start the container standalone:</p>
+<div class="highlight-python"><div class="highlight"><pre>docker-compose -f docker-stack.yml up esgf-solr
+</pre></div>
+</div>
+<p>or you can start the container as part of the whole ESGF stack:</p>
+<div class="highlight-python"><div class="highlight"><pre>docker stack -c docker-stack.yml esgf-stack
+</pre></div>
+</div>
+</div>
+<div class="section" id="testing">
+<h2>Testing<a class="headerlink" href="#testing" title="Permalink to this headline">¶</a></h2>
+<p>The following URLs can be used to test that the individual shards are working correctly:</p>
+<ul class="simple">
+<li>Solr admin interface:<ul>
+<li>master shard: <a class="reference external" href="http://localhost:8984/solr">http://localhost:8984/solr</a></li>
+<li>slave shard <a class="reference external" href="http://localhost:8983/solr">http://localhost:8983/solr</a></li>
+</ul>
+</li>
+<li>Solr queries (for datasets):<ul>
+<li>master shard: <a class="reference external" href="http://localhost:8984/solr/datasets/select?q=*%3A*&amp;wt=json&amp;indent=true">http://localhost:8984/solr/datasets/select?q=*%3A*&amp;wt=json&amp;indent=true</a></li>
+<li>slave  shard: <a class="reference external" href="http://localhost:8983/solr/datasets/select?q=*%3A*&amp;wt=json&amp;indent=true">http://localhost:8983/solr/datasets/select?q=*%3A*&amp;wt=json&amp;indent=true</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="section" id="important-files-and-directories">
+<h2>Important Files and Directories<a class="headerlink" href="#important-files-and-directories" title="Permalink to this headline">¶</a></h2>
+<ul>
+<li><p class="first">Shard configuration directory: <em>/usr/local/solr-home/&lt;shard&gt;</em></p>
+</li>
+<li><p class="first">Shard index: <em>/esg/solr-index/&lt;shard&gt;</em></p>
+</li>
+<li><p class="first">Server log files: <em>/usr/local/solr/server/logs/</em></p>
+</li>
+<li><p class="first">The log file level can be configured in file: <em>/usr/local/solr/server/resources/log4j.properties</em></p>
+</li>
+<li><p class="first">Supervisor configuration directory: <em>/etc/supervisor/conf.d/</em></p>
+</li>
+<li><p class="first">To start a shard with more memory, there are two options:</p>
+<blockquote>
+<div><ul class="simple">
+<li>change the value of the option &#8220;-m 512m&#8221; in the supervisor startup file for that shard (for example: <em>/etc/supervisor/conf.d/supervisord.solr_master_8984.conf</em>)</li>
+<li>or change the value of SOLR_HEAP in the shard-specific envirnment file referenced by SOLR_INCLUDE (for example: <em>/usr/local/solr-home/master-8984/solr.in.sh</em>)</li>
+</ul>
+</div></blockquote>
+<p>Note that the first option (specified when the shard is started) will override the second option.</p>
+</li>
+</ul>
+</div>
+<div class="section" id="starting-stopping-solr-shards">
+<h2>Starting/Stopping Solr shards<a class="headerlink" href="#starting-stopping-solr-shards" title="Permalink to this headline">¶</a></h2>
+<p>Once the container is running, you can enter the container to start/stop any single shard, or all shards at the same time:</p>
+<div class="highlight-python"><div class="highlight"><pre>docker exec -it &lt;container_id&gt; /bin/bash
+supervisorctl start/stop/restart solr:master_8984
+supervisorctl start/stop/restart solr:slave_8983
+supervisorctl start/stop/restart solr:*
+</pre></div>
+</div>
+</div>
+<div class="section" id="adding-removing-a-shard">
+<h2>Adding/Removing a shard<a class="headerlink" href="#adding-removing-a-shard" title="Permalink to this headline">¶</a></h2>
+<p>To add a new shard that replicates data from the JPL index node:</p>
+<div class="highlight-python"><div class="highlight"><pre># enter the container
+docker exec -it &lt;container_id&gt; /bin/bash
+
+# deploy the configuration for the new shard
+cd /usr/local/bin
+./add_shard.sh esgf-node.jpl.nasa.gov 8985
+
+# load the configuration into supervisor and start the service
+supervisorctl update
+supervisorctl restart solr:esgf-node.jpl.nasa.gov_8985
+</pre></div>
+</div>
+<p>The instructions above will perform the following actions:</p>
+<ul class="simple">
+<li>Deploy a new shard configuration home under <em>/usr/local/solr-home/esgf-node.jpl.nasa.gov-8985</em></li>
+<li>Create an empty shard index under <em>/esg/solr-index/esgf-node.jpl.nasa.gov-8985</em></li>
+<li>Insert the new shard into the shared list of shards to be queried (to be used by the <em>esgf-index-node</em> container): <em>/esg/config/esgf_shards_static.xml</em></li>
+<li>Create a new service configuration to be used by Supervisor: <em>/etc/supervisor/conf.d/supervisord.solr_esgf-node.jpl.nasa.gov_8985.conf</em></li>
+</ul>
+<p>The new shard will start replicating the JPL index node within the configured time interval (currently, 60 min). To start replicating right away, issue the following commands:</p>
+<div class="highlight-python"><div class="highlight"><pre>curl &#39;http://localhost:8985/solr/datasets/replication?command=fetchindex&#39;
+curl &#39;http://localhost:8985/solr/files/replication?command=fetchindex&#39;
+curl &#39;http://localhost:8985/solr/aggregations/replication?command=fetchindex&#39;
+</pre></div>
+</div>
+<p>Note that port 8985 (and any other additional shard port) is not exposed by default by the container, so it can only be queried from within the container.</p>
+<p>To remove the shard follow this procedure:</p>
+<div class="highlight-python"><div class="highlight"><pre># delete the shard
+cd /usr/local/bin
+./remove_shard.sh esgf-node.jpl.nasa.gov 8985
+
+# restart supervisor with the new configuration:
+supervisorctl update
+</pre></div>
+</div>
+<p>The instructions above will revert the actions taken when the shard was created.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">esgf-solr Image</a><ul>
+<li><a class="reference internal" href="#starting-the-container">Starting the container</a></li>
+<li><a class="reference internal" href="#testing">Testing</a></li>
+<li><a class="reference internal" href="#important-files-and-directories">Important Files and Directories</a></li>
+<li><a class="reference internal" href="#starting-stopping-solr-shards">Starting/Stopping Solr shards</a></li>
+<li><a class="reference internal" href="#adding-removing-a-shard">Adding/Removing a shard</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="git_workflow.html"
+                        title="previous chapter">Git Workflow</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/esgf_solr.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="git_workflow.html" title="Git Workflow"
+             >previous</a> |</li>
+        <li><a href="index.html">ESGF-Docker Documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2017, ESGF.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3b2.
+    </div>
+  </body>
+</html>
