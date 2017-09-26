@@ -75,7 +75,7 @@ function usage
   \n-i | --images-hub <name> the name of the images hub\
   \n-r | --package-repo <url> the name of the packages repository\
   \n-p | --push-it push the images to the hub\
-  \n-P | --only-push push the images already built to the hub\  
+  \n-P | --only-push push the images already built to the hub\
   \n-y | --assumeyes answer yes to all questions\
   \n-h | --help : print usage\
 \n\
