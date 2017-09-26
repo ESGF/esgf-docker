@@ -64,6 +64,9 @@ include:
 * Ability to start/stop/restart entire group of services (for example, all Solr shards at once). 
 * Ability to start services as non-privileged users such as "tomcat", "apache", etc.
 
+Supervisor is installed as part of the *esgf-node* base image, and started by default unless a child image
+overrides the Docker CMD instruction.
+
 Container Initialization
 ========================
 

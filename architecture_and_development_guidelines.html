@@ -107,6 +107,8 @@ startup pool by simply dropping configuration files in a standard location.</li>
 <li>Ability to start/stop/restart entire group of services (for example, all Solr shards at once).</li>
 <li>Ability to start services as non-privileged users such as &#8220;tomcat&#8221;, &#8220;apache&#8221;, etc.</li>
 </ul>
+<p>Supervisor is installed as part of the <em>esgf-node</em> base image, and started by default unless a child image
+overrides the Docker CMD instruction.</p>
 </div>
 <div class="section" id="container-initialization">
 <h2>Container Initialization<a class="headerlink" href="#container-initialization" title="Permalink to this headline">¶</a></h2>

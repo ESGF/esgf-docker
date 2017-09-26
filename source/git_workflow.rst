@@ -54,3 +54,14 @@ Recommended naming rules for git:
 - The personal branch name syntax is dev_X.Y_[PersonalTag] where where X and Y
   represents the version of the software being developed and [PersonalTag] an
   unique tag that is specific to a developer.
+
+
+Diagram
+======
+
+Schematic representation of how Git branches are created and tagged when working on a specific release.
+
+.. figure:: img/ESGF_versioning.png
+   :scale: 100 %
+   :alt: ESGF versioning diagram
+   
