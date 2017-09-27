@@ -14,6 +14,10 @@ echo "ESGF_FLAG=$ESGF_FLAG"
 export RUNSERVER=$3
 echo "RUNSERVER=$RUNSERVER"
 
+echo "untar grid certificates"
+mkdir /etc/grid-security
+tar --same-owner -pxaf /root/archives/grid_security_certs.tar.xz -C /etc/grid-security
+
 # execute CoG initialization
 if [ $INIT == "true" ]; then
    echo "Executing CoG initialization..."
