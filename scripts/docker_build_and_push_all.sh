@@ -43,20 +43,26 @@ packages_repo="${DEFAULT_PACKAGE_REPO}"
 
 assumeyes="${FALSE}"
 
+is_latest="${FALSE}"
+
 ################################ FUNCTIONS #####################################
 
 function build_and_push() {
   # function parameters
-  img="esgf-$1:${esgf_ver}"
+  local img="esgf-$1:${esgf_ver}"
   
   if [[ "${has_only_push}" = "${FALSE}" ]]; then
     echo -e "***** BUILDING MODULE $img\n"
-
+    
     # build the module
     docker build --no-cache --build-arg "ESGF_REPO=${packages_repo}" \
                             --build-arg "ESGF_IMAGES_HUB=${images_hub}" \
                             --build-arg "ESGF_VERSION=${esgf_ver}" \
-                            -t ${images_hub}/$img .
+                            -t "${images_hub}/${img}" .
+
+    if [[ "${is_latest}" = "${TRUE}" ]]; then
+      docker tag "${images_hub}/${img}" "${images_hub}/esgf-$1:latest"
+    fi
   
     #docker build --no-cache -t $images_hub/$img .
   fi
@@ -71,12 +77,13 @@ function usage
 {
   echo -e "usage:\n\
   \n${SCRIPT_NAME}\
-  \n-v | --version <string> the version of the images\
-  \n-i | --images-hub <name> the name of the images hub\
-  \n-r | --package-repo <url> the name of the packages repository\
-  \n-p | --push-it push the images to the hub\
-  \n-P | --only-push push the images already built to the hub\
-  \n-y | --assumeyes answer yes to all questions\
+  \n-v | --version <string> : the version of the images\
+  \n-i | --images-hub <name> : the name of the images hub\
+  \n-r | --package-repo <url> : the name of the packages repository\
+  \n-l | --latest : add the tag 'latest' on the images\
+  \n-p | --push-it : push the images to the hub\
+  \n-P | --only-push : push the images already built to the hub\
+  \n-y | --assumeyes : answer yes to all questions\
   \n-h | --help : print usage\
 \n\
 \n\
@@ -88,7 +95,7 @@ You may override default settings by exporting the following environment variabl
 
 ################################## MAIN ########################################
 
-params="$(getopt -o v:i:r:pPyh -l version:,images-hub:,packages-repo:,push-it,only-push,assumeyes,help --name "$(basename "$0")" -- "$@")"
+params="$(getopt -o v:i:r:pPlyh -l version:,images-hub:,packages-repo:,push-it,only-push,latest,assumeyes,help --name "$(basename "$0")" -- "$@")"
 
 if [ ${?} -ne 0 ]
 then
@@ -127,6 +134,9 @@ while true; do
       pushit="${TRUE}"
       has_only_push="${TRUE}"
       shift 1 ;;
+    -l|--latest)
+      is_latest="${TRUE}"
+      shift 1 ;;
     -y|--assumeyes)
       assumeyes="${TRUE}" 
       shift 1 ;;
@@ -142,7 +152,7 @@ while true; do
   esac
 done
 
-echo -e "building all the images with VERSION=$esgf_ver PUSH=$pushit HUB=$images_hub REPO=$packages_repo\n"
+echo -e "building all the images with VERSION=$esgf_ver PUSH=$pushit HUB=$images_hub REPO=$packages_repo latest=$is_latest\n"
 
 if [[ "${assumeyes}" = "${FALSE}" ]]; then
   ask_binary_question "Do you want to continue ?"
