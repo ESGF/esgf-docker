@@ -50,6 +50,7 @@ is_latest="${FALSE}"
 function build_and_push() {
   # function parameters
   local img="esgf-$1:${esgf_ver}"
+  local latest_img="esgf-$1:latest"
   
   if [[ "${has_only_push}" = "${FALSE}" ]]; then
     echo -e "***** BUILDING MODULE $img\n"
@@ -61,7 +62,7 @@ function build_and_push() {
                             -t "${images_hub}/${img}" .
 
     if [[ "${is_latest}" = "${TRUE}" ]]; then
-      docker tag "${images_hub}/${img}" "${images_hub}/esgf-$1:latest"
+      docker tag "${images_hub}/${img}" "${images_hub}/${latest_img}"
     fi
   
     #docker build --no-cache -t $images_hub/$img .
@@ -70,6 +71,9 @@ function build_and_push() {
   # optionally push the module to Docker Hub
   if [[ $pushit == "${TRUE}" ]]; then
        docker push $images_hub/$img
+       if [[ "${is_latest}" = "${TRUE}" ]]; then
+         docker push "${images_hub}/${latest_img}"
+       fi 
   fi
 }
 
