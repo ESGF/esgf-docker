@@ -30,7 +30,9 @@ if [ ! -d "$SOLR_HOME/${shard}" ]; then
     cp -R /usr/local/src/solr-home/mycore $SOLR_HOME/${shard}/${core}
     sed -i 's/@mycore@/'${core}'/g' $SOLR_HOME/$shard/$core/core.properties && \
     sed -i 's/@solr_config_type@-@solr_server_port@/'${shard}'/g' $SOLR_HOME/${shard}/${core}/core.properties
-    sed -i '/masterUrl/ s/localhost:8984/'${shard_name}'/' $SOLR_HOME/${shard}/${core}/conf/solrconfig.xml
+    if ! [[ $shard_name == 'master' || $shard_name == 'slave' ]]; then
+       sed -i '/masterUrl/ s/localhost:8984/'${shard_name}'/' $SOLR_HOME/${shard}/${core}/conf/solrconfig.xml
+    fi
   done
   chown -R solr:solr $SOLR_HOME/${shard}
 
