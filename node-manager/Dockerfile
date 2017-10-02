@@ -16,7 +16,7 @@
 # /esg/config/nm.properties 
 # /esg/config/esgf_nodemgr_map.json : periodically updated to reflect nodes status
 
-FROM esgfhub/esgf-node:devel
+FROM esgfhub/esgf-node:devel-lc
 
 MAINTAINER Luca Cinquini <luca.cinquini@jpl.nasa.gov>
 

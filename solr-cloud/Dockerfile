@@ -1,6 +1,6 @@
 # Solr-Cloud installation configured for ESGF data
 
-FROM esgfhub/esgf-node:devel
+FROM esgfhub/esgf-node:devel-lc
 
 MAINTAINER Luca Cinquini <luca.cinquini@jpl.nasa.gov>
 

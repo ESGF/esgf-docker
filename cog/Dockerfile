@@ -7,7 +7,7 @@
 # To map the local source directory:
 # docker run -ti -p 8000:8000 --name cog -v /Users/cinquini/Documents/workspace/cog:/usr/local/cog/cog_install esgfhub/esgf-cog:${ESGF_VERSION}
 
-FROM esgfhub/esgf-node:devel
+FROM esgfhub/esgf-node:devel-lc
 
 MAINTAINER Luca Cinquini <luca.cinquini@jpl.nasa.gov>
 
