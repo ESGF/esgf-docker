@@ -11,6 +11,8 @@ This page instructs on how to setup a Docker Swarm on a single MacOSX
 system. This Swarm can be effectively used as a test environment for
 deploying ESGF software stack on a multiple-host cluster.
 
+Note that all the following steps except the last can be accomplished by executing the script *scripts/setup_swarm_macosx.sh*.
+
 Execution
 =========
 
