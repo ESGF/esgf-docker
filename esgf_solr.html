@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>esgf-solr Image &mdash; ESGF-Docker Documentation</title>
+    <title>esgf-solr Image &#8212; ESGF-Docker Documentation</title>
     
     <link rel="stylesheet" href="_static/nature.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -17,13 +17,15 @@
         VERSION:     '1.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
       };
     </script>
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="ESGF-Docker Documentation" href="index.html" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
     <link rel="prev" title="Git Workflow" href="git_workflow.html" /> 
   </head>
   <body role="document">
@@ -36,7 +38,7 @@
         <li class="right" >
           <a href="git_workflow.html" title="Git Workflow"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">ESGF-Docker Documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">ESGF-Docker Documentation</a> &#187;</li> 
       </ul>
     </div>  
 
@@ -51,11 +53,11 @@
 <div class="section" id="starting-the-container">
 <h2>Starting the container<a class="headerlink" href="#starting-the-container" title="Permalink to this headline">¶</a></h2>
 <p>To start the container standalone:</p>
-<div class="highlight-python"><div class="highlight"><pre>docker-compose -f docker-stack.yml up esgf-solr
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">docker</span><span class="o">-</span><span class="n">compose</span> <span class="o">-</span><span class="n">f</span> <span class="n">docker</span><span class="o">-</span><span class="n">stack</span><span class="o">.</span><span class="n">yml</span> <span class="n">up</span> <span class="n">esgf</span><span class="o">-</span><span class="n">solr</span>
 </pre></div>
 </div>
 <p>or you can start the container as part of the whole ESGF stack:</p>
-<div class="highlight-python"><div class="highlight"><pre>docker stack -c docker-stack.yml esgf-stack
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">docker</span> <span class="n">stack</span> <span class="o">-</span><span class="n">c</span> <span class="n">docker</span><span class="o">-</span><span class="n">stack</span><span class="o">.</span><span class="n">yml</span> <span class="n">esgf</span><span class="o">-</span><span class="n">stack</span>
 </pre></div>
 </div>
 </div>
@@ -102,26 +104,26 @@
 <div class="section" id="starting-stopping-solr-shards">
 <h2>Starting/Stopping Solr shards<a class="headerlink" href="#starting-stopping-solr-shards" title="Permalink to this headline">¶</a></h2>
 <p>Once the container is running, you can enter the container to start/stop any single shard, or all shards at the same time:</p>
-<div class="highlight-python"><div class="highlight"><pre>docker exec -it &lt;container_id&gt; /bin/bash
-supervisorctl start/stop/restart solr:master_8984
-supervisorctl start/stop/restart solr:slave_8983
-supervisorctl start/stop/restart solr:*
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">docker</span> <span class="n">exec</span> <span class="o">-</span><span class="n">it</span> <span class="o">&lt;</span><span class="n">container_id</span><span class="o">&gt;</span> <span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">bash</span>
+<span class="n">supervisorctl</span> <span class="n">start</span><span class="o">/</span><span class="n">stop</span><span class="o">/</span><span class="n">restart</span> <span class="n">solr</span><span class="p">:</span><span class="n">master_8984</span>
+<span class="n">supervisorctl</span> <span class="n">start</span><span class="o">/</span><span class="n">stop</span><span class="o">/</span><span class="n">restart</span> <span class="n">solr</span><span class="p">:</span><span class="n">slave_8983</span>
+<span class="n">supervisorctl</span> <span class="n">start</span><span class="o">/</span><span class="n">stop</span><span class="o">/</span><span class="n">restart</span> <span class="n">solr</span><span class="p">:</span><span class="o">*</span>
 </pre></div>
 </div>
 </div>
 <div class="section" id="adding-removing-a-shard">
 <h2>Adding/Removing a shard<a class="headerlink" href="#adding-removing-a-shard" title="Permalink to this headline">¶</a></h2>
 <p>To add a new shard that replicates data from the JPL index node:</p>
-<div class="highlight-python"><div class="highlight"><pre># enter the container
-docker exec -it &lt;container_id&gt; /bin/bash
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="c1"># enter the container</span>
+<span class="n">docker</span> <span class="n">exec</span> <span class="o">-</span><span class="n">it</span> <span class="o">&lt;</span><span class="n">container_id</span><span class="o">&gt;</span> <span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">bash</span>
 
-# deploy the configuration for the new shard
-cd /usr/local/bin
-./add_shard.sh esgf-node.jpl.nasa.gov 8985
+<span class="c1"># deploy the configuration for the new shard</span>
+<span class="n">cd</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="nb">bin</span>
+<span class="o">./</span><span class="n">add_shard</span><span class="o">.</span><span class="n">sh</span> <span class="n">esgf</span><span class="o">-</span><span class="n">node</span><span class="o">.</span><span class="n">jpl</span><span class="o">.</span><span class="n">nasa</span><span class="o">.</span><span class="n">gov</span> <span class="mi">8985</span>
 
-# load the configuration into supervisor and start the service
-supervisorctl update
-supervisorctl restart solr:esgf-node.jpl.nasa.gov_8985
+<span class="c1"># load the configuration into supervisor and start the service</span>
+<span class="n">supervisorctl</span> <span class="n">update</span>
+<span class="n">supervisorctl</span> <span class="n">restart</span> <span class="n">solr</span><span class="p">:</span><span class="n">esgf</span><span class="o">-</span><span class="n">node</span><span class="o">.</span><span class="n">jpl</span><span class="o">.</span><span class="n">nasa</span><span class="o">.</span><span class="n">gov_8985</span>
 </pre></div>
 </div>
 <p>The instructions above will perform the following actions:</p>
@@ -132,19 +134,19 @@ supervisorctl restart solr:esgf-node.jpl.nasa.gov_8985
 <li>Create a new service configuration to be used by Supervisor: <em>/etc/supervisor/conf.d/supervisord.solr_esgf-node.jpl.nasa.gov_8985.conf</em></li>
 </ul>
 <p>The new shard will start replicating the JPL index node within the configured time interval (currently, 60 min). To start replicating right away, issue the following commands:</p>
-<div class="highlight-python"><div class="highlight"><pre>curl &#39;http://localhost:8985/solr/datasets/replication?command=fetchindex&#39;
-curl &#39;http://localhost:8985/solr/files/replication?command=fetchindex&#39;
-curl &#39;http://localhost:8985/solr/aggregations/replication?command=fetchindex&#39;
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">curl</span> <span class="s1">&#39;http://localhost:8985/solr/datasets/replication?command=fetchindex&#39;</span>
+<span class="n">curl</span> <span class="s1">&#39;http://localhost:8985/solr/files/replication?command=fetchindex&#39;</span>
+<span class="n">curl</span> <span class="s1">&#39;http://localhost:8985/solr/aggregations/replication?command=fetchindex&#39;</span>
 </pre></div>
 </div>
 <p>Note that port 8985 (and any other additional shard port) is not exposed by default by the container, so it can only be queried from within the container.</p>
 <p>To remove the shard follow this procedure:</p>
-<div class="highlight-python"><div class="highlight"><pre># delete the shard
-cd /usr/local/bin
-./remove_shard.sh esgf-node.jpl.nasa.gov 8985
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="c1"># delete the shard</span>
+<span class="n">cd</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="nb">bin</span>
+<span class="o">./</span><span class="n">remove_shard</span><span class="o">.</span><span class="n">sh</span> <span class="n">esgf</span><span class="o">-</span><span class="n">node</span><span class="o">.</span><span class="n">jpl</span><span class="o">.</span><span class="n">nasa</span><span class="o">.</span><span class="n">gov</span> <span class="mi">8985</span>
 
-# restart supervisor with the new configuration:
-supervisorctl update
+<span class="c1"># restart supervisor with the new configuration:</span>
+<span class="n">supervisorctl</span> <span class="n">update</span>
 </pre></div>
 </div>
 <p>The instructions above will revert the actions taken when the shard was created.</p>
@@ -175,21 +177,18 @@ supervisorctl update
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
-      <li><a href="_sources/esgf_solr.txt"
+      <li><a href="_sources/esgf_solr.rst.txt"
             rel="nofollow">Show Source</a></li>
     </ul>
    </div>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="search.html" method="get">
-      <input type="text" name="q" />
-      <input type="submit" value="Go" />
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
-    <p class="searchtip" style="font-size: 90%">
-    Enter search terms or a module, class or function name.
-    </p>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
@@ -205,12 +204,12 @@ supervisorctl update
         <li class="right" >
           <a href="git_workflow.html" title="Git Workflow"
              >previous</a> |</li>
-        <li><a href="index.html">ESGF-Docker Documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">ESGF-Docker Documentation</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &copy; Copyright 2017, ESGF.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3b2.
+        &#169; Copyright 2017, ESGF.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.6.
     </div>
   </body>
 </html>

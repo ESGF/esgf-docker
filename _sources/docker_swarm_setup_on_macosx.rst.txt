@@ -11,6 +11,8 @@ This page instructs on how to setup a Docker Swarm on a single MacOSX
 system. This Swarm can be effectively used as a test environment for
 deploying ESGF software stack on a multiple-host cluster.
 
+Note that all the following steps except the last can be accomplished by executing the script *scripts/setup_swarm_macosx.sh*.
+
 Execution
 =========
 
@@ -70,3 +72,23 @@ Execution
    address above can be that of any node in the Swarm, and that URLs
    starting with http(s)://my-node.esgf.org/... can be used to access any
    of the ESGF services in the stack, no matter on which node they are deployed.
+
+Developer corner
+================
+
+* Required tools for image buidlers and developers
+
+  - gnu-tar
+  - gnu-getopt
+  
+these tools replace the embedded macosx tools, respectively tar and getopt that 
+don't support features used in some scripts. To easly install these tools, 
+
+1. install `homebrew <https://brew.sh>`_::
+
+      /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+
+2. then install the required tools::
+
+      brew install gnu-tar
+      brew install gnu-getopt

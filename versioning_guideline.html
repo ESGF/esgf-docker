@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Versioning Guideline &mdash; ESGF-Docker Documentation</title>
+    <title>Versioning Guideline &#8212; ESGF-Docker Documentation</title>
     
     <link rel="stylesheet" href="_static/nature.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -17,13 +17,15 @@
         VERSION:     '1.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
       };
     </script>
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="ESGF-Docker Documentation" href="index.html" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Git Workflow" href="git_workflow.html" />
     <link rel="prev" title="Docker Swam Setup on MacOSX" href="docker_swarm_setup_on_macosx.html" /> 
   </head>
@@ -40,7 +42,7 @@
         <li class="right" >
           <a href="docker_swarm_setup_on_macosx.html" title="Docker Swam Setup on MacOSX"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">ESGF-Docker Documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">ESGF-Docker Documentation</a> &#187;</li> 
       </ul>
     </div>  
 
@@ -56,14 +58,14 @@
 <p>This document is a proposal that describes the syntax of the version name of any kind of ESGF stack component.</p>
 <p>X ; Y ; Z ; N  are zero or positive integers
 v ; a ; b ; rc are just symbols:</p>
-<div class="highlight-python"><div class="highlight"><pre>vX.Y   aN   syntax for alpha releases
- ^ ^   bN   syntax for beta releases
- | |   rcN  syntax for release candidates
- | |   .Z   syntax for production/maintenance releases
- | |
- | |____ minor version
- |
- |____major version
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">vX</span><span class="o">.</span><span class="n">Y</span>   <span class="n">aN</span>   <span class="n">syntax</span> <span class="k">for</span> <span class="n">alpha</span> <span class="n">releases</span>
+ <span class="o">^</span> <span class="o">^</span>   <span class="n">bN</span>   <span class="n">syntax</span> <span class="k">for</span> <span class="n">beta</span> <span class="n">releases</span>
+ <span class="o">|</span> <span class="o">|</span>   <span class="n">rcN</span>  <span class="n">syntax</span> <span class="k">for</span> <span class="n">release</span> <span class="n">candidates</span>
+ <span class="o">|</span> <span class="o">|</span>   <span class="o">.</span><span class="n">Z</span>   <span class="n">syntax</span> <span class="k">for</span> <span class="n">production</span><span class="o">/</span><span class="n">maintenance</span> <span class="n">releases</span>
+ <span class="o">|</span> <span class="o">|</span>
+ <span class="o">|</span> <span class="o">|</span><span class="n">____</span> <span class="n">minor</span> <span class="n">version</span>
+ <span class="o">|</span>
+ <span class="o">|</span><span class="n">____major</span> <span class="n">version</span>
 </pre></div>
 </div>
 <p>X.Y.0 is the first production release of the X.Y version family.
@@ -225,21 +227,18 @@ the same state of the git repository.</p>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
-      <li><a href="_sources/versioning_guideline.txt"
+      <li><a href="_sources/versioning_guideline.rst.txt"
             rel="nofollow">Show Source</a></li>
     </ul>
    </div>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="search.html" method="get">
-      <input type="text" name="q" />
-      <input type="submit" value="Go" />
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
-    <p class="searchtip" style="font-size: 90%">
-    Enter search terms or a module, class or function name.
-    </p>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
@@ -258,12 +257,12 @@ the same state of the git repository.</p>
         <li class="right" >
           <a href="docker_swarm_setup_on_macosx.html" title="Docker Swam Setup on MacOSX"
              >previous</a> |</li>
-        <li><a href="index.html">ESGF-Docker Documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">ESGF-Docker Documentation</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &copy; Copyright 2017, ESGF.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3b2.
+        &#169; Copyright 2017, ESGF.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.6.
     </div>
   </body>
 </html>

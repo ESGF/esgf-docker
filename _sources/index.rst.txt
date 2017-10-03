@@ -20,3 +20,4 @@ Table of Contents:
    docker_swarm_setup_on_macosx.rst
    versioning_guideline.rst
    git_workflow.rst
+   esgf_solr.rst
