@@ -198,6 +198,52 @@ services:
      default: {}
      dbnetwork: {}
 
+  esgf-slcs:
+    command: ["-sn", "$ESGF_HOSTNAME", "-ds", "rootAdmin", "-sdn", "slcs", "-sdh", "slcs-postgres", "-sdu", "dbsuper", "-udn", "esgcet", "-udh", "postgres", "-udu", "dbsuper", "--static-url", "https://$ESGF_HOSTNAME/slcs-static/", "--url-prefix", "slcs", "--use-x-forwarded-host"]
+    container_name: esgf-slcs
+    depends_on:
+      - slcs-postgres
+      - slcs-nginx
+    expose:
+      - "5000"
+    image: esgfhub/esgf-slcs:${ESGF_VERSION}
+    networks:
+      - default
+      - dbnetwork
+    ports:
+      - "5000:5000"
+    volumes:
+      - slcs_static_web:/var/www/static
+      - $ESGF_CONFIG/slcs/conf/db/:/usr/local/esgf-slcs-server/conf/db
+      - $ESGF_CONFIG/slcs/conf/ca/:/usr/local/esgf-slcs-server/conf/ca
+
+  slcs-nginx:
+    container_name: slcs-nginx
+    expose:
+      - "443"
+      - "80"
+    image: nginx
+    networks:
+      - default
+      - dbnetwork
+    volumes:
+      - "slcs_static_web:/usr/share/nginx/html"
+      - "$ESGF_CONFIG/slcs/conf/nginx/nginx.conf:/etc/nginx/conf.d/default.conf"
+
+  slcs-postgres:
+    container_name: slcs-postgres
+    environment:
+      - POSTGRES_PASSWORD=changeit
+      - POSTGRES_USER=dbsuper
+      - POSTGRES_DB=slcs
+      - POSTGRES_INITDB_ARGS=--encoding=UTF-8
+    expose:
+      - "5432"
+    image: postgres
+    networks:
+      - default
+      - dbnetwork
+
   # FTP server
   #esgf-ftp:
   # image: esgfhub/esgf-vsftp:${ESGF_VERSION}
@@ -224,3 +270,5 @@ volumes:
   # contains TDS configuration, catalogs, cache, and logs
   # (directory below -Dtds.content.root.path=/esg/content)
   tds_data:
+  # static web files for SLCS server
+  slcs_static_web:
