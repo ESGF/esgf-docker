@@ -208,5 +208,38 @@ RUN mkdir -p $DASHBOARD_HOME/logs
 
 #===========================================
 
+# ESGF-AUTH APPLICATION
+
+# library dependencies
+RUN yum -y update; yum -y install libffi-devel; yum clean all
+
+# create python virtual environment
+RUN mkdir -p /usr/local/esgf-auth && \
+    cd /usr/local/esgf-auth && \
+    virtualenv venv
+
+# install source code
+RUN mkdir -p /usr/local/esgf-auth/src
+
+# install crypto cookie
+RUN cd /usr/local/esgf-auth && \
+    source venv/bin/activate && \
+    cd src && \
+    git clone https://github.com/philipkershaw/crypto-cookie.git && \
+    cd /usr/local/esgf-auth/src/crypto-cookie && \
+    python setup.py install
+
+# install esgf-auth
+RUN cd /usr/local/esgf-auth && \
+    source venv/bin/activate && \
+    cd src && \
+    git clone https://github.com/lukaszlacinski/esgf-auth.git && \
+    cd /usr/local/esgf-auth/src/esgf-auth && \
+    pip install -r requirements.txt && \
+    pip install paste && \
+    python manage.py migrate
+
+#===========================================
+
 # startup configuration inherited from esgf-tomcat image
 CMD ["supervisord", "--nodaemon", "-c", "/etc/supervisord.conf"]

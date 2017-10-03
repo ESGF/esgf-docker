@@ -64,6 +64,7 @@ services:
       - $ESGF_DATA_DIR:/esg/data
       #- $ESGF_CONFIG/grid-security/certificates/:/etc/grid-security/certificates/
       #- $ESGF_CONFIG/globus/certificate-file:/root/.globus/certificate-file
+      - $ESGF_CONFIG/esgf-auth/settings.py:/usr/local/esgf-auth/src/esgf-auth/esgf_auth/settings.py
     volumes_from:
       - esgf-config
     environment:
