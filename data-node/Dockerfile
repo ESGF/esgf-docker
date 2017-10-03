@@ -176,7 +176,8 @@ RUN yum install -y curl-devel \
                    GeoIP-devel
 
 # install additional GeoLiteCity database
-COPY dashboard/GeoLiteCity.dat.gz /tmp
+#COPY dashboard/GeoLiteCity.dat.gz /tmp
+ADD $ESGF_REPO/dist/geoip/GeoLiteCity.dat.gz /tmp/GeoLiteCity.dat.gz
 RUN mkdir -p /usr/local/geoip/share/GeoIP && \
      cd /tmp && \
      gunzip -c GeoLiteCity.dat.gz > /usr/local/geoip/share/GeoIP/GeoLiteCity.dat
