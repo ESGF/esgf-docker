@@ -99,7 +99,7 @@ for node_index in `seq 0 ${node_max_index}`;
 do
   node_names[${node_index}]="${NODE_NAME_PREFIX}${node_index}"
   echo "  > creating '${node_names[${node_index}]}'"
-  docker-machine create --driver "${vm_driver}" "${node_names[${node_index}]}" > /dev/null
+  docker-machine create --driver "${vm_driver}" "${node_names[${node_index}]}"
 done
 
 # Initialize the swarm master node, always the first node.
