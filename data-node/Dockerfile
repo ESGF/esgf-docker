@@ -239,9 +239,14 @@ RUN cd /usr/local/esgf-auth && \
     pip install paste && \
     python manage.py migrate
 
+# FIXME: must make database writable by user apache
+#RUN chmod a+w /usr/local/esgf-auth/src/esgf-auth/db.sqlite3
+
 # start esgf-auth through supervisor
-ADD esgf-auth/conf/supervisord.esgf-auth.conf /etc/supervisor/conf.d/supervisord.esgf-auth.conf
+#ADD esgf-auth/conf/supervisord.esgf-auth.conf /etc/supervisor/conf.d/supervisord.esgf-auth.conf
+
 EXPOSE 8001
+VOLUME /usr/local/esgf-auth
 
 #===========================================
 

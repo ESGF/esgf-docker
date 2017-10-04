@@ -29,7 +29,7 @@ DEBUG = True
 
 #ALLOWED_HOSTS = [ u'dev.esgf.anl.gov', ]
 ALLOWED_HOSTS = [ u'my-node.esgf.org', u'localhost' ]
-USE_X_FORWARDED_HOST = True
+#USE_X_FORWARDED_HOST = True
 
 # Application definition
 
@@ -124,7 +124,8 @@ SOCIAL_AUTH_ESGF = {
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        #'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'NAME': '/tmp/db.sqlite3',
     }
 }
 
