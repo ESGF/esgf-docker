@@ -66,7 +66,7 @@ services:
       - $ESGF_DATA_DIR:/esg/data
       #- $ESGF_CONFIG/grid-security/certificates/:/etc/grid-security/certificates/
       #- $ESGF_CONFIG/globus/certificate-file:/root/.globus/certificate-file
-      - $ESGF_CONFIG/esgf-auth/settings.py:/usr/local/esgf-auth/src/esgf-auth/esgf_auth/settings.py
+      - esgf_auth_install:/usr/local/esgf-auth
     volumes_from:
       - esgf-config
     environment:
@@ -163,12 +163,14 @@ services:
    entrypoint: /usr/local/bin/docker-entrypoint.sh
    volumes:
      - cog_data:/usr/local/cog/cog_config
+     - esgf_auth_install:/usr/local/esgf-auth
+     - $ESGF_CONFIG/esgf-auth/settings.py:/usr/local/esgf-auth/src/esgf-auth/esgf_auth/settings.py
      - $ESGF_CONFIG/esgf-auth/db.sqlite3:/tmp/db.sqlite3
    volumes_from:
      - esgf-config
      - esgf-cog
    # - esgf-node-manager
-     - esgf-data-node
+   # - esgf-data-node
    environment:
      - SSL_CERT_DIR=/etc/grid-security/certificates
      - COG_CONFIG_DIR=/usr/local/cog/cog_config
@@ -178,6 +180,7 @@ services:
      - "443:443"
    depends_on:
      - esgf-cog
+     - esgf-data-node
    #  - esgf-node-manager
    healthcheck:
      test: 'curl --fail "https://${ESGF_HOSTNAME}/" || exit 1'
@@ -276,3 +279,5 @@ volumes:
   tds_data:
   # static web files for SLCS server
   slcs_static_web:
+  # esgf-auth installation directory, including python virtual environment
+  esgf_auth_install:
