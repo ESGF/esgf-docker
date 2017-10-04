@@ -199,6 +199,7 @@ services:
     depends_on:
       - slcs-postgres
       - slcs-nginx
+      - esgf-postgres
     image: esgfhub/esgf-slcs:${ESGF_VERSION}
     networks:
       - default

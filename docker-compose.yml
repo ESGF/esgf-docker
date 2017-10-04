@@ -206,11 +206,12 @@ services:
      dbnetwork: {}
 
   esgf-slcs:
-    command: ["-sn", "$ESGF_HOSTNAME", "-ds", "rootAdmin", "-sdn", "slcs", "-sdh", "slcs-postgres", "-sdu", "dbsuper", "-udn", "esgcet", "-udh", "postgres", "-udu", "dbsuper", "--static-url", "https://$ESGF_HOSTNAME/slcs-static/", "--url-prefix", "slcs", "--use-x-forwarded-host"]
+    command: ["-sn", "$ESGF_HOSTNAME", "-ds", "rootAdmin", "-sdn", "slcs", "-sdh", "slcs-postgres", "-sdu", "dbsuper", "-udn", "esgcet", "-udh", "esgf-postgres", "-udu", "dbsuper", "--static-url", "https://$ESGF_HOSTNAME/slcs-static/", "--url-prefix", "slcs", "--use-x-forwarded-host"]
     container_name: esgf-slcs
     depends_on:
       - slcs-postgres
       - slcs-nginx
+      - esgf-postgres
     expose:
       - "5000"
     image: esgfhub/esgf-slcs:${ESGF_VERSION}
@@ -245,7 +246,7 @@ services:
       - POSTGRES_DB=slcs
       - POSTGRES_INITDB_ARGS=--encoding=UTF-8
     expose:
-      - "5432"
+      - 5432
     image: postgres
     networks:
       - default
