@@ -239,6 +239,10 @@ RUN cd /usr/local/esgf-auth && \
     pip install paste && \
     python manage.py migrate
 
+# start esgf-auth through supervisor
+ADD esgf-auth/conf/supervisord.esgf-auth.conf /etc/supervisor/conf.d/supervisord.esgf-auth.conf
+EXPOSE 8001
+
 #===========================================
 
 # startup configuration inherited from esgf-tomcat image
