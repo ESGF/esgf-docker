@@ -212,6 +212,8 @@ services:
     volumes:
       - tds_data:/esg/content/thredds
       - $ESGF_CONFIG/esg/config/:/esg/config/ # TODO: secret&config
+      # FIXME: local jar with new AuthenticationRedirectFilter
+      - $ESGF_CONFIG/esg-orp-2.9.6.jar:/usr/local/tomcat/webapps/thredds/WEB-INF/lib/esg-orp-2.9.6.jar
     environment:
      - ESGF_HOSTNAME
     depends_on:

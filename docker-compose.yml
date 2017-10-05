@@ -67,6 +67,8 @@ services:
       #- $ESGF_CONFIG/grid-security/certificates/:/etc/grid-security/certificates/
       #- $ESGF_CONFIG/globus/certificate-file:/root/.globus/certificate-file
       - esgf_auth_install:/usr/local/esgf-auth
+      # FIXME: build new esg-opr jat into image
+      - $ESGF_CONFIG/esg-orp-2.9.6.jar:/usr/local/tomcat/webapps/thredds/WEB-INF/lib/esg-orp-2.9.6.jar
     volumes_from:
       - esgf-config
     environment:
