@@ -23,6 +23,7 @@ function usage
   \n${SCRIPT_NAME}\
   \n-d | --driver NAME the virtual infrastructure driver name\
   \n-n | --num-node INT the number of nodes (>0)\
+  \n-a | --driver-args STRING arguments for the driver\
   \n-h | --help : print usage"
 }
 
@@ -30,10 +31,11 @@ function usage
 
 nb_nodes=${DEFAULT_NB_NODES}
 vm_driver="${DEFAULT_VM_DRIVER}"
+driver_args=''
 
 ################################## MAIN ########################################
 
-params="$(getopt -o n:d:h -l driver:,num-node:,help --name "$(basename "$0")" -- "$@")"
+params="$(getopt -o n:d:a:h -l driver:,num-node:,driver-args:,help --name "$(basename "$0")" -- "$@")"
 
 if [ ${?} -ne 0 ]
 then
@@ -55,6 +57,11 @@ while true; do
       case "${2}" in
         "") echo "#### missing value. Abort ####"; exit ${SETTINGS_ERROR} ;;
         *)  nb_nodes="${2}" ; shift 2 ;;
+      esac ;;
+    -a|--driver-args)
+      case "${2}" in
+        "") echo "#### missing value. Abort ####"; exit ${SETTINGS_ERROR} ;;
+        *)  driver_args="${2}" ; shift 2 ;;
       esac ;;
     -h|--help)
       usage
@@ -99,7 +106,11 @@ for node_index in `seq 0 ${node_max_index}`;
 do
   node_names[${node_index}]="${NODE_NAME_PREFIX}${node_index}"
   echo "  > creating '${node_names[${node_index}]}'"
-  docker-machine create --driver "${vm_driver}" "${node_names[${node_index}]}"
+  if [[ "${driver_args}" != '' ]]; then
+    docker-machine create --driver "${vm_driver}" ${driver_args} "${node_names[${node_index}]}"
+  else
+    docker-machine create --driver "${vm_driver}" "${node_names[${node_index}]}"
+  fi
 done
 
 # Initialize the swarm master node, always the first node.
