@@ -115,22 +115,7 @@ docker service ls
 </pre></div>
 </div>
 </li>
-<li><p class="first">When all services are deployed, test the following URLs, replacing
-&#8220;my-node.esgf.org&#8221; with your value of $ESGF_HOSTNAME:</p>
-<ul class="simple">
-<li>Docker visualizer tool: <a class="reference external" href="http://my-node.esgf.org:8080/">http://my-node.esgf.org:8080/</a></li>
-<li>Solr admin interface: <a class="reference external" href="https://my-node.esgf.org/solr/#/">https://my-node.esgf.org/solr/#/</a></li>
-<li>ESGF search API: <a class="reference external" href="http://my-node.esgf.org/esg-search/search">http://my-node.esgf.org/esg-search/search</a></li>
-<li>ESGF IdP: <a class="reference external" href="https://my-node.esgf.org/esgf-idp/">https://my-node.esgf.org/esgf-idp/</a></li>
-<li>CoG home project: <a class="reference external" href="https://my-node.esgf.org/projects/testproject/">https://my-node.esgf.org/projects/testproject/</a>. The first time, login with:<ul>
-<li>openid=https://my-node.esgf.org/esgf-idp/openid/rootAdmin and</li>
-<li>password=changeit</li>
-</ul>
-</li>
-<li>TDS: <a class="reference external" href="https://my-node.esgf.org/thredds">https://my-node.esgf.org/thredds</a></li>
-<li>ORP: <a class="reference external" href="https://my-node.esgf.org/esg-orp/">https://my-node.esgf.org/esg-orp/</a></li>
-<li>SLCS: <a class="reference external" href="https://my-node.esgf.org/slcs/admin/">https://my-node.esgf.org/slcs/admin/</a></li>
-</ul>
+<li><p class="first">When all services are deployed, execute the tests described in the <a class="reference internal" href="testing_guide.html#testing-guide"><em>Testing Guide</em></a>.</p>
 </li>
 <li><p class="first">Clean up: remove the full ESGF stack from the Swarm:</p>
 <div class="highlight-python"><div class="highlight"><pre>eval $(docker-machine env node1)

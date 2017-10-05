@@ -22,3 +22,4 @@ Table of Contents:
    versioning_guideline.rst
    git_workflow.rst
    esgf_solr.rst
+   testing_guide.rst

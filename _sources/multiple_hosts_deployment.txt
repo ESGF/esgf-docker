@@ -70,22 +70,7 @@ Execution
       docker stack deploy -c docker-stack.yml esgf-stack
       docker service ls
 
-*  When all services are deployed, test the following URLs, replacing
-   "my-node.esgf.org" with your value of $ESGF_HOSTNAME:
-
-   * Docker visualizer tool: http://my-node.esgf.org:8080/
-   * Solr admin interface: https://my-node.esgf.org/solr/#/
-   * ESGF search API: http://my-node.esgf.org/esg-search/search
-   * ESGF IdP: https://my-node.esgf.org/esgf-idp/
-   * CoG home project: https://my-node.esgf.org/projects/testproject/. The first time, login with:
-
-     * openid=https://my-node.esgf.org/esgf-idp/openid/rootAdmin and
-     * password=changeit
-
-   * TDS: https://my-node.esgf.org/thredds
- 
-   * ORP: https://my-node.esgf.org/esg-orp/
-   * SLCS: https://my-node.esgf.org/slcs/admin/
+*  When all services are deployed, execute the tests described in the :ref:`testing_guide`.
 
 *  Clean up: remove the full ESGF stack from the Swarm::
 
