@@ -1,6 +1,10 @@
 #!/bin/bash
 # Script to start apache httpd as part of ESGF services
 
+echo "untar grid certificates"
+mkdir /etc/grid-security
+tar --same-owner -pxaf /root/archives/grid_security_certs.tar.xz -C /etc/grid-security
+
 # change CoG directory permission
 chown -R apache:apache /usr/local/cog
 

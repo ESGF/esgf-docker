@@ -7,20 +7,12 @@
 # ESGF_HOSTNAME: HostName or IP address for apache httpd front-end server
 #       example: export ESGF_HOSTNAME=my-node.esgf.org
 #       example: export ESGF_HOSTNAME=`docker-machine ip`
+#
+# Optional env variables:
 # ESGF_VERSION: version of ESGF/Docker distribution
-#       example: export ESGF_VERSION=1.2
-
-# SOLR_DATA: location of Solr index
-#       example: export SOLR_DATA=/esg/solr-index
-# COG_DATA: location of CoG site data
-#       example: export COG_DATA=/usr/local/cog/cog_config
-# TDS_DATA: location of TDS catalogs
-#       example: export TDS_DATA=/esg/content/thredds
-# PG_DATA: location od postgres database and configuration
-#       example: export PG_DATA=/var/lib/pgsql/data
-# ESGF_DATA_ARCHIVE: location of science data
-#       example: export ESGF_DATA_ARCHIVE=/esgf/data_archive
-
+#       example: export ESGF_VERSION=latest
+# ESGF_IMAGES_HUB: the repository of the esgf components images
+#       example: export ESGF_IMAGES_HUB=esgfhub
 #
 # Services deployment:
 # - front_node: httpd daemon, cog, and visualizer
@@ -78,18 +70,19 @@ secrets:
     file: $ESGF_CONFIG/slcs/conf/ca/onlineca.crt
   slcs_onlineca_key:
     file: $ESGF_CONFIG/slcs/conf/ca/onlineca.key 
-
+          ##################### GRID SECRETS ##################
+  grid_certificates:
+    file: $ESGF_CONFIG/archives/grid_security_certs.tar.xz
 services:
 
   # ESGF postgres database
   esgf-postgres:
-    image: esgfhub/esgf-postgres:${ESGF_VERSION}
+    image: ${ESGF_IMAGES_HUB-esgfhub}/esgf-postgres:${ESGF_VERSION-latest}
     ports:
       - "5432:5432"
     networks:
       - dbnetwork
     volumes:
-      #- $PG_DATA:/var/lib/pgsql/data
       - pg_data:/var/lib/pgsql/data
     deploy:
       placement:
@@ -98,7 +91,7 @@ services:
   # CoG
   # data container to hold CoG source code and python virtual environment
   esgf-cog:
-    image: esgfhub/esgf-cog:${ESGF_VERSION}
+    image: ${ESGF_IMAGES_HUB-esgfhub}/esgf-cog:${ESGF_VERSION-latest}
     ports:
       - "8000:8000"
     configs:
@@ -117,13 +110,13 @@ services:
         target: /etc/certs/hostcert.pkcs12
       - source: httpd_hostkey_pem
         target: /etc/certs/hostkey.pem
+      - source: grid_certificates
+        target: /root/archives/grid_security_certs.tar.xz
+        mode:   0400
     volumes:
       - cog_install_dir:/usr/local/cog/cog_install
       - cog_venv:/usr/local/cog/venv
-      #- $COG_DATA:/usr/local/cog/cog_config
       - cog_data:/usr/local/cog/cog_config
-      #- $ESGF_CONFIG/httpd/certs/:/etc/certs/ # TODO: secret
-      - $ESGF_CONFIG/grid-security/certificates/:/etc/grid-security/certificates/ # TODO: secret
       - $ESGF_CONFIG/esg/config/:/esg/config/ # TODO: secret&config
     #command: $ESGF_HOSTNAME true true # ESGF=true, keep django server runnining on port 8000
     command: $ESGF_HOSTNAME true false # ESGF=true, django server running on port 8000 = false
@@ -146,7 +139,7 @@ services:
 
 
   esgf-solr:
-    image: esgfhub/esgf-solr:${ESGF_VERSION}
+    image: ${ESGF_IMAGES_HUB-esgfhub}/esgf-solr:${ESGF_VERSION-latest}
     ports:
       - "8983:8983"
       - "8984:8984"
@@ -164,7 +157,7 @@ services:
 
 
   esgf-index-node:
-    image: esgfhub/esgf-index-node:${ESGF_VERSION}
+    image: ${ESGF_IMAGES_HUB-esgfhub}/esgf-index-node:${ESGF_VERSION-latest}
     ports:
       - "8081:8080"
       - "8444:8443"
@@ -183,7 +176,7 @@ services:
         constraints: [node.labels.esgf_index_node == true]
 
   esgf-idp-node:
-    image: esgfhub/esgf-idp-node:${ESGF_VERSION}
+    image: ${ESGF_IMAGES_HUB-esgfhub}/esgf-idp-node:${ESGF_VERSION-latest}
     ports:
       - "8082:8080"
       - "8445:8443"
@@ -203,7 +196,7 @@ services:
         constraints: [node.labels.esgf_idp_node == true]
 
   esgf-data-node:
-    image: esgfhub/esgf-data-node:${ESGF_VERSION}
+    image: ${ESGF_IMAGES_HUB-esgfhub}/esgf-data-node:${ESGF_VERSION-latest}
     ports:
       - "8083:8080"
       - "8446:8443"
@@ -219,7 +212,6 @@ services:
     volumes:
       - tds_data:/esg/content/thredds
       - $ESGF_CONFIG/esg/config/:/esg/config/ # TODO: secret&config
-      #- $ESGF_DATA_ARCHIVE:/esg/data_archive
     environment:
      - ESGF_HOSTNAME
     depends_on:
@@ -230,7 +222,7 @@ services:
         constraints: [node.labels.esgf_data_node == true]
 
   esgf-httpd:
-    image: esgfhub/esgf-httpd:${ESGF_VERSION}
+    image: ${ESGF_IMAGES_HUB-esgfhub}/esgf-httpd:${ESGF_VERSION-latest}
     entrypoint: /usr/local/bin/docker-entrypoint.sh
     configs:
       - source: httpd_esgf-httpd_conf
@@ -248,11 +240,13 @@ services:
         target: /etc/certs/hostcert.pkcs12
       - source: httpd_hostkey_pem
         target: /etc/certs/hostkey.pem
+      - source: grid_certificates
+        target: /root/archives/grid_security_certs.tar.xz
+        mode:   0400
     volumes:
       - cog_install_dir:/usr/local/cog/cog_install
       - cog_venv:/usr/local/cog/venv
       - cog_data:/usr/local/cog/cog_config
-      - $ESGF_CONFIG/grid-security/certificates/:/etc/grid-security/certificates/ # TODO: secret
       - $ESGF_CONFIG/esg/config/:/esg/config/ # TODO: secret&config
       # - esgf-node-manager
     environment:
@@ -281,7 +275,7 @@ services:
     depends_on:
       - slcs-postgres
       - slcs-nginx
-    image: esgfhub/esgf-slcs:${ESGF_VERSION}
+    image: ${ESGF_IMAGES_HUB-esgfhub}/esgf-slcs:${ESGF_VERSION-latest}
     networks:
       - default
       - dbnetwork
