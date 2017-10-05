@@ -61,9 +61,8 @@ ENV ESGINI /esg/config/esgcet/esg.ini
 # ESGF ORP
 RUN mkdir -p /usr/local/tomcat/webapps/esg-orp
 
-# FIXME
-COPY esgf-orp/esg-orp.war /usr/local/tomcat/webapps/esg-orp/esg-orp.war
-#ADD $ESGF_REPO/dist/esg-orp/esg-orp.war /usr/local/tomcat/webapps/esg-orp/
+#COPY esgf-orp/esg-orp.war /usr/local/tomcat/webapps/esg-orp/esg-orp.war
+ADD $ESGF_REPO/dist/esg-orp/esg-orp.war /usr/local/tomcat/webapps/esg-orp/
 RUN cd /usr/local/tomcat/webapps/esg-orp && \
     jar xvf esg-orp.war && \
     rm esg-orp.war && \
@@ -116,8 +115,6 @@ COPY thredds/conf/applicationContext.xml /usr/local/tomcat/webapps/thredds/WEB-I
 ADD $ESGF_REPO/dist/filters/XSGroupRole-1.0.0.jar $CATALINA_HOME/webapps/thredds/WEB-INF/lib/XSGroupRole-1.0.0.jar
 ADD $ESGF_REPO/dist/filters/commons-httpclient-3.1.jar $CATALINA_HOME/webapps/thredds/WEB-INF/lib/commons-httpclient-3.1.jar
 ADD $ESGF_REPO/dist/filters/commons-lang-2.6.jar $CATALINA_HOME/webapps/thredds/WEB-INF/lib/commons-lang-2.6.jar
-# FIXME
-ADD esgf-orp/esg-orp-2.9.6.jar $CATALINA_HOME/webapps/thredds/WEB-INF/lib/esg-orp-2.9.6.jar
 ADD $ESGF_REPO/dist/esgf-node-manager/esgf-node-manager-common-1.0.0.jar $CATALINA_HOME/webapps/thredds/WEB-INF/lib/esgf-node-manager-common-1.0.0.jar
 ADD $ESGF_REPO/dist/esgf-node-manager/esgf-node-manager-filters-1.0.0.jar $CATALINA_HOME/webapps/thredds/WEB-INF/lib/esgf-node-manager-filters-1.0.0.jar
 ADD $ESGF_REPO/dist/esgf-security/esgf-security-2.7.10.jar $CATALINA_HOME/webapps/thredds/WEB-INF/lib/esgf-security-2.7.15.jar
