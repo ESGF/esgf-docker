@@ -15,7 +15,31 @@
 # - index_node: esgf-search web application runnning within Tomcat
 # - solr_node: solr search engine running within Jetty
 
-version: '3'
+version: '3.3'
+
+configs:
+          #################### HTTPD CONFIGS ##################
+  httpd_esgf-httpd_conf:
+    file: $ESGF_CONFIG/httpd/conf/esgf-httpd.conf
+
+secrets:
+            #################### TOMCAT SECRETS #################
+  tomcat_esg-truststore_ts:
+    file: $ESGF_CONFIG/esg/config/tomcat/esg-truststore.ts
+          #################### HTTPD SECRETS ##################
+  httpd_cachain_pem:
+    file: $ESGF_CONFIG/httpd/certs/cachain.pem
+  httpd_esgf-ca-bundle_crt:
+    file: $ESGF_CONFIG/httpd/certs/esgf-ca-bundle.crt
+  httpd_esgf-ca-bundle_crt-orig:
+    file: $ESGF_CONFIG/httpd/certs/esgf-ca-bundle.crt-orig
+  httpd_hostcert_pem:
+    file: $ESGF_CONFIG/httpd/certs/hostcert.pem
+  httpd_hostcert_pkcs12:
+    file: $ESGF_CONFIG/httpd/certs/hostcert.pkcs12
+  httpd_hostkey_pem:
+    file: $ESGF_CONFIG/httpd/certs/hostkey.pem
+
 
 services:
 
@@ -44,9 +68,11 @@ services:
       - "8443:8443"
     depends_on:
       - esgf-solr
+    secrets:
+      - source: tomcat_esg-truststore_ts
+        target: /usr/java/latest/jre/lib/security/jssecacerts
     volumes:
-     - $ESGF_CONFIG/esg/config/:/esg/config/
-     - $ESGF_CONFIG/esg/config/tomcat/esg-truststore.ts:/usr/java/latest/jre/lib/security/jssecacerts
+     - $ESGF_CONFIG/esg/config/:/esg/config/ # TODO: secret&config
     networks:
       - default
     deploy:
@@ -57,10 +83,24 @@ services:
   esgf-httpd:
    image: esgfhub/esgf-httpd:${ESGF_VERSION}
    entrypoint: /usr/local/bin/docker-entrypoint.sh
+   configs:
+      - source: httpd_esgf-httpd_conf
+        target: /etc/httpd/conf.d/esgf-httpd.conf
+   secrets:
+      - source: httpd_cachain_pem
+        target: /etc/certs/cachain.pem
+      - source: httpd_esgf-ca-bundle_crt
+        target: /etc/certs/esgf-ca-bundle.crt
+      - source: httpd_esgf-ca-bundle_crt-orig
+        target: /etc/certs/esgf-ca-bundle.crt-orig
+      - source: httpd_hostcert_pem
+        target: /etc/certs/hostcert.pem
+      - source: httpd_hostcert_pkcs12
+        target: /etc/certs/hostcert.pkcs12
+      - source: httpd_hostkey_pem
+        target: /etc/certs/hostkey.pem
    volumes:
-     - $ESGF_CONFIG/httpd/certs/:/etc/certs/
-     - $ESGF_CONFIG/httpd/conf/esgf-httpd.conf:/etc/httpd/conf.d/esgf-httpd.conf
-     - $ESGF_CONFIG/grid-security/certificates/:/etc/grid-security/certificates/
+     - $ESGF_CONFIG/grid-security/certificates/:/etc/grid-security/certificates/ # TODO: secret
    ports:
      - "80:80"
      - "443:443"

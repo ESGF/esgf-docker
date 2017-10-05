@@ -7,20 +7,12 @@
 # ESGF_HOSTNAME: HostName or IP address for apache httpd front-end server
 #       example: export ESGF_HOSTNAME=my-node.esgf.org
 #       example: export ESGF_HOSTNAME=`docker-machine ip`
+#
+# Optional env variables:
 # ESGF_VERSION: version of ESGF/Docker distribution
-#       example: export ESGF_VERSION=1.2
-
-# SOLR_DATA: location of Solr index
-#       example: export SOLR_DATA=/esg/solr-index
-# COG_DATA: location of CoG site data
-#       example: export COG_DATA=/usr/local/cog/cog_config
-# TDS_DATA: location of TDS catalogs
-#       example: export TDS_DATA=/esg/content/thredds
-# PG_DATA: location od postgres database and configuration
-#       example: export PG_DATA=/var/lib/pgsql/data
-# ESGF_DATA_ARCHIVE: location of science data
-#       example: export ESGF_DATA_ARCHIVE=/esgf/data_archive
-
+#       example: export ESGF_VERSION=latest
+# ESGF_IMAGES_HUB: the repository of the esgf components images
+#       example: export ESGF_IMAGES_HUB=esgfhub
 #
 # Services deployment:
 # - front_node: httpd daemon, cog, and visualizer
@@ -30,23 +22,67 @@
 # - data_node: TDS and esg-orp applications running within Tomcat
 # - solr_node: Solr search engine running within Jetty
 
-version: '3'
+version: '3.3'
 
 networks:
   # network to keep postgres database isolated
   dbnetwork:
 
+configs:
+          #################### HTTPD CONFIGS ##################
+  httpd_esgf-httpd_conf:
+    file: $ESGF_CONFIG/httpd/conf/esgf-httpd.conf
+          ##################### SOLR CONFIGS ##################
+  solr_esgf_shards_static_xml:
+    file: $ESGF_CONFIG/esg/config/esgf_shards_static.xml
+          #################### THREDDS CONFIGS ################
+  thredds_web_xml:
+    file: $ESGF_CONFIG/webapps/thredds/WEB-INF/web.xml
+          ##################### NGINX CONFIGS #################
+  nginx_nginx_conf:
+    file: $ESGF_CONFIG/slcs/conf/nginx/nginx.conf
+
+secrets:
+          #################### HTTPD SECRETS ##################
+  httpd_cachain_pem:
+    file: $ESGF_CONFIG/httpd/certs/cachain.pem
+  httpd_esgf-ca-bundle_crt:
+    file: $ESGF_CONFIG/httpd/certs/esgf-ca-bundle.crt
+  httpd_esgf-ca-bundle_crt-orig:
+    file: $ESGF_CONFIG/httpd/certs/esgf-ca-bundle.crt-orig
+  httpd_hostcert_pem:
+    file: $ESGF_CONFIG/httpd/certs/hostcert.pem
+  httpd_hostcert_pkcs12:
+    file: $ESGF_CONFIG/httpd/certs/hostcert.pkcs12
+  httpd_hostkey_pem:
+    file: $ESGF_CONFIG/httpd/certs/hostkey.pem
+          #################### TOMCAT SECRETS #################
+  tomcat_esg-truststore_ts:
+    file: $ESGF_CONFIG/esg/config/tomcat/esg-truststore.ts
+          ##################### SLCS SECRETS ##################
+  slcs_django_superuser_passwd_txt:
+    file: $ESGF_CONFIG/slcs/conf/db/django_superuser_passwd.txt
+  slcs_slcsdb_passwd_txt:
+    file: $ESGF_CONFIG/slcs/conf/db/slcsdb_passwd.txt
+  slcs_userdb_passwd_txt:
+    file: $ESGF_CONFIG/slcs/conf/db/userdb_passwd.txt
+  slcs_onlineca_crt:
+    file: $ESGF_CONFIG/slcs/conf/ca/onlineca.crt
+  slcs_onlineca_key:
+    file: $ESGF_CONFIG/slcs/conf/ca/onlineca.key 
+          ##################### GRID SECRETS ##################
+  grid_certificates:
+    file: $ESGF_CONFIG/archives/grid_security_certs.tar.xz
 services:
 
   # ESGF postgres database
   esgf-postgres:
-    image: esgfhub/esgf-postgres:${ESGF_VERSION}
+    image: ${ESGF_IMAGES_HUB-esgfhub}/esgf-postgres:${ESGF_VERSION-latest}
     ports:
       - "5432:5432"
     networks:
       - dbnetwork
     volumes:
-      #- $PG_DATA:/var/lib/pgsql/data
       - pg_data:/var/lib/pgsql/data
     deploy:
       placement:
@@ -55,18 +91,33 @@ services:
   # CoG
   # data container to hold CoG source code and python virtual environment
   esgf-cog:
-    image: esgfhub/esgf-cog:${ESGF_VERSION}
+    image: ${ESGF_IMAGES_HUB-esgfhub}/esgf-cog:${ESGF_VERSION-latest}
     ports:
       - "8000:8000"
+    configs:
+      - source: httpd_esgf-httpd_conf
+        target: /etc/httpd/conf.d/esgf-httpd.conf
+    secrets:
+      - source: httpd_cachain_pem
+        target: /etc/certs/cachain.pem
+      - source: httpd_esgf-ca-bundle_crt
+        target: /etc/certs/esgf-ca-bundle.crt
+      - source: httpd_esgf-ca-bundle_crt-orig
+        target: /etc/certs/esgf-ca-bundle.crt-orig
+      - source: httpd_hostcert_pem
+        target: /etc/certs/hostcert.pem
+      - source: httpd_hostcert_pkcs12
+        target: /etc/certs/hostcert.pkcs12
+      - source: httpd_hostkey_pem
+        target: /etc/certs/hostkey.pem
+      - source: grid_certificates
+        target: /root/archives/grid_security_certs.tar.xz
+        mode:   0400
     volumes:
       - cog_install_dir:/usr/local/cog/cog_install
       - cog_venv:/usr/local/cog/venv
-      #- $COG_DATA:/usr/local/cog/cog_config
       - cog_data:/usr/local/cog/cog_config
-      - $ESGF_CONFIG/httpd/certs/:/etc/certs/
-      - $ESGF_CONFIG/httpd/conf/esgf-httpd.conf:/etc/httpd/conf.d/esgf-httpd.conf
-      - $ESGF_CONFIG/grid-security/certificates/:/etc/grid-security/certificates/
-      - $ESGF_CONFIG/esg/config/:/esg/config/
+      - $ESGF_CONFIG/esg/config/:/esg/config/ # TODO: secret&config
     #command: $ESGF_HOSTNAME true true # ESGF=true, keep django server runnining on port 8000
     command: $ESGF_HOSTNAME true false # ESGF=true, django server running on port 8000 = false
     depends_on:
@@ -88,13 +139,15 @@ services:
 
 
   esgf-solr:
-    image: esgfhub/esgf-solr:${ESGF_VERSION}
+    image: ${ESGF_IMAGES_HUB-esgfhub}/esgf-solr:${ESGF_VERSION-latest}
     ports:
       - "8983:8983"
       - "8984:8984"
+    configs:
+      - source: solr_esgf_shards_static_xml
+        target: /esg/config/esgf_shards_static.xml
     volumes:
       - solr_data:/esg/solr-index
-      - $ESGF_CONFIG/esg/config/esgf_shards_static.xml:/esg/config/esgf_shards_static.xml
     networks:
       - default
     deploy:
@@ -104,15 +157,17 @@ services:
 
 
   esgf-index-node:
-    image: esgfhub/esgf-index-node:${ESGF_VERSION}
+    image: ${ESGF_IMAGES_HUB-esgfhub}/esgf-index-node:${ESGF_VERSION-latest}
     ports:
       - "8081:8080"
       - "8444:8443"
     depends_on:
       - esgf-solr
+    secrets:
+      - source: tomcat_esg-truststore_ts
+        target: /usr/java/latest/jre/lib/security/jssecacerts
     volumes:
-     - $ESGF_CONFIG/esg/config/:/esg/config/
-     - $ESGF_CONFIG/esg/config/tomcat/esg-truststore.ts:/usr/java/latest/jre/lib/security/jssecacerts
+     - $ESGF_CONFIG/esg/config/:/esg/config/ # TODO: secret&config
     networks:
       - default
     deploy:
@@ -121,16 +176,18 @@ services:
         constraints: [node.labels.esgf_index_node == true]
 
   esgf-idp-node:
-    image: esgfhub/esgf-idp-node:${ESGF_VERSION}
+    image: ${ESGF_IMAGES_HUB-esgfhub}/esgf-idp-node:${ESGF_VERSION-latest}
     ports:
       - "8082:8080"
       - "8445:8443"
     networks:
       - default
       - dbnetwork
+    secrets:
+      - source: tomcat_esg-truststore_ts
+        target: /usr/java/latest/jre/lib/security/jssecacerts
     volumes:
-     - $ESGF_CONFIG/esg/config/:/esg/config/
-     - $ESGF_CONFIG/esg/config/tomcat/esg-truststore.ts:/usr/java/latest/jre/lib/security/jssecacerts
+     - $ESGF_CONFIG/esg/config/:/esg/config/ # TODO: secret&config
     depends_on:
       - esgf-postgres
     deploy:
@@ -139,19 +196,22 @@ services:
         constraints: [node.labels.esgf_idp_node == true]
 
   esgf-data-node:
-    image: esgfhub/esgf-data-node:${ESGF_VERSION}
+    image: ${ESGF_IMAGES_HUB-esgfhub}/esgf-data-node:${ESGF_VERSION-latest}
     ports:
       - "8083:8080"
       - "8446:8443"
     networks:
       - default
       - dbnetwork
+    configs:
+      - source: thredds_web_xml
+        target: /usr/local/tomcat/webapps/thredds/WEB-INF/web.xml
+    secrets:
+      - source: tomcat_esg-truststore_ts
+        target: /usr/java/latest/jre/lib/security/jssecacerts
     volumes:
       - tds_data:/esg/content/thredds
-      - $ESGF_CONFIG/esg/config/:/esg/config/
-      - $ESGF_CONFIG/webapps/thredds/WEB-INF/web.xml:/usr/local/tomcat/webapps/thredds/WEB-INF/web.xml
-      - $ESGF_CONFIG/esg/config/tomcat/esg-truststore.ts:/usr/java/latest/jre/lib/security/jssecacerts
-      #- $ESGF_DATA_ARCHIVE:/esg/data_archive
+      - $ESGF_CONFIG/esg/config/:/esg/config/ # TODO: secret&config
     environment:
      - ESGF_HOSTNAME
     depends_on:
@@ -162,16 +222,32 @@ services:
         constraints: [node.labels.esgf_data_node == true]
 
   esgf-httpd:
-    image: esgfhub/esgf-httpd:${ESGF_VERSION}
+    image: ${ESGF_IMAGES_HUB-esgfhub}/esgf-httpd:${ESGF_VERSION-latest}
     entrypoint: /usr/local/bin/docker-entrypoint.sh
+    configs:
+      - source: httpd_esgf-httpd_conf
+        target: /etc/httpd/conf.d/esgf-httpd.conf
+    secrets:
+      - source: httpd_cachain_pem
+        target: /etc/certs/cachain.pem
+      - source: httpd_esgf-ca-bundle_crt
+        target: /etc/certs/esgf-ca-bundle.crt
+      - source: httpd_esgf-ca-bundle_crt-orig
+        target: /etc/certs/esgf-ca-bundle.crt-orig
+      - source: httpd_hostcert_pem
+        target: /etc/certs/hostcert.pem
+      - source: httpd_hostcert_pkcs12
+        target: /etc/certs/hostcert.pkcs12
+      - source: httpd_hostkey_pem
+        target: /etc/certs/hostkey.pem
+      - source: grid_certificates
+        target: /root/archives/grid_security_certs.tar.xz
+        mode:   0400
     volumes:
       - cog_install_dir:/usr/local/cog/cog_install
       - cog_venv:/usr/local/cog/venv
       - cog_data:/usr/local/cog/cog_config
-      - $ESGF_CONFIG/httpd/certs/:/etc/certs/
-      - $ESGF_CONFIG/httpd/conf/esgf-httpd.conf:/etc/httpd/conf.d/esgf-httpd.conf
-      - $ESGF_CONFIG/grid-security/certificates/:/etc/grid-security/certificates/
-      - $ESGF_CONFIG/esg/config/:/esg/config/
+      - $ESGF_CONFIG/esg/config/:/esg/config/ # TODO: secret&config
       # - esgf-node-manager
     environment:
       - SSL_CERT_DIR=/etc/grid-security/certificates
@@ -199,16 +275,25 @@ services:
     depends_on:
       - slcs-postgres
       - slcs-nginx
-    image: esgfhub/esgf-slcs:${ESGF_VERSION}
+    image: ${ESGF_IMAGES_HUB-esgfhub}/esgf-slcs:${ESGF_VERSION-latest}
     networks:
       - default
       - dbnetwork
     ports:
       - "5000:5000"
+    secrets:
+      - source: slcs_django_superuser_passwd_txt
+        target: /usr/local/esgf-slcs-server/conf/db/django_superuser_passwd.txt
+      - source: slcs_slcsdb_passwd_txt
+        target: /usr/local/esgf-slcs-server/conf/db/slcsdb_passwd.txt
+      - source: slcs_userdb_passwd_txt
+        target: /usr/local/esgf-slcs-server/conf/db/userdb_passwd.txt
+      - source: slcs_onlineca_crt
+        target: /usr/local/esgf-slcs-server/conf/ca/onlineca.crt
+      - source: slcs_onlineca_key
+        target: /usr/local/esgf-slcs-server/conf/ca/onlineca.key
     volumes:
       - "slcs_static_web:/var/www/static"
-      - "$ESGF_CONFIG/slcs/conf/db/:/usr/local/esgf-slcs-server/conf/db"
-      - "$ESGF_CONFIG/slcs/conf/ca/:/usr/local/esgf-slcs-server/conf/ca"
     deploy:
       mode: replicated
       replicas: 1
@@ -220,9 +305,11 @@ services:
     networks:
       - default
       - dbnetwork
+    configs:
+      - source: nginx_nginx_conf
+        target: /etc/nginx/conf.d/default.conf
     volumes:
       - "slcs_static_web:/usr/share/nginx/html"
-      - "$ESGF_CONFIG/slcs/conf/nginx/nginx.conf:/etc/nginx/conf.d/default.conf"
     deploy:
       mode: replicated
       replicas: 1
