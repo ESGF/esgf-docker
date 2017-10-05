@@ -29,10 +29,9 @@ do
    docker swarm join --token $token_worker $MANAGER_IP:2377
 done
 
-docker node ls
-
 # assign functional labels to nodes
 eval $(docker-machine env node1)
+docker node ls
 docker node update --label-add esgf_front_node=true node1
 docker node update --label-add esgf_db_node=true node2
 docker node update --label-add esgf_index_node=true node3
