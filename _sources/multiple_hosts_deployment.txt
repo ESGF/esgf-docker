@@ -49,6 +49,7 @@ Execution
    ESGF services will be deployed. For example, on a Swarm cluster of 3
    nodes, the following tags could be assigned::
 
+      eval $(docker-machine env node1)
       docker node update --label-add esgf_front_node=true node1
       docker node update --label-add esgf_db_node=true node1
       docker node update --label-add esgf_idp_node=true node1
@@ -65,6 +66,7 @@ Execution
    minutes, depending on your internet connection speed, 
    since several large images need to be downloaded to the various nodes in the Swarm)::
 
+      eval $(docker-machine env node1)
       docker stack deploy -c docker-stack.yml esgf-stack
       docker service ls
 
@@ -87,5 +89,6 @@ Execution
 
 *  Clean up: remove the full ESGF stack from the Swarm::
 
+     eval $(docker-machine env node1)
      docker stack rm esgf-stack
 
