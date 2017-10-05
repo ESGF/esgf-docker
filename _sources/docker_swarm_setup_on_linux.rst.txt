@@ -155,6 +155,12 @@ docker machines and the creation of the swarm cluster::
   # and setup a swarm cluster with these VMs where node0 is the swarm manager
   scripts/setup_swarm_cluster.sh -d kvm -n 2
 
+Note that you can pass arguments to the Docker Machine driver with the command
+line option -a. For example, if you want to set the VMs memory to 2048 Mo
+(VM will be faster)::
+
+  scripts/setup_swarm_cluster.sh -d kvm -n 2 -a "--kvm-memory 2048"
+
 About managing docker machine VMs::
 
   docker-machine ls # list the VMs
