@@ -156,8 +156,8 @@ docker machines and the creation of the swarm cluster::
   scripts/setup_swarm_cluster.sh -d kvm -n 2
 
 Note that you can pass arguments to the Docker Machine driver with the command
-line option -a. For example, if you want to set the VMs memory to 2048 Mo
-(VM will be faster)::
+line option -a. For example, if you want to set the VMs RAM size to 2048 Mo
+(faster VMs ; default is 1024 Mo)::
 
   scripts/setup_swarm_cluster.sh -d kvm -n 2 -a "--kvm-memory 2048"
 
