@@ -30,3 +30,5 @@ In what follows, replace *my-node.esgf.org* with your choice for $ESGF_HOSTNAME:
   * username=rootAdmin
   * password=changeit
 
+
+
