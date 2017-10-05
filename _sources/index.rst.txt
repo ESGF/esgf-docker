@@ -18,6 +18,7 @@ Table of Contents:
    data_publishing.rst
    architecture_and_development_guidelines.rst
    docker_swarm_setup_on_macosx.rst
+   docker_swarm_setup_on_linux.rst
    versioning_guideline.rst
    git_workflow.rst
    esgf_solr.rst

@@ -1,0 +1,292 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Docker Swam Setup on Linux &#8212; ESGF-Docker Documentation</title>
+    
+    <link rel="stylesheet" href="_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Versioning Guideline" href="versioning_guideline.html" />
+    <link rel="prev" title="Docker Swam Setup on MacOSX" href="docker_swarm_setup_on_macosx.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="versioning_guideline.html" title="Versioning Guideline"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="docker_swarm_setup_on_macosx.html" title="Docker Swam Setup on MacOSX"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">ESGF-Docker Documentation</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="docker-swam-setup-on-linux">
+<span id="docker-swarm-setup-on-linux"></span><h1>Docker Swam Setup on Linux<a class="headerlink" href="#docker-swam-setup-on-linux" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="abstract">
+<h2>Abstract<a class="headerlink" href="#abstract" title="Permalink to this headline">¶</a></h2>
+<p>This page instructs on how to setup a Docker Swarm cluster on a single Linux system,
+using virtual machines.
+The examples of shell instructions are specific to the CentOS system but other
+Linux systems (like Debian base distributions) are just different from the package
+manager instructions. This Swarm can be effectively used as a test environment for
+deploying ESGF software stack on a multiple-host cluster.</p>
+</div>
+<div class="section" id="notes">
+<h2>Notes<a class="headerlink" href="#notes" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>shell instructions examples assume that you have administrator privileges.</li>
+<li>shell instructions examples are not updated, so always refer to the given
+documentations.</li>
+<li>If you have a Linux kernel security module installed (like selinux), we assume
+that you know how to configure it for docker and swarm cluster.</li>
+<li>If you want to run ESGF on a cluster of hosts, the sections Docker CE
+installation and Firewall configuration are suffisants.</li>
+</ul>
+</div>
+<div class="section" id="tested-versions">
+<h2>Tested versions<a class="headerlink" href="#tested-versions" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>CentOS 7.4.1708</li>
+<li>Docker 17.09.0-ce, build afdb6d4</li>
+<li>Docker Machine 0.12.2</li>
+<li>Docker Machine KVM driver 0.10.0</li>
+</ul>
+</div>
+<div class="section" id="docker-ce-installation">
+<h2>Docker CE installation<a class="headerlink" href="#docker-ce-installation" title="Permalink to this headline">¶</a></h2>
+<p>Follow the instructions specifics to your Linux distribution <a class="reference external" href="https://www.docker.com/community-edition">here</a></p>
+<p>The specific instructions for CentOS system are <a class="reference external" href="https://docs.docker.com/engine/installation/linux/docker-ce/centos/">here</a>.</p>
+<p>Manage the Docker daemon needs administrator privileges (using sudo or login as
+root). You can manage it as a non root user by creating a group named docker and
+add your user account to it. The procedure is described <a class="reference external" href="https://docs.docker.com/engine/installation/linux/linux-postinstall/#manage-docker-as-a-non-root-user">here</a>.</p>
+</div>
+<div class="section" id="firewall-configuration">
+<h2>Firewall configuration<a class="headerlink" href="#firewall-configuration" title="Permalink to this headline">¶</a></h2>
+<p>According to the swarm <a class="reference external" href="https://docs.docker.com/engine/swarm/swarm-tutorial/#open-protocols-and-ports-between-the-hosts">guide</a>, the following
+ports have to be open (direction INPUT and OUTPUT, states NEW and ESTABLISHED):</p>
+<ul class="simple">
+<li>TCP port 2376</li>
+<li>TCP port 2377</li>
+<li>TCP and UDP port 7946</li>
+<li>UDP port 4789</li>
+</ul>
+<p>and of course, TCP port 22 (ssh) have to be open.</p>
+<p>We also believe that localhost interface must have full access so as to connect
+to the ESGF componants.</p>
+<p>Examples of iptables configuration:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="c1"># give the localhost interface full access</span>
+<span class="n">iptables</span> <span class="o">-</span><span class="n">A</span> <span class="n">INPUT</span>  <span class="o">-</span><span class="n">i</span> <span class="n">lo</span> <span class="o">-</span><span class="n">j</span> <span class="n">ACCEPT</span>
+<span class="n">iptables</span> <span class="o">-</span><span class="n">A</span> <span class="n">OUTPUT</span> <span class="o">-</span><span class="n">o</span> <span class="n">lo</span> <span class="o">-</span><span class="n">j</span> <span class="n">ACCEPT</span>
+
+<span class="c1"># open the swarm ports</span>
+<span class="n">iptables</span> <span class="o">-</span><span class="n">A</span> <span class="n">INPUT</span>  <span class="o">-</span><span class="n">p</span> <span class="n">tcp</span> <span class="o">--</span><span class="n">dport</span> <span class="mi">2377</span> <span class="o">-</span><span class="n">j</span> <span class="n">ACCEPT</span>
+<span class="n">iptables</span> <span class="o">-</span><span class="n">A</span> <span class="n">INPUT</span>  <span class="o">-</span><span class="n">p</span> <span class="n">tcp</span> <span class="o">--</span><span class="n">dport</span> <span class="mi">7946</span> <span class="o">-</span><span class="n">j</span> <span class="n">ACCEPT</span>
+<span class="n">iptables</span> <span class="o">-</span><span class="n">A</span> <span class="n">INPUT</span>  <span class="o">-</span><span class="n">p</span> <span class="n">udp</span> <span class="o">--</span><span class="n">dport</span> <span class="mi">7946</span> <span class="o">-</span><span class="n">j</span> <span class="n">ACCEPT</span>
+<span class="n">iptables</span> <span class="o">-</span><span class="n">A</span> <span class="n">INPUT</span>  <span class="o">-</span><span class="n">p</span> <span class="n">udp</span> <span class="o">--</span><span class="n">dport</span> <span class="mi">4789</span> <span class="o">-</span><span class="n">j</span> <span class="n">ACCEPT</span>
+
+<span class="c1"># open the docker machine port</span>
+<span class="n">iptables</span> <span class="o">-</span><span class="n">A</span> <span class="n">INPUT</span>  <span class="o">-</span><span class="n">p</span> <span class="n">tcp</span> <span class="o">--</span><span class="n">dport</span> <span class="mi">2376</span> <span class="o">-</span><span class="n">j</span> <span class="n">ACCEPT</span>
+</pre></div>
+</div>
+<p>Notes:</p>
+<ul>
+<li><p class="first">The Docker daemon adds some rules when it starts. If you reset iptables, so
+don&#8217;t forget to restart Docker daemon:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">service</span> <span class="n">docker</span> <span class="n">restart</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">The virtualization infrastructure creates some network interfaces, so you have
+to give them full access.</p>
+</li>
+</ul>
+</div>
+<div class="section" id="virtualization-infrastructure">
+<h2>Virtualization infrastructure<a class="headerlink" href="#virtualization-infrastructure" title="Permalink to this headline">¶</a></h2>
+<p>Docker Machine is a command line tool that automate the creation of Virtual
+Machines (VMs) with an minimalist image of Linux with Docker engine installed.
+Nevertheless, Docker Machine relies on a virtualization infrastructure.
+Under Linux systems, you got planty of choices: KVM, Xen, VirtualBox, etc.</p>
+<p>This <a class="reference external" href="https://docs.docker.com/machine/drivers/">link</a> lists the supported
+virtualization infrastructures by Docker Inc. Although KVM is not supported
+by Docker Inc, KVM is supported by the docker community. This example give you
+some instructions to install and manage VMs with KVM and Virtual Machine Manager
+on a CentOS system:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">yum</span> <span class="o">-</span><span class="n">f</span> <span class="n">install</span> <span class="n">qemu</span><span class="o">-</span><span class="n">kvm</span><span class="o">.</span><span class="n">x86_64</span> <span class="n">virt</span><span class="o">-</span><span class="n">manager</span><span class="o">.</span><span class="n">noarch</span> <span class="n">libvirt</span><span class="o">.</span><span class="n">x86_64</span>
+</pre></div>
+</div>
+<p>and don&#8217;t forget to give full access to the interfaces created by kvm (virbr0 and
+virbr1):</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">iptables</span> <span class="o">-</span><span class="n">A</span> <span class="n">INPUT</span> <span class="o">-</span><span class="n">i</span> <span class="n">virbr0</span> <span class="o">-</span><span class="n">j</span> <span class="n">ACCEPT</span>
+<span class="n">iptables</span> <span class="o">-</span><span class="n">A</span> <span class="n">INPUT</span> <span class="o">-</span><span class="n">i</span> <span class="n">virbr1</span> <span class="o">-</span><span class="n">j</span> <span class="n">ACCEPT</span>
+<span class="n">iptables</span> <span class="o">-</span><span class="n">A</span> <span class="n">FORWARD</span> <span class="o">-</span><span class="n">i</span> <span class="n">virbr0</span> <span class="o">-</span><span class="n">j</span> <span class="n">ACCEPT</span>
+<span class="n">iptables</span> <span class="o">-</span><span class="n">A</span> <span class="n">FORWARD</span> <span class="o">-</span><span class="n">o</span> <span class="n">virbr0</span> <span class="o">-</span><span class="n">j</span> <span class="n">ACCEPT</span>
+<span class="n">iptables</span> <span class="o">-</span><span class="n">A</span> <span class="n">FORWARD</span> <span class="o">-</span><span class="n">i</span> <span class="n">virbr1</span> <span class="o">-</span><span class="n">j</span> <span class="n">ACCEPT</span>
+<span class="n">iptables</span> <span class="o">-</span><span class="n">A</span> <span class="n">FORWARD</span> <span class="o">-</span><span class="n">o</span> <span class="n">virbr1</span> <span class="o">-</span><span class="n">j</span> <span class="n">ACCEPT</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="docker-machine">
+<h2>Docker Machine<a class="headerlink" href="#docker-machine" title="Permalink to this headline">¶</a></h2>
+<p>Docker Machine is a tool that manage VMs with docker engine installed.
+This tool is perfect to simulate a cluster of swarm nodes on a single host.
+However, Docker Machine is not provided alongside the Docker installation.
+This <a class="reference external" href="https://github.com/docker/machine/releases/">link</a> explains how to install Docker Machine.</p>
+<p>example of the installation of the version 0.12.2:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span>curl -L https://github.com/docker/machine/releases/download/v0.12.2/docker-machine-`uname -s`-`uname -m` &gt;/tmp/docker-machine
+chmod +x /tmp/docker-machine
+cp /tmp/docker-machine /usr/local/bin/docker-machine
+</pre></div>
+</div>
+<p>And don&#8217;t forget to add /usr/local/bin into your PATH environment variable:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span>export PATH=/usr/local/bin/:$PATH
+</pre></div>
+</div>
+</div>
+<div class="section" id="docker-machine-driver">
+<h2>Docker Machine driver<a class="headerlink" href="#docker-machine-driver" title="Permalink to this headline">¶</a></h2>
+<p>Docker Machine needs a driver to create VMs. According to the virtualization
+infrastructure that you installed, you have to install the associated driver.
+This <a class="reference external" href="https://docs.docker.com/machine/drivers/">link</a> lists the supported
+virtualization infrastructures. Note that KVM is not supported by Docker Inc but
+the docker community. This <a class="reference external" href="https://github.com/dhiltgen/docker-machine-kvm/releases">link</a> give you the procedure of the KVM driver installation.</p>
+<p>The example of the Docker Machine KVM driver version 0.10.0:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">curl</span> <span class="o">-</span><span class="n">L</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">dhiltgen</span><span class="o">/</span><span class="n">docker</span><span class="o">-</span><span class="n">machine</span><span class="o">-</span><span class="n">kvm</span><span class="o">/</span><span class="n">releases</span><span class="o">/</span><span class="n">download</span><span class="o">/</span><span class="n">v0</span><span class="o">.</span><span class="mf">10.0</span><span class="o">/</span><span class="n">docker</span><span class="o">-</span><span class="n">machine</span><span class="o">-</span><span class="n">driver</span><span class="o">-</span><span class="n">kvm</span><span class="o">-</span><span class="n">centos7</span> <span class="o">&gt;</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">docker</span><span class="o">-</span><span class="n">machine</span><span class="o">-</span><span class="n">driver</span><span class="o">-</span><span class="n">kvm</span>
+<span class="n">chmod</span> <span class="o">+</span><span class="n">x</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">docker</span><span class="o">-</span><span class="n">machine</span><span class="o">-</span><span class="n">driver</span><span class="o">-</span><span class="n">kvm</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="execution">
+<h2>Execution<a class="headerlink" href="#execution" title="Permalink to this headline">¶</a></h2>
+<p>You can follow the Docker Machine get started guide <a class="reference external" href="https://docs.docker.com/machine/get-started/">here</a> or our <a class="reference external" href="https://esgf.github.io/esgf-docker/docker_swarm_setup_on_macosx.html">documentation</a> concerning MacOSX systems.
+You also can use our script that automate the creation of
+docker machines and the creation of the swarm cluster:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="c1"># creates 2 VMs using KVM, named node0 and node1</span>
+<span class="c1"># and setup a swarm cluster with these VMs where node0 is the swarm manager</span>
+<span class="n">scripts</span><span class="o">/</span><span class="n">setup_swarm_cluster</span><span class="o">.</span><span class="n">sh</span> <span class="o">-</span><span class="n">d</span> <span class="n">kvm</span> <span class="o">-</span><span class="n">n</span> <span class="mi">2</span>
+</pre></div>
+</div>
+<p>About managing docker machine VMs:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span>docker-machine ls # list the VMs
+docker-machine ssh node0 # log onto the VM named node0
+docker-machine rm node0 node1 # delete the VMs named node0 and node1
+eval $(docker-machine env node0) # so as to issue docker commands with
+                                 # the node0 environment
+</pre></div>
+</div>
+<p>Associate the IP address of the Swarm manager node to the hostname
+you intend to use to access the ESGF services. For example if
+$ESGF_HOSTNAME=my-node.esgf.org:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">vi</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">hosts</span>
+<span class="mf">192.168</span><span class="o">.</span><span class="mf">99.100</span> <span class="n">my</span><span class="o">-</span><span class="n">node</span><span class="o">.</span><span class="n">esgf</span><span class="o">.</span><span class="n">org</span>
+</pre></div>
+</div>
+<p>Where 192.168.99.100 is an example of the ip address of node0. But Note that
+because of the Docker Swarm routing mesh capability, the IP
+address above can be that of any node in the Swarm, and that URLs
+starting with http(s)://my-node.esgf.org/... can be used to access any
+of the ESGF services in the stack, no matter on which node they are deployed.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Docker Swam Setup on Linux</a><ul>
+<li><a class="reference internal" href="#abstract">Abstract</a></li>
+<li><a class="reference internal" href="#notes">Notes</a></li>
+<li><a class="reference internal" href="#tested-versions">Tested versions</a></li>
+<li><a class="reference internal" href="#docker-ce-installation">Docker CE installation</a></li>
+<li><a class="reference internal" href="#firewall-configuration">Firewall configuration</a></li>
+<li><a class="reference internal" href="#virtualization-infrastructure">Virtualization infrastructure</a></li>
+<li><a class="reference internal" href="#docker-machine">Docker Machine</a></li>
+<li><a class="reference internal" href="#docker-machine-driver">Docker Machine driver</a></li>
+<li><a class="reference internal" href="#execution">Execution</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="docker_swarm_setup_on_macosx.html"
+                        title="previous chapter">Docker Swam Setup on MacOSX</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="versioning_guideline.html"
+                        title="next chapter">Versioning Guideline</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/docker_swarm_setup_on_linux.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="versioning_guideline.html" title="Versioning Guideline"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="docker_swarm_setup_on_macosx.html" title="Docker Swam Setup on MacOSX"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">ESGF-Docker Documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017, ESGF.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.6.
+    </div>
+  </body>
+</html>
