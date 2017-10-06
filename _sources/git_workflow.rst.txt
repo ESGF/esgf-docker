@@ -57,7 +57,7 @@ Recommended naming rules for git:
 
 
 Diagram
-======
+=======
 
 Schematic representation of how Git branches are created and tagged when working on a specific release.
 

@@ -49,6 +49,7 @@ Execution
    ESGF services will be deployed. For example, on a Swarm cluster of 3
    nodes, the following tags could be assigned::
 
+      eval $(docker-machine env node1)
       docker node update --label-add esgf_front_node=true node1
       docker node update --label-add esgf_db_node=true node1
       docker node update --label-add esgf_idp_node=true node1
@@ -65,27 +66,14 @@ Execution
    minutes, depending on your internet connection speed, 
    since several large images need to be downloaded to the various nodes in the Swarm)::
 
+      eval $(docker-machine env node1)
       docker stack deploy -c docker-stack.yml esgf-stack
       docker service ls
 
-*  When all services are deployed, test the following URLs, replacing
-   "my-node.esgf.org" with your value of $ESGF_HOSTNAME:
-
-   * Docker visualizer tool: http://my-node.esgf.org:8080/
-   * Solr admin interface: https://my-node.esgf.org/solr/#/
-   * ESGF search API: http://my-node.esgf.org/esg-search/search
-   * ESGF IdP: https://my-node.esgf.org/esgf-idp/
-   * CoG home project: https://my-node.esgf.org/projects/testproject/. The first time, login with:
-
-     * openid=https://my-node.esgf.org/esgf-idp/openid/rootAdmin and
-     * password=changeit
-
-   * TDS: https://my-node.esgf.org/thredds
- 
-   * ORP: https://my-node.esgf.org/esg-orp/
-   * SLCS: https://my-node.esgf.org/slcs/admin/
+*  When all services are deployed, execute the tests described in the :ref:`testing_guide`.
 
 *  Clean up: remove the full ESGF stack from the Swarm::
 
+     eval $(docker-machine env node1)
      docker stack rm esgf-stack
 

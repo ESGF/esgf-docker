@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Multiple Hosts Deployment &mdash; ESGF-Docker Documentation</title>
+    <title>Multiple Hosts Deployment &#8212; ESGF-Docker Documentation</title>
     
     <link rel="stylesheet" href="_static/nature.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -17,13 +17,15 @@
         VERSION:     '1.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
       };
     </script>
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="ESGF-Docker Documentation" href="index.html" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Data Publishing" href="data_publishing.html" />
     <link rel="prev" title="Single Host Deployment" href="single_host_deployment.html" /> 
   </head>
@@ -40,7 +42,7 @@
         <li class="right" >
           <a href="single_host_deployment.html" title="Single Host Deployment"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">ESGF-Docker Documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">ESGF-Docker Documentation</a> &#187;</li> 
       </ul>
     </div>  
 
@@ -64,12 +66,12 @@ appropriate metadata tags are set for that node.</p>
 <div class="section" id="pre-requisites">
 <h2>Pre-Requisites<a class="headerlink" href="#pre-requisites" title="Permalink to this headline">¶</a></h2>
 <p>A Docker Swarm composed of 1 or more nodes. See specific instructions on
-how to set this up on <a class="reference internal" href="docker_swarm_setup_on_macosx.html#docker-swarm-setup-on-macosx"><em>a single MacOSX laptop</em></a>, on the Amazon Cloud, or an
+how to set this up on <a class="reference internal" href="docker_swarm_setup_on_macosx.html#docker-swarm-setup-on-macosx"><span class="std std-ref">a single MacOSX laptop</span></a>, on the Amazon Cloud, or an
 internal Linux cluster.</p>
 </div>
 <div class="section" id="setup">
 <h2>Setup<a class="headerlink" href="#setup" title="Permalink to this headline">¶</a></h2>
-<p>Follow the same setup steps as for the <a class="reference internal" href="single_host_deployment.html#single-host-deployment"><em>Single Host Deployment</em></a>, namely:</p>
+<p>Follow the same setup steps as for the <a class="reference internal" href="single_host_deployment.html#single-host-deployment"><span class="std std-ref">Single Host Deployment</span></a>, namely:</p>
 <ul class="simple">
 <li>Checkout the source code from this GitHub repository, on some
 location on the Swarm manager node. Use the <em>master</em> branch.</li>
@@ -92,7 +94,7 @@ container(s) where the specific services are deployed.</p>
 <li><p class="first">Assign metadata tags to the Swarm nodes to define where the specific
 ESGF services will be deployed. For example, on a Swarm cluster of 3
 nodes, the following tags could be assigned:</p>
-<div class="highlight-python"><div class="highlight"><pre>eval $(docker-machine env node1)
+<div class="highlight-default"><div class="highlight"><pre><span></span>eval $(docker-machine env node1)
 docker node update --label-add esgf_front_node=true node1
 docker node update --label-add esgf_db_node=true node1
 docker node update --label-add esgf_idp_node=true node1
@@ -102,23 +104,23 @@ docker node update --label-add esgf_data_node=true node3
 </pre></div>
 </div>
 <p>Or, on a Swarm of 6 nodes, each label can be assigned to a different node
-(as shown in the <a class="reference internal" href="docker_swarm_setup_on_macosx.html#docker-swarm-setup-on-macosx"><em>single MacOSX laptop instructions</em></a>).</p>
+(as shown in the <a class="reference internal" href="docker_swarm_setup_on_macosx.html#docker-swarm-setup-on-macosx"><span class="std std-ref">single MacOSX laptop instructions</span></a>).</p>
 </li>
 <li><p class="first">From the source code directory on the Swarm manager node, issue the
 following command to deploy the stack of ESGF services, then wait for
 the services to be ready (which the first time might take up to 20
 minutes, depending on your internet connection speed,
 since several large images need to be downloaded to the various nodes in the Swarm):</p>
-<div class="highlight-python"><div class="highlight"><pre>eval $(docker-machine env node1)
+<div class="highlight-default"><div class="highlight"><pre><span></span>eval $(docker-machine env node1)
 docker stack deploy -c docker-stack.yml esgf-stack
 docker service ls
 </pre></div>
 </div>
 </li>
-<li><p class="first">When all services are deployed, execute the tests described in the <a class="reference internal" href="testing_guide.html#testing-guide"><em>Testing Guide</em></a>.</p>
+<li><p class="first">When all services are deployed, execute the tests described in the <a class="reference internal" href="testing_guide.html#testing-guide"><span class="std std-ref">Testing Guide</span></a>.</p>
 </li>
 <li><p class="first">Clean up: remove the full ESGF stack from the Swarm:</p>
-<div class="highlight-python"><div class="highlight"><pre>eval $(docker-machine env node1)
+<div class="highlight-default"><div class="highlight"><pre><span></span>eval $(docker-machine env node1)
 docker stack rm esgf-stack
 </pre></div>
 </div>
@@ -153,21 +155,18 @@ docker stack rm esgf-stack
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
-      <li><a href="_sources/multiple_hosts_deployment.txt"
+      <li><a href="_sources/multiple_hosts_deployment.rst.txt"
             rel="nofollow">Show Source</a></li>
     </ul>
    </div>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="search.html" method="get">
-      <input type="text" name="q" />
-      <input type="submit" value="Go" />
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
-    <p class="searchtip" style="font-size: 90%">
-    Enter search terms or a module, class or function name.
-    </p>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
@@ -186,12 +185,12 @@ docker stack rm esgf-stack
         <li class="right" >
           <a href="single_host_deployment.html" title="Single Host Deployment"
              >previous</a> |</li>
-        <li><a href="index.html">ESGF-Docker Documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">ESGF-Docker Documentation</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &copy; Copyright 2017, ESGF.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3b2.
+        &#169; Copyright 2017, ESGF.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.6.
     </div>
   </body>
 </html>

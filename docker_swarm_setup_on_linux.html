@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Docker Swam Setup on Linux &mdash; ESGF-Docker Documentation</title>
+    <title>Docker Swam Setup on Linux &#8212; ESGF-Docker Documentation</title>
     
     <link rel="stylesheet" href="_static/nature.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -17,13 +17,15 @@
         VERSION:     '1.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
       };
     </script>
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="ESGF-Docker Documentation" href="index.html" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Versioning Guideline" href="versioning_guideline.html" />
     <link rel="prev" title="Docker Swam Setup on MacOSX" href="docker_swarm_setup_on_macosx.html" /> 
   </head>
@@ -40,7 +42,7 @@
         <li class="right" >
           <a href="docker_swarm_setup_on_macosx.html" title="Docker Swam Setup on MacOSX"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">ESGF-Docker Documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">ESGF-Docker Documentation</a> &#187;</li> 
       </ul>
     </div>  
 
@@ -69,7 +71,7 @@ documentations.</li>
 <li>If you have a Linux kernel security module installed (like selinux), we assume
 that you know how to configure it for docker and swarm cluster.</li>
 <li>If you want to run ESGF on a cluster of hosts, the sections Docker CE
-installation and Firewall configuration are suffisants.</li>
+installation and Firewall configuration are sufficient.</li>
 </ul>
 </div>
 <div class="section" id="tested-versions">
@@ -101,27 +103,27 @@ ports have to be open (direction INPUT and OUTPUT, states NEW and ESTABLISHED):<
 </ul>
 <p>and of course, TCP port 22 (ssh) have to be open.</p>
 <p>We also believe that localhost interface must have full access so as to connect
-to the ESGF componants.</p>
+to the ESGF components.</p>
 <p>Examples of iptables configuration:</p>
-<div class="highlight-python"><div class="highlight"><pre># give the localhost interface full access
-iptables -A INPUT  -i lo -j ACCEPT
-iptables -A OUTPUT -o lo -j ACCEPT
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="c1"># give the localhost interface full access</span>
+<span class="n">iptables</span> <span class="o">-</span><span class="n">A</span> <span class="n">INPUT</span>  <span class="o">-</span><span class="n">i</span> <span class="n">lo</span> <span class="o">-</span><span class="n">j</span> <span class="n">ACCEPT</span>
+<span class="n">iptables</span> <span class="o">-</span><span class="n">A</span> <span class="n">OUTPUT</span> <span class="o">-</span><span class="n">o</span> <span class="n">lo</span> <span class="o">-</span><span class="n">j</span> <span class="n">ACCEPT</span>
 
-# open the swarm ports
-iptables -A INPUT  -p tcp --dport 2377 -j ACCEPT
-iptables -A INPUT  -p tcp --dport 7946 -j ACCEPT
-iptables -A INPUT  -p udp --dport 7946 -j ACCEPT
-iptables -A INPUT  -p udp --dport 4789 -j ACCEPT
+<span class="c1"># open the swarm ports</span>
+<span class="n">iptables</span> <span class="o">-</span><span class="n">A</span> <span class="n">INPUT</span>  <span class="o">-</span><span class="n">p</span> <span class="n">tcp</span> <span class="o">--</span><span class="n">dport</span> <span class="mi">2377</span> <span class="o">-</span><span class="n">j</span> <span class="n">ACCEPT</span>
+<span class="n">iptables</span> <span class="o">-</span><span class="n">A</span> <span class="n">INPUT</span>  <span class="o">-</span><span class="n">p</span> <span class="n">tcp</span> <span class="o">--</span><span class="n">dport</span> <span class="mi">7946</span> <span class="o">-</span><span class="n">j</span> <span class="n">ACCEPT</span>
+<span class="n">iptables</span> <span class="o">-</span><span class="n">A</span> <span class="n">INPUT</span>  <span class="o">-</span><span class="n">p</span> <span class="n">udp</span> <span class="o">--</span><span class="n">dport</span> <span class="mi">7946</span> <span class="o">-</span><span class="n">j</span> <span class="n">ACCEPT</span>
+<span class="n">iptables</span> <span class="o">-</span><span class="n">A</span> <span class="n">INPUT</span>  <span class="o">-</span><span class="n">p</span> <span class="n">udp</span> <span class="o">--</span><span class="n">dport</span> <span class="mi">4789</span> <span class="o">-</span><span class="n">j</span> <span class="n">ACCEPT</span>
 
-# open the docker machine port
-iptables -A INPUT  -p tcp --dport 2376 -j ACCEPT
+<span class="c1"># open the docker machine port</span>
+<span class="n">iptables</span> <span class="o">-</span><span class="n">A</span> <span class="n">INPUT</span>  <span class="o">-</span><span class="n">p</span> <span class="n">tcp</span> <span class="o">--</span><span class="n">dport</span> <span class="mi">2376</span> <span class="o">-</span><span class="n">j</span> <span class="n">ACCEPT</span>
 </pre></div>
 </div>
 <p>Notes:</p>
 <ul>
 <li><p class="first">The Docker daemon adds some rules when it starts. If you reset iptables, so
 don&#8217;t forget to restart Docker daemon:</p>
-<div class="highlight-python"><div class="highlight"><pre>service docker restart
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">service</span> <span class="n">docker</span> <span class="n">restart</span>
 </pre></div>
 </div>
 </li>
@@ -135,23 +137,23 @@ to give them full access.</p>
 <p>Docker Machine is a command line tool that automate the creation of Virtual
 Machines (VMs) with an minimalist image of Linux with Docker engine installed.
 Nevertheless, Docker Machine relies on a virtualization infrastructure.
-Under Linux systems, you got planty of choices: KVM, Xen, VirtualBox, etc.</p>
+Under Linux systems, you got plenty of choices: KVM, Xen, VirtualBox, etc.</p>
 <p>This <a class="reference external" href="https://docs.docker.com/machine/drivers/">link</a> lists the supported
 virtualization infrastructures by Docker Inc. Although KVM is not supported
 by Docker Inc, KVM is supported by the docker community. This example give you
 some instructions to install and manage VMs with KVM and Virtual Machine Manager
 on a CentOS system:</p>
-<div class="highlight-python"><div class="highlight"><pre>yum -f install qemu-kvm.x86_64 virt-manager.noarch libvirt.x86_64
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">yum</span> <span class="o">-</span><span class="n">f</span> <span class="n">install</span> <span class="n">qemu</span><span class="o">-</span><span class="n">kvm</span><span class="o">.</span><span class="n">x86_64</span> <span class="n">virt</span><span class="o">-</span><span class="n">manager</span><span class="o">.</span><span class="n">noarch</span> <span class="n">libvirt</span><span class="o">.</span><span class="n">x86_64</span>
 </pre></div>
 </div>
 <p>and don&#8217;t forget to give full access to the interfaces created by kvm (virbr0 and
 virbr1):</p>
-<div class="highlight-python"><div class="highlight"><pre>iptables -A INPUT -i virbr0 -j ACCEPT
-iptables -A INPUT -i virbr1 -j ACCEPT
-iptables -A FORWARD -i virbr0 -j ACCEPT
-iptables -A FORWARD -o virbr0 -j ACCEPT
-iptables -A FORWARD -i virbr1 -j ACCEPT
-iptables -A FORWARD -o virbr1 -j ACCEPT
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">iptables</span> <span class="o">-</span><span class="n">A</span> <span class="n">INPUT</span> <span class="o">-</span><span class="n">i</span> <span class="n">virbr0</span> <span class="o">-</span><span class="n">j</span> <span class="n">ACCEPT</span>
+<span class="n">iptables</span> <span class="o">-</span><span class="n">A</span> <span class="n">INPUT</span> <span class="o">-</span><span class="n">i</span> <span class="n">virbr1</span> <span class="o">-</span><span class="n">j</span> <span class="n">ACCEPT</span>
+<span class="n">iptables</span> <span class="o">-</span><span class="n">A</span> <span class="n">FORWARD</span> <span class="o">-</span><span class="n">i</span> <span class="n">virbr0</span> <span class="o">-</span><span class="n">j</span> <span class="n">ACCEPT</span>
+<span class="n">iptables</span> <span class="o">-</span><span class="n">A</span> <span class="n">FORWARD</span> <span class="o">-</span><span class="n">o</span> <span class="n">virbr0</span> <span class="o">-</span><span class="n">j</span> <span class="n">ACCEPT</span>
+<span class="n">iptables</span> <span class="o">-</span><span class="n">A</span> <span class="n">FORWARD</span> <span class="o">-</span><span class="n">i</span> <span class="n">virbr1</span> <span class="o">-</span><span class="n">j</span> <span class="n">ACCEPT</span>
+<span class="n">iptables</span> <span class="o">-</span><span class="n">A</span> <span class="n">FORWARD</span> <span class="o">-</span><span class="n">o</span> <span class="n">virbr1</span> <span class="o">-</span><span class="n">j</span> <span class="n">ACCEPT</span>
 </pre></div>
 </div>
 </div>
@@ -162,13 +164,13 @@ This tool is perfect to simulate a cluster of swarm nodes on a single host.
 However, Docker Machine is not provided alongside the Docker installation.
 This <a class="reference external" href="https://github.com/docker/machine/releases/">link</a> explains how to install Docker Machine.</p>
 <p>example of the installation of the version 0.12.2:</p>
-<div class="highlight-python"><div class="highlight"><pre>curl -L https://github.com/docker/machine/releases/download/v0.12.2/docker-machine-`uname -s`-`uname -m` &gt;/tmp/docker-machine
+<div class="highlight-default"><div class="highlight"><pre><span></span>curl -L https://github.com/docker/machine/releases/download/v0.12.2/docker-machine-`uname -s`-`uname -m` &gt;/tmp/docker-machine
 chmod +x /tmp/docker-machine
 cp /tmp/docker-machine /usr/local/bin/docker-machine
 </pre></div>
 </div>
 <p>And don&#8217;t forget to add /usr/local/bin into your PATH environment variable:</p>
-<div class="highlight-python"><div class="highlight"><pre>export PATH=/usr/local/bin/:$PATH
+<div class="highlight-default"><div class="highlight"><pre><span></span>export PATH=/usr/local/bin/:$PATH
 </pre></div>
 </div>
 </div>
@@ -180,8 +182,8 @@ This <a class="reference external" href="https://docs.docker.com/machine/drivers
 virtualization infrastructures. Note that KVM is not supported by Docker Inc but
 the docker community. This <a class="reference external" href="https://github.com/dhiltgen/docker-machine-kvm/releases">link</a> give you the procedure of the KVM driver installation.</p>
 <p>The example of the Docker Machine KVM driver version 0.10.0:</p>
-<div class="highlight-python"><div class="highlight"><pre>curl -L https://github.com/dhiltgen/docker-machine-kvm/releases/download/v0.10.0/docker-machine-driver-kvm-centos7 &gt; /usr/local/bin/docker-machine-driver-kvm
-chmod +x /usr/local/bin/docker-machine-driver-kvm
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">curl</span> <span class="o">-</span><span class="n">L</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">dhiltgen</span><span class="o">/</span><span class="n">docker</span><span class="o">-</span><span class="n">machine</span><span class="o">-</span><span class="n">kvm</span><span class="o">/</span><span class="n">releases</span><span class="o">/</span><span class="n">download</span><span class="o">/</span><span class="n">v0</span><span class="o">.</span><span class="mf">10.0</span><span class="o">/</span><span class="n">docker</span><span class="o">-</span><span class="n">machine</span><span class="o">-</span><span class="n">driver</span><span class="o">-</span><span class="n">kvm</span><span class="o">-</span><span class="n">centos7</span> <span class="o">&gt;</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">docker</span><span class="o">-</span><span class="n">machine</span><span class="o">-</span><span class="n">driver</span><span class="o">-</span><span class="n">kvm</span>
+<span class="n">chmod</span> <span class="o">+</span><span class="n">x</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">docker</span><span class="o">-</span><span class="n">machine</span><span class="o">-</span><span class="n">driver</span><span class="o">-</span><span class="n">kvm</span>
 </pre></div>
 </div>
 </div>
@@ -190,30 +192,39 @@ chmod +x /usr/local/bin/docker-machine-driver-kvm
 <p>You can follow the Docker Machine get started guide <a class="reference external" href="https://docs.docker.com/machine/get-started/">here</a> or our <a class="reference external" href="https://esgf.github.io/esgf-docker/docker_swarm_setup_on_macosx.html">documentation</a> concerning MacOSX systems.
 You also can use our script that automate the creation of
 docker machines and the creation of the swarm cluster:</p>
-<div class="highlight-python"><div class="highlight"><pre># creates 2 VMs using KVM, named node0 and node1
-# and setup a swarm cluster with these VMs where node0 is the swarm manager
-scripts/setup_swarm_cluster.sh -d kvm -n 2
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="c1"># creates 2 VMs using KVM, named node0 and node1</span>
+<span class="c1"># and setup a swarm cluster with these VMs where node0 is the swarm manager</span>
+<span class="n">scripts</span><span class="o">/</span><span class="n">setup_swarm_cluster</span><span class="o">.</span><span class="n">sh</span> <span class="o">-</span><span class="n">d</span> <span class="n">kvm</span> <span class="o">-</span><span class="n">n</span> <span class="mi">2</span>
 </pre></div>
 </div>
+<p>Creating VMs can take few minutes.</p>
 <p>Note that you can pass arguments to the Docker Machine driver with the command
 line option -a. For example, if you want to set the VMs RAM size to 2048 Mo
 (faster VMs ; default is 1024 Mo):</p>
-<div class="highlight-python"><div class="highlight"><pre>scripts/setup_swarm_cluster.sh -d kvm -n 2 -a &quot;--kvm-memory 2048&quot;
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">scripts</span><span class="o">/</span><span class="n">setup_swarm_cluster</span><span class="o">.</span><span class="n">sh</span> <span class="o">-</span><span class="n">d</span> <span class="n">kvm</span> <span class="o">-</span><span class="n">n</span> <span class="mi">2</span> <span class="o">-</span><span class="n">a</span> <span class="s2">&quot;--kvm-memory 2048&quot;</span>
 </pre></div>
 </div>
 <p>About managing docker machine VMs:</p>
-<div class="highlight-python"><div class="highlight"><pre>docker-machine ls # list the VMs
+<div class="highlight-default"><div class="highlight"><pre><span></span>docker-machine ls # list the VMs
 docker-machine ssh node0 # log onto the VM named node0
 docker-machine rm node0 node1 # delete the VMs named node0 and node1
 eval $(docker-machine env node0) # so as to issue docker commands with
                                  # the node0 environment
 </pre></div>
 </div>
+<p>As an example, these instructions completely shutdown ESGF stack and VMs:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span>bash # don&#39;t mess with variable environment settings because
+eval $(docker-machine env node0) # we have switch to the node0 context
+docker stack rm esgf-stack # so as to shutdown ESGF stack because node0 is the swarm manager
+exit # optionally exit the subprocess bash
+docker-machine rm node0 # node1 nodei and so onto
+</pre></div>
+</div>
 <p>Associate the IP address of the Swarm manager node to the hostname
 you intend to use to access the ESGF services. For example if
 $ESGF_HOSTNAME=my-node.esgf.org:</p>
-<div class="highlight-python"><div class="highlight"><pre>sudo vi /etc/hosts
-192.168.99.100 my-node.esgf.org
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">vi</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">hosts</span>
+<span class="mf">192.168</span><span class="o">.</span><span class="mf">99.100</span> <span class="n">my</span><span class="o">-</span><span class="n">node</span><span class="o">.</span><span class="n">esgf</span><span class="o">.</span><span class="n">org</span>
 </pre></div>
 </div>
 <p>Where 192.168.99.100 is an example of the ip address of node0. But Note that
@@ -255,21 +266,18 @@ of the ESGF services in the stack, no matter on which node they are deployed.</p
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
-      <li><a href="_sources/docker_swarm_setup_on_linux.txt"
+      <li><a href="_sources/docker_swarm_setup_on_linux.rst.txt"
             rel="nofollow">Show Source</a></li>
     </ul>
    </div>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="search.html" method="get">
-      <input type="text" name="q" />
-      <input type="submit" value="Go" />
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
-    <p class="searchtip" style="font-size: 90%">
-    Enter search terms or a module, class or function name.
-    </p>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
@@ -288,12 +296,12 @@ of the ESGF services in the stack, no matter on which node they are deployed.</p
         <li class="right" >
           <a href="docker_swarm_setup_on_macosx.html" title="Docker Swam Setup on MacOSX"
              >previous</a> |</li>
-        <li><a href="index.html">ESGF-Docker Documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">ESGF-Docker Documentation</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &copy; Copyright 2017, ESGF.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3b2.
+        &#169; Copyright 2017, ESGF.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.6.
     </div>
   </body>
 </html>
