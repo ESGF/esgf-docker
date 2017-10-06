@@ -177,7 +177,7 @@ As an example, these instructions completely shutdown ESGF stack and VMs::
   eval $(docker-machine env node0) # we have switch to the node0 context
   docker stack rm esgf-stack # so as to shutdown ESGF stack because node0 is the swarm manager
   exit # optionally exit the subprocess bash
-  docker-machine rm node0 # node1 nodei and so onto
+  docker-machine rm node0 node1 # node2 and so onto ; delete the VMs created by docker-machine
   
 Associate the IP address of the Swarm manager node to the hostname
 you intend to use to access the ESGF services. For example if 
