@@ -62,7 +62,7 @@ ENV ESGINI /esg/config/esgcet/esg.ini
 RUN mkdir -p /usr/local/tomcat/webapps/esg-orp
 
 #COPY esgf-orp/esg-orp.war /usr/local/tomcat/webapps/esg-orp/esg-orp.war
-ADD $ESGF_REPO/dist/devel/esg-orp/esg-orp.war /usr/local/tomcat/webapps/esg-orp/
+ADD $ESGF_REPO/dist/esg-orp/esg-orp.war /usr/local/tomcat/webapps/esg-orp/
 RUN cd /usr/local/tomcat/webapps/esg-orp && \
     jar xvf esg-orp.war && \
     rm esg-orp.war && \
@@ -77,7 +77,7 @@ COPY esgf-orp/conf/esg-orp.properties /usr/local/tomcat/webapps/esg-orp/WEB-INF/
 # ESGF OLD NODE MANAGER
 # uset to extract dependency jars
 RUN mkdir -p /usr/local/tomcat/webapps/esgf-node-manager
-ADD $ESGF_REPO/dist/devel/esgf-node-manager/esgf-node-manager.war /usr/local/tomcat/webapps/esgf-node-manager/
+ADD $ESGF_REPO/dist/esgf-node-manager/esgf-node-manager.war /usr/local/tomcat/webapps/esgf-node-manager/
 RUN cd /usr/local/tomcat/webapps/esgf-node-manager/ && \
     jar xvf esgf-node-manager.war
 
@@ -87,7 +87,7 @@ RUN cd /usr/local/tomcat/webapps/esgf-node-manager/ && \
 
 RUN mkdir -p /usr/local/tomcat/webapps/thredds
 #COPY thredds/thredds.war /usr/local/tomcat/webapps/thredds/thredds.war
-ADD $ESGF_REPO/dist/devel/thredds/5.0/5.0.1/thredds.war /usr/local/tomcat/webapps/thredds/
+ADD $ESGF_REPO/dist/thredds/5.0/5.0.2/thredds.war /usr/local/tomcat/webapps/thredds/
 RUN cd /usr/local/tomcat/webapps/thredds && \
     jar xvf thredds.war && \
     rm thredds.war && \
@@ -112,17 +112,17 @@ COPY thredds/conf/applicationContext.xml /usr/local/tomcat/webapps/thredds/WEB-I
 # other jars are copied from the unpacked ORP or NM distributions
 #COPY  thredds/jars/*  $CATALINA_HOME/webapps/thredds/WEB-INF/lib/
 
-ADD $ESGF_REPO/dist/devel/filters/XSGroupRole-1.0.0.jar $CATALINA_HOME/webapps/thredds/WEB-INF/lib/XSGroupRole-1.0.0.jar
-ADD $ESGF_REPO/dist/devel/filters/commons-httpclient-3.1.jar $CATALINA_HOME/webapps/thredds/WEB-INF/lib/commons-httpclient-3.1.jar
-ADD $ESGF_REPO/dist/devel/filters/commons-lang-2.6.jar $CATALINA_HOME/webapps/thredds/WEB-INF/lib/commons-lang-2.6.jar
-ADD $ESGF_REPO/dist/devel/esg-orp/esg-orp-2.9.3.jar $CATALINA_HOME/webapps/thredds/WEB-INF/lib/esg-orp-2.9.3.jar
-ADD $ESGF_REPO/dist/devel/esgf-node-manager/esgf-node-manager-common-1.0.0.jar $CATALINA_HOME/webapps/thredds/WEB-INF/lib/esgf-node-manager-common-1.0.0.jar
-ADD $ESGF_REPO/dist/devel/esgf-node-manager/esgf-node-manager-filters-1.0.0.jar $CATALINA_HOME/webapps/thredds/WEB-INF/lib/esgf-node-manager-filters-1.0.0.jar
-ADD $ESGF_REPO/dist/devel/esgf-security/esgf-security-2.7.10.jar $CATALINA_HOME/webapps/thredds/WEB-INF/lib/esgf-security-2.7.10.jar
-ADD $ESGF_REPO/dist/devel/filters/jdom-legacy-1.1.3.jar $CATALINA_HOME/webapps/thredds/WEB-INF/lib/jdom-legacy-1.1.3.jar
-ADD $ESGF_REPO/dist/devel/filters/opensaml-2.3.2.jar $CATALINA_HOME/webapps/thredds/WEB-INF/lib/opensaml-2.3.2.jar
-ADD $ESGF_REPO/dist/devel/filters/openws-1.3.1.jar $CATALINA_HOME/webapps/thredds/WEB-INF/lib/openws-1.3.1.jar
-ADD $ESGF_REPO/dist/devel/filters/xmltooling-1.2.2.jar $CATALINA_HOME/webapps/thredds/WEB-INF/lib/xmltooling-1.2.2.jar
+ADD $ESGF_REPO/dist/filters/XSGroupRole-1.0.0.jar $CATALINA_HOME/webapps/thredds/WEB-INF/lib/XSGroupRole-1.0.0.jar
+ADD $ESGF_REPO/dist/filters/commons-httpclient-3.1.jar $CATALINA_HOME/webapps/thredds/WEB-INF/lib/commons-httpclient-3.1.jar
+ADD $ESGF_REPO/dist/filters/commons-lang-2.6.jar $CATALINA_HOME/webapps/thredds/WEB-INF/lib/commons-lang-2.6.jar
+ADD $ESGF_REPO/dist/esg-orp/esg-orp-2.9.3.jar $CATALINA_HOME/webapps/thredds/WEB-INF/lib/esg-orp-2.9.6.jar
+ADD $ESGF_REPO/dist/esgf-node-manager/esgf-node-manager-common-1.0.0.jar $CATALINA_HOME/webapps/thredds/WEB-INF/lib/esgf-node-manager-common-1.0.0.jar
+ADD $ESGF_REPO/dist/esgf-node-manager/esgf-node-manager-filters-1.0.0.jar $CATALINA_HOME/webapps/thredds/WEB-INF/lib/esgf-node-manager-filters-1.0.0.jar
+ADD $ESGF_REPO/dist/esgf-security/esgf-security-2.7.10.jar $CATALINA_HOME/webapps/thredds/WEB-INF/lib/esgf-security-2.7.15.jar
+ADD $ESGF_REPO/dist/filters/jdom-legacy-1.1.3.jar $CATALINA_HOME/webapps/thredds/WEB-INF/lib/jdom-legacy-1.1.3.jar
+ADD $ESGF_REPO/dist/filters/opensaml-2.3.2.jar $CATALINA_HOME/webapps/thredds/WEB-INF/lib/opensaml-2.3.2.jar
+ADD $ESGF_REPO/dist/filters/openws-1.3.1.jar $CATALINA_HOME/webapps/thredds/WEB-INF/lib/openws-1.3.1.jar
+ADD $ESGF_REPO/dist/filters/xmltooling-1.2.2.jar $CATALINA_HOME/webapps/thredds/WEB-INF/lib/xmltooling-1.2.2.jar
 
 RUN cp /usr/local/tomcat/webapps/esg-orp/WEB-INF/lib/serializer-2.9.1.jar $CATALINA_HOME/webapps/thredds/WEB-INF/lib/serializer-2.9.1.jar
 RUN cp /usr/local/tomcat/webapps/esg-orp/WEB-INF/lib/velocity-1.5.jar $CATALINA_HOME/webapps/thredds/WEB-INF/lib/velocity-1.5.jar
@@ -130,8 +130,14 @@ RUN cp /usr/local/tomcat/webapps/esg-orp/WEB-INF/lib/xalan-2.7.2.jar $CATALINA_H
 RUN cp /usr/local/tomcat/webapps/esg-orp/WEB-INF/lib/xercesImpl-2.10.0.jar $CATALINA_HOME/webapps/thredds/WEB-INF/lib/xercesImpl-2.10.0.jar
 RUN cp /usr/local/tomcat/webapps/esg-orp/WEB-INF/lib/xml-apis-1.4.01.jar $CATALINA_HOME/webapps/thredds/WEB-INF/lib/xml-apis-1.4.01.jar
 RUN cp /usr/local/tomcat/webapps/esg-orp/WEB-INF/lib/xmlsec-1.4.2.jar $CATALINA_HOME/webapps/thredds/WEB-INF/lib/xmlsec-1.4.2.jar
-RUN cp /usr/local/tomcat/webapps/esg-orp/WEB-INF/lib/log4j-1.2.17.jar $CATALINA_HOME/webapps/thredds/WEB-INF/lib/log4j-1.2.17.jar
 RUN cp /usr/local/tomcat/webapps/esg-orp/WEB-INF/lib/commons-io-2.4.jar $CATALINA_HOME/webapps/thredds/WEB-INF/lib/commons-io-2.4.jar
+#RUN cp /usr/local/tomcat/webapps/esg-orp/WEB-INF/lib/jcl-over-slf4j-1.6.4.jar $CATALINA_HOME/webapps/thredds/WEB-INF/lib/jcl-over-slf4j-1.6.4.jar
+#RUN cp /usr/local/tomcat/webapps/esg-orp/WEB-INF/lib/slf4j-api-1.6.4.jar $CATALINA_HOME/webapps/thredds/WEB-INF/lib/slf4j-api-1.6.4.jar
+#RUN cp /usr/local/tomcat/webapps/esg-orp/WEB-INF/lib/slf4j-log4j12-1.6.4.jar $CATALINA_HOME/webapps/thredds/WEB-INF/lib/slf4j-log4j12-1.6.4.jar
+#RUN cp /usr/local/tomcat/webapps/esg-orp/WEB-INF/lib/log4j-api-2.6.2.jar $CATALINA_HOME/webapps/thredds/WEB-INF/lib/log4j-api-2.6.2.jar
+#RUN cp /usr/local/tomcat/webapps/esg-orp/WEB-INF/lib/log4j-core-2.6.2.jar $CATALINA_HOME/webapps/thredds/WEB-INF/lib/log4j-core-2.6.2.jar
+#RUN cp /usr/local/tomcat/webapps/esg-orp/WEB-INF/lib/log4j-slf4j-impl-2.6.2.jar $CATALINA_HOME/webapps/thredds/WEB-INF/lib/log4j-slf4j-impl-2.6.2.jar
+#RUN cp /usr/local/tomcat/webapps/esg-orp/WEB-INF/lib/log4j-web-2.6.2.jar $CATALINA_HOME/webapps/thredds/WEB-INF/lib/log4j-web-2.6.2.jar
 
 RUN cp /usr/local/tomcat/webapps/esgf-node-manager/WEB-INF/lib/commons-dbcp-1.4.jar $CATALINA_HOME/webapps/thredds/WEB-INF/lib/commons-dbcp-1.4.jar
 RUN cp /usr/local/tomcat/webapps/esgf-node-manager/WEB-INF/lib/commons-dbutils-1.3.jar $CATALINA_HOME/webapps/thredds/WEB-INF/lib/commons-dbutils-1.3.jar
@@ -180,7 +186,7 @@ RUN mkdir -p /usr/local/geoip/share/GeoIP && \
 
 # install esgf-stats-api war file
 #COPY dashboard/esgf-stats-api.war /usr/local/tomcat/webapps/esgf-stats-api/esgf-stats-api.war
-ADD $ESGF_REPO/dist/devel/esgf-stats-api/esgf-stats-api.war /usr/local/tomcat/webapps/esgf-stats-api/esgf-stats-api.war
+ADD $ESGF_REPO/dist/esgf-stats-api/esgf-stats-api.war /usr/local/tomcat/webapps/esgf-stats-api/esgf-stats-api.war
 RUN cd /usr/local/tomcat/webapps/esgf-stats-api && \
     jar xvf esgf-stats-api.war && \
     rm esgf-stats-api.war && \

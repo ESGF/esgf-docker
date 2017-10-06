@@ -11,7 +11,7 @@ MAINTAINER Luca Cinquini <luca.cinquini@jpl.nasa.gov>
 # ESGF esg-idp web application
 ARG ESGF_REPO=http://distrib-coffee.ipsl.jussieu.fr/pub/esgf
 
-ADD $ESGF_REPO/dist/devel/esgf-idp/esgf-idp.war /usr/local/tomcat/webapps/esgf-idp/
+ADD $ESGF_REPO/dist/esgf-idp/esgf-idp.war /usr/local/tomcat/webapps/esgf-idp/
 #ADD esgf-idp.war /usr/local/tomcat/webapps/esgf-idp/
 RUN cd /usr/local/tomcat/webapps/esgf-idp/ && \
     jar xvf esgf-idp.war && \

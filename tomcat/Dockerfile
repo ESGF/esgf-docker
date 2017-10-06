@@ -10,9 +10,9 @@ FROM $ESGF_IMAGES_HUB/esgf-node:$ESGF_VERSION
 MAINTAINER Luca Cinquini <luca.cinquini@jpl.nasa.gov>
 
 # Tomcat 8
-ENV TOMCAT_VERSION 8.5.20
+ENV TOMCAT_VERSION 8.5.23
 
-RUN wget -O /tmp/apache-tomcat-${TOMCAT_VERSION}.tar.gz http://mirror.reverse.net/pub/apache/tomcat/tomcat-8/v${TOMCAT_VERSION}/bin/apache-tomcat-${TOMCAT_VERSION}.tar.gz && \
+RUN wget -O /tmp/apache-tomcat-${TOMCAT_VERSION}.tar.gz http://archive.apache.org/dist/tomcat/tomcat-8/v${TOMCAT_VERSION}/bin/apache-tomcat-${TOMCAT_VERSION}.tar.gz && \
     cd /usr/local && tar xzf /tmp/apache-tomcat-${TOMCAT_VERSION}.tar.gz && \
     ln -s /usr/local/apache-tomcat-${TOMCAT_VERSION} /usr/local/tomcat && \
     rm /tmp/apache-tomcat-${TOMCAT_VERSION}.tar.gz
