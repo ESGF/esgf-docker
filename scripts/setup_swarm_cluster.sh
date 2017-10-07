@@ -93,13 +93,6 @@ fi
 
 readonly node_max_index=$(( ${nb_nodes}-1 ))
 
-systemctl --no-pager status docker > /dev/null
-
-if [ $? -ne 0 ]; then
-  echo "> starting docker"
-  service docker start
-fi
-
 echo "> create up to ${nb_nodes} nodes"
 
 for node_index in `seq 0 ${node_max_index}`;
