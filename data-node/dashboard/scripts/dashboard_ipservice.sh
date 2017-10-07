@@ -46,7 +46,7 @@ git clone https://github.com/ESGF/esgf-dashboard.git
 
 cd esgf-dashboard/
 
-git checkout -b work_plana origin/work_plana
+git checkout -b devel origin/devel
 
 cd src/c/esgf-dashboard-ip
 
