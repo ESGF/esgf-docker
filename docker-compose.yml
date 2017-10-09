@@ -66,7 +66,6 @@ services:
       - $ESGF_DATA_DIR:/esg/data
       #- $ESGF_CONFIG/grid-security/certificates/:/etc/grid-security/certificates/
       #- $ESGF_CONFIG/globus/certificate-file:/root/.globus/certificate-file
-      - esgf_auth_install:/usr/local/esgf-auth
       # FIXME: build new esg-opr jat into image
       - $ESGF_CONFIG/esg-orp-2.9.6.jar:/usr/local/tomcat/webapps/thredds/WEB-INF/lib/esg-orp-2.9.6.jar
     volumes_from:
@@ -76,6 +75,12 @@ services:
     depends_on:
       - esgf-postgres
 
+  # ESGF-Auth client
+  esgf-auth:
+    image: esgfhub/esgf-auth:${ESGF_VERSION}
+    container_name: esgf-auth
+    volumes:
+      - esgf_auth_install:/usr/local/esgf-auth
 
   # ESGF Identity Provider
   esgf-idp-node:
@@ -182,7 +187,7 @@ services:
      - "443:443"
    depends_on:
      - esgf-cog
-     - esgf-data-node
+     - esgf-auth
    #  - esgf-node-manager
    healthcheck:
      test: 'curl --fail "https://${ESGF_HOSTNAME}/" || exit 1'

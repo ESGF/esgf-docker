@@ -73,6 +73,11 @@ secrets:
           ##################### GRID SECRETS ##################
   grid_certificates:
     file: $ESGF_CONFIG/archives/grid_security_certs.tar.xz
+          ##################### ESGF-AUTH SECRETS ##################
+  esgf_auth_settings:
+    file: $ESGF_CONFIG/esgf-auth/settings.py
+
+
 services:
 
   # ESGF postgres database
@@ -203,9 +208,10 @@ services:
     networks:
       - default
       - dbnetwork
+    # FIXME
     configs:
       - source: thredds_web_xml
-        target: /usr/local/tomcat/webapps/thredds/WEB-INF/web.xml
+        target: /usr/local/tomcat/webapps/thredds/WEB-INF/web.xml2
     secrets:
       - source: tomcat_esg-truststore_ts
         target: /usr/java/latest/jre/lib/security/jssecacerts
@@ -214,6 +220,8 @@ services:
       - $ESGF_CONFIG/esg/config/:/esg/config/ # TODO: secret&config
       # FIXME: local jar with new AuthenticationRedirectFilter
       - $ESGF_CONFIG/esg-orp-2.9.6.jar:/usr/local/tomcat/webapps/thredds/WEB-INF/lib/esg-orp-2.9.6.jar
+      # FIXME: use secret instead
+      - $ESGF_CONFIG/webapps/thredds/WEB-INF/web.xml:/usr/local/tomcat/webapps/thredds/WEB-INF/web.xml
     environment:
      - ESGF_HOSTNAME
     depends_on:
@@ -222,6 +230,15 @@ services:
       replicas: 1
       placement:
         constraints: [node.labels.esgf_data_node == true]
+
+  esgf-auth:
+    image: ${ESGF_IMAGES_HUB-esgfhub}/esgf-auth:${ESGF_VERSION-latest}
+    volumes:
+      - esgf_auth_install:/usr/local/esgf-auth
+    deploy:
+      replicas: 1
+      placement:
+        constraints: [node.labels.esgf_front_node == true]
 
   esgf-httpd:
     image: ${ESGF_IMAGES_HUB-esgfhub}/esgf-httpd:${ESGF_VERSION-latest}
@@ -245,11 +262,16 @@ services:
       - source: grid_certificates
         target: /root/archives/grid_security_certs.tar.xz
         mode:   0400
+      - source: esgf_auth_settings
+        target: /usr/local/esgf-auth/src/esgf-auth/esgf_auth/settings.py
     volumes:
       - cog_install_dir:/usr/local/cog/cog_install
       - cog_venv:/usr/local/cog/venv
       - cog_data:/usr/local/cog/cog_config
+      - esgf_auth_install:/usr/local/esgf-auth
       - $ESGF_CONFIG/esg/config/:/esg/config/ # TODO: secret&config
+      # esgf-auth database
+      - $ESGF_CONFIG/esgf-auth/db.sqlite3:/tmp/db.sqlite3
       # - esgf-node-manager
     environment:
       - SSL_CERT_DIR=/etc/grid-security/certificates
@@ -260,6 +282,7 @@ services:
      - "443:443"
     depends_on:
      - esgf-cog
+     - esgf-auth
     #  - esgf-node-manager
     # httpd URLs must use hostname=$ESGF_HOSTNAME
     networks:
@@ -367,3 +390,5 @@ volumes:
   tds_data:
   # SLCS web pages
   slcs_static_web:
+  # esgf-auth installation directory
+  esgf_auth_install:

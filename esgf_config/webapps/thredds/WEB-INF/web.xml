@@ -52,8 +52,8 @@
   <!-- ******************************** -->
   <filter>
     <filter-name>authenticationFilter</filter-name>
-    <!-- <filter-class>esg.orp.app.AuthenticationFilter</filter-class> -->
-    <filter-class>esg.orp.app.AuthenticationRedirectFilter</filter-class>
+    <filter-class>esg.orp.app.AuthenticationFilter</filter-class>
+    <!-- <filter-class>esg.orp.app.AuthenticationRedirectFilter</filter-class> -->
     <init-param>
       <param-name>policyServiceClass</param-name>
       <!-- <param-value>esg.orp.app.tds.TDSPolicyService</param-value> -->
