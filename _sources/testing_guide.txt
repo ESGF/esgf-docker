@@ -23,12 +23,10 @@ In what follows, replace *my-node.esgf.org* with your choice for $ESGF_HOSTNAME:
    * password=changeit
 
 * ORP: https://my-node.esgf.org/esg-orp/. Check you can login with the credentials above.
-
 * TDS: https://my-node.esgf.org/thredds. Check you can browse the catalogs, and download one file after logging in.
+* ESGF-Auth web client: https://my-node.esgf.org/esgf-auth/home/ . Check you can login with the openid and password above, 
+  and with at least one other external openid.
 * SLCS: https://my-node.esgf.org/slcs/admin/. Check you can log in as root administrator using:
 
   * username=rootAdmin
   * password=changeit
-
-
-
