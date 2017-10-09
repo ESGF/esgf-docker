@@ -20,7 +20,7 @@ Pre-Requisites
 *  A host system with the latest version of Docker Engine installed (at
    this time, Docker 1.12+). Tested on MacOSX and Linux CentOS.
 *  Java SDK (at this time 1.8), keytool is required.
-.. *  Docker-compose (at this time 1.14.0), installation procedure
+*  Docker-compose (at this time 1.14.0), installation procedure
    `here <https://docs.docker.com/compose/install/#install-compose>`__
 
 Setup

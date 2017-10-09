@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Data Publishing &#8212; ESGF-Docker Documentation</title>
+    <title>Data Publishing &mdash; ESGF-Docker Documentation</title>
     
     <link rel="stylesheet" href="_static/nature.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -17,15 +17,13 @@
         VERSION:     '1.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true,
-        SOURCELINK_SUFFIX: '.txt'
+        HAS_SOURCE:  true
       };
     </script>
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="index" title="Index" href="genindex.html" />
-    <link rel="search" title="Search" href="search.html" />
+    <link rel="top" title="ESGF-Docker Documentation" href="index.html" />
     <link rel="next" title="Architecture and Development Guidelines" href="architecture_and_development_guidelines.html" />
     <link rel="prev" title="Multiple Hosts Deployment" href="multiple_hosts_deployment.html" /> 
   </head>
@@ -42,7 +40,7 @@
         <li class="right" >
           <a href="multiple_hosts_deployment.html" title="Multiple Hosts Deployment"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">ESGF-Docker Documentation</a> &#187;</li> 
+        <li><a href="index.html">ESGF-Docker Documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -60,8 +58,8 @@
 publish a sample dataset and file to the ESGF data node running as a
 Docker container. These instructions are meant to be executed inside the
 data node container:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">docker</span><span class="o">-</span><span class="n">compose</span> <span class="n">up</span>
-<span class="n">docker</span> <span class="n">exec</span> <span class="o">-</span><span class="n">it</span> <span class="o">-</span><span class="n">u</span> <span class="mi">0</span> <span class="n">data</span><span class="o">-</span><span class="n">node</span> <span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">bash</span>
+<div class="highlight-python"><div class="highlight"><pre>docker-compose up
+docker exec -it -u 0 data-node /bin/bash
 </pre></div>
 </div>
 </div>
@@ -71,13 +69,13 @@ data node container:</p>
 to its internal test datasets. This catalog must be replaced with the
 standard ESGF main catalog (which is mounted onto the container as part
 of the Docker distribution):</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">cd</span> <span class="o">/</span><span class="n">esg</span><span class="o">/</span><span class="n">content</span><span class="o">/</span><span class="n">thredds</span>
-<span class="n">mv</span> <span class="n">catalog</span><span class="o">.</span><span class="n">xml</span><span class="o">-</span><span class="n">esgcet</span> <span class="n">catalog</span><span class="o">.</span><span class="n">xml</span>
+<div class="highlight-python"><div class="highlight"><pre>cd /esg/content/thredds
+mv catalog.xml-esgcet catalog.xml
 </pre></div>
 </div>
 <p>Also, the postgres database must be initialized with the list of models,
 experiments found in the file <em>esgcet_models_table.xml</em>:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span>cd /esg/config/esgcet
+<div class="highlight-python"><div class="highlight"><pre>cd /esg/config/esgcet
 source ${CDAT_HOME}/bin/activate esgf-pub
 esginitialize -c
 </pre></div>
@@ -85,16 +83,16 @@ esginitialize -c
 <p>(this step must actually be repeated any time that file changes).</p>
 <p>The test file to be published should already be present at the location:
 <em>/esg/data/test/sftlf.nc</em> . If not, it can be downloaded as:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">mkdir</span> <span class="o">-</span><span class="n">p</span> <span class="o">/</span><span class="n">esg</span><span class="o">/</span><span class="n">data</span><span class="o">/</span><span class="n">test</span>
-<span class="n">cd</span> <span class="o">/</span><span class="n">esg</span><span class="o">/</span><span class="n">data</span><span class="o">/</span><span class="n">test</span>
-<span class="n">wget</span> <span class="o">-</span><span class="n">O</span> <span class="n">sftlf</span><span class="o">.</span><span class="n">nc</span> <span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="n">distrib</span><span class="o">-</span><span class="n">coffee</span><span class="o">.</span><span class="n">ipsl</span><span class="o">.</span><span class="n">jussieu</span><span class="o">.</span><span class="n">fr</span><span class="o">/</span><span class="n">pub</span><span class="o">/</span><span class="n">esgf</span><span class="o">/</span><span class="n">dist</span><span class="o">/</span><span class="n">externals</span><span class="o">/</span><span class="n">sftlf</span><span class="o">.</span><span class="n">nc</span>
+<div class="highlight-python"><div class="highlight"><pre>mkdir -p /esg/data/test
+cd /esg/data/test
+wget -O sftlf.nc http://distrib-coffee.ipsl.jussieu.fr/pub/esgf/dist/externals/sftlf.nc
 </pre></div>
 </div>
 </div>
 <div class="section" id="step-1">
 <h2>Step 1<a class="headerlink" href="#step-1" title="Permalink to this headline">¶</a></h2>
 <p>Generate the mapfile listing the dataset and files to be published:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span>cd /esg/config/esgcet
+<div class="highlight-python"><div class="highlight"><pre>cd /esg/config/esgcet
 source ${CDAT_HOME}/bin/activate esgf-pub
 esgprep mapfile --project test /esg/data/test
 ls -l test.test.map
@@ -104,15 +102,15 @@ ls -l test.test.map
 <div class="section" id="step-2">
 <h2>Step 2<a class="headerlink" href="#step-2" title="Permalink to this headline">¶</a></h2>
 <p>Publish to the postgres database:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">esgpublish</span> <span class="o">--</span><span class="n">project</span> <span class="n">test</span> <span class="o">--</span><span class="nb">map</span> <span class="n">test</span><span class="o">.</span><span class="n">test</span><span class="o">.</span><span class="n">map</span> <span class="o">--</span><span class="n">service</span> <span class="n">fileservice</span>
-<span class="n">esglist_datasets</span> <span class="n">test</span>
+<div class="highlight-python"><div class="highlight"><pre>esgpublish --project test --map test.test.map --service fileservice
+esglist_datasets test
 </pre></div>
 </div>
 </div>
 <div class="section" id="step-3">
 <h2>Step 3<a class="headerlink" href="#step-3" title="Permalink to this headline">¶</a></h2>
 <p>Publish to the TDS:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">esgpublish</span> <span class="o">--</span><span class="n">project</span> <span class="n">test</span> <span class="o">--</span><span class="nb">map</span> <span class="n">test</span><span class="o">.</span><span class="n">test</span><span class="o">.</span><span class="n">map</span> <span class="o">--</span><span class="n">service</span> <span class="n">fileservice</span> <span class="o">--</span><span class="n">noscan</span> <span class="o">--</span><span class="n">thredds</span>
+<div class="highlight-python"><div class="highlight"><pre>esgpublish --project test --map test.test.map --service fileservice --noscan --thredds
 </pre></div>
 </div>
 <p>Note: this operation will use the credentials contained in the <em>esg.ini</em>
@@ -129,7 +127,7 @@ from the TDS main catalog page:</p>
 by the data-node. The authorization required for downloading the file is
 specified in the access policy file: <em>/esg/config/esgf_policies_local.xml</em>
 as an XML statement of the form:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="n">policy</span> <span class="n">resource</span><span class="o">=</span><span class="s2">&quot;.*test.*&quot;</span> <span class="n">attribute_type</span><span class="o">=</span><span class="s2">&quot;AUTH_ONLY&quot;</span> <span class="n">attribute_value</span><span class="o">=</span><span class="s2">&quot;&quot;</span> <span class="n">action</span><span class="o">=</span><span class="s2">&quot;Read&quot;</span><span class="o">/&gt;</span>
+<div class="highlight-python"><div class="highlight"><pre>&lt;policy resource=&quot;.*test.*&quot; attribute_type=&quot;AUTH_ONLY&quot; attribute_value=&quot;&quot; action=&quot;Read&quot;/&gt;
 </pre></div>
 </div>
 </div>
@@ -143,17 +141,17 @@ workarounds can be adopted.</p>
 <p>Obtain a short-term X509 certificate from any other trusted ESGF
 identity provider, and copy it into the data-node container in the location
 referenced by the file esg.ini:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">cp</span> <span class="n">certificate</span><span class="o">-</span><span class="n">file</span> <span class="o">/</span><span class="n">root</span><span class="o">/.</span><span class="n">globus</span><span class="o">/</span><span class="n">certificate</span><span class="o">-</span><span class="n">file</span>
+<div class="highlight-python"><div class="highlight"><pre>cp certificate-file /root/.globus/certificate-file
 </pre></div>
 </div>
 <p>Then, disable specific authorization for publishing test data, requiring only
 the availability of an X509 certificate. Edit the file: <em>/esg/config/esgf_policies_local.xml</em>
 and insert the following policy statement (as XML):</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="n">policy</span> <span class="n">resource</span><span class="o">=</span><span class="s2">&quot;.*test.*&quot;</span> <span class="n">attribute_type</span><span class="o">=</span><span class="s2">&quot;ANY&quot;</span> <span class="n">attribute_value</span><span class="o">=</span><span class="s2">&quot;&quot;</span> <span class="n">action</span><span class="o">=</span><span class="s2">&quot;Write&quot;</span><span class="o">/&gt;</span>
+<div class="highlight-python"><div class="highlight"><pre>&lt;policy resource=&quot;.*test.*&quot; attribute_type=&quot;ANY&quot; attribute_value=&quot;&quot; action=&quot;Write&quot;/&gt;
 </pre></div>
 </div>
 <p>At this point, you can issue the publishing command:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">esgpublish</span> <span class="o">--</span><span class="n">project</span> <span class="n">test</span> <span class="o">--</span><span class="nb">map</span> <span class="n">test</span><span class="o">.</span><span class="n">test</span><span class="o">.</span><span class="n">map</span> <span class="o">--</span><span class="n">service</span> <span class="n">fileservice</span> <span class="o">--</span><span class="n">noscan</span> <span class="o">--</span><span class="n">publish</span>
+<div class="highlight-python"><div class="highlight"><pre>esgpublish --project test --map test.test.map --service fileservice --noscan --publish
 </pre></div>
 </div>
 <p>After about a minute, the dataset and file should be returned when
@@ -198,18 +196,21 @@ CoG user interface, if the project has searching enabled:</p>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
-      <li><a href="_sources/data_publishing.rst.txt"
+      <li><a href="_sources/data_publishing.txt"
             rel="nofollow">Show Source</a></li>
     </ul>
    </div>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="search.html" method="get">
-      <div><input type="text" name="q" /></div>
-      <div><input type="submit" value="Go" /></div>
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
@@ -228,12 +229,12 @@ CoG user interface, if the project has searching enabled:</p>
         <li class="right" >
           <a href="multiple_hosts_deployment.html" title="Multiple Hosts Deployment"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">ESGF-Docker Documentation</a> &#187;</li> 
+        <li><a href="index.html">ESGF-Docker Documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &#169; Copyright 2017, ESGF.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.6.
+        &copy; Copyright 2017, ESGF.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3b2.
     </div>
   </body>
 </html>

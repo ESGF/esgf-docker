@@ -23,7 +23,7 @@ Notes
 - If you have a Linux kernel security module installed (like selinux), we assume
   that you know how to configure it for docker and swarm cluster.
 - If you want to run ESGF on a cluster of hosts, the sections Docker CE
-  installation and Firewall configuration are suffisants.
+  installation and Firewall configuration are sufficient.
 
 Tested versions
 ===============
@@ -59,7 +59,7 @@ ports have to be open (direction INPUT and OUTPUT, states NEW and ESTABLISHED):
 and of course, TCP port 22 (ssh) have to be open.
 
 We also believe that localhost interface must have full access so as to connect
-to the ESGF componants.
+to the ESGF components.
 
 Examples of iptables configuration::
 
@@ -92,7 +92,7 @@ Virtualization infrastructure
 Docker Machine is a command line tool that automate the creation of Virtual 
 Machines (VMs) with an minimalist image of Linux with Docker engine installed.
 Nevertheless, Docker Machine relies on a virtualization infrastructure.
-Under Linux systems, you got planty of choices: KVM, Xen, VirtualBox, etc.
+Under Linux systems, you got plenty of choices: KVM, Xen, VirtualBox, etc.
 
 This `link <https://docs.docker.com/machine/drivers/>`__ lists the supported 
 virtualization infrastructures by Docker Inc. Although KVM is not supported 
@@ -155,6 +155,8 @@ docker machines and the creation of the swarm cluster::
   # and setup a swarm cluster with these VMs where node0 is the swarm manager
   scripts/setup_swarm_cluster.sh -d kvm -n 2
 
+Creating VMs can take few minutes.
+
 Note that you can pass arguments to the Docker Machine driver with the command
 line option -a. For example, if you want to set the VMs RAM size to 2048 Mo
 (faster VMs ; default is 1024 Mo)::
@@ -168,7 +170,15 @@ About managing docker machine VMs::
   docker-machine rm node0 node1 # delete the VMs named node0 and node1
   eval $(docker-machine env node0) # so as to issue docker commands with 
                                    # the node0 environment
-                                   
+
+As an example, these instructions completely shutdown ESGF stack and VMs::
+
+  bash # don't mess with variable environment settings because
+  eval $(docker-machine env node0) # we have switch to the node0 context
+  docker stack rm esgf-stack # so as to shutdown ESGF stack because node0 is the swarm manager
+  exit # optionally exit the subprocess bash
+  docker-machine rm node0 node1 # node2 and so onto ; delete the VMs created by docker-machine
+  
 Associate the IP address of the Swarm manager node to the hostname
 you intend to use to access the ESGF services. For example if 
 $ESGF_HOSTNAME=my-node.esgf.org::

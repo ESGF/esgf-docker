@@ -72,8 +72,9 @@ Execution
 
 *  When all services are deployed, execute the tests described in the :ref:`testing_guide`.
 
-*  Clean up: remove the full ESGF stack from the Swarm::
+*  Clean up: remove the full ESGF stack from the Swarm, and delete the networks::
 
      eval $(docker-machine env node1)
      docker stack rm esgf-stack
+     docker network rm esgf-stack_dbnetwork  esgf-stack_default
 
