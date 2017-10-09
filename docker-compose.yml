@@ -52,11 +52,9 @@ services:
     expose:
       - "8080"
       - "8443"
-    # - "8001"
     ports:
       - "8080:8080"
       - "8443:8443"
-    # - "8001:8001"
     networks:
       - default
       - dbnetwork 
@@ -66,8 +64,6 @@ services:
       - $ESGF_DATA_DIR:/esg/data
       #- $ESGF_CONFIG/grid-security/certificates/:/etc/grid-security/certificates/
       #- $ESGF_CONFIG/globus/certificate-file:/root/.globus/certificate-file
-      # FIXME: build new esg-opr jat into image
-      - $ESGF_CONFIG/esg-orp-2.9.6.jar:/usr/local/tomcat/webapps/thredds/WEB-INF/lib/esg-orp-2.9.6.jar
     volumes_from:
       - esgf-config
     environment:
