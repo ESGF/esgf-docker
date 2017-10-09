@@ -20,5 +20,7 @@ RUN cd /usr/local/tomcat/webapps/esgf-idp/ && \
 
 # Override Tomcat startup to wait for Postgred connection to be ready
 COPY scripts/wait_for_postgres.sh /usr/local/bin/wait_for_postgres.sh
-COPY conf/supervisord.tomcat.conf /etc/supervisor/conf.d/supervisord.tomcat.conf 
-CMD ["supervisord", "--nodaemon", "-c", "/etc/supervisord.conf"]
+COPY scripts/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+COPY scripts/process_esgf_config_archive.sh /usr/local/bin/process_esgf_config_archive.sh
+COPY conf/supervisord.tomcat.conf /etc/supervisor/conf.d/supervisord.tomcat.conf
+ENTRYPOINT /usr/local/bin/docker-entrypoint.sh

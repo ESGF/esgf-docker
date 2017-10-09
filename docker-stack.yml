@@ -73,6 +73,10 @@ secrets:
           ##################### GRID SECRETS ##################
   grid_certificates:
     file: $ESGF_CONFIG/archives/grid_security_certs.tar.xz
+          ##################### ESGF SECRETS ##################
+  esgf_config_files:
+    file: $ESGF_CONFIG/archives/esgf_config.tar.xz
+
 services:
 
   # ESGF postgres database
@@ -112,7 +116,7 @@ services:
         target: /etc/certs/hostkey.pem
       - source: grid_certificates
         target: /root/archives/grid_security_certs.tar.xz
-        mode:   0400
+        mode:   0600
     volumes:
       - cog_install_dir:/usr/local/cog/cog_install
       - cog_venv:/usr/local/cog/venv
@@ -186,8 +190,11 @@ services:
     secrets:
       - source: tomcat_esg-truststore_ts
         target: /usr/java/latest/jre/lib/security/jssecacerts
-    volumes:
-     - $ESGF_CONFIG/esg/config/:/esg/config/ # TODO: secret&config
+      - source: esgf_config_files
+        target: /root/archives/esgf_config.tar.xz
+        mode:   0600
+    #volumes:
+    # - $ESGF_CONFIG/esg/config/:/esg/config/ # TODO: secret&config
     depends_on:
       - esgf-postgres
     deploy:
@@ -242,7 +249,7 @@ services:
         target: /etc/certs/hostkey.pem
       - source: grid_certificates
         target: /root/archives/grid_security_certs.tar.xz
-        mode:   0400
+        mode:   0600
     volumes:
       - cog_install_dir:/usr/local/cog/cog_install
       - cog_venv:/usr/local/cog/venv
