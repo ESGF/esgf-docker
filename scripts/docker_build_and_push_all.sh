@@ -49,8 +49,8 @@ is_latest="${FALSE}"
 
 function build_and_push() {
   # function parameters
-  local img="esgf-$1:${esgf_ver}"
-  local latest_img="esgf-$1:latest"
+  local img="${ESGF_IMAGE_PREFIX}$1:${esgf_ver}"
+  local latest_img="${ESGF_IMAGE_PREFIX}$1:latest"
   
   if [[ "${has_only_push}" = "${FALSE}" ]]; then
     echo -e "***** BUILDING MODULE $img\n"
@@ -156,7 +156,7 @@ while true; do
   esac
 done
 
-echo -e "building all the images with VERSION=$esgf_ver PUSH=$pushit HUB=$images_hub REPO=$packages_repo latest=$is_latest\n"
+echo -e "building all the images with VERSION=$esgf_ver PUSH=$pushit HUB=$images_hub REPO=$packages_repo latest=$is_latest ?\n"
 
 if [[ "${assumeyes}" = "${FALSE}" ]]; then
   ask_binary_question "Do you want to continue ?"
@@ -188,4 +188,5 @@ done
 
 cd "${BASE_DIR_PATH}"
 
+echo "**** build&push successful ****"
 exit ${SUCCESS_CODE}

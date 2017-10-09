@@ -16,6 +16,8 @@ readonly DEFAULT_PACKAGE_REPO=${ESGF_REPO-"http://distrib-coffee.ipsl.jussieu.fr
 
 readonly ESGF_IMAGE_DIR_NAMES=('node' 'postgres' 'tomcat' 'solr' 'httpd' 'cog' 'data-node' 'idp-node' 'index-node' 'slcs' 'node-manager' 'vsftp' 'solr-cloud')
 
+readonly ESGF_IMAGE_PREFIX='esgf-'
+
 ################################ FUNCTIONS #####################################
 
 # return 0 if user answer yes, return 1 otherwise.
