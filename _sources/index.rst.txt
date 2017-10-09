@@ -23,4 +23,4 @@ Table of Contents:
    git_workflow.rst
    esgf_solr.rst
    testing_guide.rst
-
+   docker_tips.rst
