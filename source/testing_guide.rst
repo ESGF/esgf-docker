@@ -12,7 +12,7 @@ These tests **must** be executed before the *integration* branch is merged into 
 
 In what follows, replace *my-node.esgf.org* with your choice for $ESGF_HOSTNAME:
 
-* Docker visualizer tool: http://my-node.esgf.org:8080/. Check all containers are up and running.
+* Docker visualizer tool: http://my-node.esgf.org:8080/. Check all containers are up and running. Only when running with Docker Swarm on a multi-host environment - not when using Docker compose.
 * Solr admin interface: https://my-node.esgf.org/solr/#/. Check you can perform a basic search.
 * ESGF search API: http://my-node.esgf.org/esg-search/search.
 * ESGF IdP: https://my-node.esgf.org/esgf-idp/.
