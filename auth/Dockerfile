@@ -8,45 +8,42 @@ FROM $ESGF_IMAGES_HUB/esgf-node:$ESGF_VERSION
 
 MAINTAINER Earth System Grid Federation <esgf-devel@lists.llnl.gov>
 
+# installation directory
+ENV ESGF_AUTH_INSTALL_DIR=/usr/local/esgf-auth
+
 # library dependencies
 RUN yum -y update; yum -y install libffi-devel; yum clean all
 
 # create python virtual environment
-RUN mkdir -p /usr/local/esgf-auth && \
-    cd /usr/local/esgf-auth && \
+RUN mkdir -p $ESGF_AUTH_INSTALL_DIR && \
+    cd $ESGF_AUTH_INSTALL_DIR && \
     virtualenv venv
 
 # install source code
-RUN mkdir -p /usr/local/esgf-auth/src
+RUN mkdir -p $ESGF_AUTH_INSTALL_DIR/src
 
 # install crypto cookie
-RUN cd /usr/local/esgf-auth && \
+RUN cd $ESGF_AUTH_INSTALL_DIR && \
     source venv/bin/activate && \
     cd src && \
     git clone https://github.com/philipkershaw/crypto-cookie.git && \
-    cd /usr/local/esgf-auth/src/crypto-cookie && \
+    cd crypto-cookie && \
     python setup.py install
 
 # install esgf-auth
-RUN cd /usr/local/esgf-auth && \
+RUN cd $ESGF_AUTH_INSTALL_DIR && \
     source venv/bin/activate && \
     cd src && \
     git clone https://github.com/lukaszlacinski/esgf-auth.git && \
-    cd /usr/local/esgf-auth/src/esgf-auth && \
+    cd esgf-auth && \
     pip install -r requirements.txt && \
     pip install paste && \
-    python manage.py migrate
+    python ./manage.py migrate
 
-# FIXME: must make database writable by user apache
-#RUN chmod a+w /usr/local/esgf-auth/src/esgf-auth/db.sqlite3
+# change permission on parent directory and database file so user apache can write
+RUN chmod a+w /usr/local/esgf-auth/src/esgf-auth && \
+    chmod a+w /usr/local/esgf-auth/src/esgf-auth/db.sqlite3
 
-# start esgf-auth through supervisor
-#ADD esgf-auth/conf/supervisord.esgf-auth.conf /etc/supervisor/conf.d/supervisord.esgf-auth.conf
-
-EXPOSE 8001
 VOLUME /usr/local/esgf-auth
 
-#===========================================
-
-# startup configuration inherited from esgf-tomcat image
 CMD ["supervisord", "--nodaemon", "-c", "/etc/supervisord.conf"]
