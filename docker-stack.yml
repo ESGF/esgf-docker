@@ -170,8 +170,9 @@ services:
     secrets:
       - source: tomcat_esg-truststore_ts
         target: /usr/java/latest/jre/lib/security/jssecacerts
-    volumes:
-     - $ESGF_CONFIG/esg/config/:/esg/config/ # TODO: secret&config
+      - source: esgf_config_files
+        target: /root/archives/esgf_config.tar.xz
+        mode:   0600
     networks:
       - default
     deploy:
