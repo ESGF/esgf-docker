@@ -30,3 +30,6 @@ sed -i.back 's/my\.esgf\.node/'"${ESGF_HOSTNAME}"'/g' $ESGF_CONFIG/webapps/thred
 
 # change ESGF publisher configuration (esg.ini)
 sed -i.back 's/my\.esgf\.node/'"${ESGF_HOSTNAME}"'/g' $ESGF_CONFIG/esg/config/esgcet/esg.ini
+
+# change esgf-auth settings file
+sed -i.bak 's/ALLOWED_HOSTS = .*/ALLOWED_HOSTS = [u\"'"${ESGF_HOSTNAME}"'\"]/g' $ESGF_CONFIG/esgf-auth/settings.py
