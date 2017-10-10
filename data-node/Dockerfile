@@ -210,5 +210,6 @@ RUN mkdir -p $DASHBOARD_HOME/logs
 
 #===========================================
 
-# startup configuration inherited from esgf-tomcat image
-CMD ["supervisord", "--nodaemon", "-c", "/etc/supervisord.conf"]
+COPY scripts/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+COPY scripts/process_esgf_config_archive.sh /usr/local/bin/process_esgf_config_archive.sh
+ENTRYPOINT /usr/local/bin/docker-entrypoint.sh

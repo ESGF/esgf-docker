@@ -193,8 +193,6 @@ services:
       - source: esgf_config_files
         target: /root/archives/esgf_config.tar.xz
         mode:   0600
-    #volumes:
-    # - $ESGF_CONFIG/esg/config/:/esg/config/ # TODO: secret&config
     depends_on:
       - esgf-postgres
     deploy:
@@ -216,9 +214,11 @@ services:
     secrets:
       - source: tomcat_esg-truststore_ts
         target: /usr/java/latest/jre/lib/security/jssecacerts
+      - source: esgf_config_files
+        target: /root/archives/esgf_config.tar.xz
+        mode:   0600
     volumes:
       - tds_data:/esg/content/thredds
-      - $ESGF_CONFIG/esg/config/:/esg/config/ # TODO: secret&config
     environment:
      - ESGF_HOSTNAME
     depends_on:

@@ -1,14 +1,8 @@
 #!/bin/bash
-# Default script to start Tomcat inside a container
+# Script to start ESGF data node
 
-# start Tomcat in the background (so it can be restarted without stopping the container)
-# note: additional startup parameters are read from bin/setenv.sh
-$CATALINA_HOME/bin/catalina.sh start
+# deploy esgf config files
+/usr/local/bin/process_esgf_config_archive.sh
 
-# keep container running by printing log to standard output
-logfile=/usr/local/tomcat/logs/catalina.out
-while ! [ -f $logfile ];
-do
-    sleep 1
-done
-tail -f $logfile
+# startup configuration inherited from esgf-tomcat image
+supervisord --nodaemon -c /etc/supervisord.conf
