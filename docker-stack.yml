@@ -230,10 +230,15 @@ services:
   # so they can share data in the volume 'esgf_auth_install'
   esgf-auth:
     image: ${ESGF_IMAGES_HUB-esgfhub}/esgf-auth:${ESGF_VERSION-latest}
+    # override image command by starting supervisor and exiting immediately
+    # which will also cause the container to exit after initialization
+    # (i.e. after the volume is initialized)
+    command: ["supervisord", "-v"]
     volumes:
       - esgf_auth_install:/usr/local/esgf-auth
+    # use 0 replicas to prevent Docker from keep trying to restart the container
     deploy:
-      replicas: 1
+      replicas: 0
       placement:
         constraints: [node.labels.esgf_front_node == true]
 
