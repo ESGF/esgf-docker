@@ -41,4 +41,5 @@ EXPOSE 80 443
 # the child processes that serve user requests run as user 'apache'
 ADD conf/supervisord.httpd.conf /etc/supervisor/conf.d/supervisord.httpd.conf
 ADD scripts/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+ADD scripts/process_esgf_config_archive.sh /usr/local/bin/process_esgf_config_archive.sh
 ENTRYPOINT /usr/local/bin/docker-entrypoint.sh
