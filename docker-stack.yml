@@ -117,11 +117,13 @@ services:
       - source: grid_certificates
         target: /root/archives/grid_security_certs.tar.xz
         mode:   0600
+      - source: esgf_config_files
+        target: /root/archives/esgf_config.tar.xz
+        mode:   0600
     volumes:
       - cog_install_dir:/usr/local/cog/cog_install
       - cog_venv:/usr/local/cog/venv
       - cog_data:/usr/local/cog/cog_config
-      - $ESGF_CONFIG/esg/config/:/esg/config/ # TODO: secret&config
     #command: $ESGF_HOSTNAME true true # ESGF=true, keep django server runnining on port 8000
     command: $ESGF_HOSTNAME true false # ESGF=true, django server running on port 8000 = false
     depends_on:

@@ -19,6 +19,9 @@ mkdir /etc/grid-security
 tar --same-owner -pxaf /root/archives/grid_security_certs.tar.xz -C /etc/grid-security
 chmod -R 664 /etc/grid-security/certificates
 
+# deploy esgf config files
+/usr/local/bin/process_esgf_config_archive.sh
+
 # wait for Postgred connection to be ready
 /usr/local/bin/wait_for_postgres.sh
 
