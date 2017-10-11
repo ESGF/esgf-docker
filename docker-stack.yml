@@ -272,8 +272,6 @@ services:
       - cog_data:/usr/local/cog/cog_config
       - esgf_auth_install:/usr/local/esgf-auth
       - $ESGF_CONFIG/esg/config/:/esg/config/ # TODO: secret&config
-      # esgf-auth database
-      - $ESGF_CONFIG/esgf-auth/db.sqlite3:/tmp/db.sqlite3
       # - esgf-node-manager
     environment:
       - SSL_CERT_DIR=/etc/grid-security/certificates
