@@ -76,6 +76,8 @@ secrets:
           ##################### ESGF-AUTH SECRETS ##################
   esgf_auth_settings:
     file: $ESGF_CONFIG/esgf-auth/settings.py
+  esgf_oauth2_secrets:
+    file: $ESGF_CONFIG//esg/config/esgf_oauth2.json
 
 
 services:
@@ -261,6 +263,8 @@ services:
         mode:   0400
       - source: esgf_auth_settings
         target: /usr/local/esgf-auth/src/esgf-auth/esgf_auth/settings.py
+      - source: esgf_oauth2_secrets:
+        target: /esg/config/esgf_oauth2.json
     volumes:
       - cog_install_dir:/usr/local/cog/cog_install
       - cog_venv:/usr/local/cog/venv

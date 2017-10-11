@@ -8,8 +8,12 @@ then
    exit -1
 fi
 
-# generate a random secret key that does not contain characters that would create problems in the sed replacement below
-new_secret_key=`cat /dev/random | LC_CTYPE=C tr -dc "[a-zA-Z0-9]" | head -c 24`
+# generate a random secret key to encrypt/decript cookies
+# chose a key that does not contain characters that would create problems in the sed replacement below
+# IMPORTANT: for base64 encoding/decofing to work, the key must be composed of a multiple of 3 characters
+# here we are using 22 characters and padding it with '=='
+new_secret_key=`cat /dev/random | LC_CTYPE=C tr -dc "[a-zA-Z0-9]" | head -c 22`
+new_secret_key="${new_secret_key}=="
 old_secret_key='xnVuDEZROQfoBT+scRkaig=='
 echo "Generated secret key: $new_secret_key"
 
@@ -18,3 +22,8 @@ sed -i.back 's/'"${old_secret_key}"'/'"${new_secret_key}"'/g' $ESGF_CONFIG/webap
 
 # replace in esgf-auth settings.py
 sed -i.back 's/'"${old_secret_key}"'/'"${new_secret_key}"'/g' $ESGF_CONFIG/esgf-auth/settings.py
+
+# generate a second secret key to be used by Django
+django_secret_key=`cat /dev/random | LC_CTYPE=C tr -dc "[a-zA-Z0-9]" | head -c 40`
+sed -i.bak 's/^SECRET_KEY = .*/SECRET_KEY = \"'"${django_secret_key}"'\"/g' $ESGF_CONFIG/esgf-auth/settings.py
+

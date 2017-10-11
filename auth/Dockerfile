@@ -37,7 +37,6 @@ RUN cd $ESGF_AUTH_INSTALL_DIR && \
     git clone https://github.com/lukaszlacinski/esgf-auth.git && \
     cd esgf-auth && \
     pip install -r requirements.txt && \
-    pip install paste && \
     python ./manage.py migrate
 
 # change permission on parent directory and database file so user apache can write

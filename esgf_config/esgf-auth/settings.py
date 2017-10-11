@@ -15,20 +15,18 @@ import os
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.10/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = '5_7$jn1-c8h5@(e$x8fhk=&!mk=ea6=irwm+b22nu)h=rhox46'
 
-# FIXME
-COOKIES_SECRET_KEY = 'xnVuDEZROQfoBT+scRkaig=='
-
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG =False
+DEBUG = True
+#DEBUG =False
 
 ALLOWED_HOSTS = [ u'my.esgf.node', u'localhost' ]
-#USE_X_FORWARDED_HOST = True
 
 # Application definition
 
@@ -101,21 +99,10 @@ SOCIAL_AUTH_SANITIZE_REDIRECTS = False
 SOCIAL_AUTH_ESGF_AUTH_EXTRA_ARGUMENTS = {\
     'access_type': 'offline',
 }
-# Key and secret pairs obtained from the ESGF OAuth2 servers  
-SOCIAL_AUTH_ESGF = {
-#    'ceda.ac.uk': {
-#        'key': '',
-#        'secret': ''
-#    },
-#    'esgf-node.llnl.gov': {
-#        'key': '',
-#        'secret': ''
-#    },
-    'my-node.esgf.org': {
-        'key': 'abc',
-        'secret': '123'
-    }
-}
+ESGF_OAUTH2_SECRET_FILE = '/esg/config/esgf_oauth2.json'
+ESGF_RETURN_QUERY_NAME = 'redirect'
+ESGF_SESSION_COOKIE_NAME = 'esg.openid.saml.cookie'
+ESGF_SECRET_KEY = 'xnVuDEZROQfoBT+scRkaig=='
 
 # Database
 # https://docs.djangoproject.com/en/1.10/ref/settings/#databases
