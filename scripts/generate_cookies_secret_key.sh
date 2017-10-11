@@ -6,8 +6,6 @@ if [ "${ESGF_CONFIG}" = "" ];
 then
    echo "Env variable: ESGF_CONFIG must be set  "
    exit -1
-else
-   echo "Using ESGF_CONFIG=$ESGF_CONFIG"
 fi
 
 # generate a random secret key that does not contain characters that would create problems in the sed replacement below
