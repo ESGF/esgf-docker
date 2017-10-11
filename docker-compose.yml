@@ -75,10 +75,6 @@ services:
   esgf-auth:
     image: esgfhub/esgf-auth:${ESGF_VERSION}
     container_name: esgf-auth
-    # override image command by starting supervisor and exiting immediately
-    # which will also cause the container to exit after initialization
-    # (i.e. after the volume is initialized)
-    command: ["supervisord", "-v"]
     volumes:
       - esgf_auth_install:/usr/local/esgf-auth
 
