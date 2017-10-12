@@ -61,4 +61,10 @@ echo ""
 echo "Creating archives"
 $SCRIPT_PARENT_DIR_PATH/manage_archives.sh
 
+# generate a secret key to encode/decode cookies on the data node
+echo ""
+echo "Customizing OAuth servers"
+$SCRIPT_PARENT_DIR_PATH/generate_cookies_secret_key.sh
+
+echo ""
 echo "... ESGF node initialization completed."

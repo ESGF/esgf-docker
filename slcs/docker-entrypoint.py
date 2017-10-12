@@ -60,6 +60,7 @@ def parse_args():
     slcs_db_group.add_argument('-sdp', '--slcs-database-port',
                                help='The SLCS database port.',
                                required=False,
+                               type=int,
                                default=5432,
                                metavar=5432)
     slcs_db_group.add_argument('-sde', '--slcs-database-engine',

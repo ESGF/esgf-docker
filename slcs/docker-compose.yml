@@ -19,15 +19,15 @@ networks:
       name: esgfdocker_dbnetwork
 
 services: 
-  slcs: 
+  esgf-slcs: 
     command: ["-sn", "$ESGF_HOSTNAME", "-ds", "rootAdmin", "-sdn", "slcs", "-sdh", "slcs-postgres", "-sdu", "dbsuper", "-udn", "esgcet", "-udh", "postgres", "-udu", "dbsuper", "--static-url", "https://$ESGF_HOSTNAME/slcs-static/", "--url-prefix", "slcs", "--use-x-forwarded-host"]
-    container_name: slcs-server
+    container_name: esgf-slcs
     depends_on: 
       - slcs-postgres
       - slcs-nginx
     expose: 
       - "5000"
-    image: esgfhub/slcs-server:${ESGF_VERSION}
+    image: esgfhub/esgf-slcs:${ESGF_VERSION}
     networks: 
       - default
       - dbnetwork

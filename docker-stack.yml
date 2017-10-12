@@ -76,6 +76,10 @@ secrets:
           ##################### ESGF SECRETS ##################
   esgf_config_files:
     file: $ESGF_CONFIG/archives/esgf_config.tar.xz
+          ##################### ESGF-AUTH SECRETS ##################
+  esgf_auth_settings:
+    file: $ESGF_CONFIG/esgf-auth/settings.py
+
 
 services:
 
@@ -231,6 +235,17 @@ services:
       placement:
         constraints: [node.labels.esgf_data_node == true]
 
+  # note: this service must run on the same host as the httpd front-end
+  # so they can share data in the volume 'esgf_auth_install'
+  esgf-auth:
+    image: ${ESGF_IMAGES_HUB-esgfhub}/esgf-auth:${ESGF_VERSION-latest}
+    volumes:
+      - esgf_auth_install:/usr/local/esgf-auth
+    deploy:
+      replicas: 1
+      placement:
+        constraints: [node.labels.esgf_front_node == true]
+
   esgf-httpd:
     image: ${ESGF_IMAGES_HUB-esgfhub}/esgf-httpd:${ESGF_VERSION-latest}
     entrypoint: /usr/local/bin/docker-entrypoint.sh
@@ -256,10 +271,13 @@ services:
       - source: esgf_config_files
         target: /root/archives/esgf_config.tar.xz
         mode:   0600
+      - source: esgf_auth_settings
+        target: /usr/local/esgf-auth/src/esgf-auth/esgf_auth/settings.py
     volumes:
       - cog_install_dir:/usr/local/cog/cog_install
       - cog_venv:/usr/local/cog/venv
       - cog_data:/usr/local/cog/cog_config
+      - esgf_auth_install:/usr/local/esgf-auth
       # - esgf-node-manager
     environment:
       - SSL_CERT_DIR=/etc/grid-security/certificates
@@ -270,6 +288,7 @@ services:
      - "443:443"
     depends_on:
      - esgf-cog
+     - esgf-auth
     #  - esgf-node-manager
     # httpd URLs must use hostname=$ESGF_HOSTNAME
     networks:
@@ -287,6 +306,7 @@ services:
     depends_on:
       - slcs-postgres
       - slcs-nginx
+      - esgf-postgres
     image: ${ESGF_IMAGES_HUB-esgfhub}/esgf-slcs:${ESGF_VERSION-latest}
     networks:
       - default
@@ -376,3 +396,5 @@ volumes:
   tds_data:
   # SLCS web pages
   slcs_static_web:
+  # esgf-auth installation directory, including python virtual environment and sqllite database
+  esgf_auth_install:

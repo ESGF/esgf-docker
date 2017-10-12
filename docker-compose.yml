@@ -71,6 +71,12 @@ services:
     depends_on:
       - esgf-postgres
 
+  # ESGF-Auth client
+  esgf-auth:
+    image: esgfhub/esgf-auth:${ESGF_VERSION}
+    container_name: esgf-auth
+    volumes:
+      - esgf_auth_install:/usr/local/esgf-auth
 
   # ESGF Identity Provider
   esgf-idp-node:
@@ -160,10 +166,14 @@ services:
    entrypoint: /usr/local/bin/docker-entrypoint.sh
    volumes:
      - cog_data:/usr/local/cog/cog_config
+     - esgf_auth_install:/usr/local/esgf-auth
+     - $ESGF_CONFIG/esgf-auth/settings.py:/usr/local/esgf-auth/src/esgf-auth/esgf_auth/settings.py
+   # - $ESGF_CONFIG/esgf-auth/db.sqlite3:/tmp/db.sqlite3
    volumes_from:
      - esgf-config
      - esgf-cog
    # - esgf-node-manager
+   # - esgf-data-node
    environment:
      - SSL_CERT_DIR=/etc/grid-security/certificates
      - COG_CONFIG_DIR=/usr/local/cog/cog_config
@@ -173,6 +183,7 @@ services:
      - "443:443"
    depends_on:
      - esgf-cog
+     - esgf-auth
    #  - esgf-node-manager
    healthcheck:
      test: 'curl --fail "https://${ESGF_HOSTNAME}/" || exit 1'
@@ -196,6 +207,53 @@ services:
    networks:
      default: {}
      dbnetwork: {}
+
+  esgf-slcs:
+    command: ["-sn", "$ESGF_HOSTNAME", "-ds", "rootAdmin", "-sdn", "slcs", "-sdh", "slcs-postgres", "-sdu", "dbsuper", "-udn", "esgcet", "-udh", "esgf-postgres", "-udu", "dbsuper", "--static-url", "https://$ESGF_HOSTNAME/slcs-static/", "--url-prefix", "slcs", "--use-x-forwarded-host"]
+    container_name: esgf-slcs
+    depends_on:
+      - slcs-postgres
+      - slcs-nginx
+      - esgf-postgres
+    expose:
+      - "5000"
+    image: esgfhub/esgf-slcs:${ESGF_VERSION}
+    networks:
+      - default
+      - dbnetwork
+    ports:
+      - "5000:5000"
+    volumes:
+      - slcs_static_web:/var/www/static
+      - $ESGF_CONFIG/slcs/conf/db/:/usr/local/esgf-slcs-server/conf/db
+      - $ESGF_CONFIG/slcs/conf/ca/:/usr/local/esgf-slcs-server/conf/ca
+
+  slcs-nginx:
+    container_name: slcs-nginx
+    expose:
+      - "443"
+      - "80"
+    image: nginx
+    networks:
+      - default
+      - dbnetwork
+    volumes:
+      - "slcs_static_web:/usr/share/nginx/html"
+      - "$ESGF_CONFIG/slcs/conf/nginx/nginx.conf:/etc/nginx/conf.d/default.conf"
+
+  slcs-postgres:
+    container_name: slcs-postgres
+    environment:
+      - POSTGRES_PASSWORD=changeit
+      - POSTGRES_USER=dbsuper
+      - POSTGRES_DB=slcs
+      - POSTGRES_INITDB_ARGS=--encoding=UTF-8
+    expose:
+      - 5432
+    image: postgres
+    networks:
+      - default
+      - dbnetwork
 
   # FTP server
   #esgf-ftp:
@@ -223,3 +281,7 @@ volumes:
   # contains TDS configuration, catalogs, cache, and logs
   # (directory below -Dtds.content.root.path=/esg/content)
   tds_data:
+  # static web files for SLCS server
+  slcs_static_web:
+  # esgf-auth installation directory, including python virtual environment
+  esgf_auth_install:

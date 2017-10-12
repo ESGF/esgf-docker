@@ -1,5 +1,16 @@
+SET statement_timeout = 0;
+SET client_encoding = 'UTF8';
+SET check_function_bodies = false;
+SET client_min_messages = warning;
+SET escape_string_warning = off;
+
+SET default_tablespace = '';
+
+SET default_with_oids = false;
+
 DROP SCHEMA IF EXISTS esgf_dashboard CASCADE;
 CREATE SCHEMA esgf_dashboard;
+SET search_path = esgf_dashboard, pg_catalog;
 
 -- ----------------------------
 -- Table structure for `continent`
@@ -293,21 +304,21 @@ INSERT INTO esgf_dashboard.country VALUES ('248', 'AP', 'No country', 'AS');
 DROP TABLE IF EXISTS esgf_dashboard.dashboard_queue;
 
 CREATE TABLE esgf_dashboard.dashboard_queue (
-    id bigint PRIMARY KEY,
-    url_path character varying NOT NULL,
-    remote_addr character varying NOT NULL,
-    user_id_hash character varying,
-    user_idp character varying,
-    service_type character varying,
-    success boolean,
-    duration double precision,
-    size bigint DEFAULT (-1),
-    "timestamp" double precision NOT NULL,
-    processed smallint DEFAULT 0 NOT NULL
+    id_dash bigserial PRIMARY KEY,                      -- unique id
+    id integer NOT NULL,                                -- access_logging table id                       
+    url_path character varying NOT NULL,                -- path of the downloaded file
+    remote_addr character varying NOT NULL,             -- user ip address
+    user_id_hash character varying,                     -- hash code of the user id
+    user_idp character varying,                         -- user identity provider
+    service_type character varying,                     -- download service type
+    success boolean,                                    -- outcome of the download operation
+    duration double precision,                          -- duration of the download operation
+    size bigint DEFAULT (-1),                           -- file dimensions
+    "timestamp" double precision NOT NULL,              -- download time instant
+    processed smallint DEFAULT 0 NOT NULL               -- dashboard flag
 );
 
 ALTER TABLE esgf_dashboard.dashboard_queue OWNER TO dbsuper;
-
 
 /**
  * Project-specific tables
@@ -330,7 +341,7 @@ DROP TABLE IF EXISTS esgf_dashboard.cmip5_bridge_realm CASCADE;
 DROP TABLE IF EXISTS esgf_dashboard.cmip5_dim_institute CASCADE;
 DROP TABLE IF EXISTS esgf_dashboard.cmip5_bridge_institute CASCADE;
 DROP TABLE IF EXISTS esgf_dashboard.cmip5_fact_download CASCADE;
-DROP TABLE IF EXISTS esgf_dashboard.cmip5_dmart_clients_time_geolocation CASCADE;
+DROP TABLE IF EXISTS esgf_dashboard.cmip5_dmart_clients_host_time_geolocation CASCADE;
 DROP TABLE IF EXISTS esgf_dashboard.cmip5_dmart_model_host_time CASCADE;
 DROP TABLE IF EXISTS esgf_dashboard.cmip5_dmart_experiment_host_time CASCADE;
 DROP TABLE IF EXISTS esgf_dashboard.cmip5_dmart_variable_host_time CASCADE;
@@ -377,7 +388,7 @@ ALTER TABLE esgf_dashboard.cmip5_bridge_time_frequency OWNER TO dbsuper;
 CREATE TABLE esgf_dashboard.cmip5_dim_variable (
    variable_key serial PRIMARY KEY,
    variable_code character varying(64),
-   variable_long_name character varying(64),
+   variable_long_name character varying(128),
    cf_standard_name character varying(64)
 );
 ALTER TABLE esgf_dashboard.cmip5_dim_variable OWNER TO dbsuper;
@@ -462,7 +473,7 @@ CREATE TABLE esgf_dashboard.cmip5_fact_download (
 ALTER TABLE esgf_dashboard.cmip5_fact_download OWNER TO dbsuper;
 
 /* CMIP5 DATA MARTS */
-CREATE TABLE esgf_dashboard.cmip5_dmart_clients_host_time_geolocation (
+CREATE TABLE esgf_dashboard.cmip5_dmart_clients_host_geolocation (
    dmart_key bigserial PRIMARY KEY,
    total_size bigint,
    number_of_downloads bigint,
@@ -476,7 +487,7 @@ CREATE TABLE esgf_dashboard.cmip5_dmart_clients_host_time_geolocation (
    longitude numeric(14,11),
    host_name character varying(64)
 );
-ALTER TABLE esgf_dashboard.cmip5_dmart_clients_time_geolocation OWNER TO dbsuper;
+ALTER TABLE esgf_dashboard.cmip5_dmart_clients_host_geolocation OWNER TO dbsuper;
 
 CREATE TABLE esgf_dashboard.cmip5_dmart_model_host_time (
    dmart_key bigserial PRIMARY KEY,
@@ -587,7 +598,7 @@ ALTER TABLE esgf_dashboard.obs4mips_dim_date OWNER TO dbsuper;
 
 CREATE TABLE esgf_dashboard.obs4mips_dim_dataset (
    dataset_key bigserial PRIMARY KEY,
-   dataset_name character varying(64),
+   dataset_name character varying(128),
    dataset_version smallint,
    datetime_start character varying(64),
    datetime_stop character varying(64)
@@ -596,7 +607,7 @@ ALTER TABLE esgf_dashboard.obs4mips_dim_dataset OWNER TO dbsuper;
 
 CREATE TABLE esgf_dashboard.obs4mips_dim_file (
    file_key bigserial PRIMARY KEY,
-   file_name character varying(64),
+   file_name character varying(128),
    file_size bigint
 );
 ALTER TABLE esgf_dashboard.obs4mips_dim_file OWNER TO dbsuper;
@@ -616,7 +627,7 @@ ALTER TABLE esgf_dashboard.obs4mips_bridge_institute OWNER TO dbsuper;
 CREATE TABLE esgf_dashboard.obs4mips_dim_variable (
    variable_key serial PRIMARY KEY,
    variable_code character varying(64),
-   variable_long_name character varying(64),
+   variable_long_name character varying(128),
    cf_standard_name character varying(64)
 );
 ALTER TABLE esgf_dashboard.obs4mips_dim_variable OWNER TO dbsuper;
@@ -702,7 +713,7 @@ CREATE TABLE esgf_dashboard.obs4mips_fact_download (
 ALTER TABLE esgf_dashboard.obs4mips_fact_download OWNER TO dbsuper;
 
 /* OBS4MIPS DATA MARTS */
-CREATE TABLE esgf_dashboard.obs4mips_dmart_clients_host_time_geolocation (
+CREATE TABLE esgf_dashboard.obs4mips_dmart_clients_host_geolocation (
    dmart_key bigserial PRIMARY KEY,
    total_size bigint,
    number_of_downloads bigint,
@@ -715,7 +726,7 @@ CREATE TABLE esgf_dashboard.obs4mips_dmart_clients_host_time_geolocation (
    longitude numeric(14,11),
    host_name character varying(64)
 );
-ALTER TABLE esgf_dashboard.obs4mips_dmart_clients_time_geolocation OWNER TO dbsuper;
+ALTER TABLE esgf_dashboard.obs4mips_dmart_clients_host_geolocation OWNER TO dbsuper;
 
 CREATE TABLE esgf_dashboard.obs4mips_dmart_variable_host_time (
    dmart_key bigserial PRIMARY KEY,
@@ -728,7 +739,7 @@ CREATE TABLE esgf_dashboard.obs4mips_dmart_variable_host_time (
    year smallint,
    host_name character varying(64),
    variable_code character varying(64),
-   variable_long_name character varying(64),
+   variable_long_name character varying(128),
    cf_standard_name character varying(64)
 );
 ALTER TABLE esgf_dashboard.obs4mips_dmart_variable_host_time OWNER TO dbsuper;
@@ -771,7 +782,7 @@ CREATE TABLE esgf_dashboard.obs4mips_dmart_dataset_host_time (
    month smallint,
    year smallint,
    host_name character varying(64),
-   dataset_name character varying(64),
+   dataset_name character varying(128),
    dataset_version smallint,
    datetime_start character varying(64),
    datetime_stop character varying(64)
@@ -880,12 +891,12 @@ CREATE TABLE esgf_dashboard.registry (
 );
 insert into esgf_dashboard.registry values('esgf_dashboard.cross_dmart_project_host_time',0,0);
 insert into esgf_dashboard.registry values('esgf_dashboard.cross_dmart_project_host_geolocation',0,0);
-insert into esgf_dashboard.registry values('esgf_dashboard.obs4mips_dmart_clients_host_time_geolocation',0,0);
+insert into esgf_dashboard.registry values('esgf_dashboard.obs4mips_dmart_clients_host_geolocation',0,0);
 insert into esgf_dashboard.registry values('esgf_dashboard.obs4mips_dmart_variable_host_time',0,0);
 insert into esgf_dashboard.registry values('esgf_dashboard.obs4mips_dmart_source_host_time',0,0);
 insert into esgf_dashboard.registry values('esgf_dashboard.obs4mips_dmart_realm_host_time',0,0);
 insert into esgf_dashboard.registry values('esgf_dashboard.obs4mips_dmart_dataset_host_time',0,0);
-insert into esgf_dashboard.registry values('esgf_dashboard.cmip5_dmart_clients_host_time_geolocation',0,0);
+insert into esgf_dashboard.registry values('esgf_dashboard.cmip5_dmart_clients_host_geolocation',0,0);
 insert into esgf_dashboard.registry values('esgf_dashboard.cmip5_dmart_experiment_host_time',0,0);
 insert into esgf_dashboard.registry values('esgf_dashboard.cmip5_dmart_model_host_time',0,0);
 insert into esgf_dashboard.registry values('esgf_dashboard.cmip5_dmart_variable_host_time',0,0);
@@ -899,7 +910,6 @@ drop function if exists store_dashboard_queue() CASCADE;
 drop function if exists update_dashboard_queue() CASCADE;
 drop function if exists delete_dashboard_queue() CASCADE;
 drop function if exists update_url(integer);
-drop extension if exists plpgsql;
 
 --
 --Copy the rows of the access_logging table into the dashboard_queue table
@@ -907,7 +917,7 @@ drop extension if exists plpgsql;
 
 insert into esgf_dashboard.dashboard_queue(id, url_path, remote_addr,user_id_hash, user_idp, service_type, success, duration, size, timestamp) select id, url, remote_addr, user_id_hash, user_idp, service_type, success, duration, data_size, date_fetched from esgf_node_manager.access_logging;
 
-update esgf_dashboard.dashboard_queue set processed=1 where timestamp<1488326400;
+update esgf_dashboard.dashboard_queue set processed=1 where timestamp<1491004800;
 
 SET statement_timeout = 0;
 SET client_encoding = 'UTF8';
@@ -925,16 +935,63 @@ SET default_with_oids = false;
 --
 -- Function to update the urls in the dashboard_queue table
 --
-
+CREATE OR REPLACE FUNCTION make_plpgsql()
+RETURNS VOID
+LANGUAGE SQL
+AS $$
 CREATE LANGUAGE plpgsql;
+$$;
+ 
+SELECT
+    CASE
+    WHEN EXISTS(
+        SELECT 1
+        FROM pg_catalog.pg_language
+        WHERE lanname='plpgsql'
+    )
+    THEN NULL
+    ELSE make_plpgsql() END;
+
+create function read_url(integer)
+returns integer as'
+declare
+  url varchar[];
+  r record;
+  result integer;
+  result1 integer;
+  name TEXT;
+  name1 TEXT;
+  a dashboard_queue[]= array(select row(id,id_dash,url_path,remote_addr,user_id_hash,user_idp,service_type,success,duration,size,timestamp,processed) from esgf_dashboard.dashboard_queue);
+begin
+  name:=''/fileServer/'';
+  for r in select * from unnest(a) 
+  loop
+   if (strpos(r.url_path,''http'')<>0)AND(strpos(r.url_path,name)<>0) then
+    RAISE NOTICE ''a***% ****b****%'', r.id, r.url_path;
+    select position(name in r.url_path) INTO result;
+    RAISE NOTICE ''%'', result;
+    result1:=result+12;
+    SELECT SUBSTRING(r.url_path, result1) into name1;
+    RAISE NOTICE ''url corretta = %'', name1;
+    UPDATE esgf_dashboard.dashboard_queue SET url_path = name1 where id=r.id; 
+   end if;
+  end loop;
+  return 0;
+end;
+'language 'plpgsql';
+
 create function update_url(integer)
 returns integer as'
 declare
 i alias for $1;
 j integer:=28+i;
+url   character varying(255);
 begin
+
 UPDATE esgf_dashboard.dashboard_queue SET url_path = substr(url_path,
-j) where url_path like ''http%'';
+j) where url_path like ''http://%'';
+UPDATE esgf_dashboard.dashboard_queue SET url_path = substr(url_path,
+j+1) where url_path like ''https://%'';
 return 0;
 end;
 'language 'plpgsql';
@@ -948,7 +1005,7 @@ $store_new_entry$
 declare
 BEGIN
 -- Update dashboard_queue table
-if NEW.date_fetched>=1488326400 then
+if NEW.date_fetched>=1491004800 then
 insert into esgf_dashboard.dashboard_queue(id, url_path, remote_addr,
 user_id_hash, user_idp, service_type, success, duration, size,
 timestamp)values(NEW.id, NEW.url, NEW.remote_addr, NEW.user_id_hash,
@@ -977,7 +1034,7 @@ url_http:=url_path from esgf_dashboard.dashboard_queue WHERE id = OLD.id;
 if strpos(url_http,'http')<>0 then
 update esgf_dashboard.dashboard_queue set url_path=subquery.url_res
 FROM (select file.url as url_res from public.file_version as file,
-esgf_dashboard.dashboard_queue as log where log.url_path like '%'||file.url
+esgf_dashboard.dashboard_queue as log where log.url_path like '%%'||file.url
 and log.url_path=url_http) as subquery where url_path=url_http and id=OLD.id;
 end if;
 RETURN NEW;
@@ -1006,9 +1063,3 @@ CREATE TRIGGER store_delete_entry
 AFTER DELETE ON
 esgf_node_manager.access_logging
 FOR EACH ROW EXECUTE PROCEDURE delete_dashboard_queue();
---
--- Update the urls in the dashboard_queue_table
--- Note: FQDN=0 will truncate no URL
---
-set search_path=esgf_dashboard;
-select update_url(0);
