@@ -8,7 +8,7 @@ FROM $ESGF_IMAGES_HUB/esgf-node:$ESGF_VERSION
 MAINTAINER Luca Cinquini <luca.cinquini@jpl.nasa.gov>
 
 # Solr/Jetty web application
-ENV SOLR_VERSION 5.5.3
+ENV SOLR_VERSION 5.5.4
 ENV SOLR_INSTALL_DIR /usr/local/solr
 ENV SOLR_HOME /usr/local/solr-home
 ENV SOLR_DATA_DIR /esg/solr-index
