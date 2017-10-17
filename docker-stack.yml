@@ -263,7 +263,7 @@ services:
         mode:   0400
       - source: esgf_auth_settings
         target: /usr/local/esgf-auth/src/esgf-auth/esgf_auth/settings.py
-      - source: esgf_oauth2_secrets:
+      - source: esgf_oauth2_secrets
         target: /esg/config/esgf_oauth2.json
     volumes:
       - cog_install_dir:/usr/local/cog/cog_install
