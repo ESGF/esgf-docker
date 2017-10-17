@@ -13,7 +13,7 @@ source "${SCRIPT_PARENT_DIR_PATH}/common"
 # optional 'version' argument - defaults to 'latest'
 esgf_ver="${1-latest}"
 
-images_hub="${DEFAULT_IMAGES_HUB}"
+images_hub="${ESGF_IMAGES_HUB}"
 
 # loop over ordered list of ESGF images
 for img in ${ESGF_IMAGE_DIR_NAMES[*]}; do
