@@ -17,5 +17,6 @@ RUN cd /usr/local/tomcat/webapps/esg-search/ && \
     rm esg-search.war && \
     chown -R tomcat:tomcat /usr/local/tomcat/webapps/esg-search
 
-# index node startup configuration inherited from esgf-tomcat image
-CMD ["supervisord", "--nodaemon", "-c", "/etc/supervisord.conf"]
+COPY scripts/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+COPY scripts/process_esgf_config_archive.sh /usr/local/bin/process_esgf_config_archive.sh
+ENTRYPOINT /usr/local/bin/docker-entrypoint.sh

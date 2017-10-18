@@ -12,7 +12,7 @@ fi
 # chose a key that does not contain characters that would create problems in the sed replacement below
 # IMPORTANT: for base64 encoding/decofing to work, the key must be composed of a multiple of 3 characters
 # here we are using 22 characters and padding it with '=='
-new_secret_key=`cat /dev/random | LC_CTYPE=C tr -dc "[a-zA-Z0-9]" | head -c 22`
+new_secret_key=`cat /dev/urandom | LC_CTYPE=C tr -dc "[a-zA-Z0-9]" | head -c 22`
 new_secret_key="${new_secret_key}=="
 old_secret_key='xnVuDEZROQfoBT+scRkaig=='
 echo "Generated secret key: $new_secret_key"
