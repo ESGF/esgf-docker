@@ -30,6 +30,9 @@ RUN cd $ESGF_AUTH_INSTALL_DIR && \
     cd crypto-cookie && \
     python setup.py install
 
+# copy mock configuration file which is read by settings.py during the database creation
+COPY conf/esgf_auth_config.json /esg/config/esgf_auth_config.json
+
 # install esgf-auth
 RUN cd $ESGF_AUTH_INSTALL_DIR && \
     source venv/bin/activate && \
@@ -38,9 +41,6 @@ RUN cd $ESGF_AUTH_INSTALL_DIR && \
     cd esgf-auth && \
     pip install -r requirements.txt && \
     python ./manage.py migrate
-
-# FIXME: override settings.py to read external configuration
-COPY conf/settings.py /usr/local/esgf-auth/src/esgf-auth/esgf_auth/settings.py
 
 # change permission on parent directory and database file so user apache can write
 RUN chmod a+w /usr/local/esgf-auth/src/esgf-auth && \

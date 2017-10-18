@@ -104,10 +104,11 @@ VOLUME $COG_INSTALL_DIR
 
 # startup
 COPY  scripts/ /usr/local/bin/
-COPY conf/supervisord.cog.conf /etc/supervisor/conf.d/supervisord.cog.conf
+COPY  conf/supervisord.cog.conf /etc/supervisor/conf.d/supervisord.cog.conf
+#COPY  scripts/wait_for_postgres.sh /usr/local/bin/wait_for_postgres.sh
+#COPY  scripts/process_esgf_config_archive.sh /usr/local/bin/process_esgf_config_archive.sh
+
 # wait for Postgred connection to be ready
-COPY scripts/wait_for_postgres.sh /usr/local/bin/wait_for_postgres.sh
-COPY scripts/process_esgf_config_archive.sh /usr/local/bin/process_esgf_config_archive.sh
 ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
 # will override these CMD options at run time
 CMD ["localhost", "false", "true"]

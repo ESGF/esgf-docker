@@ -151,6 +151,8 @@ COPY thredds/conf/log4j2.xml /usr/local/tomcat/webapps/thredds/WEB-INF/classes/l
 
 # data node scripts
 COPY scripts/ /usr/local/bin/
+#COPY scripts/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+#COPY scripts/process_esgf_config_archive.sh /usr/local/bin/process_esgf_config_archive.sh
 
 # TDS test ESGF catalogs
 # COPY esgf-content/thredds/ /esg/content/thredds/
@@ -213,6 +215,4 @@ RUN mkdir -p $DASHBOARD_HOME/logs
 
 #===========================================
 
-COPY scripts/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
-COPY scripts/process_esgf_config_archive.sh /usr/local/bin/process_esgf_config_archive.sh
 ENTRYPOINT /usr/local/bin/docker-entrypoint.sh
