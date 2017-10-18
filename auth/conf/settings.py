@@ -25,7 +25,7 @@ with open(ESGF_AUTH_CONFIG_FILE) as json_data_file:
 # See https://docs.djangoproject.com/en/1.10/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = '5_7$jn1-c8h5@(e$x8fhk=&!mk=ea6=irwm+b22nu)h=rhox46'
+SECRET_KEY = config_data['DJANGO_SECRET_KEY']
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
