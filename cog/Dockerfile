@@ -15,7 +15,7 @@ FROM $ESGF_IMAGES_HUB/esgf-node:$ESGF_VERSION
 MAINTAINER Luca Cinquini <luca.cinquini@jpl.nasa.gov>
 
 # choose CoG version
-ENV COG_TAG=v3.9.2
+ENV COG_TAG=v3.9.6
 
 # env variable to execute CoG initialization
 # may be overridden from command line after first container startup
@@ -38,8 +38,8 @@ RUN cd $COG_DIR && \
 RUN cd $COG_DIR && \
     git clone https://github.com/EarthSystemCoG/COG cog_install && \
     cd cog_install && \
-    #git checkout -b devel origin/devel
     git checkout $COG_TAG
+    #git checkout -b devel origin/devel
 
 # install CoG dependencies
 RUN cd $COG_INSTALL_DIR && \
@@ -73,9 +73,9 @@ RUN cd $COG_DIR && \
 COPY conf/cog_settings.cfg /usr/local/cog/cog_config/cog_settings.cfg
 RUN cd $COG_INSTALL_DIR && \
     source $COG_DIR/venv/bin/activate && \
-    #python setup.py -q setup_cog --esgf=false
     python manage.py collectstatic --no-input && \
     rm /usr/local/cog/cog_config/cog_settings.cfg
+    #python setup.py -q setup_cog --esgf=false
 
 # for some unknown reason, must reinstall captcha
 #RUN source $COG_DIR/venv/bin/activate && \

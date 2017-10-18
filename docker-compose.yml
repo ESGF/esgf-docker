@@ -31,6 +31,7 @@ services:
      - $ESGF_CONFIG/grid-security/certificates/:/etc/grid-security/certificates/
      - $ESGF_CONFIG/esg/config/:/esg/config/
      - $ESGF_CONFIG/esg/config/tomcat/esg-truststore.ts:/usr/java/latest/jre/lib/security/jssecacerts
+     - $ESGF_CONFIG/archives/grid_security_certs.tar.xz:/root/archives/grid_security_certs.tar.xz
 
   # ESGF postgres database
   esgf-postgres:
