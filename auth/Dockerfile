@@ -39,6 +39,9 @@ RUN cd $ESGF_AUTH_INSTALL_DIR && \
     pip install -r requirements.txt && \
     python ./manage.py migrate
 
+# FIXME: override settings.py to read external configuration
+COPY conf/settings.py /usr/local/esgf-auth/src/esgf-auth/esgf_auth/settings.py
+
 # change permission on parent directory and database file so user apache can write
 RUN chmod a+w /usr/local/esgf-auth/src/esgf-auth && \
     chmod a+w /usr/local/esgf-auth/src/esgf-auth/db.sqlite3

@@ -74,10 +74,10 @@ secrets:
   grid_certificates:
     file: $ESGF_CONFIG/archives/grid_security_certs.tar.xz
           ##################### ESGF-AUTH SECRETS ##################
-  esgf_auth_settings:
-    file: $ESGF_CONFIG/esgf-auth/settings.py
+  esgf_auth_config:
+    file: $ESGF_CONFIG/esg/config/esgf_auth_config.json
   esgf_oauth2_secrets:
-    file: $ESGF_CONFIG//esg/config/esgf_oauth2.json
+    file: $ESGF_CONFIG/esg/config/esgf_oauth2.json
 
 
 services:
@@ -261,8 +261,8 @@ services:
       - source: grid_certificates
         target: /root/archives/grid_security_certs.tar.xz
         mode:   0400
-      - source: esgf_auth_settings
-        target: /usr/local/esgf-auth/src/esgf-auth/esgf_auth/settings.py
+      - source: esgf_auth_config
+        target: /esg/config/esgf_auth_config.json
       - source: esgf_oauth2_secrets
         target: /esg/config/esgf_oauth2.json
     volumes:
