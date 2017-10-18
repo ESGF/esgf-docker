@@ -63,6 +63,7 @@ cert_hash=`docker run -ti --rm -v $ESGF_CONFIG/esgfcerts/:/tmp/certs/ $images_hu
 # must remove the trailing white space i.e. end of line
 cert_hash=${cert_hash%%[[:space:]]}
 cp hostcert.pem ${cert_hash}.0
+echo "This host certificate: ${cert_hash}.0"
 
 # import self-signed certificate into ESGF truststore
 echo ""

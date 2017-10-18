@@ -15,7 +15,7 @@ FROM $ESGF_IMAGES_HUB/esgf-node:$ESGF_VERSION
 MAINTAINER Luca Cinquini <luca.cinquini@jpl.nasa.gov>
 
 # choose CoG version
-ENV COG_TAG=v3.9.6
+ENV COG_TAG=v3.9.7
 
 # env variable to execute CoG initialization
 # may be overridden from command line after first container startup
