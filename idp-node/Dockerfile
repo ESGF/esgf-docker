@@ -18,9 +18,14 @@ RUN cd /usr/local/tomcat/webapps/esgf-idp/ && \
     rm esgf-idp.war && \
     chown -R tomcat:tomcat /usr/local/tomcat/webapps/esgf-idp
 
-# Override Tomcat startup to wait for Postgred connection to be ready
+# Override Tomcat startup to wait for Postgres connection to be ready
 COPY scripts/wait_for_postgres.sh /usr/local/bin/wait_for_postgres.sh
 COPY scripts/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 COPY scripts/process_esgf_config_archive.sh /usr/local/bin/process_esgf_config_archive.sh
 COPY conf/supervisord.tomcat.conf /etc/supervisor/conf.d/supervisord.tomcat.conf
+
+# FIXME: override Yadis configuration file to serve SLCS endpoints
+# remove this override when change is entered into ESGF official war file
+COPY conf/yadis-config.xml /usr/local/tomcat/webapps/esgf-idp/WEB-INF/classes/esg/idp/config/yadis-config.xml
+
 ENTRYPOINT /usr/local/bin/docker-entrypoint.sh
