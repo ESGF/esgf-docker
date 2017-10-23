@@ -159,7 +159,7 @@ def replace_in_file(file_path, replacements):
 
 def wait_for_db(db_host, db_port):
     attempts = 20
-    sleep = 0.25
+    sleep = 1.0
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     while True:
         try:
