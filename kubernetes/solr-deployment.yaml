@@ -1,0 +1,23 @@
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: esgf-solr-deployment
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        stack: esgf
+    spec:
+      containers:
+      - name: esgf-solr
+        image: esgfhub/esgf-solr:devel
+        ports:
+        - containerPort: 8983
+        - containerPort: 8984
+        volumeMounts:
+        - name: solr-index
+          mountPath: /esg/solr-index
+      volumes:
+      - name: solr-index
+        emptyDir: {}
