@@ -25,6 +25,6 @@ sed -i.back 's/'"${old_secret_key}"'/'"${new_secret_key}"'/g' $ESGF_CONFIG/esgf-
 sed -i.back 's/.*ESGF_SECRET_KEY.*/\"ESGF_SECRET_KEY\":\"'"${new_secret_key}"'\",/g' $ESGF_CONFIG/esg/config/esgf_auth_config.json
 
 # generate a second secret key to be used by Django
-django_secret_key=`cat /dev/random | LC_CTYPE=C tr -dc "[a-zA-Z0-9]" | head -c 40`
+django_secret_key=`cat /dev/urandom | LC_CTYPE=C tr -dc "[a-zA-Z0-9]" | head -c 40`
 sed -i.back 's/.*DJANGO_SECRET_KEY.*/\"DJANGO_SECRET_KEY\":\"'"${django_secret_key}"'\"/g' $ESGF_CONFIG/esg/config/esgf_auth_config.json
 
