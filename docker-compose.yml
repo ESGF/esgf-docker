@@ -28,10 +28,11 @@ services:
     volumes:
      - $ESGF_CONFIG/httpd/certs/:/etc/certs/
      - $ESGF_CONFIG/httpd/conf/esgf-httpd.conf:/etc/httpd/conf.d/esgf-httpd.conf
-     - $ESGF_CONFIG/grid-security/certificates/:/etc/grid-security/certificates/
-     - $ESGF_CONFIG/esg/config/:/esg/config/
-     - $ESGF_CONFIG/esg/config/tomcat/esg-truststore.ts:/usr/java/latest/jre/lib/security/jssecacerts
+     #- $ESGF_CONFIG/grid-security/certificates/:/etc/grid-security/certificates/
+     #- $ESGF_CONFIG/esg/config/:/esg/config/
+     #- $ESGF_CONFIG/esg/config/tomcat/esg-truststore.ts:/usr/java/latest/jre/lib/security/jssecacerts
      - $ESGF_CONFIG/archives/grid_security_certs.tar.xz:/root/archives/grid_security_certs.tar.xz
+     - $ESGF_CONFIG/archives/esgf_config.tar.xz:/root/archives/esgf_config.tar.xz
 
   # ESGF postgres database
   esgf-postgres:
@@ -177,6 +178,7 @@ services:
    # - esgf-data-node
    environment:
      - SSL_CERT_DIR=/etc/grid-security/certificates
+     - SSL_CERT_FILE=/etc/certs/esgf-ca-bundle.crt
      - COG_CONFIG_DIR=/usr/local/cog/cog_config
      - ESGF_HOSTNAME
    ports:
@@ -202,6 +204,7 @@ services:
      - esgf-config
    environment:
      - SSL_CERT_DIR=/etc/grid-security/certificates
+     - SSL_CERT_FILE=/etc/certs/esgf-ca-bundle.crt
      - ESGF_HOSTNAME
    depends_on:
      - esgf-postgres

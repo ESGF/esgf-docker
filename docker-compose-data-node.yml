@@ -87,6 +87,7 @@ services:
      - esgf-config
    environment:
      - SSL_CERT_DIR=/etc/grid-security/certificates
+     - SSL_CERT_FILE=/etc/certs/esgf-ca-bundle.crt
      - ESGF_HOSTNAME
    depends_on:
      - esgf-postgres
