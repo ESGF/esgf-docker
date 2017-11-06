@@ -19,7 +19,7 @@ spec:
   # the selector identifies the set of pods to load-balance against
   selector:
     stack: esgf
-    app: index-node
+    app: solr
 ---
 apiVersion: apps/v1beta1
 kind: Deployment
@@ -31,7 +31,7 @@ spec:
     metadata:
       labels:
         stack: esgf
-        app: index-node
+        app: solr
     spec:
       containers:
       - name: esgf-solr
