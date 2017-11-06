@@ -1,9 +1,10 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: esgf-solr-service
+  name: esgf-solr
   labels:
     stack: esgf
+    app: index-node
 spec:
   type: NodePort
   ports:
@@ -18,3 +19,4 @@ spec:
   # the selector identifies the set of pods to load-balance against
   selector:
     stack: esgf
+    app: index-node

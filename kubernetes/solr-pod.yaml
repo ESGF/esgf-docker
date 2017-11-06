@@ -4,6 +4,7 @@ metadata:
   name: esgf-solr
   labels:
     stack: esgf
+    app: index-node
 spec:
   containers:
   - name: esgf-solr

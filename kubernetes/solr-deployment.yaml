@@ -8,6 +8,7 @@ spec:
     metadata:
       labels:
         stack: esgf
+        app: index-node
     spec:
       containers:
       - name: esgf-solr
