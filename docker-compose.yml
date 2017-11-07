@@ -47,32 +47,24 @@ services:
      volumes:
        - pg_data:/var/lib/pgsql/data
 
-  # ESGF Data Node
-  #esgf-data-node:
-  #  image: esgfhub/esgf-data-node:${ESGF_VERSION}
-  #  container_name: data-node
-  #  expose:
-  #    - "8080"
-  #    - "8443"
-  #  ports:
-  #    - "8080:8080"
-  #    - "8443:8443"
-  #  networks:
-  #    - default
-  #    - dbnetwork 
-  #  volumes:
-  #    - tds_data:/esg/content/thredds
-  #    - $ESGF_CONFIG/webapps/thredds/WEB-INF/web.xml:/usr/local/tomcat/webapps/thredds/WEB-INF/web.xml
-  #    - $ESGF_DATA_DIR:/esg/data
-      #- $ESGF_CONFIG/grid-security/certificates/:/etc/grid-security/certificates/
-      #- $ESGF_CONFIG/globus/certificate-file:/root/.globus/certificate-file
-  #  volumes_from:
-  #    - esgf-config
-  #  environment:
-  #   - ESGF_HOSTNAME
-  #  depends_on:
-  #    - esgf-postgres
+  # ESGF Openid Relying Party
+  esgf-orp:
+    image: esgfhub/esgf-orp:${ESGF_VERSION}
+    container_name: orp
+    expose:
+      - "8080"
+      - "8443"
+    ports:
+      - "8083:8080"
+      - "8446:8443"
+    networks:
+      - default
+    volumes_from:
+      - esgf-config
+    environment:
+     - ESGF_HOSTNAME
 
+  # THREDDS Data Server
   esgf-tds:
     image: esgfhub/esgf-tds:${ESGF_VERSION}
     container_name: tds
