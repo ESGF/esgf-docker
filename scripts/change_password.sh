@@ -29,6 +29,8 @@ docker exec -it cog /bin/bash -c "export ESGF_PASSWORD=${ESGF_PASSWORD} && /usr/
 docker stop cog
 
 # change password inside (running) data-node container
-docker start data-node
-docker exec -it data-node /bin/bash -c "export ESGF_PASSWORD=${ESGF_PASSWORD} && /usr/local/bin/change_data_node_password.sh"
-docker stop data-node
+docker start tds
+docker exec -it tds /bin/bash -c "export ESGF_PASSWORD=${ESGF_PASSWORD} && /usr/local/bin/change_tds_password.sh"
+docker stop tds
+
+# TODO: change password in file esg.ini inside esgf-publisher container
