@@ -204,11 +204,31 @@ services:
       placement:
         constraints: [node.labels.esgf_idp_node == true]
 
-  esgf-data-node:
-    image: ${ESGF_IMAGES_HUB-esgfhub}/esgf-data-node:${ESGF_VERSION-latest}
+  esgf-orp:
+    image: ${ESGF_IMAGES_HUB-esgfhub}/esgf-orp:${ESGF_VERSION-latest}
     ports:
       - "8083:8080"
       - "8446:8443"
+    networks:
+      - default
+    secrets:
+      - source: tomcat_esg-truststore_ts
+        target: /usr/java/latest/jre/lib/security/jssecacerts
+      - source: esgf_config_files
+        target: /root/archives/esgf_config.tar.xz
+        mode:   0600
+    environment:
+     - ESGF_HOSTNAME
+    deploy:
+      replicas: 1
+      placement:
+        constraints: [node.labels.esgf_data_node == true]
+
+  esgf-tds:
+    image: ${ESGF_IMAGES_HUB-esgfhub}/esgf-tds:${ESGF_VERSION-latest}
+    ports:
+      - "8084:8080"
+      - "8447:8443"
     networks:
       - default
       - dbnetwork
