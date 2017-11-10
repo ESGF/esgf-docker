@@ -15,7 +15,7 @@ readonly DEFAULT_IMAGES_HUB=${ESGF_IMAGES_HUB-esgfhub}
 readonly DEFAULT_PACKAGE_REPO=${ESGF_REPO-"http://distrib-coffee.ipsl.jussieu.fr/pub/esgf"}
 
 #readonly ESGF_IMAGE_DIR_NAMES=('node' 'postgres' 'tomcat' 'solr' 'httpd' 'cog' 'data-node' 'idp-node' 'index-node' 'slcs' 'auth' 'node-manager' 'vsftp' 'solr-cloud')
-readonly ESGF_IMAGE_DIR_NAMES=('node' 'postgres' 'tomcat' 'solr' 'httpd' 'cog' 'tds' 'orp' 'idp-node' 'index-node' 'slcs' 'auth')
+readonly ESGF_IMAGE_DIR_NAMES=('node' 'postgres' 'tomcat' 'solr' 'httpd' 'cog' 'tds' 'orp' 'publisher' 'dashboard' 'idp-node' 'index-node' 'slcs' 'auth' 'node-manager')
 
 readonly ESGF_IMAGE_PREFIX='esgf-'
 

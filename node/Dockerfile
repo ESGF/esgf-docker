@@ -1,5 +1,4 @@
-# Docker image based on Centos 6 that includes:
-# Oracle Java 8
+
 # Python 2.7 + a few common Python packages
 # Supervisor
 # Also includes common, non-site specific ESGF env variables (ESGF_HOME).
@@ -36,9 +35,11 @@ RUN yum -y install epel-release; yum clean all
 
 # install Oracle Java 8
 # see download string at: http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html
-ENV JAVA_VERSION 8u144
-ENV JAVA_BUILD_VERSION b01
-ENV JAVA_HASH=090f390dda5b47b9b721c7dfaa008135
+# run scripts/get_oracle_jdk_linux_x64.sh to identify the correct URL
+
+ENV JAVA_VERSION 8u152
+ENV JAVA_BUILD_VERSION b16
+ENV JAVA_HASH=aa0333dd3019491ca4f6ddbe78cdb6d0
 
 RUN wget --no-cookies --no-check-certificate --header "Cookie: oraclelicense=accept-securebackup-cookie" \
     -O /tmp/jdk-8-linux-x64.rpm \
