@@ -28,9 +28,6 @@ services:
     volumes:
      - $ESGF_CONFIG/httpd/certs/:/etc/certs/
      - $ESGF_CONFIG/httpd/conf/esgf-httpd.conf:/etc/httpd/conf.d/esgf-httpd.conf
-     #- $ESGF_CONFIG/grid-security/certificates/:/etc/grid-security/certificates/
-     #- $ESGF_CONFIG/esg/config/:/esg/config/
-     #- $ESGF_CONFIG/esg/config/tomcat/esg-truststore.ts:/usr/java/latest/jre/lib/security/jssecacerts
      - $ESGF_CONFIG/archives/grid_security_certs.tar.xz:/root/archives/grid_security_certs.tar.xz
      - $ESGF_CONFIG/archives/esgf_config.tar.xz:/root/archives/esgf_config.tar.xz
 
@@ -88,6 +85,39 @@ services:
     depends_on:
       - esgf-postgres
 
+  # ESGF Publisher Client
+  esgf-publisher:
+    image: esgfhub/esgf-publisher:${ESGF_VERSION}
+    container_name: publisher
+    networks:
+      - default
+      - dbnetwork
+    volumes:
+      - tds_data:/esg/content/thredds
+      - $ESGF_DATA_DIR:/esg/data
+    volumes_from:
+      - esgf-config
+    environment:
+     - SSL_CERT_DIR=/etc/grid-security/certificates
+     #- SSL_CERT_FILE=/etc/certs/esgf-ca-bundle.crt
+     - ESGF_HOSTNAME
+    depends_on:
+      - esgf-postgres
+
+  # ESGF Dashboard
+  esgf-dashboard:
+    image: esgfhub/esgf-dashboard:${ESGF_VERSION}
+    container_name: dashboard
+    networks:
+      - default
+      - dbnetwork
+    volumes_from:
+      - esgf-config
+    ports:
+      - "8084:8080"
+      - "8447:8443"
+    depends_on:
+      - esgf-postgres
 
   # ESGF-Auth client
   esgf-auth:

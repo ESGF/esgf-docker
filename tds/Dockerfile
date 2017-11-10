@@ -84,7 +84,7 @@ RUN rm -rf /tmp/esgf-node-manager
 # TDS customized logging (uses DEBUG)
 COPY conf/log4j2.xml /usr/local/tomcat/webapps/thredds/WEB-INF/classes/log4j2.xml
 
-# data node scripts
+# startup scripts
 COPY scripts/ /usr/local/bin/
 
 # TDS test ESGF catalogs
