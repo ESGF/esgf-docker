@@ -69,8 +69,8 @@ services:
       - "8080"
       - "8443"
     ports:
-      - "8080:8080"
-      - "8443:8443"
+      - "8084:8080"
+      - "8447:8443"
     networks:
       - default
       - dbnetwork
@@ -114,8 +114,8 @@ services:
     volumes_from:
       - esgf-config
     ports:
-      - "8084:8080"
-      - "8447:8443"
+      - "8085:8080"
+      - "8448:8443"
     depends_on:
       - esgf-postgres
 

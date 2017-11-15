@@ -48,8 +48,8 @@ secrets:
     file: $ESGF_CONFIG/httpd/certs/cachain.pem
   httpd_esgf-ca-bundle_crt:
     file: $ESGF_CONFIG/httpd/certs/esgf-ca-bundle.crt
-  httpd_esgf-ca-bundle_crt-orig:
-    file: $ESGF_CONFIG/httpd/certs/esgf-ca-bundle.crt-orig
+  #httpd_esgf-ca-bundle_crt-orig:
+  #  file: $ESGF_CONFIG/httpd/certs/esgf-ca-bundle.crt-orig
   httpd_hostcert_pem:
     file: $ESGF_CONFIG/httpd/certs/hostcert.pem
   httpd_hostcert_pkcs12:
@@ -107,8 +107,8 @@ services:
         target: /etc/certs/cachain.pem
       - source: httpd_esgf-ca-bundle_crt
         target: /etc/certs/esgf-ca-bundle.crt
-      - source: httpd_esgf-ca-bundle_crt-orig
-        target: /etc/certs/esgf-ca-bundle.crt-orig
+      #- source: httpd_esgf-ca-bundle_crt-orig
+      #  target: /etc/certs/esgf-ca-bundle.crt-orig
       - source: httpd_hostcert_pem
         target: /etc/certs/hostcert.pem
       - source: httpd_hostcert_pkcs12
@@ -243,8 +243,51 @@ services:
         mode:   0600
     volumes:
       - tds_data:/esg/content/thredds
+      - $ESGF_DATA_DIR:/esg/data
     environment:
      - ESGF_HOSTNAME
+    depends_on:
+      - esgf-postgres
+    deploy:
+      replicas: 1
+      placement:
+        constraints: [node.labels.esgf_data_node == true]
+
+  esgf-publisher:
+    image: ${ESGF_IMAGES_HUB-esgfhub}/esgf-publisher:${ESGF_VERSION-latest}
+    networks:
+      - default
+      - dbnetwork
+    volumes:
+      - tds_data:/esg/content/thredds
+      - $ESGF_DATA_DIR:/esg/data
+    secrets:
+      - source: esgf_config_files
+        target: /root/archives/esgf_config.tar.xz
+        mode:   0600
+    environment:
+     - SSL_CERT_DIR=/etc/grid-security/certificates
+     #- SSL_CERT_FILE=/etc/certs/esgf-ca-bundle.crt
+     - ESGF_HOSTNAME
+    depends_on:
+      - esgf-postgres
+    deploy:
+      replicas: 1
+      placement:
+        constraints: [node.labels.esgf_data_node == true]
+
+  esgf-dashboard:
+    image: ${ESGF_IMAGES_HUB-esgfhub}/esgf-dashboard:${ESGF_VERSION-latest}
+    networks:
+      - default
+      - dbnetwork
+    secrets:
+      - source: esgf_config_files
+        target: /root/archives/esgf_config.tar.xz
+        mode:   0600
+    ports:
+      - "8085:8080"
+      - "8448:8443"
     depends_on:
       - esgf-postgres
     deploy:
@@ -274,8 +317,8 @@ services:
         target: /etc/certs/cachain.pem
       - source: httpd_esgf-ca-bundle_crt
         target: /etc/certs/esgf-ca-bundle.crt
-      - source: httpd_esgf-ca-bundle_crt-orig
-        target: /etc/certs/esgf-ca-bundle.crt-orig
+      #- source: httpd_esgf-ca-bundle_crt-orig
+      #  target: /etc/certs/esgf-ca-bundle.crt-orig
       - source: httpd_hostcert_pem
         target: /etc/certs/hostcert.pem
       - source: httpd_hostcert_pkcs12
