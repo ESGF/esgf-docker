@@ -51,15 +51,17 @@
             
   <div class="section" id="data-publishing">
 <h1>Data Publishing<a class="headerlink" href="#data-publishing" title="Permalink to this headline">¶</a></h1>
-<p><em>Tested with ESGF_VERSION=1.1</em></p>
+<p><em>Tested with ESGF_VERSION=dev_1.4</em></p>
 <div class="section" id="description">
 <h2>Description<a class="headerlink" href="#description" title="Permalink to this headline">¶</a></h2>
 <p>This page instructs on how to use the esgf-publisher Python client to
-publish a sample dataset and file to the ESGF data node running as a
-Docker container. These instructions are meant to be executed inside the
-data node container:</p>
+publish a sample dataset and file to the ESGF <strong>tds</strong> and <strong>index</strong> node
+containers. These publishing instructions are meant to be executed inside the
+<strong>publisher</strong> container. Additionally, the <strong>postgres</strong> contrainer is needed
+to store publishing metadata, and the <strong>orp</strong> container is needed to enforce access
+control (for publishing and downloading data):</p>
 <div class="highlight-python"><div class="highlight"><pre>docker-compose up
-docker exec -it -u 0 data-node /bin/bash
+docker exec -it -u 0 publisher /bin/bash
 </pre></div>
 </div>
 </div>
@@ -95,14 +97,14 @@ wget -O sftlf.nc http://distrib-coffee.ipsl.jussieu.fr/pub/esgf/dist/externals/s
 <div class="highlight-python"><div class="highlight"><pre>cd /esg/config/esgcet
 source ${CDAT_HOME}/bin/activate esgf-pub
 esgprep mapfile --project test /esg/data/test
-ls -l test.test.map
+ls -l mapfiles/test.test.map
 </pre></div>
 </div>
 </div>
 <div class="section" id="step-2">
 <h2>Step 2<a class="headerlink" href="#step-2" title="Permalink to this headline">¶</a></h2>
 <p>Publish to the postgres database:</p>
-<div class="highlight-python"><div class="highlight"><pre>esgpublish --project test --map test.test.map --service fileservice
+<div class="highlight-python"><div class="highlight"><pre>esgpublish --project test --map mapfiles/test.test.map --service fileservice
 esglist_datasets test
 </pre></div>
 </div>
@@ -110,7 +112,7 @@ esglist_datasets test
 <div class="section" id="step-3">
 <h2>Step 3<a class="headerlink" href="#step-3" title="Permalink to this headline">¶</a></h2>
 <p>Publish to the TDS:</p>
-<div class="highlight-python"><div class="highlight"><pre>esgpublish --project test --map test.test.map --service fileservice --noscan --thredds
+<div class="highlight-python"><div class="highlight"><pre>esgpublish --project test --map mapfiles/test.test.map --service fileservice --noscan --thredds
 </pre></div>
 </div>
 <p>Note: this operation will use the credentials contained in the <em>esg.ini</em>
@@ -125,7 +127,7 @@ from the TDS main catalog page:</p>
 </ul>
 <p>and downloadable using any openid, password combination that is trusted
 by the data-node. The authorization required for downloading the file is
-specified in the access policy file: <em>/esg/config/esgf_policies_local.xml</em>
+specified inside the <strong>orp</strong> container in the access policy file: <em>/esg/config/esgf_policies_local.xml</em>
 as an XML statement of the form:</p>
 <div class="highlight-python"><div class="highlight"><pre>&lt;policy resource=&quot;.*test.*&quot; attribute_type=&quot;AUTH_ONLY&quot; attribute_value=&quot;&quot; action=&quot;Read&quot;/&gt;
 </pre></div>
@@ -139,19 +141,20 @@ that is able to issue short term X509 certificates for users managed by
 the identity provider container. In the meantime, the following
 workarounds can be adopted.</p>
 <p>Obtain a short-term X509 certificate from any other trusted ESGF
-identity provider, and copy it into the data-node container in the location
+identity provider, and copy it into the <strong>publisher</strong> container in the location
 referenced by the file esg.ini:</p>
 <div class="highlight-python"><div class="highlight"><pre>cp certificate-file /root/.globus/certificate-file
 </pre></div>
 </div>
-<p>Then, disable specific authorization for publishing test data, requiring only
+<p>Then, disable the specific authorization for publishing test data, requiring only
 the availability of an X509 certificate. Edit the file: <em>/esg/config/esgf_policies_local.xml</em>
+inside the <strong>orp</strong> container
 and insert the following policy statement (as XML):</p>
 <div class="highlight-python"><div class="highlight"><pre>&lt;policy resource=&quot;.*test.*&quot; attribute_type=&quot;ANY&quot; attribute_value=&quot;&quot; action=&quot;Write&quot;/&gt;
 </pre></div>
 </div>
 <p>At this point, you can issue the publishing command:</p>
-<div class="highlight-python"><div class="highlight"><pre>esgpublish --project test --map test.test.map --service fileservice --noscan --publish
+<div class="highlight-python"><div class="highlight"><pre>esgpublish --project test --map mapfiles/test.test.map --service fileservice --noscan --publish
 </pre></div>
 </div>
 <p>After about a minute, the dataset and file should be returned when
