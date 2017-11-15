@@ -24,10 +24,10 @@
 #--------------|---------------|-----------------------------------------
 # EACL entry #1|
 
- access_id_CA      X509         '/O=Grid/OU=Globus/OU=bvlpenes.knmi.nl/CN=Globus Simple CA'
+ access_id_CA      X509         '/O=ESGF/OU=ESGF.ORG/CN=esgf-fedtest.dkrz.de-CA'
 
  pos_rights        globus        CA:sign
 
- cond_subjects     globus       '"/O=Grid/OU=Globus/OU=bvlpenes.knmi.nl/*"'
+ cond_subjects     globus       '"/O=ESGF/OU=ESGF.ORG/*"'
 
 # end of EACL
