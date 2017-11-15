@@ -6,13 +6,9 @@
 
 ARG ESGF_IMAGES_HUB=esgfhub
 ARG ESGF_VERSION=devel
-
-FROM $ESGF_IMAGES_HUB/esgf-tomcat:$ESGF_VERSION
-
-MAINTAINER ESGF <esgf-devel@lists.llnl.gov>
-
-# default ESGF repository
 ARG ESGF_REPO=http://distrib-coffee.ipsl.jussieu.fr/pub/esgf
+FROM $ESGF_IMAGES_HUB/esgf-tomcat:$ESGF_VERSION
+MAINTAINER ESGF <esgf-devel@lists.llnl.gov>
 
 ENV DASHBOARD_HOME /usr/local/esgf-dashboard-ip
 

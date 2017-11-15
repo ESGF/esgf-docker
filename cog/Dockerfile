@@ -7,11 +7,10 @@
 # To map the local source directory:
 # docker run -ti -p 8000:8000 --name cog -v /Users/cinquini/Documents/workspace/cog:/usr/local/cog/cog_install $ESGF_IMAGES_HUB/esgf-cog:${ESGF_VERSION}
 
-FROM $ESGF_IMAGES_HUB/esgf-node:$ESGF_VERSION
-MAINTAINER Earth System Grid Federation <esgf-devel@lists.llnl.gov>
-
 ARG ESGF_IMAGES_HUB=esgfhub
 ARG ESGF_VERSION=devel
+FROM $ESGF_IMAGES_HUB/esgf-node:$ESGF_VERSION
+MAINTAINER Earth System Grid Federation <esgf-devel@lists.llnl.gov>
 
 # choose CoG version
 ENV COG_TAG=v3.9.7

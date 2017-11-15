@@ -1,14 +1,10 @@
 # ESGF Identity Provider node
 # Implemented as Java web servlet application running inside Tomcat container.
 
-FROM $ESGF_IMAGES_HUB/esgf-tomcat:$ESGF_VERSION
-MAINTAINER Earth System Grid Federation <esgf-devel@lists.llnl.gov>
-
 ARG ESGF_IMAGES_HUB=esgfhub
 ARG ESGF_VERSION=devel
-
-# ESGF esg-idp web application
-ARG ESGF_REPO=http://distrib-coffee.ipsl.jussieu.fr/pub/esgf
+FROM $ESGF_IMAGES_HUB/esgf-tomcat:$ESGF_VERSION
+MAINTAINER Earth System Grid Federation <esgf-devel@lists.llnl.gov>
 
 ADD $ESGF_REPO/dist/esgf-idp/esgf-idp.war /usr/local/tomcat/webapps/esgf-idp/
 #ADD esgf-idp.war /usr/local/tomcat/webapps/esgf-idp/

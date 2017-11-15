@@ -1,10 +1,9 @@
 # ESGF node with Apache httpd and mod_wsgi
 
-FROM $ESGF_IMAGES_HUB/esgf-node:$ESGF_VERSION
-MAINTAINER Earth System Grid Federation <esgf-devel@lists.llnl.gov>
-
 ARG ESGF_IMAGES_HUB=esgfhub
 ARG ESGF_VERSION=devel
+FROM $ESGF_IMAGES_HUB/esgf-node:$ESGF_VERSION
+MAINTAINER Earth System Grid Federation <esgf-devel@lists.llnl.gov>
 
 # install latest apache httpd
 RUN yum -y update \

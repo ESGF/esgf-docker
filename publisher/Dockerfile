@@ -1,13 +1,10 @@
 # Docker image containing the ESGF publisher client
 
-FROM $ESGF_IMAGES_HUB/esgf-node:$ESGF_VERSION
-MAINTAINER Earth System Grid Federation <esgf-devel@lists.llnl.gov>
-
 ARG ESGF_IMAGES_HUB=esgfhub
 ARG ESGF_VERSION=devel
-
-# default ESGF repository
 ARG ESGF_REPO=http://distrib-coffee.ipsl.jussieu.fr/pub/esgf
+FROM $ESGF_IMAGES_HUB/esgf-node:$ESGF_VERSION
+MAINTAINER Earth System Grid Federation <esgf-devel@lists.llnl.gov>
 
 # install library pre-requisites
 RUN yum -y update; yum -y install libxml2-devel libxslt-devel; yum clean all
