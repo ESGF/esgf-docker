@@ -183,9 +183,9 @@ if [[ "${pushit}" = "${TRUE}" && "${assumeyes}" = "${FALSE}" ]]; then
   fi
 fi
 
-pushd "${GEOLITECITY_PARENT_DIR_PATH}" > /dev/null
-wget -N -nv "${packages_repo}/dist/devel/geoip/GeoLiteCity.dat.gz"
-popd > /dev/null
+#pushd "${GEOLITECITY_PARENT_DIR_PATH}" > /dev/null
+#wget -N -nv "${packages_repo}/dist/devel/geoip/GeoLiteCity.dat.gz"
+#popd > /dev/null
 
 # loop over ordered list of ESGF images
 for subdir in ${ESGF_IMAGE_DIR_NAMES[*]}; do

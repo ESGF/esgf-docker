@@ -1,8 +1,7 @@
 # vsftp (Verty Secure File Transfer protocol) server installed on centOS
 
 FROM centos:6
-
-MAINTAINER Luca Cinquini <luca.cinquini@jpl.nasa.gov>
+MAINTAINER Earth System Grid Federation <esgf-devel@lists.llnl.gov>
 
 # install latest vsftp server
 RUN yum -y update && \

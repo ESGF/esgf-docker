@@ -4,12 +4,11 @@
 # o ORP
 # o Dashboard
 
+FROM $ESGF_IMAGES_HUB/esgf-tomcat:$ESGF_VERSION
+MAINTAINER Earth System Grid Federation <esgf-devel@lists.llnl.gov>
+
 ARG ESGF_IMAGES_HUB=esgfhub
 ARG ESGF_VERSION=devel
-
-FROM $ESGF_IMAGES_HUB/esgf-tomcat:$ESGF_VERSION
-
-MAINTAINER Luca Cinquini <luca.cinquini@jpl.nasa.gov>
 
 # default ESGF repository
 ARG ESGF_REPO=http://distrib-coffee.ipsl.jussieu.fr/pub/esgf

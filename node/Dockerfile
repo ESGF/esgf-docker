@@ -1,11 +1,10 @@
-
 # Python 2.7 + a few common Python packages
 # Supervisor
 # Also includes common, non-site specific ESGF env variables (ESGF_HOME).
 
 FROM centos:6
 
-MAINTAINER Luca Cinquini <luca.cinquini@jpl.nasa.gov>
+MAINTAINER Earth System Grid Federation <esgf-devel@lists.llnl.gov>
 
 # install dependencies with yum
 RUN yum -y update && \

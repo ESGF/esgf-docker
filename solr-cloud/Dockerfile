@@ -1,11 +1,10 @@
 # Solr-Cloud installation configured for ESGF data
 
+FROM $ESGF_IMAGES_HUB/esgf-node:$ESGF_VERSION
+MAINTAINER Earth System Grid Federation <esgf-devel@lists.llnl.gov>
+
 ARG ESGF_IMAGES_HUB=esgfhub
 ARG ESGF_VERSION=devel
-
-FROM $ESGF_IMAGES_HUB/esgf-node:$ESGF_VERSION
-
-MAINTAINER Luca Cinquini <luca.cinquini@jpl.nasa.gov>
 
 # Maven
 ENV MAVEN_VERSION 3.3.9

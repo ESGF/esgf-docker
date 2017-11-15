@@ -1,7 +1,6 @@
 
 from centos:6
-
-MAINTAINER Frank Greguska <greguska@jpl.nasa.gov>
+MAINTAINER Earth System Grid Federation <esgf-devel@lists.llnl.gov>
 
 RUN yum clean all && \
     yum -y update && \

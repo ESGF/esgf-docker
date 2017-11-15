@@ -1,11 +1,10 @@
 # ESGF index node:  esgf-search application running inside Tomcat
 
+FROM $ESGF_IMAGES_HUB/esgf-tomcat:$ESGF_VERSION
+MAINTAINER Earth System Grid Federation <esgf-devel@lists.llnl.gov>
+
 ARG ESGF_IMAGES_HUB=esgfhub
 ARG ESGF_VERSION=devel
-
-FROM $ESGF_IMAGES_HUB/esgf-tomcat:$ESGF_VERSION
-
-MAINTAINER Luca Cinquini <luca.cinquini@jpl.nasa.gov>
 
 # ESGF esg-search web application
 

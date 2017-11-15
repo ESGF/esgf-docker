@@ -2,12 +2,11 @@
 # o Tomcat keystore, truststore files located in /esg/config/tomcat
 # o startup with ESGF specific env variables defined in bin/setenv.sh
 
+FROM $ESGF_IMAGES_HUB/esgf-node:$ESGF_VERSION
+MAINTAINER Earth System Grid Federation <esgf-devel@lists.llnl.gov>
+
 ARG ESGF_IMAGES_HUB=esgfhub
 ARG ESGF_VERSION=devel
-
-FROM $ESGF_IMAGES_HUB/esgf-node:$ESGF_VERSION
-
-MAINTAINER Luca Cinquini <luca.cinquini@jpl.nasa.gov>
 
 # Tomcat 8
 ENV TOMCAT_VERSION 8.5.23
