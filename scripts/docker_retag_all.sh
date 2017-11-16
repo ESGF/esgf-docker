@@ -1,8 +1,8 @@
 #!/bin/bash
 # Script to retag all ESGF Docker images
 # Usage:
-# ./docker_pull_all.sh [old_version] [new_version]
-# Example: # ./docker_pull_all.sh devel 1.3
+# ./docker_retag_all.sh [old_version] [new_version]
+# Example: # ./docker_retag_all.sh devel 1.3
 
 readonly BASE_DIR_PATH="$(pwd)"
 SCRIPT_PARENT_DIR_PATH="$(dirname $0)"; cd "${SCRIPT_PARENT_DIR_PATH}"
