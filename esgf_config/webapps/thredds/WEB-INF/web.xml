@@ -110,9 +110,9 @@
       <param-value>esg.openid.saml.cookie</param-value>
     </init-param>
     <init-param>
-      <!-- base64 encoded secret key used to encrypt the cookie, example: -->
+      <!-- base64 encoded secret key used to encrypt the cookie: -->
       <param-name>secretKey</param-name>
-      <param-value>xnVuDEZROQfoBT+scRkaig==</param-value>
+      <param-value>ESGF_SECRET_KEY</param-value>
     </init-param>
     <init-param>
       <!-- name of the httpRequest attribute to set on authentication success -->

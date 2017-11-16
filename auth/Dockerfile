@@ -36,7 +36,7 @@ COPY conf/esgf_auth_config.json /esg/config/esgf_auth_config.json
 RUN cd $ESGF_AUTH_INSTALL_DIR && \
     source venv/bin/activate && \
     cd src && \
-    git clone https://github.com/lukaszlacinski/esgf-auth.git && \
+    git clone https://github.com/ESGF/esgf-auth.git && \
     cd esgf-auth && \
     pip install -r requirements.txt && \
     python ./manage.py migrate

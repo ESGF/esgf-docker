@@ -8,6 +8,7 @@ echo "set permissions"
 chmod 644 /esg/config/*
 #chown root:tomcat /esg/config/.esg*
 chmod 640 /esg/config/.esg*
+chown apache:apache /esg/config/.esgf_oauth2.json
 
 #chown -R tomcat:tomcat /esg/config/tomcat
 chmod 755 /esg/config/tomcat

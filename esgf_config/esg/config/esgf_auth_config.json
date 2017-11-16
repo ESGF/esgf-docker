@@ -1,5 +1,6 @@
 {
-"ESGF_HOSTNAME":"localhost",
+"ESGF_HOSTNAME":"my.esgf.node",
 "ESGF_SECRET_KEY":"A7JiFckYWpqezusdOfJoH[==",
-"DJANGO_SECRET_KEY":"5_7$jn1-c8h5@(e$x8fhk=&!mk=ea6=irwm+b22nu)h=rhox46"
+"WEBAPP_SECRET_KEY":"5_7$jn1-c8h5@(e$x8fhk=&!mk=ea6=irwm+b22nu)h=rhox46",
+"OAUTH@_SECRET_FILE": "/esg/config/.esgf_oauth2.json"
 }

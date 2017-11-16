@@ -215,7 +215,7 @@ services:
    volumes:
      - cog_data:/usr/local/cog/cog_config
      - esgf_auth_install:/usr/local/esgf-auth
-     - $ESGF_CONFIG/esgf-auth/settings.py:/usr/local/esgf-auth/src/esgf-auth/esgf_auth/settings.py
+   # - $ESGF_CONFIG/esgf-auth/settings.py:/usr/local/esgf-auth/src/esgf-auth/esgf_auth/settings.py
    # - $ESGF_CONFIG/esgf-auth/db.sqlite3:/tmp/db.sqlite3
    volumes_from:
      - esgf-config
