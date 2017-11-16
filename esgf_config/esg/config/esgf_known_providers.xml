@@ -39,7 +39,7 @@
  </OP>
  <OP>
   <NAME>DOE Lawrence Livermore National Laboratory (LLNL)</NAME>
-  <URL>https://pcmdi.llnl.gov/esgf-idp/openid/</URL>
+  <URL>https://esgf-node.llnl.gov/esgf-idp/openid/</URL>
  </OP>
  <OP>
   <NAME>Centre for Environmental Data Analysis (CEDA)</NAME>
