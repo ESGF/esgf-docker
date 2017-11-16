@@ -1,3 +1,5 @@
+.. _data_publishing:
+
 ***************
 Data Publishing
 ***************
@@ -12,10 +14,11 @@ publish a sample dataset and file to the ESGF **tds** and **index** node
 containers. These publishing instructions are meant to be executed inside the
 **publisher** container. Additionally, the **postgres** contrainer is needed
 to store publishing metadata, and the **orp** container is needed to enforce access
-control (for publishing and downloading data).::
+control (for publishing and downloading data), and the **idp** container is needed 
+for authentication and to retrieve the group memberships of the data publisher .::
 
   docker-compose up 
-  docker exec -it -u 0 publisher /bin/bash
+  docker exec -it -u 0 <publisher container id> /bin/bash
 
 One-Time Setup
 ==============

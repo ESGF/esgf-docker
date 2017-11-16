@@ -50,7 +50,7 @@
           <div class="body" role="main">
             
   <div class="section" id="data-publishing">
-<h1>Data Publishing<a class="headerlink" href="#data-publishing" title="Permalink to this headline">¶</a></h1>
+<span id="id1"></span><h1>Data Publishing<a class="headerlink" href="#data-publishing" title="Permalink to this headline">¶</a></h1>
 <p><em>Tested with ESGF_VERSION=dev_1.4</em></p>
 <div class="section" id="description">
 <h2>Description<a class="headerlink" href="#description" title="Permalink to this headline">¶</a></h2>
@@ -59,9 +59,10 @@ publish a sample dataset and file to the ESGF <strong>tds</strong> and <strong>i
 containers. These publishing instructions are meant to be executed inside the
 <strong>publisher</strong> container. Additionally, the <strong>postgres</strong> contrainer is needed
 to store publishing metadata, and the <strong>orp</strong> container is needed to enforce access
-control (for publishing and downloading data):</p>
+control (for publishing and downloading data), and the <strong>idp</strong> container is needed
+for authentication and to retrieve the group memberships of the data publisher .:</p>
 <div class="highlight-python"><div class="highlight"><pre>docker-compose up
-docker exec -it -u 0 publisher /bin/bash
+docker exec -it -u 0 &lt;publisher container id&gt; /bin/bash
 </pre></div>
 </div>
 </div>
