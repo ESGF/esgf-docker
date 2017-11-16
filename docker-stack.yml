@@ -48,8 +48,6 @@ secrets:
     file: $ESGF_CONFIG/httpd/certs/cachain.pem
   httpd_esgf-ca-bundle_crt:
     file: $ESGF_CONFIG/httpd/certs/esgf-ca-bundle.crt
-  #httpd_esgf-ca-bundle_crt-orig:
-  #  file: $ESGF_CONFIG/httpd/certs/esgf-ca-bundle.crt-orig
   httpd_hostcert_pem:
     file: $ESGF_CONFIG/httpd/certs/hostcert.pem
   httpd_hostcert_pkcs12:
@@ -107,8 +105,6 @@ services:
         target: /etc/certs/cachain.pem
       - source: httpd_esgf-ca-bundle_crt
         target: /etc/certs/esgf-ca-bundle.crt
-      #- source: httpd_esgf-ca-bundle_crt-orig
-      #  target: /etc/certs/esgf-ca-bundle.crt-orig
       - source: httpd_hostcert_pem
         target: /etc/certs/hostcert.pem
       - source: httpd_hostcert_pkcs12
@@ -317,8 +313,6 @@ services:
         target: /etc/certs/cachain.pem
       - source: httpd_esgf-ca-bundle_crt
         target: /etc/certs/esgf-ca-bundle.crt
-      #- source: httpd_esgf-ca-bundle_crt-orig
-      #  target: /etc/certs/esgf-ca-bundle.crt-orig
       - source: httpd_hostcert_pem
         target: /etc/certs/hostcert.pem
       - source: httpd_hostcert_pkcs12

@@ -29,7 +29,7 @@ fi
 mkdir -p $ESGF_CONFIG/esgfcerts
 cd $ESGF_CONFIG/esgfcerts
 cp ../esg/config/tomcat/esg-truststore.ts ./esg-truststore.ts
-cp ../httpd/certs/esgf-ca-bundle.crt-orig ./esgf-ca-bundle.crt
+cp ../httpd/certs/esgf-ca-bundle.crt ./esgf-ca-bundle.crt
 
 # generate host private key hostkey.pem, certificate hostcert.pem
 echo ""
