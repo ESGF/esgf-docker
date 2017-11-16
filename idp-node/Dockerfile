@@ -3,8 +3,13 @@
 
 ARG ESGF_IMAGES_HUB=esgfhub
 ARG ESGF_VERSION=devel
+
 FROM $ESGF_IMAGES_HUB/esgf-tomcat:$ESGF_VERSION
+
 MAINTAINER Earth System Grid Federation <esgf-devel@lists.llnl.gov>
+
+# default ESGF repository
+ARG ESGF_REPO=http://distrib-coffee.ipsl.jussieu.fr/pub/esgf
 
 ADD $ESGF_REPO/dist/esgf-idp/esgf-idp.war /usr/local/tomcat/webapps/esgf-idp/
 #ADD esgf-idp.war /usr/local/tomcat/webapps/esgf-idp/

@@ -3,9 +3,12 @@
 
 ARG ESGF_IMAGES_HUB=esgfhub
 ARG ESGF_VERSION=devel
-ARG ESGF_REPO=http://distrib-coffee.ipsl.jussieu.fr/pub/esgf
+
 FROM $ESGF_IMAGES_HUB/esgf-tomcat:$ESGF_VERSION
 MAINTAINER Earth System Grid Federation <esgf-devel@lists.llnl.gov>
+
+# default ESGF repository
+ARG ESGF_REPO=http://distrib-coffee.ipsl.jussieu.fr/pub/esgf
 
 #============================================
 
@@ -15,7 +18,7 @@ RUN yum -y update; yum clean all
 # install TDS
 RUN mkdir -p /usr/local/tomcat/webapps/thredds
 #COPY thredds/thredds.war /usr/local/tomcat/webapps/thredds/thredds.war
-ADD $ESGF_REPO/dist/thredds/5.0/5.0.2/thredds.war /usr/local/tomcat/webapps/thredds/
+ADD http://aims1.llnl.gov/esgf/dist/thredds/5.0/5.0.2/thredds.war /usr/local/tomcat/webapps/thredds
 RUN cd /usr/local/tomcat/webapps/thredds && \
     jar xvf thredds.war && \
     rm thredds.war && \
