@@ -39,11 +39,11 @@ RUN cd $ESGF_AUTH_INSTALL_DIR && \
     git clone https://github.com/ESGF/esgf-auth.git && \
     cd esgf-auth && \
     pip install -r requirements.txt && \
+    mkdir db && \
     python ./manage.py migrate
 
-# change permission on parent directory and database file so user apache can write
-RUN chmod a+w /usr/local/esgf-auth/src/esgf-auth && \
-    chmod a+w /usr/local/esgf-auth/src/esgf-auth/db.sqlite3
+# change permission on parent directory of database file so user apache can write
+RUN chmod -R a+w /usr/local/esgf-auth/src/esgf-auth/db
 
 VOLUME /usr/local/esgf-auth
 
