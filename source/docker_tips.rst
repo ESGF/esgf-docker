@@ -36,7 +36,7 @@ Remove dangling images::
 
 Remove all volumes::
 
-  docker image ls -q | xargs docker volume rm --force
+  docker image ls -q | xargs docker image rm --force
 
 Remove image according to a given pattern::
 

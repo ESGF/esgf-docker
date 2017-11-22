@@ -1,19 +1,24 @@
+.. _data_publishing:
+
 ***************
 Data Publishing
 ***************
 
-*Tested with ESGF_VERSION=1.1*
+*Tested with ESGF_VERSION=dev_1.4*
 
 Description
 ===========
 
 This page instructs on how to use the esgf-publisher Python client to
-publish a sample dataset and file to the ESGF data node running as a
-Docker container. These instructions are meant to be executed inside the
-data node container::
+publish a sample dataset and file to the ESGF **tds** and **index** node
+containers. These publishing instructions are meant to be executed inside the
+**publisher** container. Additionally, the **postgres** contrainer is needed
+to store publishing metadata, and the **orp** container is needed to enforce access
+control (for publishing and downloading data), and the **idp** container is needed 
+for authentication and to retrieve the group memberships of the data publisher .::
 
   docker-compose up 
-  docker exec -it -u 0 data-node /bin/bash
+  docker exec -it -u 0 <publisher container id> /bin/bash
 
 One-Time Setup
 ==============
@@ -50,14 +55,14 @@ Generate the mapfile listing the dataset and files to be published::
   cd /esg/config/esgcet
   source ${CDAT_HOME}/bin/activate esgf-pub 
   esgprep mapfile --project test /esg/data/test
-  ls -l test.test.map
+  ls -l mapfiles/test.test.map
 
 Step 2
 ======
 
 Publish to the postgres database::
   
-  esgpublish --project test --map test.test.map --service fileservice
+  esgpublish --project test --map mapfiles/test.test.map --service fileservice
   esglist_datasets test
 
 Step 3
@@ -65,7 +70,7 @@ Step 3
 
 Publish to the TDS::
 
-  esgpublish --project test --map test.test.map --service fileservice --noscan --thredds
+  esgpublish --project test --map mapfiles/test.test.map --service fileservice --noscan --thredds
 
 Note: this operation will use the credentials contained in the *esg.ini*
 file to invoke the TDS re-initialization URL: 
@@ -79,7 +84,7 @@ from the TDS main catalog page:
 
 and downloadable using any openid, password combination that is trusted
 by the data-node. The authorization required for downloading the file is
-specified in the access policy file: */esg/config/esgf_policies_local.xml*
+specified inside the **orp** container in the access policy file: */esg/config/esgf_policies_local.xml*
 as an XML statement of the form::
 
    <policy resource=".*test.*" attribute_type="AUTH_ONLY" attribute_value="" action="Read"/>
@@ -95,20 +100,21 @@ the identity provider container. In the meantime, the following
 workarounds can be adopted.
 
 Obtain a short-term X509 certificate from any other trusted ESGF
-identity provider, and copy it into the data-node container in the location
+identity provider, and copy it into the **publisher** container in the location
 referenced by the file esg.ini::
 
   cp certificate-file /root/.globus/certificate-file
 
-Then, disable specific authorization for publishing test data, requiring only
+Then, disable the specific authorization for publishing test data, requiring only
 the availability of an X509 certificate. Edit the file: */esg/config/esgf_policies_local.xml*
+inside the **orp** container
 and insert the following policy statement (as XML)::
 
   <policy resource=".*test.*" attribute_type="ANY" attribute_value="" action="Write"/>
 
 At this point, you can issue the publishing command::
 
-  esgpublish --project test --map test.test.map --service fileservice --noscan --publish
+  esgpublish --project test --map mapfiles/test.test.map --service fileservice --noscan --publish
 
 After about a minute, the dataset and file should be returned when
 querying the "slave" Solr index:

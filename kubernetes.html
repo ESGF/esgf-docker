@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Kubernetes for ESGF &mdash; ESGF-Docker Documentation</title>
+    <title>Kubernetes for ESGF &#8212; ESGF-Docker Documentation</title>
     
     <link rel="stylesheet" href="_static/nature.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -17,13 +17,15 @@
         VERSION:     '1.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
       };
     </script>
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="ESGF-Docker Documentation" href="index.html" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
     <link rel="prev" title="Docker Tips" href="docker_tips.html" /> 
   </head>
   <body role="document">
@@ -36,7 +38,7 @@
         <li class="right" >
           <a href="docker_tips.html" title="Docker Tips"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">ESGF-Docker Documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">ESGF-Docker Documentation</a> &#187;</li> 
       </ul>
     </div>  
 
@@ -57,9 +59,9 @@
 <h2>Setup<a class="headerlink" href="#setup" title="Permalink to this headline">¶</a></h2>
 <p>Before using Kubernetes, you need to have a Kubernetes cluster, and the kubectl command-line tool must be configured to communicate with your cluster.
 For example, you can install <em>minikube</em> and <em>kubectl</em> on a Mac laptop, then start a Kubernetes cluster as follows:</p>
-<div class="highlight-python"><div class="highlight"><pre>minikube start --vm-driver=xhyve
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">minikube</span> <span class="n">start</span> <span class="o">--</span><span class="n">vm</span><span class="o">-</span><span class="n">driver</span><span class="o">=</span><span class="n">xhyve</span>
 
-kubectl config use-context minikube
+<span class="n">kubectl</span> <span class="n">config</span> <span class="n">use</span><span class="o">-</span><span class="n">context</span> <span class="n">minikube</span>
 </pre></div>
 </div>
 <p>All Kubernetes files to follow this tutorial are contained in the <em>kubernetes</em> sub-dirctory.</p>
@@ -67,7 +69,7 @@ kubectl config use-context minikube
 <div class="section" id="solr">
 <h2>Solr<a class="headerlink" href="#solr" title="Permalink to this headline">¶</a></h2>
 <p>To start a pod that contains the <em>esgf-solr</em> container:</p>
-<div class="highlight-python"><div class="highlight"><pre>kubectl create -f solr-deployment.yaml
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="n">create</span> <span class="o">-</span><span class="n">f</span> <span class="n">solr</span><span class="o">-</span><span class="n">deployment</span><span class="o">.</span><span class="n">yaml</span>
 </pre></div>
 </div>
 <p>The <em>esgf-solr</em> container includes the ESGF solr master instance (port 8984) and slave instance (port 8983).
@@ -75,22 +77,22 @@ The Solr indexes are written to a Kubernetes PersistentVolume that is mounted in
 The configuration file above also includes a Kubernetes service which makes the two Solr instances available
 within the cluster at the URLs <em>http://esgf-solr:8984/</em> and <em>http://esgf-solr:8983/</em>, respectively.</p>
 <p>To inspect the Kubernetes deployment:</p>
-<div class="highlight-python"><div class="highlight"><pre>kubectl get pods -l app=solr
-kubectl describe deployment esgf-solr
-kubectl describe service esgf-solr
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="n">get</span> <span class="n">pods</span> <span class="o">-</span><span class="n">l</span> <span class="n">app</span><span class="o">=</span><span class="n">solr</span>
+<span class="n">kubectl</span> <span class="n">describe</span> <span class="n">deployment</span> <span class="n">esgf</span><span class="o">-</span><span class="n">solr</span>
+<span class="n">kubectl</span> <span class="n">describe</span> <span class="n">service</span> <span class="n">esgf</span><span class="o">-</span><span class="n">solr</span>
 </pre></div>
 </div>
 <p>To test that the two Solr instances are working, enter the container and query localhost:</p>
-<div class="highlight-python"><div class="highlight"><pre>kubectl exec -it esgf-solr-&lt;pod hash-id&gt; -- /bin/bash
-/]# curl &#39;http://localhost:8983/solr/datasets/select?q=*%3A*&amp;wt=json&amp;indent=true&#39;
-/]# curl &#39;http://localhost:8984/solr/datasets/select?q=*%3A*&amp;wt=json&amp;indent=true&#39;
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="n">exec</span> <span class="o">-</span><span class="n">it</span> <span class="n">esgf</span><span class="o">-</span><span class="n">solr</span><span class="o">-&lt;</span><span class="n">pod</span> <span class="nb">hash</span><span class="o">-</span><span class="nb">id</span><span class="o">&gt;</span> <span class="o">--</span> <span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">bash</span>
+<span class="o">/</span><span class="p">]</span><span class="c1"># curl &#39;http://localhost:8983/solr/datasets/select?q=*%3A*&amp;wt=json&amp;indent=true&#39;</span>
+<span class="o">/</span><span class="p">]</span><span class="c1"># curl &#39;http://localhost:8984/solr/datasets/select?q=*%3A*&amp;wt=json&amp;indent=true&#39;</span>
 </pre></div>
 </div>
 </div>
 <div class="section" id="index-node">
 <h2>Index Node<a class="headerlink" href="#index-node" title="Permalink to this headline">¶</a></h2>
 <p>To start a pod that contains the ESGF Index Node (i.e. the ESGF search web application running within Tomcat):</p>
-<div class="highlight-python"><div class="highlight"><pre>kubectl create -f index-node-deployment.yaml
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="n">create</span> <span class="o">-</span><span class="n">f</span> <span class="n">index</span><span class="o">-</span><span class="n">node</span><span class="o">-</span><span class="n">deployment</span><span class="o">.</span><span class="n">yaml</span>
 </pre></div>
 </div>
 <p>The <em>esgf-index-node</em> container mounts an archive file that contains all the necessary configuration files, and that is expanded into the location
@@ -98,22 +100,22 @@ kubectl describe service esgf-solr
 at the URLs <em>http://esgf-solr:8984/</em> and <em>http://esgf-solr:8983/</em>.
 This deployment also includes its own service which exposes the web application at the URL <em>http://esgf-index-node:8080/esg-search/search</em> to other containers in the cluster.</p>
 <p>To inspect the Kubernetes deployment:</p>
-<div class="highlight-python"><div class="highlight"><pre>kubectl get pods -l app=index-node
-kubectl describe deployment esgf-index-node
-kubectl describe service esgf-index-node
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="n">get</span> <span class="n">pods</span> <span class="o">-</span><span class="n">l</span> <span class="n">app</span><span class="o">=</span><span class="n">index</span><span class="o">-</span><span class="n">node</span>
+<span class="n">kubectl</span> <span class="n">describe</span> <span class="n">deployment</span> <span class="n">esgf</span><span class="o">-</span><span class="n">index</span><span class="o">-</span><span class="n">node</span>
+<span class="n">kubectl</span> <span class="n">describe</span> <span class="n">service</span> <span class="n">esgf</span><span class="o">-</span><span class="n">index</span><span class="o">-</span><span class="n">node</span>
 </pre></div>
 </div>
 <p>To test that the ESGF web app is working, connect inside the container and query localhost:</p>
-<div class="highlight-python"><div class="highlight"><pre>kubectl exec -it esgf-index-node-&lt;pod hash-id&gt; -- /bin/bash
-/]# curl &#39;http://localhost:8080/esg-search/search&#39;
-/]# curl -k &#39;https://localhost:8443/esg-search/search&#39;
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="n">exec</span> <span class="o">-</span><span class="n">it</span> <span class="n">esgf</span><span class="o">-</span><span class="n">index</span><span class="o">-</span><span class="n">node</span><span class="o">-&lt;</span><span class="n">pod</span> <span class="nb">hash</span><span class="o">-</span><span class="nb">id</span><span class="o">&gt;</span> <span class="o">--</span> <span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">bash</span>
+<span class="o">/</span><span class="p">]</span><span class="c1"># curl &#39;http://localhost:8080/esg-search/search&#39;</span>
+<span class="o">/</span><span class="p">]</span><span class="c1"># curl -k &#39;https://localhost:8443/esg-search/search&#39;</span>
 </pre></div>
 </div>
 </div>
 <div class="section" id="cleanup">
 <h2>Cleanup<a class="headerlink" href="#cleanup" title="Permalink to this headline">¶</a></h2>
 <p>To clean up all pods, services and deployments:</p>
-<div class="highlight-python"><div class="highlight"><pre>kubectl delete deployment,svc esgf-solr esgf-index-node
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="n">delete</span> <span class="n">deployment</span><span class="p">,</span><span class="n">svc</span> <span class="n">esgf</span><span class="o">-</span><span class="n">solr</span> <span class="n">esgf</span><span class="o">-</span><span class="n">index</span><span class="o">-</span><span class="n">node</span>
 </pre></div>
 </div>
 </div>
@@ -142,21 +144,18 @@ kubectl describe service esgf-index-node
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
-      <li><a href="_sources/kubernetes.txt"
+      <li><a href="_sources/kubernetes.rst.txt"
             rel="nofollow">Show Source</a></li>
     </ul>
    </div>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="search.html" method="get">
-      <input type="text" name="q" />
-      <input type="submit" value="Go" />
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
-    <p class="searchtip" style="font-size: 90%">
-    Enter search terms or a module, class or function name.
-    </p>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
@@ -172,12 +171,12 @@ kubectl describe service esgf-index-node
         <li class="right" >
           <a href="docker_tips.html" title="Docker Tips"
              >previous</a> |</li>
-        <li><a href="index.html">ESGF-Docker Documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">ESGF-Docker Documentation</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &copy; Copyright 2017, ESGF.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3b2.
+        &#169; Copyright 2017, ESGF.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.6.
     </div>
   </body>
 </html>

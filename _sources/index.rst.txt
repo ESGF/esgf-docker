@@ -24,3 +24,4 @@ Table of Contents:
    esgf_solr.rst
    testing_guide.rst
    docker_tips.rst
+   kubernetes.rst

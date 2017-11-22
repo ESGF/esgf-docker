@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Docker Tips &mdash; ESGF-Docker Documentation</title>
+    <title>Docker Tips &#8212; ESGF-Docker Documentation</title>
     
     <link rel="stylesheet" href="_static/nature.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -17,13 +17,16 @@
         VERSION:     '1.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
       };
     </script>
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="ESGF-Docker Documentation" href="index.html" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Kubernetes for ESGF" href="kubernetes.html" />
     <link rel="prev" title="Testing Guide" href="testing_guide.html" /> 
   </head>
   <body role="document">
@@ -34,9 +37,12 @@
           <a href="genindex.html" title="General Index"
              accesskey="I">index</a></li>
         <li class="right" >
+          <a href="kubernetes.html" title="Kubernetes for ESGF"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
           <a href="testing_guide.html" title="Testing Guide"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">ESGF-Docker Documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">ESGF-Docker Documentation</a> &#187;</li> 
       </ul>
     </div>  
 
@@ -60,26 +66,26 @@
 <div class="section" id="docker-volume-managment">
 <h2>Docker volume managment<a class="headerlink" href="#docker-volume-managment" title="Permalink to this headline">¶</a></h2>
 <p>Remove dangling volumes of container:</p>
-<div class="highlight-python"><div class="highlight"><pre>docker volume ls -f &quot;dangling=true&quot; | xargs docker volume rm
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">docker</span> <span class="n">volume</span> <span class="n">ls</span> <span class="o">-</span><span class="n">f</span> <span class="s2">&quot;dangling=true&quot;</span> <span class="o">|</span> <span class="n">xargs</span> <span class="n">docker</span> <span class="n">volume</span> <span class="n">rm</span>
 </pre></div>
 </div>
 <p>Remove all volumes:</p>
-<div class="highlight-python"><div class="highlight"><pre>docker volume ls -q | xargs docker volume rm --force
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">docker</span> <span class="n">volume</span> <span class="n">ls</span> <span class="o">-</span><span class="n">q</span> <span class="o">|</span> <span class="n">xargs</span> <span class="n">docker</span> <span class="n">volume</span> <span class="n">rm</span> <span class="o">--</span><span class="n">force</span>
 </pre></div>
 </div>
 </div>
 <div class="section" id="docker-image-managment">
 <h2>Docker image managment<a class="headerlink" href="#docker-image-managment" title="Permalink to this headline">¶</a></h2>
 <p>Remove dangling images:</p>
-<div class="highlight-python"><div class="highlight"><pre>docker image ls -f &quot;dangling=true&quot; | xargs docker image rm
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">docker</span> <span class="n">image</span> <span class="n">ls</span> <span class="o">-</span><span class="n">f</span> <span class="s2">&quot;dangling=true&quot;</span> <span class="o">|</span> <span class="n">xargs</span> <span class="n">docker</span> <span class="n">image</span> <span class="n">rm</span>
 </pre></div>
 </div>
 <p>Remove all volumes:</p>
-<div class="highlight-python"><div class="highlight"><pre>docker image ls -q | xargs docker volume rm --force
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">docker</span> <span class="n">image</span> <span class="n">ls</span> <span class="o">-</span><span class="n">q</span> <span class="o">|</span> <span class="n">xargs</span> <span class="n">docker</span> <span class="n">image</span> <span class="n">rm</span> <span class="o">--</span><span class="n">force</span>
 </pre></div>
 </div>
 <p>Remove image according to a given pattern:</p>
-<div class="highlight-python"><div class="highlight"><pre>docker images &quot;esgfhub/*:devel&quot; -q | xargs docker image rm
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">docker</span> <span class="n">images</span> <span class="s2">&quot;esgfhub/*:devel&quot;</span> <span class="o">-</span><span class="n">q</span> <span class="o">|</span> <span class="n">xargs</span> <span class="n">docker</span> <span class="n">image</span> <span class="n">rm</span>
 </pre></div>
 </div>
 </div>
@@ -105,24 +111,24 @@
   <h4>Previous topic</h4>
   <p class="topless"><a href="testing_guide.html"
                         title="previous chapter">Testing Guide</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="kubernetes.html"
+                        title="next chapter">Kubernetes for ESGF</a></p>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
-      <li><a href="_sources/docker_tips.txt"
+      <li><a href="_sources/docker_tips.rst.txt"
             rel="nofollow">Show Source</a></li>
     </ul>
    </div>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="search.html" method="get">
-      <input type="text" name="q" />
-      <input type="submit" value="Go" />
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
-    <p class="searchtip" style="font-size: 90%">
-    Enter search terms or a module, class or function name.
-    </p>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
@@ -136,14 +142,17 @@
           <a href="genindex.html" title="General Index"
              >index</a></li>
         <li class="right" >
+          <a href="kubernetes.html" title="Kubernetes for ESGF"
+             >next</a> |</li>
+        <li class="right" >
           <a href="testing_guide.html" title="Testing Guide"
              >previous</a> |</li>
-        <li><a href="index.html">ESGF-Docker Documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">ESGF-Docker Documentation</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &copy; Copyright 2017, ESGF.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3b2.
+        &#169; Copyright 2017, ESGF.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.6.
     </div>
   </body>
 </html>
