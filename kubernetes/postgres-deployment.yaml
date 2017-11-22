@@ -1,0 +1,33 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: esgf-postgres
+  labels:
+    stack: esgf
+    app: postgres
+spec:
+  type: ClusterIP
+  ports:
+  - port: 5432
+    protocol: TCP
+  selector:
+    stack: esgf
+    app: postgres
+---
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: esgf-postgres
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        stack: esgf
+        app: postgres
+    spec:
+      containers:
+      - name: esgf-postgres
+        image: esgfhub/esgf-postgres:devel
+        ports:
+        - containerPort: 5432
