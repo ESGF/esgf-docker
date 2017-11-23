@@ -1,0 +1,25 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: esgf-tds
+  labels:
+    stack: esgf
+    app: tds
+spec:
+  containers:
+  - name: esgf-tds
+    image: esgfhub/esgf-tds:devel
+    ports:
+    - containerPort: 8080
+    - containerPort: 8443
+    volumeMounts:
+    - name: tds-data
+      mountPath: /esg/content/thredds
+    - name: esgf-config-archive
+      mountPath: /root/archives/esgf_config.tar.xz
+  volumes:
+  - name: tds-data
+    emptyDir: {}
+  - name: esgf-config-archive
+    hostPath:
+      path: /Users/cinquini/ESGF_CONFIG/archives/esgf_config.tar.xz
