@@ -60,12 +60,10 @@ function build_and_push() {
                             --build-arg "ESGF_IMAGES_HUB=${images_hub}" \
                             --build-arg "ESGF_VERSION=${esgf_ver}" \
                             -t "${images_hub}/${img}" .
-
-    if [[ "${is_latest}" = "${TRUE}" ]]; then
-      docker tag "${images_hub}/${img}" "${images_hub}/${latest_img}"
-    fi
+  fi
   
-    #docker build --no-cache -t $images_hub/$img .
+  if [[ "${is_latest}" = "${TRUE}" ]]; then
+    docker tag "${images_hub}/${img}" "${images_hub}/${latest_img}"
   fi
 
   # optionally push the module to Docker Hub
