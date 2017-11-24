@@ -17,6 +17,13 @@ spec:
       mountPath: /esg/content/thredds
     - name: esgf-config-archive
       mountPath: /root/archives/esgf_config.tar.xz
+    readinessProbe:
+      httpGet:
+        path: /thredds
+        port: 8080
+      initialDelaySeconds: 5
+      periodSeconds: 10
+
   volumes:
   - name: tds-data
     emptyDir: {}
