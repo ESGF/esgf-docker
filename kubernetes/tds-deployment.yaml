@@ -44,6 +44,10 @@ spec:
           mountPath: /esg/content/thredds
         - name: esgf-config-archive
           mountPath: /root/archives/esgf_config.tar.xz
+        - name: tds-web-xml
+          mountPath: /usr/local/tomcat/webapps/thredds/WEB-INF/web.xml
+        - name: tomcat-esg-truststore
+          mountPath: /usr/java/latest/jre/lib/security/jssecacerts
         readinessProbe:
           httpGet:
             path: /thredds
@@ -56,3 +60,10 @@ spec:
       - name: esgf-config-archive
         hostPath:
           path: /Users/cinquini/ESGF_CONFIG/archives/esgf_config.tar.xz
+      - name: tds-web-xml
+        hostPath:
+          path: /Users/cinquini/ESGF_CONFIG/webapps/thredds/WEB-INF/web.xml
+      - name: tomcat-esg-truststore
+        hostPath:
+          path: /Users/cinquini/ESGF_CONFIG/esg/config/tomcat/esg-truststore.ts
+
