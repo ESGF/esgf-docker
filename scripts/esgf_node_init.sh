@@ -47,6 +47,12 @@ cp -R $SCRIPT_PARENT_DIR_PATH/../esgf_config/* $ESGF_CONFIG/.
 # empty directory needed for CoG initialization
 mkdir -p $ESGF_CONFIG/cog/cog_config
 
+if [ ! -d $ESGF_DATA_DIR ]
+then
+   echo "Create an empty ESGF data directory at $ESGF_DATA_DIR"
+   mkdir -p $ESGF_DATA_DIR
+fi
+
 # generate new certificates
 echo ""
 echo "Generating new self-signed certificates..."
