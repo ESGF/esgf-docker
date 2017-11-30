@@ -48,12 +48,12 @@ spec:
           mountPath: /usr/local/tomcat/webapps/thredds/WEB-INF/web.xml
         - name: tomcat-esg-truststore
           mountPath: /usr/java/latest/jre/lib/security/jssecacerts
-        readinessProbe:
-          httpGet:
-            path: /thredds
-            port: 8080
-          initialDelaySeconds: 5
-          periodSeconds: 10
+        #readinessProbe:
+        #  httpGet:
+        #    path: /thredds
+        #    port: 8080
+        #  initialDelaySeconds: 5
+        #  periodSeconds: 10
       volumes:
       - name: tds-data
         emptyDir: {}
