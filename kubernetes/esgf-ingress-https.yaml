@@ -1,0 +1,15 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: esgf-ingress
+  annotations:
+    ingress.kubernetes.io/rewrite-target: /
+    ingress.kubernetes.io/ssl-redirect: "false"
+spec:
+  tls:
+  - hosts:
+    - my-node.esgf.org
+    secretName: esgf-secret
+  backend:
+    serviceName: esgf-httpd
+    servicePort: 80

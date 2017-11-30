@@ -5,6 +5,8 @@ metadata:
   #annotations:
   #  ingress.kubernetes.io/rewrite-target: /
 spec:
+  #tls:
+  #- secretName: tls-certificate
   backend:
-    serviceName: esgf-tds
-    servicePort: 8080
+    serviceName: esgf-httpd
+    servicePort: 80

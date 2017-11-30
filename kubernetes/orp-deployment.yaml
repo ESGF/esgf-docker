@@ -16,6 +16,10 @@ spec:
     targetPort: 8443
     protocol: TCP
     name: tomcat-https
+  - port: 8009
+    targetPort: 8009
+    protocol: TCP
+    name: tomcat-ajp
   selector:
     stack: esgf
     app: orp
