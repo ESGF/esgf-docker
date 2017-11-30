@@ -4,6 +4,8 @@
 Testing Guide
 *************
 
+*Tested with $ESGF_VERSION=1.4 (except for ESGF-Auth web client, currently not working)*.
+
 This document contains a list of tests that need to be executed to assert that a given ESGF/Docker release is fully functioning.
 
 We **recommend** that each developer executes these tests before merging his/her changes into the *integration* branch for that release.
