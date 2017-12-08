@@ -113,7 +113,7 @@ RUN mkdir -p "$ESGF_LOG_DIR"
 RUN mkdir -p "$ESGF_TOOL_DIR"
 RUN mkdir -p "$ESGF_CONFIG_DIR"
 RUN mkdir -p "$ESGF_BACKUP_DIR"
-RUN mkdir -p "ESGF_CONTENT_DIR"
+RUN mkdir -p "$ESGF_CONTENT_DIR"
 
 # default command starts supervisor in non-daemon mode
 # to be overridden by child images
