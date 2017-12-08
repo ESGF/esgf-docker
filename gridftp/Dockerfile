@@ -17,10 +17,11 @@ ARG ESGF_REPO='http://distrib-coffee.ipsl.jussieu.fr/pub/esgf'
 ENV USAGE_PARSER_VERSION='0.1.1'
 ENV ESGF_GRIDFTP_JAIL_DIR="$ESGF_HOME/gridftp_root"
 ENV ESGF_GRIDFTP_CONFIG_DIR="$ESGF_CONFIG_DIR/gridftp"
+ENV GLOBUS_ACCOUNT='globus'
 
 # Create the account globus (no login).
-RUN groupadd globus
-RUN useradd -g globus -m -s /bin/bash globus
+RUN groupadd "$GLOBUS_ACCOUNT"
+RUN useradd -g "$GLOBUS_ACCOUNT" -m -s /bin/bash "$GLOBUS_ACCOUNT"
 
 ############################### INSTALLATION ###################################
 
@@ -62,15 +63,14 @@ COPY conf/globus-connect-esgf /etc/gridftp.d/
 
 RUN yum -y install perl-DBD-Pg
 
-RUN mkdir -p "$ESGF_TOOL_DIR/esg_usage_parser"
+RUN wget -qO- "$ESGF_REPO/dist/globus/gridftp/esg_usage_parser-$USAGE_PARSER_VERSION.tar.bz2" | tar xvj -C "/tmp"
+RUN mv /tmp/esg_usage_parser "$ESGF_TOOL_DIR"
 RUN chmod 755 "$ESGF_TOOL_DIR/esg_usage_parser"
-
-RUN wget -qO- "$ESGF_REPO/dist/globus/gridftp/esg_usage_parser-$USAGE_PARSER_VERSION.tar.bz2" | tar xvj -C "$ESGF_TOOL_DIR/esg_usage_parser"
 
 # XXX static configuration esgf-node.jpl.nasa.gov as an authorization service !!!
 COPY conf/esgsaml_auth.conf /etc/grid-security/
 
-RUN grid-mapfile-add-entry -dn '^.*$' -ln 'globus'
+RUN grid-mapfile-add-entry -dn '^.*$' -ln "$GLOBUS_ACCOUNT"
 
 COPY conf/globus-esgf /etc/gridftp.d
 
@@ -79,6 +79,6 @@ COPY conf/esg-server-usage-gridftp.conf $ESGF_GRIDFTP_CONFIG_DIR
 
 RUN mkdir -p $ESGF_GRIDFTP_JAIL_DIR
 
-#???
-RUN chown -R globus:globus /etc/gridftp.d/
-RUN chown -R globus:globus /etc/grid-security
+#??? so as to run the container with the id: globus
+RUN chown -R "$GLOBUS_ACCOUNT":"$GLOBUS_ACCOUNT" /etc/gridftp.d/
+RUN chown -R "$GLOBUS_ACCOUNT":"$GLOBUS_ACCOUNT" /etc/grid-security
