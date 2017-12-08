@@ -6,6 +6,11 @@ FROM centos:6
 
 MAINTAINER Earth System Grid Federation <esgf-devel@lists.llnl.gov>
 
+# install GPG keys
+RUN rpm --import http://download.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-6
+RUN rpm --import http://vault.centos.org/RPM-GPG-KEY-CentOS-6
+RUN yum history new # That fix the warning 'Warning: RPMDB altered outside of yum'
+
 # install dependencies with yum
 RUN yum -y update && \
     yum groupinstall -y development && \
@@ -40,7 +45,7 @@ ENV JAVA_VERSION 8u152
 ENV JAVA_BUILD_VERSION b16
 ENV JAVA_HASH=aa0333dd3019491ca4f6ddbe78cdb6d0
 
-RUN wget --no-cookies --no-check-certificate --header "Cookie: oraclelicense=accept-securebackup-cookie" \
+RUN wget -q --no-cookies --no-check-certificate --header "Cookie: oraclelicense=accept-securebackup-cookie" \
     -O /tmp/jdk-8-linux-x64.rpm \
     "http://download.oracle.com/otn-pub/java/jdk/${JAVA_VERSION}-${JAVA_BUILD_VERSION}/${JAVA_HASH}/jdk-${JAVA_VERSION}-linux-x64.rpm"
 
@@ -56,7 +61,7 @@ ENV PATH=${JAVA_HOME}/bin:$PATH
 # note: option "--enable-shared" is needed by mod_wsgi, will generate /usr/local/lib/libpython2.7.so.1.0
 ENV PYTHON_VERSION 2.7.13
 RUN cd /tmp && \
-    wget https://www.python.org/ftp/python/${PYTHON_VERSION}/Python-${PYTHON_VERSION}.tgz && \
+    wget -q https://www.python.org/ftp/python/${PYTHON_VERSION}/Python-${PYTHON_VERSION}.tgz && \
     tar xvfz Python-${PYTHON_VERSION}.tgz && \
     cd Python-${PYTHON_VERSION} && \
     ./configure --prefix=/usr/local --enable-shared && \
@@ -69,7 +74,7 @@ ENV LD_LIBRARY_PATH=/usr/local/lib:/usr/local/bin/python:$LD_LIBRARY_PATH
 # install additional core Python packages
 ENV PILLOW_VERSION 2.8.2
 RUN cd /tmp
-RUN wget --no-check-certificate https://bootstrap.pypa.io/ez_setup.py
+RUN wget -q --no-check-certificate https://bootstrap.pypa.io/ez_setup.py
 RUN python ez_setup.py --insecure
 RUN rm -rf ez_setup.py
 RUN easy_install pip
@@ -87,13 +92,28 @@ COPY conf/supervisord.conf /etc/supervisord.conf
 COPY conf/supervisord_noothers.conf /etc/supervisord_noothers.conf
 RUN mkdir -p /etc/supervisor/conf.d/
 
-# common directories
-RUN mkdir -p /esg/config
-RUN mkdir -p /esg/content
 
-# common environment variables
 # necessary to locate /esg/config/esgf.properties
-ENV ESGF_HOME /esg
+
+### ARGS
+
+ARG ESGF_REPO='http://distrib-coffee.ipsl.jussieu.fr/pub/esgf'
+
+### Common ESGF environment variables
+ENV ESGF_HOME='/esg'
+ENV ESGF_REPO=$ESGF_REPO
+ENV ESGF_BACKUP_DIR="$ESGF_HOME/backups"
+ENV ESGF_LOG_DIR="$ESGF_HOME/log"
+ENV ESGF_TOOL_DIR="$ESGF_HOME/tools"
+ENV ESGF_CONFIG_DIR="$ESGF_HOME/config"
+ENV ESGF_CONTENT_DIR="$ESGF_HOME/content"
+
+# common ESGF directories
+RUN mkdir -p "$ESGF_LOG_DIR"
+RUN mkdir -p "$ESGF_TOOL_DIR"
+RUN mkdir -p "$ESGF_CONFIG_DIR"
+RUN mkdir -p "$ESGF_BACKUP_DIR"
+RUN mkdir -p "ESGF_CONTENT_DIR"
 
 # default command starts supervisor in non-daemon mode
 # to be overridden by child images

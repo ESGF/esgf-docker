@@ -2,6 +2,11 @@
 from centos:6
 MAINTAINER Earth System Grid Federation <esgf-devel@lists.llnl.gov>
 
+# install GPG keys
+RUN rpm --import http://download.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-6
+RUN rpm --import http://vault.centos.org/RPM-GPG-KEY-CentOS-6
+RUN yum history new # That fix the warning 'Warning: RPMDB altered outside of yum'
+
 RUN yum clean all && \
     yum -y update && \
     yum -y install wget \
