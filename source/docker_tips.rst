@@ -38,6 +38,14 @@ Remove all volumes::
 
   docker image ls -q | xargs docker image rm --force
 
-Remove image according to a given pattern::
+Remove image according to a given pattern (e.g. the esgfhub devel images)::
 
   docker images "esgfhub/*:devel" -q | xargs docker image rm
+
+Remove imges tagged "<none>"::
+
+  docker image ls | grep "^<none>" | awk '{print $3}' | xargs docker image rm --force
+
+Inspect the contains of an image (esgfhub/esgf-http:devel image)::
+
+  docker run --rm -it --entrypoint=/bin/bash esgfhub/esgf-http:devel
