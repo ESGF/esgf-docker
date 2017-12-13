@@ -1,0 +1,84 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: esgf-data-node
+  labels:
+    stack: esgf
+    app: data-node
+spec:
+  type: NodePort
+  ports:
+  - port: 8080 # host port
+    targetPort: 8080 # container port
+    protocol: TCP
+    name: tomcat-http
+  - port: 8443
+    targetPort: 8443
+    protocol: TCP
+    name: tomcat-https
+  selector:
+    stack: esgf
+---
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: esgf-data-node
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        stack: esgf
+        app: data-node
+    spec:
+      containers:
+      - name: esgf-tds
+        image: esgfhub/esgf-tds:devel
+        ports:
+        - containerPort: 8080
+        - containerPort: 8443
+        volumeMounts:
+        - name: tds-data
+          mountPath: /esg/content/thredds
+        - name: esgf-config-archive
+          mountPath: /root/archives/esgf_config.tar.xz
+        - name: tds-web-xml
+          mountPath: /usr/local/tomcat/webapps/thredds/WEB-INF/web.xml
+        - name: tomcat-esg-truststore
+          mountPath: /usr/java/latest/jre/lib/security/jssecacerts
+        #readinessProbe:
+        #  httpGet:
+        #    path: /thredds
+        #    port: 8080
+        #  initialDelaySeconds: 5
+        #  periodSeconds: 10
+      - name: esgf-orp
+        image: esgfhub/esgf-orp:devel
+        ports:
+        - containerPort: 8080
+        - containerPort: 8443
+        volumeMounts:
+        - name: esgf-config-archive
+          mountPath: /root/archives/esgf_config.tar.xz
+        - name: tomcat-esg-truststore
+          mountPath: /usr/java/latest/jre/lib/security/jssecacerts
+        #readinessProbe:
+        #  httpGet:
+        #    path: /esg-orp/home.htm
+        #    scheme: HTTPS
+        #    port: 8443
+        #  initialDelaySeconds: 10
+        #  periodSeconds: 10
+        #  timeoutSeconds: 2
+      volumes:
+      - name: tds-data
+        emptyDir: {}
+      - name: esgf-config-archive
+        hostPath:
+          path: /Users/cinquini/ESGF_CONFIG/archives/esgf_config.tar.xz
+      - name: tds-web-xml
+        hostPath:
+          path: /Users/cinquini/ESGF_CONFIG/webapps/thredds/WEB-INF/web.xml
+      - name: tomcat-esg-truststore
+        hostPath:
+          path: /Users/cinquini/ESGF_CONFIG/esg/config/tomcat/esg-truststore.ts

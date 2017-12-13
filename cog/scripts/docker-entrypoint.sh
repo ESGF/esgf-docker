@@ -14,16 +14,18 @@ echo "ESGF_FLAG=$ESGF_FLAG"
 export RUNSERVER=$3
 echo "RUNSERVER=$RUNSERVER"
 
-echo "untar grid certificates"
-mkdir /etc/grid-security
-tar --same-owner -pxaf /root/archives/grid_security_certs.tar.xz -C /etc/grid-security
-chmod -R 664 /etc/grid-security/certificates
+if [ $ESGF_FLAG == "true" ]; then
+   echo "untar grid certificates"
+   mkdir /etc/grid-security
+   tar --same-owner -pxaf /root/archives/grid_security_certs.tar.xz -C /etc/grid-security
+   chmod -R 664 /etc/grid-security/certificates
 
-# deploy esgf config files
-/usr/local/bin/process_esgf_config_archive.sh
+   # deploy esgf config files
+   /usr/local/bin/process_esgf_config_archive.sh
 
-# wait for Postgred connection to be ready
-/usr/local/bin/wait_for_postgres.sh
+   # wait for Postgred connection to be ready
+   /usr/local/bin/wait_for_postgres.sh
+fi
 
 # execute CoG initialization
 if [ $INIT == "true" ]; then
