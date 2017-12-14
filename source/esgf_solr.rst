@@ -9,9 +9,23 @@ Starting the container
 
 To start the container standalone::
 
+  docker run -ti -p 8983:8983 -p 8984:8984 --name esgf-solr esgfhub/esgf-solr:${ESGF_VERSION}
+
+To start the container using an existing pre-populated index::
+  
+  docker run -ti -p 8983:8983 -p 8984:8984 --name esgf-solr -v ${SOLR_INDEX_DIR}:/esg/solr-index  esgfhub/esgf-solr:${ESGF_VERSION}
+
+where the *SOLR_INDEX_DIR* directory must contain the master and slave indexes::
+
+  ls -l $SOLR_INDEX_DIR
+  master-8984
+  slave-8983
+
+To start the container using docker-compose::
+
   docker-compose -f docker-stack.yml up esgf-solr
 
-or you can start the container as part of the whole ESGF stack::
+To start the container as part of the whole ESGF stack::
 
   docker stack -c docker-stack.yml esgf-stack
 

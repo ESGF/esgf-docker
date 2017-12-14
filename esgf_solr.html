@@ -25,7 +25,7 @@
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="top" title="ESGF-Docker Documentation" href="index.html" />
     <link rel="next" title="Testing Guide" href="testing_guide.html" />
-    <link rel="prev" title="Git Workflow" href="git_workflow.html" /> 
+    <link rel="prev" title="esgf-cog Image" href="esgf_cog.html" /> 
   </head>
   <body role="document">
     <div class="related" role="navigation" aria-label="related navigation">
@@ -38,7 +38,7 @@
           <a href="testing_guide.html" title="Testing Guide"
              accesskey="N">next</a> |</li>
         <li class="right" >
-          <a href="git_workflow.html" title="Git Workflow"
+          <a href="esgf_cog.html" title="esgf-cog Image"
              accesskey="P">previous</a> |</li>
         <li><a href="index.html">ESGF-Docker Documentation</a> &raquo;</li> 
       </ul>
@@ -55,10 +55,24 @@
 <div class="section" id="starting-the-container">
 <h2>Starting the container<a class="headerlink" href="#starting-the-container" title="Permalink to this headline">¶</a></h2>
 <p>To start the container standalone:</p>
+<div class="highlight-python"><div class="highlight"><pre>docker run -ti -p 8983:8983 -p 8984:8984 --name esgf-solr esgfhub/esgf-solr:${ESGF_VERSION}
+</pre></div>
+</div>
+<p>To start the container using an existing pre-populated index:</p>
+<div class="highlight-python"><div class="highlight"><pre>docker run -ti -p 8983:8983 -p 8984:8984 --name esgf-solr -v ${SOLR_INDEX_DIR}:/esg/solr-index  esgfhub/esgf-solr:${ESGF_VERSION}
+</pre></div>
+</div>
+<p>where the <em>SOLR_INDEX_DIR</em> directory must contain the master and slave indexes:</p>
+<div class="highlight-python"><div class="highlight"><pre>ls -l $SOLR_INDEX_DIR
+master-8984
+slave-8983
+</pre></div>
+</div>
+<p>To start the container using docker-compose:</p>
 <div class="highlight-python"><div class="highlight"><pre>docker-compose -f docker-stack.yml up esgf-solr
 </pre></div>
 </div>
-<p>or you can start the container as part of the whole ESGF stack:</p>
+<p>To start the container as part of the whole ESGF stack:</p>
 <div class="highlight-python"><div class="highlight"><pre>docker stack -c docker-stack.yml esgf-stack
 </pre></div>
 </div>
@@ -174,8 +188,8 @@ supervisorctl update
 </ul>
 
   <h4>Previous topic</h4>
-  <p class="topless"><a href="git_workflow.html"
-                        title="previous chapter">Git Workflow</a></p>
+  <p class="topless"><a href="esgf_cog.html"
+                        title="previous chapter">esgf-cog Image</a></p>
   <h4>Next topic</h4>
   <p class="topless"><a href="testing_guide.html"
                         title="next chapter">Testing Guide</a></p>
@@ -213,7 +227,7 @@ supervisorctl update
           <a href="testing_guide.html" title="Testing Guide"
              >next</a> |</li>
         <li class="right" >
-          <a href="git_workflow.html" title="Git Workflow"
+          <a href="esgf_cog.html" title="esgf-cog Image"
              >previous</a> |</li>
         <li><a href="index.html">ESGF-Docker Documentation</a> &raquo;</li> 
       </ul>
