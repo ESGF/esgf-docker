@@ -167,6 +167,21 @@ supervisorctl update
 </div>
 <p>The instructions above will revert the actions taken when the shard was created.</p>
 </div>
+<div class="section" id="other-admin-commands">
+<h2>Other Admin Commands<a class="headerlink" href="#other-admin-commands" title="Permalink to this headline">¶</a></h2>
+<p>To optimize an index (i.e. reduce the number of segments to 1, which optimnizes query performance):</p>
+<div class="highlight-python"><div class="highlight"><pre>http://localhost:8984/solr/datasets/update?optimize=true
+</pre></div>
+</div>
+<p>Repeat for all cores (datasets, files, aggregations) for the <em>master</em> and <em>local</em> shards only (i.e. do not
+execute for the <em>slave</em> and <em>replica</em> shards).</p>
+<p>To migrate the Lucene index to the latest version:</p>
+<div class="highlight-python"><div class="highlight"><pre>cd /usr/local/solr/server/solr-webapp/webapp/WEB-INF/lib
+java -cp lucene-core-&lt;version&gt;.jar:lucene-backward-codecs-&lt;version&gt;.jar org.apache.lucene.index.IndexUpgrader -verbose /esg/solr-index/master-8984/datasets/index/
+</pre></div>
+</div>
+<p>Again repeat for all cores (datasets, files, aggregations) for the <em>master</em> and <em>local</em> shards only, not for the <em>slave</em> or <em>replicas</em>.</p>
+</div>
 </div>
 
 
@@ -183,6 +198,7 @@ supervisorctl update
 <li><a class="reference internal" href="#important-files-and-directories">Important Files and Directories</a></li>
 <li><a class="reference internal" href="#starting-stopping-solr-shards">Starting/Stopping Solr shards</a></li>
 <li><a class="reference internal" href="#adding-removing-a-shard">Adding/Removing a shard</a></li>
+<li><a class="reference internal" href="#other-admin-commands">Other Admin Commands</a></li>
 </ul>
 </li>
 </ul>

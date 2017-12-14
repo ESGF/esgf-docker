@@ -113,3 +113,21 @@ To remove the shard follow this procedure::
    supervisorctl update
 
 The instructions above will revert the actions taken when the shard was created.
+
+
+Other Admin Commands
+====================
+
+To optimize an index (i.e. reduce the number of segments to 1, which optimnizes query performance)::
+
+   http://localhost:8984/solr/datasets/update?optimize=true
+
+Repeat for all cores (datasets, files, aggregations) for the *master* and *local* shards only (i.e. do not
+execute for the *slave* and *replica* shards).
+
+To migrate the Lucene index to the latest version::
+
+  cd /usr/local/solr/server/solr-webapp/webapp/WEB-INF/lib
+  java -cp lucene-core-<version>.jar:lucene-backward-codecs-<version>.jar org.apache.lucene.index.IndexUpgrader -verbose /esg/solr-index/master-8984/datasets/index/
+
+Again repeat for all cores (datasets, files, aggregations) for the *master* and *local* shards only, not for the *slave* or *replicas*.
