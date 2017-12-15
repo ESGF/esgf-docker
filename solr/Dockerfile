@@ -7,6 +7,7 @@ MAINTAINER Earth System Grid Federation <esgf-devel@lists.llnl.gov>
 
 # Solr/Jetty web application
 ENV SOLR_VERSION 5.5.4
+#ENV SOLR_VERSION 6.6.2
 ENV SOLR_INSTALL_DIR /usr/local/solr
 ENV SOLR_HOME /usr/local/solr-home
 ENV SOLR_DATA_DIR /esg/solr-index
