@@ -1,16 +1,16 @@
-# note: the esg-index-node container must connect to the esgf-solr container at http://esgf-solr:8983/solr
+# note: the esg-idp-node container must connect to the esgf-postgres container at esgf-postgres:5432
 # (as specified in the file /esg/config/esgf.properties)
 apiVersion: v1
 kind: Pod
 metadata:
-  name: esgf-index-node
+  name: esgf-idp-node
   labels:
     stack: esgf
-    app: index-node
+    app: idp-node
 spec:
   containers:
-  - name: esgf-index-node
-    image: esgfhub/esgf-index-node:devel
+  - name: esgf-idp-node
+    image: esgfhub/esgf-idp-node:devel
     ports:
     - containerPort: 8080
     - containerPort: 8443
