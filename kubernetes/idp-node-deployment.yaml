@@ -1,10 +1,10 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: esgf-index-node
+  name: esgf-idp-node
   labels:
     stack: esgf
-    app: index-node
+    app: idp-node
 spec:
   type: NodePort
   ports:
@@ -19,23 +19,23 @@ spec:
   # the selector identifies the set of pods to load-balance against
   selector:
     stack: esgf
-    app: index-node
+    app: idp-node
 ---
 apiVersion: apps/v1beta1
 kind: Deployment
 metadata:
-  name: esgf-index-node
+  name: esgf-idp-node
 spec:
   replicas: 1
   template:
     metadata:
       labels:
         stack: esgf
-        app: index-node
+        app: idp-node
     spec:
       containers:
-      - name: esgf-index-node
-        image: esgfhub/esgf-index-node:devel
+      - name: esgf-idp-node
+        image: esgfhub/esgf-idp-node:devel
         ports:
         - containerPort: 8080
         - containerPort: 8443
@@ -51,4 +51,3 @@ spec:
       - name: esgf-truststore
         hostPath:
           path: /Users/cinquini/ESGF_CONFIG/esg/config/tomcat/esg-truststore.ts
-

@@ -4,7 +4,7 @@ metadata:
   name: esgf-solr
   labels:
     stack: esgf
-    app: index-node
+    app: solr
 spec:
   type: NodePort
   ports:
