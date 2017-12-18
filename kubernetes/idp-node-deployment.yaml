@@ -44,6 +44,10 @@ spec:
           mountPath: /root/archives/esgf_config.tar.xz
         - name: esgf-truststore
           mountPath: /usr/java/latest/jre/lib/security/jssecacerts
+      initContainers:
+      - name: wait-for-postgres
+        image: busybox
+        command: ['sh', '-c', 'until nslookup esgf-postgres; do echo waiting for esgf-postgres; sleep 1; done;']
       volumes:
       - name: esgf-config-archive
         hostPath:
