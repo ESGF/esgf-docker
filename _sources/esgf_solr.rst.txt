@@ -9,9 +9,23 @@ Starting the container
 
 To start the container standalone::
 
+  docker run -ti -p 8983:8983 -p 8984:8984 --name esgf-solr esgfhub/esgf-solr:${ESGF_VERSION}
+
+To start the container using an existing pre-populated index::
+  
+  docker run -ti -p 8983:8983 -p 8984:8984 --name esgf-solr -v ${SOLR_INDEX_DIR}:/esg/solr-index  esgfhub/esgf-solr:${ESGF_VERSION}
+
+where the *SOLR_INDEX_DIR* directory must contain the master and slave indexes::
+
+  ls -l $SOLR_INDEX_DIR
+  master-8984
+  slave-8983
+
+To start the container using docker-compose::
+
   docker-compose -f docker-stack.yml up esgf-solr
 
-or you can start the container as part of the whole ESGF stack::
+To start the container as part of the whole ESGF stack::
 
   docker stack -c docker-stack.yml esgf-stack
 
@@ -99,3 +113,21 @@ To remove the shard follow this procedure::
    supervisorctl update
 
 The instructions above will revert the actions taken when the shard was created.
+
+
+Other Admin Commands
+====================
+
+To optimize an index (i.e. reduce the number of segments to 1, which optimnizes query performance)::
+
+   http://localhost:8984/solr/datasets/update?optimize=true
+
+Repeat for all cores (datasets, files, aggregations) for the *master* and *local* shards only (i.e. do not
+execute for the *slave* and *replica* shards).
+
+To migrate the Lucene index to the latest version::
+
+  cd /usr/local/solr/server/solr-webapp/webapp/WEB-INF/lib
+  java -cp lucene-core-<version>.jar:lucene-backward-codecs-<version>.jar org.apache.lucene.index.IndexUpgrader -verbose /esg/solr-index/master-8984/datasets/index/
+
+Again repeat for all cores (datasets, files, aggregations) for the *master* and *local* shards only, not for the *slave* or *replicas*.

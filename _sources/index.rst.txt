@@ -21,6 +21,7 @@ Table of Contents:
    docker_swarm_setup_on_linux.rst
    versioning_guideline.rst
    git_workflow.rst
+   esgf_cog.rst
    esgf_solr.rst
    testing_guide.rst
    docker_tips.rst
