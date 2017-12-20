@@ -24,13 +24,20 @@ esgf_ver="${DEFAULT_VERSION}"
 # verify env variables are set
 if [ "${ESGF_HOSTNAME}" = "" ] || [ "${ESGF_CONFIG}" = "" ];
 then
-   echo "All env variables: ESGF_HOSTNAME and ESGF_CONFIG must be set  "
+   echo "All env variables: ESGF_HOSTNAME and ESGF_CONFIG must be set. Abort."
    exit -1
 else
    echo "Using ESGF_HOSTNAME=$ESGF_HOSTNAME"
    echo "Using ESGF_CONFIG=$ESGF_CONFIG"
    echo "Using ESGF_VERSION=$esgf_ver"
    echo "Using ESGF_IMAGES_HUB=$images_hub"
+fi
+
+# verify if keytool is in the PATH
+which keytool > /dev/null
+if [ ${?} -ne 0 ]; then
+   echo "Missing keytool. Install and/or add it to the PATH. Abort."
+   exit -1
 fi
 
 # initialize the node configuration directory
