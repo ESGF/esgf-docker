@@ -64,9 +64,14 @@ appropriate metadata tags are set for that node.</p>
 </div>
 <div class="section" id="pre-requisites">
 <h2>Pre-Requisites<a class="headerlink" href="#pre-requisites" title="Permalink to this headline">¶</a></h2>
-<p>A Docker Swarm composed of 1 or more nodes. See specific instructions on
-how to set this up on <a class="reference internal" href="docker_swarm_setup_on_macosx.html#docker-swarm-setup-on-macosx"><span class="std std-ref">a single MacOSX laptop</span></a>, on the Amazon Cloud, or an
-internal Linux cluster.</p>
+<ul class="simple">
+<li>A host system with the latest version of Docker Engine installed (at
+this time, Docker 1.12+).</li>
+<li>Java SDK (at this time 1.8), keytool is required (add it to the PATH var env).</li>
+<li>A Docker Swarm composed of 1 or more nodes. See specific instructions on
+how to set this up on <a class="reference internal" href="docker_swarm_setup_on_macosx.html#docker-swarm-setup-on-macosx"><span class="std std-ref">a single MacOSX laptop</span></a>, on
+the Amazon Cloud, or <a class="reference internal" href="docker_swarm_setup_on_linux.html#docker-swarm-setup-on-linux"><span class="std std-ref">a single Linux machine</span></a>.</li>
+</ul>
 </div>
 <div class="section" id="setup">
 <h2>Setup<a class="headerlink" href="#setup" title="Permalink to this headline">¶</a></h2>
@@ -74,7 +79,7 @@ internal Linux cluster.</p>
 <ul class="simple">
 <li>Checkout the source code from this GitHub repository, on some
 location on the Swarm manager node. Use the <em>master</em> branch.</li>
-<li>Define the environmental variables $ESGF_HOSTNAME, $ESGF_CONFIG,
+<li>Define the environmental variables $PATH (for keytool), $ESGF_HOSTNAME, $ESGF_CONFIG,
 $ESGF_VERSION and $ESGF_DATA_DIR.</li>
 <li>Initialize the ESGF node configuration: ./esgf_node_init.sh</li>
 </ul>
@@ -103,7 +108,7 @@ docker node update --label-add esgf_data_node=true node3
 </pre></div>
 </div>
 <p>Or, on a Swarm of 6 nodes, each label can be assigned to a different node
-(as shown in the <a class="reference internal" href="docker_swarm_setup_on_macosx.html#docker-swarm-setup-on-macosx"><span class="std std-ref">single MacOSX laptop instructions</span></a>).</p>
+(as shown in the <a class="reference internal" href="docker_swarm_setup_on_macosx.html#docker-swarm-setup-on-macosx"><span class="std std-ref">single MacOSX laptop instructions</span></a> or <a class="reference internal" href="docker_swarm_setup_on_linux.html#docker-swarm-setup-on-linux"><span class="std std-ref">single Linux laptop instructions</span></a>).</p>
 </li>
 <li><p class="first">From the source code directory on the Swarm manager node, issue the
 following command to deploy the stack of ESGF services, then wait for

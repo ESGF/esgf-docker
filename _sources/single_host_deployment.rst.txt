@@ -19,7 +19,7 @@ Pre-Requisites
 
 *  A host system with the latest version of Docker Engine installed (at
    this time, Docker 1.12+). Tested on MacOSX and Linux CentOS.
-*  Java SDK (at this time 1.8), keytool is required.
+*  Java SDK (at this time 1.8), keytool is required (add it to the PATH var env).
 *  Docker-compose (at this time 1.14.0), installation procedure
    `here <https://docs.docker.com/compose/install/#install-compose>`__
 
@@ -40,6 +40,10 @@ Setup
 
 *  Define your environment:
 
+   * Add the path to the keytool install directory::
+   
+       export PATH='/path/to/keytool/install/dir':$PATH
+   
    *  **ESGF_HOSTNAME** must reference the Fully Qualified Domain Name of the host where the containers will be running:
 
      * On linux, use the actual server host name::

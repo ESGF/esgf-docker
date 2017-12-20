@@ -66,7 +66,7 @@ proceeding.</p>
 <ul class="simple">
 <li>A host system with the latest version of Docker Engine installed (at
 this time, Docker 1.12+). Tested on MacOSX and Linux CentOS.</li>
-<li>Java SDK (at this time 1.8), keytool is required.</li>
+<li>Java SDK (at this time 1.8), keytool is required (add it to the PATH var env).</li>
 <li>Docker-compose (at this time 1.14.0), installation procedure
 <a class="reference external" href="https://docs.docker.com/compose/install/#install-compose">here</a></li>
 </ul>
@@ -88,8 +88,14 @@ the latest stable branch, which is named &#8220;vN.M&#8221; (for example, &#8220
 </div>
 </li>
 <li><p class="first">Define your environment:</p>
-<ul class="simple">
-<li><strong>ESGF_HOSTNAME</strong> must reference the Fully Qualified Domain Name of the host where the containers will be running:</li>
+<ul>
+<li><p class="first">Add the path to the keytool install directory:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span>export PATH=&#39;/path/to/keytool/install/dir&#39;:$PATH
+</pre></div>
+</div>
+</li>
+<li><p class="first"><strong>ESGF_HOSTNAME</strong> must reference the Fully Qualified Domain Name of the host where the containers will be running:</p>
+</li>
 </ul>
 <blockquote>
 <div><ul>

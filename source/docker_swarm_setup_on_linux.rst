@@ -1,8 +1,8 @@
 .. _docker_swarm_setup_on_linux:
 
-**************************
-Docker Swam Setup on Linux
-**************************
+***************************
+Docker Swarm Setup on Linux
+***************************
 
 Abstract
 ========
