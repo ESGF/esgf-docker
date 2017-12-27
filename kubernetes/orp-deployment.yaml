@@ -47,14 +47,14 @@ spec:
           mountPath: /root/archives/esgf_config.tar.xz
         - name: tomcat-esg-truststore
           mountPath: /usr/java/latest/jre/lib/security/jssecacerts
-        readinessProbe:
-          httpGet:
-            path: /esg-orp/home.htm
-            scheme: HTTPS
-            port: 8443
-          initialDelaySeconds: 10
-          periodSeconds: 10
-          timeoutSeconds: 2
+        #readinessProbe:
+        #  httpGet:
+        #    path: /esg-orp/home.htm
+        #    scheme: HTTPS
+        #    port: 8443
+        #  initialDelaySeconds: 10
+        #  periodSeconds: 10
+        #  timeoutSeconds: 2
       volumes:
       - name: esgf-config-archive
         hostPath:

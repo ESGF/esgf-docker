@@ -88,4 +88,3 @@ spec:
       - name: esgf-config-files
         hostPath:
           path: /Users/cinquini/ESGF_CONFIG/archives/esgf_config.tar.xz
-
