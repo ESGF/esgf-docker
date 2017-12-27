@@ -12,24 +12,30 @@ spec:
     ports:
     - containerPort: 8080
     - containerPort: 8443
+    envFrom:
+    - configMapRef:
+        name: esgf-env
     volumeMounts:
     - name: tds-data
       mountPath: /esg/content/thredds
+    - name: esg-data
+      mountPath: /esg/data
     - name: esgf-config-archive
       mountPath: /root/archives/esgf_config.tar.xz
     - name: tds-web-xml
       mountPath: /usr/local/tomcat/webapps/thredds/WEB-INF/web.xml
     - name: tomcat-esg-truststore
       mountPath: /usr/java/latest/jre/lib/security/jssecacerts
-    readinessProbe:
-      httpGet:
-        path: /thredds
-        port: 8080
-      initialDelaySeconds: 5
-      periodSeconds: 10
-
+    #readinessProbe:
+    #  httpGet:
+    #    path: /thredds
+    #    port: 8080
+    #  initialDelaySeconds: 5
+    #  periodSeconds: 10
   volumes:
   - name: tds-data
+    emptyDir: {}
+  - name: esg-data
     emptyDir: {}
   - name: esgf-config-archive
     hostPath:

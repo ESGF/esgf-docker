@@ -43,9 +43,14 @@ spec:
         ports:
         - containerPort: 8080
         - containerPort: 8443
+        envFrom:
+        - configMapRef:
+            name: esgf-env
         volumeMounts:
         - name: tds-data
           mountPath: /esg/content/thredds
+        - name: esg-data
+          mountPath: /esg/data
         - name: esgf-config-archive
           mountPath: /root/archives/esgf_config.tar.xz
         - name: tds-web-xml
@@ -61,6 +66,8 @@ spec:
       volumes:
       - name: tds-data
         emptyDir: {}
+      - name: esg-data
+        emptyDir: {}
       - name: esgf-config-archive
         hostPath:
           path: /Users/cinquini/ESGF_CONFIG/archives/esgf_config.tar.xz
@@ -70,4 +77,3 @@ spec:
       - name: tomcat-esg-truststore
         hostPath:
           path: /Users/cinquini/ESGF_CONFIG/esg/config/tomcat/esg-truststore.ts
-
