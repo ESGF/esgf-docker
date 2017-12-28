@@ -37,6 +37,11 @@ spec:
         stack: esgf
         app: tds
     spec:
+      initContainers:
+      # container used to delay this pod's initialization untill postgres database is available
+      - name: wait-for-postgres
+        image: busybox
+        command: ['sh', '-c', 'until nslookup esgf-postgres; do echo waiting for esgf-postgres; sleep 1; done;']
       containers:
       - name: esgf-tds
         image: esgfhub/esgf-tds:devel
@@ -63,6 +68,24 @@ spec:
         #    port: 8080
         #  initialDelaySeconds: 5
         #  periodSeconds: 10
+      # publisher container must be co-located with tds container
+      # to be able to write thredds catalogs to /esg/content/tredds
+      - name: esgf-publisher
+        image: esgfhub/esgf-publisher:devel
+        volumeMounts:
+        - name: tds-data
+          mountPath: /esg/content/thredds
+        - name: esg-data
+          mountPath: /esg/data
+        - name: esgf-config-archive
+          mountPath: /root/archives/esgf_config.tar.xz
+        envFrom:
+        - configMapRef:
+            name: esgf-env
+        env:
+        - name: SSL_CERT_DIR
+          value: /etc/grid-security/certificates
+
       volumes:
       - name: tds-data
         emptyDir: {}
