@@ -32,6 +32,50 @@ spec:
         stack: esgf
         app: httpd
     spec:
+      initContainers:
+      # container used to delay initialization untill postgres database is available
+      - name: wait-for-postgres
+        image: busybox
+        command: ['sh', '-c', 'until nslookup esgf-postgres; do echo waiting for esgf-postgres; sleep 1; done;']
+      # "sidecar" container used to initialize the CoG source directory executed by httpd mod_wsgi
+      - name: esgf-cog
+        image: esgfhub/esgf-cog:devel
+        # override default cog container command
+        command:
+        - bash
+        - "-c"
+        - |
+          set -ex
+          # skip all initialization if CoG installation already exists
+          [[ -d /tmp/cog/cog_install ]] && exit 0
+          # execute default docker container command to initialize CoG
+          # do NOT start django server on port 8000
+          /usr/local/bin/cog-docker-entrypoint.sh $ESGF_HOSTNAME true false
+          # copy all CoG directories to shared volume
+          cp -R /usr/local/cog/* /tmp/cog/.
+        env:
+        - name: COG_DIR
+          value: "/usr/local/cog"
+        - name: COG_INSTALL_DIR
+          value: "/usr/local/cog/cog_install"
+        - name: COG_CONFIG_DIR
+          value: "/usr/local/cog/cog_config"
+        - name: INIT
+          value: "true"
+        envFrom:
+        - configMapRef:
+            name: esgf-env
+        volumeMounts:
+        - name: cog-dir
+          mountPath: /tmp/cog
+        - name: esgf-config
+          mountPath: /root/archives/esgf_config.tar.xz
+        - name: grid-certificates
+          mountPath: /root/archives/grid_security_certs.tar.xz
+        # FIXME
+        - name: cog-docker-entrypoint
+          mountPath: /usr/local/bin/cog-docker-entrypoint.sh
+
       containers:
       - name: esgf-httpd
         image: esgfhub/esgf-httpd:devel
@@ -54,15 +98,22 @@ spec:
           mountPath: /etc/certs/hostkey.pem
         - name: grid-certificates
           mountPath: /root/archives/grid_security_certs.tar.xz
-        - name: esgf-config-files
+        - name: esgf-config
           mountPath: /root/archives/esgf_config.tar.xz
+        - name: cog-dir
+          mountPath: /usr/local/cog
         env:
         - name: SSL_CERT_DIR
           value: /etc/grid-security/certificates
         - name: SSL_CERT_FILE
           value: /etc/certs/esgf-ca-bundle.crt
+        - name: COG_DIR
+          value: "/usr/local/cog"
+        - name: COG_INSTALL_DIR
+          value: "/usr/local/cog/cog_install"
         - name: COG_CONFIG_DIR
-          value: /usr/local/cog/cog_config
+          value: "/usr/local/cog/cog_config"
+
       volumes:
       - name: httpd-esgf-httpd-conf
         hostPath:
@@ -85,6 +136,12 @@ spec:
       - name: grid-certificates
         hostPath:
           path: /Users/cinquini/ESGF_CONFIG/archives/grid_security_certs.tar.xz
-      - name: esgf-config-files
+      - name: esgf-config
         hostPath:
           path: /Users/cinquini/ESGF_CONFIG/archives/esgf_config.tar.xz
+      - name: cog-dir
+        emptyDir: {}
+      # FIXME: make this the real cog docker-entrypoint.sh
+      - name: cog-docker-entrypoint
+        hostPath:
+          path: /Users/cinquini/Documents/workspace/esgf-docker/kubernetes/cog-docker-entrypoint.sh
