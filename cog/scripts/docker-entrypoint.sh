@@ -42,6 +42,6 @@ if [ $RUNSERVER == "true" ]; then
    sleep 2
    tail -f /tmp/cog.log
 # or keep the container running by starting supervisor without including sub-processes
-else
-   supervisord --nodaemon -c /etc/supervisord_noothers.conf
+#else
+#   supervisord --nodaemon -c /etc/supervisord_noothers.conf
 fi

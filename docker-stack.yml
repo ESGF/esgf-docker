@@ -93,6 +93,8 @@ services:
 
   # CoG
   # data container to hold CoG source code and python virtual environment
+  # this container stops after the volume 'cog_data' is initialized
+  # because of the shared volume, this container must be co-located with the httpd container
   esgf-cog:
     image: ${ESGF_IMAGES_HUB-esgfhub}/esgf-cog:${ESGF_VERSION-latest}
     ports:
