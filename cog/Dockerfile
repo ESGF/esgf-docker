@@ -13,7 +13,7 @@ FROM $ESGF_IMAGES_HUB/esgf-node:$ESGF_VERSION
 MAINTAINER Earth System Grid Federation <esgf-devel@lists.llnl.gov>
 
 # choose CoG version
-ENV COG_TAG=v3.9.8
+ENV COG_TAG=v3.9.9
 
 # env variable to execute CoG initialization
 # may be overridden from command line after first container startup
