@@ -1,0 +1,33 @@
+# volume holding TDS catalogs
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: tds-data-pv
+  labels:
+    type: local
+    stack: esgf
+    app: tds
+spec:
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: /esg/content/thredds
+---
+# volume holding climate data
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: esg-data-pv
+  labels:
+    type: local
+    stack: esgf
+    app: climate-data
+spec:
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: /esg/data

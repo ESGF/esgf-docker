@@ -25,6 +25,40 @@ spec:
     stack: esgf
     app: tds
 ---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: tds-data-pvc
+  labels:
+    stack: esgf
+    app: tds
+spec:
+  selector:
+    matchLabels:
+      app: tds
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: esg-data-pvc
+  labels:
+    stack: esgf
+    app: climate-data
+spec:
+  selector:
+    matchLabels:
+      app: climate-data
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---
 apiVersion: apps/v1beta1
 kind: Deployment
 metadata:
@@ -87,10 +121,10 @@ spec:
           value: /etc/grid-security/certificates
 
       volumes:
-      - name: tds-data
-        emptyDir: {}
-      - name: esg-data
-        emptyDir: {}
+      #- name: tds-data
+      #  emptyDir: {}
+      #- name: esg-data
+      #  emptyDir: {}
       - name: esgf-config-archive
         hostPath:
           path: /Users/cinquini/ESGF_CONFIG/archives/esgf_config.tar.xz
@@ -100,3 +134,9 @@ spec:
       - name: tomcat-esg-truststore
         hostPath:
           path: /Users/cinquini/ESGF_CONFIG/esg/config/tomcat/esg-truststore.ts
+      - name: tds-data
+        persistentVolumeClaim:
+          claimName: tds-data-pvc
+      - name: esg-data
+        persistentVolumeClaim:
+          claimName: esg-data-pvc
