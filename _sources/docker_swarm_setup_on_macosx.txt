@@ -1,8 +1,8 @@
 .. _docker_swarm_setup_on_macosx:
 
-***************************
-Docker Swam Setup on MacOSX
-***************************
+****************************
+Docker Swarm Setup on MacOSX
+****************************
 
 Abstract
 ========

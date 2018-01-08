@@ -15,9 +15,13 @@ appropriate metadata tags are set for that node.
 Pre-Requisites
 ==============
 
-A Docker Swarm composed of 1 or more nodes. See specific instructions on
-how to set this up on :ref:`a single MacOSX laptop <docker_swarm_setup_on_macosx>`, on the Amazon Cloud, or an
-internal Linux cluster.
+*  A host system with the latest version of Docker Engine installed (at
+   this time, Docker 1.12+).
+*  Java SDK (at this time 1.8), keytool is required (add it to the PATH var env).
+
+*  A Docker Swarm composed of 1 or more nodes. See specific instructions on
+   how to set this up on :ref:`a single MacOSX laptop <docker_swarm_setup_on_macosx>`, on 
+   the Amazon Cloud, or :ref:`a single Linux machine <docker_swarm_setup_on_linux>`.
 
 Setup
 =====
@@ -26,7 +30,7 @@ Follow the same setup steps as for the :ref:`single_host_deployment`, namely:
 
 *  Checkout the source code from this GitHub repository, on some
    location on the Swarm manager node. Use the *master* branch.
-*  Define the environmental variables $ESGF_HOSTNAME, $ESGF_CONFIG,
+*  Define the environmental variables $PATH (for keytool), $ESGF_HOSTNAME, $ESGF_CONFIG,
    $ESGF_VERSION and $ESGF_DATA_DIR. 
 *  Initialize the ESGF node configuration: ./esgf_node_init.sh
 
@@ -56,7 +60,7 @@ Execution
       docker node update --label-add esgf_data_node=true node3
 
    Or, on a Swarm of 6 nodes, each label can be assigned to a different node 
-   (as shown in the :ref:`single MacOSX laptop instructions <docker_swarm_setup_on_macosx>`).
+   (as shown in the :ref:`single MacOSX laptop instructions <docker_swarm_setup_on_macosx>` or :ref:`single Linux laptop instructions <docker_swarm_setup_on_linux>`).
 
 *  From the source code directory on the Swarm manager node, issue the
    following command to deploy the stack of ESGF services, then wait for

@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Single Host Deployment &#8212; ESGF-Docker Documentation</title>
+    <title>Single Host Deployment &mdash; ESGF-Docker Documentation</title>
     
     <link rel="stylesheet" href="_static/nature.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -17,15 +17,13 @@
         VERSION:     '1.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true,
-        SOURCELINK_SUFFIX: '.txt'
+        HAS_SOURCE:  true
       };
     </script>
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="index" title="Index" href="genindex.html" />
-    <link rel="search" title="Search" href="search.html" />
+    <link rel="top" title="ESGF-Docker Documentation" href="index.html" />
     <link rel="next" title="Multiple Hosts Deployment" href="multiple_hosts_deployment.html" />
     <link rel="prev" title="Table of Contents:" href="index.html" /> 
   </head>
@@ -42,7 +40,7 @@
         <li class="right" >
           <a href="index.html" title="Table of Contents:"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">ESGF-Docker Documentation</a> &#187;</li> 
+        <li><a href="index.html">ESGF-Docker Documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -53,7 +51,7 @@
             
   <div class="section" id="single-host-deployment">
 <span id="id1"></span><h1>Single Host Deployment<a class="headerlink" href="#single-host-deployment" title="Permalink to this headline">¶</a></h1>
-<p><em>Tested with ESGF_VERSION=1.1</em></p>
+<p><em>Tested with ESGF_VERSION=1.4</em></p>
 <div class="section" id="abstract">
 <h2>Abstract<a class="headerlink" href="#abstract" title="Permalink to this headline">¶</a></h2>
 <p>The following instructions explain how to run an ESGF node as a set of
@@ -65,32 +63,43 @@ proceeding.</p>
 <h2>Pre-Requisites<a class="headerlink" href="#pre-requisites" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li>A host system with the latest version of Docker Engine installed (at
-this time, Docker 1.12+). Tested on MacOSX and Linux CentOS.</li>
+this time, Docker 1.17.x). Tested on MacOSX (Version 17.09.1-ce-mac42) and Linux CentOS.</li>
 <li>Java SDK (at this time 1.8), keytool is required (add it to the PATH var env).</li>
-<li>Docker-compose (at this time 1.14.0), installation procedure
-<a class="reference external" href="https://docs.docker.com/compose/install/#install-compose">here</a></li>
+<li>Docker Compose (at this time 1.17.x), installation procedure
+<a class="reference external" href="https://docs.docker.com/compose/install/#install-compose">here</a>
+(on a Mac, Compose is automatically installed as part of the standard Docker installation).</li>
 </ul>
+</div>
+<div class="section" id="cleanup">
+<h2>Cleanup<a class="headerlink" href="#cleanup" title="Permalink to this headline">¶</a></h2>
+<p>If you are following these instructions <em>not</em> for the first time,
+it might be a good idea to completely reset the system so you can start from a clean slate. To do so,
+stop all running containers, and remove all data volumes and all configuration.
+From the top-level <em>esgf-docker/</em> directory, issue the commands:</p>
+<div class="highlight-python"><div class="highlight"><pre>docker-compose down
+docker rm $(docker ps -a -q)
+docker volume ls -qf dangling=true | xargs docker volume rm
+rm -rf $ESGF_CONFIG/*
+</pre></div>
+</div>
 </div>
 <div class="section" id="setup">
 <h2>Setup<a class="headerlink" href="#setup" title="Permalink to this headline">¶</a></h2>
 <ul>
 <li><p class="first">Clone the current repository, cd to the top-level directory. Checkout
-the latest stable branch, which is named &#8220;vN.M&#8221; (for example, &#8220;v1.1&#8221;).</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">clone</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">ESGF</span><span class="o">/</span><span class="n">esgf</span><span class="o">-</span><span class="n">docker</span><span class="o">.</span><span class="n">git</span>
-<span class="n">cd</span> <span class="n">esgf</span><span class="o">-</span><span class="n">docker</span>
-<span class="n">git</span> <span class="n">tag</span> <span class="o">-</span><span class="n">l</span>
-<span class="n">git</span> <span class="n">checkout</span> <span class="n">vN</span><span class="o">.</span><span class="n">M</span>
-</pre></div>
-</div>
-<p>Note: if you want to create a new branch based on a tag, use the command:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">checkout</span> <span class="n">tags</span><span class="o">/&lt;</span><span class="n">tag_name</span><span class="o">&gt;</span> <span class="o">-</span><span class="n">b</span> <span class="o">&lt;</span><span class="n">branch_name</span><span class="o">&gt;</span>
+the master branch, which is the latest stable branch:</p>
+<div class="highlight-python"><div class="highlight"><pre>git clone https://github.com/ESGF/esgf-docker.git
+cd esgf-docker
+git checkout master
 </pre></div>
 </div>
 </li>
-<li><p class="first">Define your environment:</p>
+<li><p class="first">Define your environment. Note that on a Mac the Docker engine has access only to the filesystem under the user home directory,
+so all environment variables that reference directories must use paths under the user home directory.</p>
 <ul>
 <li><p class="first">Add the path to the keytool install directory:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span>export PATH=&#39;/path/to/keytool/install/dir&#39;:$PATH
+<div class="highlight-python"><div class="highlight"><pre>export PATH=&#39;/path/to/keytool/install/dir&#39;:$PATH
+which keytool
 </pre></div>
 </div>
 </li>
@@ -100,104 +109,64 @@ the latest stable branch, which is named &#8220;vN.M&#8221; (for example, &#8220
 <blockquote>
 <div><ul>
 <li><p class="first">On linux, use the actual server host name:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span>export ESGF_HOSTNAME=`hostname`
+<div class="highlight-python"><div class="highlight"><pre>export ESGF_HOSTNAME=`hostname`
 </pre></div>
 </div>
 </li>
 <li><p class="first">On mac, choose a custom host name, and bind it to the current IP address of the Mac, for example:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">export</span> <span class="n">ESGF_HOSTNAME</span><span class="o">=</span><span class="n">my</span><span class="o">-</span><span class="n">node</span><span class="o">.</span><span class="n">esgf</span><span class="o">.</span><span class="n">org</span>
+<div class="highlight-python"><div class="highlight"><pre>export ESGF_HOSTNAME=my-node.esgf.org
+echo $ESGF_HOSTNAME
 </pre></div>
 </div>
 <p>You must edit <em>/private/etc/hosts</em> and map <em>my-node.esgf.org</em> to the current Mac IP address
 (which you can find from the Control Panel Network Settings), for example:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">cat</span> <span class="o">/</span><span class="n">private</span><span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">hosts</span>
-<span class="o">...</span>
-<span class="mf">192.168</span><span class="o">.</span><span class="mf">0.5</span> <span class="n">my</span><span class="o">-</span><span class="n">node</span><span class="o">.</span><span class="n">esgf</span><span class="o">.</span><span class="n">org</span>
+<div class="highlight-python"><div class="highlight"><pre>cat /private/etc/hosts
+...
+192.168.0.5 my-node.esgf.org
 </pre></div>
 </div>
-</li>
-<li><p class="first">On mac using docker-machine:</p>
-<ul>
-<li><p class="first">set ESGF_HOSTNAME, for example:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">export</span> <span class="n">ESGF_HOSTNAME</span><span class="o">=</span><span class="n">my</span><span class="o">-</span><span class="n">esgf</span><span class="o">-</span><span class="n">node</span>
-</pre></div>
-</div>
-</li>
-<li><p class="first">create a docker-machine with a name that matches a chosen ESGF_HOSTNAME, for example:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">docker</span><span class="o">-</span><span class="n">machine</span> <span class="n">create</span> <span class="o">--</span><span class="n">driver</span> <span class="n">virtualbox</span> <span class="o">--</span><span class="n">virtualbox</span><span class="o">-</span><span class="n">memory</span><span class="o">=</span><span class="mi">4096</span> <span class="o">--</span><span class="n">virtualbox</span><span class="o">-</span><span class="n">cpu</span><span class="o">-</span><span class="n">count</span><span class="o">=</span><span class="mi">2</span> <span class="n">my</span><span class="o">-</span><span class="n">esgf</span><span class="o">-</span><span class="n">node</span>
-</pre></div>
-</div>
-</li>
-<li><p class="first">determine the IP address of the new docker-machine:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">docker</span><span class="o">-</span><span class="n">machine</span> <span class="n">ip</span> <span class="n">my</span><span class="o">-</span><span class="n">esgf</span><span class="o">-</span><span class="n">node</span>
-</pre></div>
-</div>
-</li>
-<li><p class="first">edit <em>/private/etc/hosts</em> and map <em>my-esgf-node</em> to the docker-machine IP address, e.g.:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">cat</span> <span class="o">/</span><span class="n">private</span><span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">hosts</span>
-<span class="o">...</span>
-<span class="mf">192.168</span><span class="o">.</span><span class="mf">99.101</span>  <span class="n">my</span><span class="o">-</span><span class="n">esgf</span><span class="o">-</span><span class="n">node</span>
-</pre></div>
-</div>
-</li>
-<li><p class="first">make sure to run:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span>eval $(docker-machine env my-esgf-node)
-</pre></div>
-</div>
-<p>to ensure your docker commands use the new docker-machine and not the default.</p>
-</li>
-</ul>
 </li>
 </ul>
 </div></blockquote>
 <ul>
 <li><p class="first"><strong>ESGF_CONFIG</strong> must reference a directory on the host system that will store
 all the site-specific configuration, e.g.:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span>export ESGF_CONFIG=~/esgf_config
+<div class="highlight-python"><div class="highlight"><pre>export ESGF_CONFIG=~/esgf_config
 mkdir -p $ESGF_CONFIG
+</pre></div>
+</div>
+</li>
+<li><p class="first"><strong>ESGF_VERSION</strong> must specify the version of the ESGF/Docker stack to be used,
+which is recommended to be the latest stable version, e.g.:</p>
+<div class="highlight-python"><div class="highlight"><pre>export ESGF_VERSION=1.4
 </pre></div>
 </div>
 </li>
 <li><p class="first"><strong>ESGF_DATA_DIR</strong> must reference the root of the data directory on your host.</p>
 <ul>
 <li><p class="first">for example on linux:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">export</span> <span class="n">ESGF_DATA_DIR</span><span class="o">=/</span><span class="n">esgf</span><span class="o">/</span><span class="n">data</span>
+<div class="highlight-python"><div class="highlight"><pre>export ESGF_DATA_DIR=/esgf/data
 </pre></div>
 </div>
 </li>
 <li><p class="first">for example on mac:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">export</span> <span class="n">ESGF_DATA_DIR</span><span class="o">=~/</span><span class="n">esgf_data</span>
+<div class="highlight-python"><div class="highlight"><pre>export ESGF_DATA_DIR=~/esgf_data
 </pre></div>
 </div>
-<p>(since on a mac the Docker engine only has access to the filesystem under the user home directory).</p>
 </li>
 </ul>
 <p>Then create the directory if not existing already:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span>mkdir -p $ESGF_DATA_DIR
+<div class="highlight-python"><div class="highlight"><pre>mkdir -p $ESGF_DATA_DIR
 </pre></div>
 </div>
-</li>
-<li><p class="first"><strong>ESGF_VERSION</strong> is the version of the ESGF/Docker stack to be used,
-which is recommended to be the latest stable version, e.g.:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">export</span> <span class="n">ESGF_VERSION</span><span class="o">=</span><span class="mf">1.1</span>
-</pre></div>
-</div>
+<p>Note that this location is currently not really used to store any data.</p>
 </li>
 </ul>
 </li>
 <li><p class="first">Initialize your node configuration: create a self-signed certificate
-for $ESGF_HOSTNAME and populate the $ESGF_CONFIG directory with initial content. From the scripts/ directory:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span>./esgf_node_init.sh
+for $ESGF_HOSTNAME and populate the $ESGF_CONFIG directory with initial content:</p>
+<div class="highlight-python"><div class="highlight"><pre>./scripts/esgf_node_init.sh
 ls -l $ESGF_CONFIG
-</pre></div>
-</div>
-<p>Note: if you are going through these instructions more than one time,
-make sure you don&#8217;t have previous containers that were configured with a different version of the certificates.
-So before re-initializing the node, make sure to stop all running containers. It might be also useful to remove all previously created volumes. From
-the top-level <em>esgf-docker/</em> directory, issue the commands:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span>docker-compose down
-docker rm $(docker ps -a -q)
-docker volume ls -qf dangling=true | xargs docker volume rm
 </pre></div>
 </div>
 <p>Note: it&#8217;s been observed that the Docker engine on a mac might not track time correctly
@@ -213,77 +182,83 @@ To bypass this issue, restart the Docker engine after generating the certificate
 If not done now, the images will be pulled down automatically one by
 one when each service is started. Note that downloading or
 pre-downloading all the images (which amount to several GBs) may take
-a considerable time, depending on your internet connection. From the <em>scripts/</em> directory:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span>./docker_pull_all.sh $ESGF_VERSION
+a considerable time, depending on your internet connection.:</p>
+<div class="highlight-python"><div class="highlight"><pre>./scripts/docker_pull_all.sh $ESGF_VERSION
+docker images | grep $ESGF_VERSION
 </pre></div>
 </div>
+<p>Make sure the hash of each image is what you would expect from the $ESGF_VERSION you are using.</p>
 </li>
 <li><p class="first">Start all ESGF services in daemon mode, then look at the combined
 logs. Even if the images have been pre-download, starting all the
 services the first time may take a few minutes as the host system is
-allocating memory, disk space, and initializing each service.</p>
-<ul>
-<li><p class="first">if you have pre-downloaded the images, issue:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">docker</span> <span class="n">images</span>
+allocating memory, disk space, and initializing each service.
+From the top-level <em>esgf-docker/</em> directory:</p>
+<div class="highlight-python"><div class="highlight"><pre>docker-compose up -d
+docker-compose logs -f
+# in another terminal:
+docker ps
 </pre></div>
 </div>
-<p>to make sure the version of the images matches what you expect from $ESGF_VERSION</p>
-</li>
-<li><p class="first">from the top-level <em>esgf-docker/</em> directory:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">docker</span><span class="o">-</span><span class="n">compose</span> <span class="n">up</span> <span class="o">-</span><span class="n">d</span>
-<span class="n">docker</span><span class="o">-</span><span class="n">compose</span> <span class="n">logs</span> <span class="o">-</span><span class="n">f</span>
-<span class="n">docker</span> <span class="n">ps</span>
-</pre></div>
-</div>
-</li>
-</ul>
 </li>
 <li><p class="first">Do some testing. Note that you will have to instruct your browser to
 trust the self-signed certificate from $ESGF_HOSTNAME.</p>
 <ul>
 <li><p class="first">In a browser, access the top-level CoG page for the node:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span>https://$ESGF_HOSTNAME/
+<div class="highlight-python"><div class="highlight"><pre>https://$ESGF_HOSTNAME/
 </pre></div>
 </div>
 </li>
 <li><p class="first">Login with the <em>rootAdmin</em> openid:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span>https://$ESGF_HOSTNAME/esgf-idp/openid/rootAdmin
+<div class="highlight-python"><div class="highlight"><pre>https://$ESGF_HOSTNAME/esgf-idp/openid/rootAdmin
 </pre></div>
 </div>
 <p>and use the password: <em>changeit</em> .</p>
 </li>
 <li><p class="first">Access the top-level TDS catalog:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span>http://$ESGF_HOSTNAME/thredds
+<div class="highlight-python"><div class="highlight"><pre>http://$ESGF_HOSTNAME/thredds
 </pre></div>
 </div>
+</li>
+<li><p class="first">Re-initialize the TDS catalogs:</p>
+<div class="highlight-python"><div class="highlight"><pre>https://$ESGF_HOSTNAME/thredds/admin/debug?Catalogs/reinit
+</pre></div>
+</div>
+<p>Use username = <em>rootAdmin</em> and password = <em>changeit</em> .</p>
 </li>
 <li><p class="first">Download one of the test files.
 You will have to log onto the ORP with the same openid as above.</p>
 </li>
+<li><p class="first">Test the Solr admin interface:</p>
+<div class="highlight-python"><div class="highlight"><pre>https://$ESGF_HOSTNAME/solr
+</pre></div>
+</div>
+</li>
 </ul>
 </li>
-<li><p class="first">Change the ESGF root password. You must first stop the containers,
+<li><p class="first"><strong>NOTE: changing password not currently working in ESGF_VERSION=1.4: will be fixed in ESGF_VERSION=1.5.</strong></p>
+<p>Change the ESGF root password. You must first stop the containers,
 then run a script that picks up the new password from an environment
 variable. This must be done after the containers have been started at
 least once, because the initial default password is hard-coded into the postgres image.</p>
 <ul>
 <li><p class="first">From the top-level <em>esgf-docker/</em> directory:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">docker</span><span class="o">-</span><span class="n">compose</span> <span class="n">stop</span>
+<div class="highlight-python"><div class="highlight"><pre>docker-compose stop
 </pre></div>
 </div>
 </li>
 <li><p class="first">For example, set the new password to:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">export</span> <span class="n">ESGF_PASSWORD</span><span class="o">=</span><span class="n">abc123</span>
+<div class="highlight-python"><div class="highlight"><pre>export ESGF_PASSWORD=abc123
 </pre></div>
 </div>
 </li>
-<li><p class="first">From the <em>scripts/</em> directory:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="o">./</span><span class="n">change_password</span><span class="o">.</span><span class="n">sh</span>
+<li><p class="first">Change the password:</p>
+<div class="highlight-python"><div class="highlight"><pre>./scripts/change_password.sh
 </pre></div>
 </div>
 </li>
 <li><p class="first">Restart the ESGF services to make sure everything still works:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">docker</span><span class="o">-</span><span class="n">compose</span> <span class="n">up</span> <span class="o">-</span><span class="n">d</span>
+<div class="highlight-python"><div class="highlight"><pre>docker-compose up -d
 </pre></div>
 </div>
 <p>Note that the above operation will change the ESGF password for all
@@ -292,16 +267,16 @@ onto the web (this is by design, so that the two passwords can be
 different). This last password can be changed through the CoG
 interface once <em>rootAdmin</em> is logged in.</p>
 </li>
+</ul>
+</li>
 <li><p class="first">Stop all services, and optionally remove all containers and associated data volumes:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">docker</span><span class="o">-</span><span class="n">compose</span> <span class="n">stop</span>
-<span class="c1"># optional:</span>
-<span class="n">docker</span><span class="o">-</span><span class="n">compose</span> <span class="n">down</span>
-<span class="c1"># optional:</span>
-<span class="n">docker</span> <span class="n">volume</span> <span class="n">ls</span> <span class="o">-</span><span class="n">qf</span> <span class="n">dangling</span><span class="o">=</span><span class="n">true</span> \<span class="o">|</span> <span class="n">xargs</span> <span class="n">docker</span> <span class="n">volume</span> <span class="n">rm</span>
+<div class="highlight-python"><div class="highlight"><pre>docker-compose stop
+# optional:
+docker-compose down
+# optional:
+docker volume ls -qf dangling=true \| xargs docker volume rm
 </pre></div>
 </div>
-</li>
-</ul>
 </li>
 </ul>
 </div>
@@ -318,6 +293,7 @@ interface once <em>rootAdmin</em> is logged in.</p>
 <li><a class="reference internal" href="#">Single Host Deployment</a><ul>
 <li><a class="reference internal" href="#abstract">Abstract</a></li>
 <li><a class="reference internal" href="#pre-requisites">Pre-Requisites</a></li>
+<li><a class="reference internal" href="#cleanup">Cleanup</a></li>
 <li><a class="reference internal" href="#setup">Setup</a></li>
 <li><a class="reference internal" href="#execution">Execution</a></li>
 </ul>
@@ -333,18 +309,21 @@ interface once <em>rootAdmin</em> is logged in.</p>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
-      <li><a href="_sources/single_host_deployment.rst.txt"
+      <li><a href="_sources/single_host_deployment.txt"
             rel="nofollow">Show Source</a></li>
     </ul>
    </div>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="search.html" method="get">
-      <div><input type="text" name="q" /></div>
-      <div><input type="submit" value="Go" /></div>
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
@@ -363,12 +342,12 @@ interface once <em>rootAdmin</em> is logged in.</p>
         <li class="right" >
           <a href="index.html" title="Table of Contents:"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">ESGF-Docker Documentation</a> &#187;</li> 
+        <li><a href="index.html">ESGF-Docker Documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &#169; Copyright 2017, ESGF.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.6.
+        &copy; Copyright 2017, ESGF.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3b2.
     </div>
   </body>
 </html>
