@@ -90,8 +90,13 @@ spec:
           mountPath: /esg/content/thredds
         - name: esg-data
           mountPath: /esg/data
-        - name: esgf-config-archive
-          mountPath: /root/archives/esgf_config.tar.xz
+        #- name: esgf-config-archive
+        # if using hostPath volume: mount volume to complete file path 
+        #  mountPath: /root/archives/esgf_config.tar.xz
+        # if using configMap volume: mount volume to directory path
+        #  mountPath: /root/archives
+        - name: esgf-config-files
+          mountPath: /esg/config
         - name: tds-web-xml
           mountPath: /usr/local/tomcat/webapps/thredds/WEB-INF/web.xml
         - name: tomcat-esg-truststore
@@ -111,8 +116,10 @@ spec:
           mountPath: /esg/content/thredds
         - name: esg-data
           mountPath: /esg/data
-        - name: esgf-config-archive
-          mountPath: /root/archives/esgf_config.tar.xz
+        #- name: esgf-config-archive
+        #  mountPath: /root/archives
+        - name: esgf-config-files
+          mountPath: /esg/config
         envFrom:
         - configMapRef:
             name: esgf-env
@@ -125,9 +132,12 @@ spec:
       #  emptyDir: {}
       #- name: esg-data
       #  emptyDir: {}
-      - name: esgf-config-archive
-        hostPath:
-          path: /Users/cinquini/ESGF_CONFIG/archives/esgf_config.tar.xz
+      #- name: esgf-config-archive
+        #hostPath:
+        #  path: /Users/cinquini/ESGF_CONFIG/archives/esgf_config.tar.xz
+      - name: esgf-config-files
+        configMap:
+          name: esgf-config-files
       - name: tds-web-xml
         hostPath:
           path: /Users/cinquini/ESGF_CONFIG/webapps/thredds/WEB-INF/web.xml
