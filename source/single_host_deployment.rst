@@ -85,6 +85,11 @@ Setup
 
        export ESGF_VERSION=1.4
 
+   * **ESGF_IMAGES_HUB** must reference the name of the Docker repository to pull the images from, which for this
+     exercise should be *esgfhub*::
+
+       export ESGF_IMAGES_HUB=esgfhub
+
    * **ESGF_DATA_DIR** must reference the root of the data directory on your host.
 
      * for example on linux::
@@ -159,7 +164,7 @@ Execution
 
         https://$ESGF_HOSTNAME/thredds/admin/debug?Catalogs/reinit
 
-     Use username = *rootAdmin* and password = *changeit* .
+     Use username = *dnode_user* and password = *changeit* .
         
    * Download one of the test files. 
      You will have to log onto the ORP with the same openid as above.

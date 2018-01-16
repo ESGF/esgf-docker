@@ -142,6 +142,12 @@ which is recommended to be the latest stable version, e.g.:</p>
 </pre></div>
 </div>
 </li>
+<li><p class="first"><strong>ESGF_IMAGES_HUB</strong> must reference the name of the Docker repository to pull the images from, which for this
+exercise should be <em>esgfhub</em>:</p>
+<div class="highlight-python"><div class="highlight"><pre>export ESGF_IMAGES_HUB=esgfhub
+</pre></div>
+</div>
+</li>
 <li><p class="first"><strong>ESGF_DATA_DIR</strong> must reference the root of the data directory on your host.</p>
 <ul>
 <li><p class="first">for example on linux:</p>
@@ -224,7 +230,7 @@ trust the self-signed certificate from $ESGF_HOSTNAME.</p>
 <div class="highlight-python"><div class="highlight"><pre>https://$ESGF_HOSTNAME/thredds/admin/debug?Catalogs/reinit
 </pre></div>
 </div>
-<p>Use username = <em>rootAdmin</em> and password = <em>changeit</em> .</p>
+<p>Use username = <em>dnode_user</em> and password = <em>changeit</em> .</p>
 </li>
 <li><p class="first">Download one of the test files.
 You will have to log onto the ORP with the same openid as above.</p>
