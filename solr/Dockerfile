@@ -1,51 +1,29 @@
-# ESGF node with Solr engine configured to serve ESGF shards
+#####
+## Standard Solr container with setup of ESGF cores built-in
+#####
 
-ARG ESGF_IMAGES_HUB=esgfhub
-ARG ESGF_VERSION=devel
-FROM $ESGF_IMAGES_HUB/esgf-node:$ESGF_VERSION
-MAINTAINER Earth System Grid Federation <esgf-devel@lists.llnl.gov>
+FROM solr:5.5
 
-# Solr/Jetty web application
-ENV SOLR_VERSION 5.5.4
-ENV SOLR_INSTALL_DIR /usr/local/solr
-ENV SOLR_HOME /usr/local/solr-home
-ENV SOLR_DATA_DIR /esg/solr-index
-ENV SOLR_INCLUDE=${SOLR_HOME}/solr.in.sh
+# In order to consistently resolve permissions issues with volumes, we need to be root
+USER root
 
-RUN wget -O /tmp/solr-${SOLR_VERSION}.tgz http://archive.apache.org/dist/lucene/solr/${SOLR_VERSION}/solr-${SOLR_VERSION}.tgz && \
-    cd /usr/local && \
-    tar xzf /tmp/solr-${SOLR_VERSION}.tgz && \
-    rm /tmp/solr-${SOLR_VERSION}.tgz && \
-    ln -s ./solr-${SOLR_VERSION} ./solr
-RUN mkdir -p $SOLR_DATA_DIR
+# But we want to run the solr command as the solr user
+# Use gosu, as recommended here: https://docs.docker.com/engine/userguide/eng-image/dockerfile_best-practices/#user
+ENV GOSU_VERSION 1.10
+RUN curl -o /usr/local/bin/gosu -sSL "https://github.com/tianon/gosu/releases/download/$GOSU_VERSION/gosu-amd64" \
+    && curl -o /usr/local/bin/gosu.asc -sSL "https://github.com/tianon/gosu/releases/download/$GOSU_VERSION/gosu-amd64.asc" \
+    && export GNUPGHOME="$(mktemp -d)" \
+    && gpg --keyserver keyserver.ubuntu.com --recv-keys B42F6819007F00F88E364FD4036A9C25BF357DD4 \
+    && gpg --batch --verify /usr/local/bin/gosu.asc /usr/local/bin/gosu \
+    && rm -rf "$GNUPGHOME" /usr/local/bin/gosu.asc \
+    && chmod +x /usr/local/bin/gosu \
+    && gosu nobody true
 
-# download template directory structure for shards home
-ARG ESGF_REPO=http://distrib-coffee.ipsl.jussieu.fr/pub/esgf
-RUN cd /usr/local/src && \
-    wget -O solr-home.tar $ESGF_REPO/dist/esg-search/solr-home.tar && \
-    tar xvf /usr/local/src/solr-home.tar
-RUN mkdir -p $SOLR_HOME
+# Install the ESGF configset
+COPY configset /opt/solr/server/solr/configsets/esgf
 
-# create non-privilged user to run Solr server
-RUN groupadd solr
-RUN useradd -s /sbin/nologin -g solr -d /usr/local/solr solr
-RUN chown -R solr:solr /usr/local/solr-${SOLR_VERSION}
-RUN chown -R solr:solr ${SOLR_HOME}
-RUN chown -R solr:solr ${SOLR_DATA_DIR}
+# Install the Docker entrypoint script that sets up the datadir and switches to solr user
+COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 
-# add shards
-COPY conf/supervisord.solr.conf /etc/supervisor/conf.d/supervisord.solr.conf
-COPY conf/supervisord.solr_HOST_PORT.conf-TEMPLATE /usr/local/src/supervisord.solr_HOST_PORT.conf-TEMPLATE
-COPY scripts/add_shard.sh /usr/local/bin/add_shard.sh
-COPY scripts/remove_shard.sh /usr/local/bin/remove_shard.sh
-RUN /usr/local/bin/add_shard.sh master 8984
-RUN /usr/local/bin/add_shard.sh slave 8983
-
-# custom logging properties
-COPY conf/log4j.properties ${SOLR_INSTALL_DIR}/server/resources/log4j.properties
-
-EXPOSE 8983
-EXPOSE 8984
-
-# startup
-CMD ["/usr/local/bin/supervisord", "--nodaemon", "-c", "/etc/supervisord.conf"]
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
+CMD ["solr-foreground"]
