@@ -4,6 +4,8 @@
 
 FROM solr:5.5
 
+MAINTAINER Earth System Grid Federation <esgf-devel@lists.llnl.gov>
+
 # In order to consistently resolve permissions issues with volumes, we need to be root
 USER root
 
