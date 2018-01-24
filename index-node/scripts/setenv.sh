@@ -26,7 +26,7 @@ esg.search.solr.publish.url=$ESGF_SOLR_PUBLISH_URL
 # URL of Solr server for querying metadata (slave solr)
 esg.search.solr.query.url=$ESGF_SOLR_QUERY_URL
 # URL of authorization service used to authorize publishing operations
-security.authz.service.endpoint=$ESGF_ORP_URL/saml/soap/secure/authorizationService.htm
+security.authz.service.endpoint=$ESGF_ORP_URL/esg-orp/saml/soap/secure/authorizationService.htm
 EOF
 
 export CATALINA_OPTS="-Xmx256m -server -Xms256m"

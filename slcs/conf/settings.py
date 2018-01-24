@@ -106,7 +106,7 @@ BOOTSTRAP3 = {
 
 
 # OAuth provider configuration
-CERTIFICATE_SCOPE = '{}/oauth/certificate/'.format(os.environ['ESGF_SLCS_ROOT_URL'])
+CERTIFICATE_SCOPE = '{}/oauth/certificate/'.format(os.environ['ESGF_SLCS_URL'])
 OAUTH2_PROVIDER = {
     'SCOPES' : {
         CERTIFICATE_SCOPE : 'Obtain short-lived certificate for user',

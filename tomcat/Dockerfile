@@ -9,6 +9,12 @@ ENV TOMCAT_GROUP tomcat
 ENV TOMCAT_UID 501
 ENV TOMCAT_GID 501
 
+# Remove the default webapps
+# Because we don't want to use *, we have to use bash (the default shell is sh)
+# and enable brace expansion for the command
+# Using this form of RUN prevents the use of 'sh -c {}' to run the command
+RUN ["/bin/bash", "-B", "-c", "rm -rf $CATALINA_HOME/webapps/{docs,examples,host-manager,manager}"]
+
 # Create the tomcat user and group
 RUN groupadd -g $TOMCAT_GID $TOMCAT_GROUP &&  \
     useradd -d $CATALINA_HOME -g $TOMCAT_GROUP -s /usr/sbin/nologin -u $TOMCAT_UID $TOMCAT_USER
