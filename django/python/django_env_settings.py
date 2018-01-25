@@ -90,6 +90,8 @@ for name, value in os.environ.items():
 
 
 # Static files settings
-# Put static files under the home directory as we know we can write there for collectstatic
-STATIC_ROOT = os.path.join(os.environ['HOME'], 'static')
 STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(os.environ['HOME'], 'srv', 'static')
+# Check if we are running under a prefix
+if 'SCRIPT_NAME' in os.environ:
+    STATIC_URL = os.environ['SCRIPT_NAME'] + STATIC_URL

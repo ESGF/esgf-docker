@@ -72,11 +72,14 @@ function django_setting {
     # Remove any instances of the REPL string and any remaining whitespace
     echo -e "${setting//">>>"/}" | tr -d '[:space:]'
 }
+# Note that because gunicorn understands SCRIPT_NAME, we need to strip it from
+# the STATIC_URL setting for the static app
+static_url=$(django_setting STATIC_URL)
 cat > /home/gunicorn/paste.ini <<EOF
 [composite:main]
 use = egg:Paste#urlmap
 / = django
-$(django_setting STATIC_URL) = static
+${static_url#"$SCRIPT_NAME"} = static
 
 [app:django]
 use = call:django_paste:app_factory
