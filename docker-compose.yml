@@ -304,6 +304,12 @@ services:
     networks:
       - default
       - dbnetwork
+      
+  visus-server:
+    container_name: visus-server
+    image: visus/visus
+    networks:
+      - default
 
   # FTP server
   #esgf-ftp:
