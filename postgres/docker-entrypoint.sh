@@ -7,25 +7,6 @@
 
 set -e
 
-function error {
-    echo "[ERROR] $1" 1>&2
-    exit "${2:-1}"
-}
-
-# This function is to allow support for Docker secrets which, unlike Kubernetes,
-# can only be mounted as files
-function env_var {
-    local varname="$1"
-    local filevar="${varname}_FILE"
-    # If the variable is already set, there is nothing to do
-    [ -n "${!varname}" ] && return
-    # Otherwise, load it from the file if it exists
-    if [ -f "${!filevar}" ]; then
-        val="$(cat ${!filevar})"
-    fi
-    export "$varname"="$val"
-}
-
 # If running as root, do some permissions
 if [ "$(id -u)" = "0" ]; then
     mkdir -p "$PGDATA"
@@ -39,11 +20,31 @@ fi
 # If postgres is not setup, set it up
 # Check for the presence of a sentinel file to know
 if [ ! -s "$PGDATA/PG_VERSION" ]; then
-    # Check all the environment variables we require are present
-    env_var "DBSUPER_PASSWORD"
-    [ -z "$DBSUPER_PASSWORD" ] && error "DBSUPER_PASSWORD is not set."
-    env_var "ESGCET_PASSWORD"
-    [ -z "$ESGCET_PASSWORD" ] && error "ESGCET_PASSWORD is not set."
+    # These variables can be specified directly or, to allow support for Docker
+    # secrets (which can only be mounted as files), a variable telling us where
+    # to read them from
+    if [ -z "$DBSUPER_PASSWORD" ]; then
+        [ -z "$DBSUPER_PASSWORD_FILE" ] && {
+            echo "[ERROR] DBSUPER_PASSWORD or DBSUPER_PASSWORD_FILE must be set" 1>&2
+            exit 1
+        }
+        [ -f "$DBSUPER_PASSWORD_FILE" ] || {
+            echo "[ERROR] DBSUPER_PASSWORD_FILE does not exist" 1>&2
+            exit 1
+        }
+        DBSUPER_PASSWORD="$(cat "$DBSUPER_PASSWORD_FILE")"
+    fi
+    if [ -z "$ESGCET_PASSWORD" ]; then
+        [ -z "$ESGCET_PASSWORD_FILE" ] && {
+            echo "[ERROR] ESGCET_PASSWORD or ESGCET_PASSWORD_FILE must be set" 1>&2
+            exit 1
+        }
+        [ -f "$ESGCET_PASSWORD_FILE" ] || {
+            echo "[ERROR] ESGCET_PASSWORD_FILE does not exist" 1>&2
+            exit 1
+        }
+        ESGCET_PASSWORD="$(cat "$ESGCET_PASSWORD_FILE")"
+    fi
 
     # Initialise the database
     initdb -U postgres -D "$PGDATA"

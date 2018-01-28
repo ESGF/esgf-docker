@@ -10,6 +10,7 @@ if [ -d "/django-init.d" ]; then
     for file in $(find /django-init.d/ -mindepth 1 -type f -executable | sort -n); do
         # All customisations have access to the exported environment variables only,
         # whether they are bash, python or otherwise
+        # If a customisation fails, the whole container fails
         eval $file || exit 1
     done
 fi
@@ -62,14 +63,16 @@ STDIN
 fi
 
 # Collect static files for serving later
-django-admin collectstatic --no-input --clear || exit 1
+django-admin collectstatic --no-input || exit 1
 
 # Create the Paste config file
 # Note that we have to do this rather than using Paste variables because we want
 # to have a dynamic route name in the urlmap
 function django_setting {
     setting=$(django-admin shell <<< "from django.conf import settings; print(settings.$1)" || exit 1)
-    # Remove any instances of the REPL string and any remaining whitespace
+    # Find the first line containing an instance of the REPL string
+    setting="$(echo -e "$setting" | grep ">>>")"
+    # Remove the REPL string and any remaining whitespace
     echo -e "${setting//">>>"/}" | tr -d '[:space:]'
 }
 # Note that because gunicorn understands SCRIPT_NAME, we need to strip it from
@@ -93,10 +96,11 @@ document_root = $(django_setting STATIC_ROOT)
 use = egg:gunicorn#main
 EOF
 
-# Run the app with gunicorn
-exec gunicorn --paste /home/gunicorn/paste.ini \
-              --bind 0.0.0.0:${GUNICORN_PORT:-8000} \
-              --access-logfile '-' \
-              --error-logfile '-' \
-              --log-level ${GUNICORN_LOG_LEVEL:-info} \
-              --workers ${GUNICORN_WORKERS:-4}
+# Run the app using gunicorn as the Django user
+gosu "$DJANGO_USER" gunicorn \
+    --paste /home/gunicorn/paste.ini \
+    --bind 0.0.0.0:${GUNICORN_PORT:-8000} \
+    --access-logfile '-' \
+    --error-logfile '-' \
+    --log-level ${GUNICORN_LOG_LEVEL:-info} \
+    --workers ${GUNICORN_WORKERS:-1}

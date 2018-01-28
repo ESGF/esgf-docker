@@ -12,14 +12,14 @@ MAINTAINER Earth System Grid Federation <esgf-devel@lists.llnl.gov>
 
 # Use gosu for better sudo, as recommended here: https://docs.docker.com/engine/userguide/eng-image/dockerfile_best-practices/#user
 ENV GOSU_VERSION 1.10
-RUN curl -o /usr/local/bin/gosu -sSL "https://github.com/tianon/gosu/releases/download/$GOSU_VERSION/gosu-amd64" \
-    && curl -o /usr/local/bin/gosu.asc -sSL "https://github.com/tianon/gosu/releases/download/$GOSU_VERSION/gosu-amd64.asc" \
-    && export GNUPGHOME="$(mktemp -d)" \
-    && gpg --keyserver keyserver.ubuntu.com --recv-keys B42F6819007F00F88E364FD4036A9C25BF357DD4 \
-    && gpg --batch --verify /usr/local/bin/gosu.asc /usr/local/bin/gosu \
-    && rm -rf "$GNUPGHOME" /usr/local/bin/gosu.asc \
-    && chmod +x /usr/local/bin/gosu \
-    && gosu nobody true
+RUN curl -o /usr/local/bin/gosu -sSL "https://github.com/tianon/gosu/releases/download/$GOSU_VERSION/gosu-amd64" && \
+    curl -o /usr/local/bin/gosu.asc -sSL "https://github.com/tianon/gosu/releases/download/$GOSU_VERSION/gosu-amd64.asc" && \
+    export GNUPGHOME="$(mktemp -d)" && \
+    gpg --keyserver keyserver.ubuntu.com --recv-keys B42F6819007F00F88E364FD4036A9C25BF357DD4 && \
+    gpg --batch --verify /usr/local/bin/gosu.asc /usr/local/bin/gosu && \
+    rm -rf "$GNUPGHOME" /usr/local/bin/gosu.asc && \
+    chmod +x /usr/local/bin/gosu && \
+    gosu nobody true
 
 # Build the UTF-8 locale so postgres is UTF-8 enabled
 RUN localedef -i en_US -c -f UTF-8 -A /usr/share/locale/locale.alias en_US.UTF-8
