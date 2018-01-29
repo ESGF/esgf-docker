@@ -26,7 +26,7 @@ services:
       - "$ESGF_CONFIG/hostcert:/etc/nginx/ssl:ro"
     environment:
       ESGF_HOSTNAME: ${ESGF_HOSTNAME}
-#      ESGF_SOLR_INTERNAL_URL: http://esgf-solr:8983
+      ESGF_SOLR_INTERNAL_URL: http://esgf-solr:8983
       ESGF_INDEX_NODE_INTERNAL_URL: http://esgf-index-node:8080
       ESGF_TDS_INTERNAL_URL: http://esgf-tds:8080
       ESGF_ORP_INTERNAL_URL: http://esgf-orp:8080
@@ -55,9 +55,7 @@ services:
   esgf-solr:
     image: cedadev/esgf-solr
     build: ./solr
-    restart: "no"
-    ports:
-      - "8983:8983"
+    restart: always
     environment:
       SOLR_HOME: /esg/solr-home
       SOLR_HEAP: 1g
@@ -76,6 +74,13 @@ services:
     depends_on:
       - esgf-zookeeper
 
+  # Build dependency only
+  esgf-tomcat:
+    image: cedadev/esgf-tomcat
+    build: ./tomcat
+    # Use an entrypoint that exits immediately with success
+    entrypoint: ["true"]
+
 #  esgf-orp:
 #    image: cedadev/esgf-orp
 #    ports:
@@ -86,16 +91,17 @@ services:
 #    depends_on:
 #      - esgf-tomcat
 
-#  esgf-index-node:
-#    image: cedadev/esgf-index-node
-#    ports:
-#      - "8080:8080"
-#    environment:
-#      ESGF_SOLR_URL: http://esgf-solr:8983/solr
-#      ESGF_ORP_URL: http://localhost:8081
-#    depends_on:
-#      - esgf-tomcat
-#      - esgf-solr
+  esgf-index-node:
+    image: cedadev/esgf-index-node
+    build: ./index-node
+    restart: always
+    environment:
+      ESGF_SOLR_INTERNAL_URL: http://esgf-solr:8983
+      ESGF_SOLR_EXTERNAL_URL: https://${ESGF_HOSTNAME}
+      ESGF_ORP_URL: https://${ESGF_HOSTNAME}
+    depends_on:
+      - esgf-tomcat
+      - esgf-solr
 #      - esgf-orp
 
   esgf-postgres:
@@ -141,6 +147,8 @@ services:
       ESGF_SEARCH_URL: https://${ESGF_HOSTNAME}
       ESGF_IDP_URL: https://${ESGF_HOSTNAME}
       ESGF_ROOTADMIN_PASSWORD: "rootadmin123"
+    volumes:
+      - "$ESGF_CONFIG/esg-trusted-bundle.crt:/usr/local/share/ca-certificates/esg-trusted-bundle.crt:ro"
     depends_on:
       - esgf-django  # Build dependency
       - esgf-postgres

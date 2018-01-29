@@ -44,12 +44,11 @@ FROM cedadev/esgf-django:${ESGF_DJANGO_VERSION}
 
 MAINTAINER Earth System Grid Federation <esgf-devel@lists.llnl.gov>
 
-# Install gettext for envsubst to allow environment variable substitution in config files
-# Install postgresql shared objects for psycopg2
+# Install postgresql-client for shared objects for psycopg2
 RUN mkdir -p /usr/share/man/man1 && \
     mkdir -p /usr/share/man/man7 && \
     apt-get update && \
-    apt-get install -y gettext-base postgresql-client && \
+    apt-get install -y postgresql-client && \
     rm -rf /var/lib/apt/lists/*
 
 # setup CoG environment

@@ -1,10 +1,6 @@
 #!/bin/bash
 
-#####
-## This script sets up the required cores before deferring to the standard entrypoint
-#####
-
-set -e
+set -eo pipefail
 
 # Make sure SOLR_HOME is set and has the correct permissions
 [ -z "$SOLR_HOME" ] && { echo "[ERROR] SOLR_HOME must be set" 1>&2 ; exit 1; }
@@ -35,15 +31,15 @@ if [ -n "$ZOOKEEPER_HOST" ]; then
         exit 1
     fi
 
-    # Upload the ESGF configset to zookeeper
+    # Upload the ESGF config to zookeeper
     /opt/solr/server/scripts/cloud-scripts/zkcli.sh \
-        -zkhost esgf-zookeeper:2181 \
+        -zkhost "${ZOOKEEPER_HOST}:${ZOOKEEPER_PORT}" \
         -cmd upconfig \
-        -confdir /esg/solr-configset \
+        -confdir /esg/solr-config \
         -confname esgf
+    echo "[INFO] Uploaded ESGF configset to zookeeper"
 fi
 
-echo "$@"
-
 # Run the given command
+echo "[INFO] Running '$@'"
 exec gosu "$SOLR_USER" /opt/docker-solr/scripts/docker-entrypoint.sh "$@"

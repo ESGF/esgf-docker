@@ -5,6 +5,11 @@ set -x
 # Configure settings module to the first argument
 export DJANGO_SETTINGS_MODULE="$1"
 
+# Make sure the trusted certificates have been updated
+update-ca-certificates
+# Make sure Python uses the correct trust bundle
+export SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt
+
 # Execute customisations from /django-init.d before doing anything
 if [ -d "/django-init.d" ]; then
     for file in $(find /django-init.d/ -mindepth 1 -type f -executable | sort -n); do

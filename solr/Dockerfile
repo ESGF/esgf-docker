@@ -25,7 +25,7 @@ RUN curl -o /usr/local/bin/gosu -sSL "https://github.com/tianon/gosu/releases/do
     gosu nobody true
 
 # Install the ESGF configset
-COPY configset /esg/solr-configset
+COPY config /esg/solr-config
 
 # Install the Docker entrypoint script that sets up the environment and switches to solr user
 COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh

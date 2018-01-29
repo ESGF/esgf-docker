@@ -19,8 +19,10 @@ ENV DJANGO_GID 1001
 RUN groupadd -g $DJANGO_GID $DJANGO_USER &&  \
     useradd -d /home/gunicorn -m -g $DJANGO_GROUP -s /sbin/nologin -u $DJANGO_UID $DJANGO_USER
 
-# Install curl
-RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
+# Install curl and gettext-base (for envsubst)
+RUN apt-get update && \
+    apt-get install -y curl gettext-base && \
+    rm -rf /var/lib/apt/lists/*
 
 # Use gosu for better sudo, as recommended here: https://docs.docker.com/engine/userguide/eng-image/dockerfile_best-practices/#user
 ENV GOSU_VERSION 1.10

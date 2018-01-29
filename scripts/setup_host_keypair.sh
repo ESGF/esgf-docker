@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -e
+set -eo pipefail
 
 function error { echo "[ERROR] $1" 1>&2 ; exit 1; }
 
@@ -16,15 +16,16 @@ ESGF_CONFIG="${ESGF_CONFIG%/}"
 
 echo "[INFO] Using ESGF_CONFIG = $ESGF_CONFIG"
 echo "[INFO] Using ESGF_HOSTNAME = $ESGF_HOSTNAME"
-echo "[INFO] Using ESGF_HOSTCERT_SUBJECT = $ESGF_HOSTCERT_SUBJECT"
 
 # If a hostkey already exists in the config directory, use that
 # Otherwise, create a new self-signed keypair
 mkdir -p "$ESGF_CONFIG/hostcert"
 HOSTCERT_FILE="$ESGF_CONFIG/hostcert/${ESGF_HOSTNAME}.crt"
 HOSTKEY_FILE="$ESGF_CONFIG/hostcert/${ESGF_HOSTNAME}.key"
-if [ ! -f "$HOSTCERT_FILE" ]; then
-    echo "[INFO] Generating new host keypair"
+if [ -f "$HOSTCERT_FILE" ]; then
+    echo "[INFO] Using existing host keypair"
+else
+    echo "[INFO] Generating new host keypair with ESGF_HOSTCERT_SUBJECT = $ESGF_HOSTCERT_SUBJECT"
     # Use a docker container to avoid the need for openssl on the host
     docker run --rm \
         -v "$ESGF_CONFIG/hostcert:/hostcert" \

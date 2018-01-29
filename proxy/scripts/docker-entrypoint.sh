@@ -6,7 +6,7 @@ function error {
 
 # Verify that the required environment variables are present
 [ -z "$ESGF_HOSTNAME" ] && error "ESGF_HOSTNAME must be set"
-[ -z "$ESGF_SOLR_INTERNAL_URL" ] && error "ESGF_SOLR_INTERNAL_URL must be set"
+#[ -z "$ESGF_SOLR_INTERNAL_URL" ] && error "ESGF_SOLR_INTERNAL_URL must be set"
 [ -z "$ESGF_INDEX_NODE_INTERNAL_URL" ] && error "ESGF_INDEX_NODE_INTERNAL_URL must be set"
 [ -z "$ESGF_TDS_INTERNAL_URL" ] && error "ESGF_TDS_INTERNAL_URL must be set"
 [ -z "$ESGF_ORP_INTERNAL_URL" ] && error "ESGF_ORP_INTERNAL_URL must be set"
