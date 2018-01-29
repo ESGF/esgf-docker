@@ -25,9 +25,21 @@ export PGDATABASE="$ESGF_COG_DATABASE_NAME"
 export PGUSER="$ESGF_COG_DATABASE_USER"
 export PGPASSWORD="$ESGF_COG_DATABASE_PASSWORD"
 
-while ! psql -c "select 1" > /dev/null 2>&1; do
-    echo "Waiting for connection to $ESGF_COG_DATABASE_HOST..."
-    sleep 1
+# Wait up to 5 minutes for postgres to become available
+WAIT=5
+TRIES=60
+connected=0
+for i in $(seq 1 $TRIES); do
+    if psql -c "select 1" > /dev/null 2>&1; then
+        connected=1
+        break
+    fi
+    echo "[INFO] Waiting for connection to $ESGF_COG_DATABASE_HOST..."
+    sleep $WAIT
 done
-
-echo "Connected to $ESGF_COG_DATABASE_HOST..."
+if [ "$connected" -eq "1" ]; then
+    echo "[INFO] Connected to $ESGF_COG_DATABASE_HOST"
+else
+    echo "[ERROR] Failed to connect to $ESGF_COG_DATABASE_HOST" 1>&2
+    exit 1
+fi

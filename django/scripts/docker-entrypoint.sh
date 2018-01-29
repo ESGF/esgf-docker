@@ -97,7 +97,7 @@ use = egg:gunicorn#main
 EOF
 
 # Run the app using gunicorn as the Django user
-gosu "$DJANGO_USER" gunicorn \
+exec gosu "$DJANGO_USER" gunicorn \
     --paste /home/gunicorn/paste.ini \
     --bind 0.0.0.0:${GUNICORN_PORT:-8000} \
     --access-logfile '-' \

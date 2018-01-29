@@ -23,10 +23,10 @@ services:
       - "80:80"
       - "443:443"
     volumes:
-      - "$ESGF_CONFIG/hostcert:/etc/nginx/ssl"
+      - "$ESGF_CONFIG/hostcert:/etc/nginx/ssl:ro"
     environment:
       ESGF_HOSTNAME: ${ESGF_HOSTNAME}
-      ESGF_SOLR_INTERNAL_URL: http://esgf-solr:8983
+#      ESGF_SOLR_INTERNAL_URL: http://esgf-solr:8983
       ESGF_INDEX_NODE_INTERNAL_URL: http://esgf-index-node:8080
       ESGF_TDS_INTERNAL_URL: http://esgf-tds:8080
       ESGF_ORP_INTERNAL_URL: http://esgf-orp:8080
@@ -35,14 +35,46 @@ services:
       ESGF_AUTH_INTERNAL_URL: http://esgf-auth:8000
       ESGF_COG_INTERNAL_URL: http://esgf-cog:8000
 
-#  esgf-solr:
-#    image: cedadev/esgf-solr
-#    ports:
-#      - "8983:8983"
-#    environment:
-#      SOLR_HEAP: 1g
-#    volumes:
-#      - "solr-data:/esg/solr-data"
+  # Zookeeper is not replicated (yet), but is used to store solr config
+  esgf-zookeeper:
+    image: "zookeeper:${ZOOKEEPER_VERSION}"
+    restart: always
+    expose:
+      - "2181"
+      - "2888"
+      - "3888"
+    volumes:
+      - "zk-data:/data"
+      - "zk-datalog:/datalog"
+    healthcheck:
+      test: ["CMD-SHELL", "echo ruok | nc 127.0.0.1 2181 | grep imok"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  esgf-solr:
+    image: cedadev/esgf-solr
+    build: ./solr
+    restart: "no"
+    ports:
+      - "8983:8983"
+    environment:
+      SOLR_HOME: /esg/solr-home
+      SOLR_HEAP: 1g
+      ZOOKEEPER_HOST: esgf-zookeeper
+    command:
+      - "solr-foreground"
+      - "-c"
+      - "-p"
+      - "8983"
+      - "-z"
+      - "esgf-zookeeper:2181"
+      - "-s"
+      - "/esg/solr-home"
+    volumes:
+      - "solr-home:/esg/solr-home"
+    depends_on:
+      - esgf-zookeeper
 
 #  esgf-orp:
 #    image: cedadev/esgf-orp
@@ -69,7 +101,7 @@ services:
   esgf-postgres:
     image: cedadev/esgf-postgres
     build: ./postgres
-    restart: "no"
+    restart: always
     environment:
       DBSUPER_PASSWORD: "dbsuper123"
       ESGCET_PASSWORD: "esgcet123"
@@ -99,6 +131,7 @@ services:
   esgf-cog:
     image: cedadev/esgf-cog
     build: ./cog
+    restart: always
     environment:
       ESGF_COG_DOMAIN: ${ESGF_HOSTNAME}
       ESGF_COG_TIME_ZONE: "Europe/London"
@@ -190,7 +223,9 @@ services:
 
 # Use Docker volumes to store persistent data
 volumes:
-#  solr-data:
+  zk-data:
+  zk-datalog:
+  solr-home:
   postgres-data:
 #  slcs-postgres-data:
 #  slcs-certificate-authority:
