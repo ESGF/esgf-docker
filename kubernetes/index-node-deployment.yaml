@@ -47,8 +47,8 @@ spec:
       volumes:
       - name: esgf-config-archive
         hostPath:
-          path: /Users/cinquini/ESGF_CONFIG/archives/esgf_config.tar.xz
+          path: /Users/cinquini/data/ESGF_CONFIG/archives/esgf_config.tar.xz
       - name: esgf-truststore
         hostPath:
-          path: /Users/cinquini/ESGF_CONFIG/esg/config/tomcat/esg-truststore.ts
+          path: /Users/cinquini/data/ESGF_CONFIG/esg/config/tomcat/esg-truststore.ts
 
