@@ -37,12 +37,12 @@ ENV ESGF_HOME /esg
 # Copy the unpacked webapp from the previous build stage
 COPY --from=esgf-idp-unpack --chown=tomcat:tomcat /opt/esgf-idp $CATALINA_HOME/webapps/esgf-idp
 
+# Remove all permissions from any user except tomcat on the webapp
+RUN chmod -R o-rwx $CATALINA_HOME/webapps/esgf-idp
+
 # Copy configuration and utils from esgf-configure
 COPY --from=cedadev/esgf-configure /esg/config /esg/config
 COPY --from=cedadev/esgf-configure /opt/esgf-docker/scripts/interpolate-configs.sh /tomcat-init.d/
-
-# Remove all permissions from any user except tomcat on the webapp
-RUN chmod -R o-rwx $CATALINA_HOME/webapps/esgf-idp
 
 # Install environment customisations, config files and templates
 COPY scripts/setenv.sh $CATALINA_HOME/bin/

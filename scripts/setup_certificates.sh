@@ -67,5 +67,18 @@ for certfile in $(grep -lr -- "-----BEGIN CERTIFICATE-----" "$ESGF_CONFIG/esg_tr
 done
 echo "" >> "$BUNDLE"
 
+echo "[INFO] Creating Java keystore for host certificate"
+rm -f "$ESGF_CONFIG/tomcat-keystore.pkcs12"
+# Java accepts PKCS12 format stores
+docker run --rm \
+    -v "$ESGF_CONFIG:/config" \
+    centos:6 \
+    openssl pkcs12 -export \
+        -name "$ESGF_HOSTNAME" \
+        -out /config/tomcat-keystore.pkcs12 \
+        -in "/config/hostcert/${ESGF_HOSTNAME}.crt" \
+        -inkey "/config/hostcert/${ESGF_HOSTNAME}.key" \
+        -password pass:changeit
+
 # Remove the unpacked directory
 rm -rf "$ESGF_CONFIG/esg_trusted_certificates"

@@ -20,7 +20,6 @@ info "Interpolating configuration files"
 # Passwords
 #   In production, these would be mounted in as files from secrets, so these
 #   defaults would never take effect
-: ${ESGF_JAVA_KEYSTORE_PASSWORD:="changeit"}
 : ${ESGF_ROOTADMIN_PASSWORD:="changeit"}
 : ${ESGF_DATABASE_PASSWORD:="changeit"}
 : ${ESGF_PUBLISHER_DATABASE_PASSWORD:="changeit"}
@@ -71,5 +70,6 @@ env | grep "ESGF_"
 # Interpolate each file ending in .template unless the actual file already exists
 ###
 for src in $(find /esg/config -type f -name '*.template'); do
-    [ -f "$dest" ] || envsubst < "$src" > "${src%".template"}"
+    dest="${src%".template"}"
+    [ -f "$dest" ] || envsubst < "$src" > "$dest"
 done

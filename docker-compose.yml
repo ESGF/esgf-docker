@@ -121,13 +121,20 @@ services:
     # Use an entrypoint that exits immediately with success
     entrypoint: ["true"]
 
-#  esgf-orp:
-#    image: cedadev/esgf-orp
-#    environment:
-#
-#    depends_on:
-#      - esgf-configure
-#      - esgf-tomcat
+  esgf-orp:
+    image: cedadev/esgf-orp
+    build: ./orp
+    restart: "no"
+    environment:
+      <<: *config_env
+      ESGF_KEYSTORE_FILE: /esg/tomcat-keystore.pkcs12
+      ESGF_KEYSTORE_PASSWORD: changeit
+      ESGF_KEYSTORE_ALIAS: "$ESGF_HOSTNAME"
+    volumes:
+      - "$ESGF_CONFIG/tomcat-keystore.pkcs12:/esg/tomcat-keystore.pkcs12:ro"
+    depends_on:
+      - esgf-configure
+      - esgf-tomcat
 
   esgf-index-node:
     image: cedadev/esgf-index-node
