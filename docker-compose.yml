@@ -153,7 +153,7 @@ services:
       - "8984"
     ports:
       - "8983:8983"
-      - "8984:8984" 
+      - "8984:8984"
     volumes:
       - solr_data:/esg/solr-index
     volumes_from:
@@ -304,26 +304,20 @@ services:
     networks:
       - default
       - dbnetwork
-      
-  visus-server:
-    container_name: visus-server
-    image: visus/visus
-    networks:
-      - default
 
   # FTP server
   #esgf-ftp:
   # image: esgfhub/esgf-vsftp:${ESGF_VERSION}
-  # container_name: ftp 
+  # container_name: ftp
   # ports:
   #   - "20:20"
   #   - "21:21"
-  #   - "12020-12025:12020-12025" 
+  #   - "12020-12025:12020-12025"
   # networks:
   #   - default
   # volumes:
   #   - $ESGF_DATA_DIR:/var/ftp/pub
-   
+
 
 # use Docker volumes to store persistent data
 # (which survives when the containers are removed)
