@@ -2,32 +2,10 @@
 
 set -eo pipefail
 
-: ${ESGF_SOLR_PUBLISH_URL:="$ESGF_SOLR_INTERNAL_URL"}
-: ${ESGF_SOLR_QUERY_URL:="$ESGF_SOLR_INTERNAL_URL"}
-
 [ -z "$ESGF_SOLR_PUBLISH_URL" ] && {
-    echo "ESGF_SOLR_PUBLISH_URL or ESGF_SOLR_INTERNAL_URL must be specified" 1>&2
+    echo "[ERROR] ESGF_SOLR_PUBLISH_URL or ESGF_SOLR_INTERNAL_URL must be specified" 1>&2
     exit 1
 }
-[ -z "$ESGF_SOLR_QUERY_URL" ] && {
-    echo "ESGF_SOLR_QUERY_URL or ESGF_SOLR_INTERNAL_URL must be specified" 1>&2
-    exit 1
-}
-[ -z "$ESGF_SOLR_EXTERNAL_URL" ] && {
-    echo "ESGF_SOLR_EXTERNAL_URL must be specified" 1>&2
-    exit 1
-}
-ESGF_SOLR_HOSTNAME="${ESGF_SOLR_EXTERNAL_URL##http*://}"
-[ -z "$ESGF_ORP_URL" ] && {
-    echo "ESGF_ORP_URL must be specified" 1>&2
-    exit 1
-}
-
-export ESGF_SOLR_PUBLISH_URL ESGF_SOLR_QUERY_URL ESGF_ORP_URL ESGF_SOLR_HOSTNAME
-
-echo "[INFO] Using ESGF_SOLR_PUBLISH_URL: $ESGF_SOLR_PUBLISH_URL"
-echo "[INFO] Using ESGF_SOLR_QUERY_URL: $ESGF_SOLR_QUERY_URL"
-echo "[INFO] Using ESGF_ORP_URL: $ESGF_ORP_URL"
 
 #####
 ## Ensure that the required collections/cores exist in Solr
@@ -59,17 +37,3 @@ else
 #        curl -fsS "$ESGF_SOLR_PUBLISH_URL/solr/admin/cores?action=CREATE&name=${name}&configSet=esgf"
 #    done
 fi
-
-#####
-## Interpolate config files with values from the environment where required
-##
-## If the actual files already exist, i.e. because they have been mounted
-## in, use them in preference
-#####
-echo "[INFO] Interpolating configuration files"
-
-ESGF_PROPS_FILE="/esg/config/esgf.properties"
-[ -f "$ESGF_PROPS_FILE" ] || envsubst < "$ESGF_PROPS_FILE.template" > "$ESGF_PROPS_FILE"
-
-ESGF_SHARDS_FILE="/esg/config/esgf_shards_static.xml"
-[ -f "$ESGF_SHARDS_FILE" ] || envsubst < "$ESGF_SHARDS_FILE.template" > "$ESGF_SHARDS_FILE"

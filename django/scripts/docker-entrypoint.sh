@@ -13,10 +13,10 @@ export SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt
 # Execute customisations from /django-init.d before doing anything
 if [ -d "/django-init.d" ]; then
     for file in $(find /django-init.d/ -mindepth 1 -type f -executable | sort -n); do
-        # All customisations have access to the exported environment variables only,
-        # whether they are bash, python or otherwise
-        # If a customisation fails, the whole container fails
-        eval $file || exit 1
+        case "$file" in
+            *.sh) . $file ;;
+            *) eval $file || exit 1 ;;
+        esac
     done
 fi
 

@@ -28,13 +28,13 @@
 	to confirm their username along with their password.
 -->
 <OPS>
-    <OP>
-        <!--
-    	    Identity Provider Organisation name to be displayed in ORP user interface combobox
-    	    The first entry is blank to indicate to the user that they can type in their
-    	    own if needed
-        -->
-        <NAME></NAME>
-        <URL>https://</URL>
-    </OP>
+ <OP>
+  <!--
+	Identity Provider Organisation name to be displayed in ORP user interface combobox
+	The first entry is blank to indicate to the user that they can type in their
+	own if needed
+  -->
+  <NAME></NAME>
+  <URL>https://</URL>
+ </OP>
 </OPS>

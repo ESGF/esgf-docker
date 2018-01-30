@@ -16,7 +16,9 @@ ENV ESGF_REPO $ESGF_DIST_URL
 RUN curl -o $CATALINA_HOME/webapps/esg-search.war -sSL $ESGF_REPO/esg-search/esg-search.war
 
 # Install environment customisations
+COPY --from=cedadev/esgf-configure /esg/config /esg/config
+# Make sure the config interpolation runs first by giving it a low ordinal
+COPY --from=cedadev/esgf-configure /opt/esgf-docker/scripts/interpolate-configs.sh /tomcat-init.d/01-interpolate.sh
 COPY scripts/setenv.sh $CATALINA_HOME/bin/
-COPY scripts/configure.sh /tomcat-init.d/
-COPY templates/esgf.properties /esg/config/esgf.properties.template
-COPY templates/esgf_shards_static.xml /esg/config/esgf_shards_static.xml.template
+# Make sure this runs after the config interpolation
+COPY scripts/create-indices.sh /tomcat-init.d/02-create-indices.sh

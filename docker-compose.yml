@@ -15,22 +15,29 @@ version: '3.4'
 
 
 services:
+  # Build dependency only
+  esgf-configure:
+    image: cedadev/esgf-configure
+    build: ./configure
+    # Use an entrypoint that exits immediately with success
+    entrypoint: ["true"]
+
   esgf-proxy:
     image: cedadev/esgf-proxy
     build: ./proxy
-    restart: always
+    restart: "no"
     ports:
       - "80:80"
       - "443:443"
     volumes:
       - "$ESGF_CONFIG/hostcert:/etc/nginx/ssl:ro"
     environment:
-      ESGF_HOSTNAME: ${ESGF_HOSTNAME}
+      ESGF_HOSTNAME:
       ESGF_SOLR_INTERNAL_URL: http://esgf-solr:8983
       ESGF_INDEX_NODE_INTERNAL_URL: http://esgf-index-node:8080
       ESGF_TDS_INTERNAL_URL: http://esgf-tds:8080
       ESGF_ORP_INTERNAL_URL: http://esgf-orp:8080
-      ESGF_IDP_INTERNAL_URL: http://esgf-idp:8080
+      ESGF_IDP_INTERNAL_URL: http://esgf-idp-node:8080
       ESGF_SLCS_INTERNAL_URL: http://esgf-slcs:8000
       ESGF_AUTH_INTERNAL_URL: http://esgf-auth:8000
       ESGF_COG_INTERNAL_URL: http://esgf-cog:8000
@@ -38,7 +45,7 @@ services:
   # Zookeeper is not replicated (yet), but is used to store solr config
   esgf-zookeeper:
     image: "zookeeper:${ZOOKEEPER_VERSION}"
-    restart: always
+    restart: "no"
     expose:
       - "2181"
       - "2888"
@@ -55,7 +62,7 @@ services:
   esgf-solr:
     image: cedadev/esgf-solr
     build: ./solr
-    restart: always
+    restart: "no"
     environment:
       SOLR_HOME: /esg/solr-home
       SOLR_HEAP: 1g
@@ -94,12 +101,14 @@ services:
   esgf-index-node:
     image: cedadev/esgf-index-node
     build: ./index-node
-    restart: always
+    restart: "no"
     environment:
-      ESGF_SOLR_INTERNAL_URL: http://esgf-solr:8983
-      ESGF_SOLR_EXTERNAL_URL: https://${ESGF_HOSTNAME}
-      ESGF_ORP_URL: https://${ESGF_HOSTNAME}
+      ESGF_HOSTNAME:
+      ESGF_DATABASE_HOST: esgf-postgres
+      ESGF_DATABASE_PASSWORD: "dbsuper123"
+      ESGF_SOLR_INTERNAL_URL: "http://esgf-solr:8983"
     depends_on:
+      - esgf-configure
       - esgf-tomcat
       - esgf-solr
 #      - esgf-orp
@@ -107,25 +116,25 @@ services:
   esgf-postgres:
     image: cedadev/esgf-postgres
     build: ./postgres
-    restart: always
+    restart: "no"
     environment:
       DBSUPER_PASSWORD: "dbsuper123"
       ESGCET_PASSWORD: "esgcet123"
     volumes:
       - "postgres-data:/var/lib/pgsql/data"
 
-#  esgf-idp-node:
-#    image: cedadev/esgf-idp-node
-#    ports:
-#      - "8080:8080"
-#    environment:
-#      ESGF_IDP_URL: http://localhost:8081
-#      ESGF_DB_HOST: esgf-postgres
-#      ESGF_DB_PASSWORD: "Password123"
-#      ESGF_SLCS_URL: http://localhost:8000
-#    depends_on:
-#      - esgf-tomcat
-#      - esgf-postgres
+  esgf-idp-node:
+    image: cedadev/esgf-idp-node
+    build: ./idp-node
+    restart: "no"
+    environment:
+      ESGF_HOSTNAME:
+      ESGF_DATABASE_HOST: esgf-postgres
+      ESGF_DATABASE_PASSWORD: "dbsuper123"
+    depends_on:
+      - esgf-configure
+      - esgf-tomcat
+      - esgf-postgres
 
   # Build dependency only
   esgf-django:
@@ -137,19 +146,18 @@ services:
   esgf-cog:
     image: cedadev/esgf-cog
     build: ./cog
-    restart: always
+    restart: "no"
     environment:
-      ESGF_COG_DOMAIN: ${ESGF_HOSTNAME}
+      ESGF_HOSTNAME:
+      ESGF_DATABASE_HOST: esgf-postgres
+      ESGF_DATABASE_PASSWORD: "dbsuper123"
+      ESGF_ROOTADMIN_PASSWORD: "rootadmin123"
       ESGF_COG_TIME_ZONE: "Europe/London"
       ESGF_COG_SECRET_KEY: "djangosecretkeyforcog"
-      ESGF_COG_DATABASE_HOST: esgf-postgres
-      ESGF_COG_DATABASE_PASSWORD: "dbsuper123"
-      ESGF_SEARCH_URL: https://${ESGF_HOSTNAME}
-      ESGF_IDP_URL: https://${ESGF_HOSTNAME}
-      ESGF_ROOTADMIN_PASSWORD: "rootadmin123"
     volumes:
       - "$ESGF_CONFIG/esg-trusted-bundle.crt:/usr/local/share/ca-certificates/esg-trusted-bundle.crt:ro"
     depends_on:
+      - esgf-configure
       - esgf-django  # Build dependency
       - esgf-postgres
 
@@ -237,17 +245,3 @@ volumes:
   postgres-data:
 #  slcs-postgres-data:
 #  slcs-certificate-authority:
-
-  # postgres data and configuration
-  #pg_data:
-  # cog data directory
-  #cog_data:
-  # contains Solr index data
-  #solr_data:
-  # contains TDS configuration, catalogs, cache, and logs
-  # (directory below -Dtds.content.root.path=/esg/content)
-  #tds_data:
-  # static web files for SLCS server
-  #slcs_static_web:
-  # esgf-auth installation directory, including python virtual environment
-  #esgf_auth_install:

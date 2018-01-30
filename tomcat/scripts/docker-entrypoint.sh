@@ -4,10 +4,10 @@
 # These customisations also run as root, which can be handy
 if [ -d "/tomcat-init.d" ]; then
     for file in $(find /tomcat-init.d/ -mindepth 1 -type f -executable | sort -n); do
-        # All customisations have access to the exported environment variables only,
-        # whether they are bash or otherwise
-        # If a customisation fails, the whole container fails
-        eval $file || exit 1
+        case "$file" in
+            *.sh) . $file ;;
+            *) eval $file || exit 1 ;;
+        esac
     done
 fi
 

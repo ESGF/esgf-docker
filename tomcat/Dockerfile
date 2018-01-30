@@ -33,11 +33,14 @@ RUN curl -o /usr/local/bin/gosu -sSL "https://github.com/tianon/gosu/releases/do
 # Remove the default webapps
 RUN rm -rf $CATALINA_HOME/webapps/*
 
+# Install custom server.xml with remote IP valve
+COPY conf/server.xml $CATALINA_HOME/conf/
+
 # Transfer ownership of CATALINA_HOME to TOMCAT_USER
 RUN chown -R $TOMCAT_USER:$TOMCAT_GROUP $CATALINA_HOME
 
 # Install custom entrypoint script
-COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+COPY scripts/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 
 ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
 CMD ["catalina.sh", "run"]

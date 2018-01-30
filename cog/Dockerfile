@@ -75,9 +75,9 @@ RUN pip install --no-index --find-links=/pip-wheels -r $COG_INSTALL_DIR/requirem
 COPY python/*.py /usr/local/lib/python2.7/site-packages/
 
 # Install configuration files and scripts
-COPY templates/cog_settings.cfg $COG_CONFIG_DIR/cog_settings.cfg.template
-COPY templates/esgf_idp.xml /esg/config/esgf_idp.xml.template
-COPY conf/* /esg/config/
+COPY --from=cedadev/esgf-configure /esg/config /esg/config
+COPY --from=cedadev/esgf-configure /opt/esgf-docker/scripts /opt/esgf-docker/scripts
+COPY conf/cog_settings.cfg.template $COG_CONFIG_DIR/
 COPY scripts/* /django-init.d/
 
 # The "command" is the settings module to use

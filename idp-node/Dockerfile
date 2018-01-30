@@ -13,7 +13,7 @@
 
 ARG ESGF_TOMCAT_VERSION=latest
 
-FROM openjdk:8-jdk AS unpack
+FROM openjdk:8-jdk AS esgf-idp-unpack
 
 # Download and unpack esg-orp war
 ARG ESGF_REPO=http://dist.ceda.ac.uk/esgf/dist
@@ -35,23 +35,16 @@ MAINTAINER Earth System Grid Federation <esgf-devel@lists.llnl.gov>
 ENV ESGF_HOME /esg
 
 # Copy the unpacked webapp from the previous build stage
-COPY --from=unpack --chown=tomcat:tomcat /opt/esgf-idp $CATALINA_HOME/webapps/esgf-idp
+COPY --from=esgf-idp-unpack --chown=tomcat:tomcat /opt/esgf-idp $CATALINA_HOME/webapps/esgf-idp
+
+# Copy configuration and utils from esgf-configure
+COPY --from=cedadev/esgf-configure /esg/config /esg/config
+COPY --from=cedadev/esgf-configure /opt/esgf-docker/scripts/interpolate-configs.sh /tomcat-init.d/
 
 # Remove all permissions from any user except tomcat on the webapp
 RUN chmod -R o-rwx $CATALINA_HOME/webapps/esgf-idp
 
-# Remove the requirement for HTTPS
-RUN sed -i '/security:intercept-url/d' $CATALINA_HOME/webapps/esgf-idp/WEB-INF/classes/esg/idp/config/client-config.xml
-
-# Install environment customisations - this script will create esgf.properties
-# from environment variables at runtime before Tomcat runs
-COPY scripts/setenv.sh $CATALINA_HOME/bin/setenv.sh
-
-# FIXME: override Yadis configuration file to serve SLCS endpoints
-# remove this override when change is entered into ESGF official war file
+# Install environment customisations, config files and templates
+COPY scripts/setenv.sh $CATALINA_HOME/bin/
+# Override Yadis configuration file to use full SLCS URL
 COPY conf/yadis-config.xml $CATALINA_HOME/webapps/esgf-idp/WEB-INF/classes/esg/idp/config/yadis-config.xml
-
-# Install the esgf_ats_static.xml config file from the distribution site
-ARG ESGF_REPO=http://dist.ceda.ac.uk/esgf/dist
-RUN mkdir -p /esg/config && \
-    curl -o /esg/config/esgf_ats_static.xml -fsSL $ESGF_REPO/lists/esgf_ats_static.xml
