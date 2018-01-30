@@ -1,9 +1,10 @@
 #!/bin/bash
 
-set -ex
+set -e
 
 # Run the CoG initial setup
 # This should be idempotent, so it shouldn't matter if it is run multiple times
+echo "[INFO] Running CoG setup"
 cd $COG_INSTALL_DIR
 python setup.py -q setup_cog --esgf="True"
 

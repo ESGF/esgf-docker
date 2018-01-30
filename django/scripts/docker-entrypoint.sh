@@ -1,54 +1,59 @@
 #! /usr/bin/env bash
 
-set -x
+set -eo pipefail
+
+function info { echo "[INFO] $1"; }
+function error { echo "[ERROR] $1" 1>&2; exit 1; }
 
 # Configure settings module to the first argument
+info "Using DJANGO_SETTINGS_MODULE = $1"
 export DJANGO_SETTINGS_MODULE="$1"
 
 # Make sure the trusted certificates have been updated
-update-ca-certificates
+info "Updating trusted certificates"
+update-ca-certificates > /dev/null
 # Make sure Python uses the correct trust bundle
 export SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt
 
 # Execute customisations from /django-init.d before doing anything
+info "Running customisations"
 if [ -d "/django-init.d" ]; then
     for file in $(find /django-init.d/ -mindepth 1 -type f -executable | sort -n); do
         case "$file" in
             *.sh) . $file ;;
-            *) eval $file || exit 1 ;;
+            *) eval $file ;;
         esac
     done
 fi
 
 # Run database migrations
-django-admin migrate --no-input || exit 1
+info "Running database migrations"
+django-admin migrate --no-input > /dev/null
 
 # Create Django superuser if required
 if [ "${DJANGO_CREATE_SUPERUSER:-0}" -eq 1 ]; then
     # We require that username and email exist
-    if [ -z "$DJANGO_SUPERUSER_USERNAME" ]; then
-        echo "[ERROR] DJANGO_SUPERUSER_USERNAME must be set to create superuser" 1>&2
-        exit 1
-    fi
-    if [ -z "$DJANGO_SUPERUSER_EMAIL" ]; then
-        echo "[ERROR] DJANGO_SUPERUSER_EMAIL must be set to create superuser" 1>&2
-        exit 1
-    fi
-    # This command exits with a non-zero exit code if the user already exists
-    django-admin shell <<STDIN
+    [ -z "$DJANGO_SUPERUSER_USERNAME" ] ||
+        error "DJANGO_SUPERUSER_USERNAME must be set to create superuser"
+    [ -z "$DJANGO_SUPERUSER_EMAIL" ] ||
+        error "DJANGO_SUPERUSER_EMAIL must be set to create superuser"
+    # When passed to the Django shell, this command exits with a non-zero exit
+    # code if the user already exists
+    superuser_exists_command=<<EOF
 import sys
 from django.contrib.auth import get_user_model
 
 if get_user_model().objects.filter(username='$DJANGO_SUPERUSER_USERNAME').exists():
     sys.exit(1)
-STDIN
+EOF
     # A zero exit status means the user needs to be created
-    if [ "$?" -eq 0 ]; then
+    if django-admin shell <<< "$superuser_exists_command" > /dev/null; then
+        info "Creating Django superuser"
         # Create the superuser with an unusable password
         django-admin createsuperuser --no-input  \
                                      --username "$DJANGO_SUPERUSER_USERNAME"  \
                                      --email "$DJANGO_SUPERUSER_EMAIL"  \
-                                     $DJANGO_SUPERUSER_EXTRA_ARGS || exit 1
+                                     $DJANGO_SUPERUSER_EXTRA_ARGS > /dev/null
         # Update the password for the superuser if required
         # For compatability with Docker secrets, which can only be mounted as
         # files, allow for DJANGO_SUPERUSER_PASSWORD_FILE as well
@@ -56,7 +61,8 @@ STDIN
             DJANGO_SUPERUSER_PASSWORD=$(cat "$DJANGO_SUPERUSER_PASSWORD_FILE")
         fi
         if [ -n "$DJANGO_SUPERUSER_PASSWORD" ]; then
-            django-admin shell <<STDIN || exit 1
+            info "Setting Django superuser password"
+            django-admin shell <<STDIN > /dev/null
 from django.contrib.auth import get_user_model
 
 user = get_user_model().objects.get(username='$DJANGO_SUPERUSER_USERNAME')
@@ -68,9 +74,11 @@ STDIN
 fi
 
 # Collect static files for serving later
-django-admin collectstatic --no-input || exit 1
+info "Collecting static files"
+django-admin collectstatic --no-input > /dev/null
 
 # Create the Paste config file
+info "Generating Paste config file"
 # Note that we have to do this rather than using Paste variables because we want
 # to have a dynamic route name in the urlmap
 function django_setting {
@@ -102,6 +110,7 @@ use = egg:gunicorn#main
 EOF
 
 # Run the app using gunicorn as the Django user
+info "Starting gunicorn"
 exec gosu "$DJANGO_USER" gunicorn \
     --paste /home/gunicorn/paste.ini \
     --bind 0.0.0.0:${GUNICORN_PORT:-8000} \
