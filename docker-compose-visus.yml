@@ -1,0 +1,10 @@
+# Docker Compose file to start a Visus server
+
+version: '2.1'
+
+services:
+  visus-server:
+    container_name: visus-server
+    image: visus/visus
+    networks:
+      - default
