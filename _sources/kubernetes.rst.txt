@@ -15,13 +15,33 @@ Setup
 =====
 
 Before using Kubernetes, you need to have a Kubernetes cluster, and the kubectl command-line tool must be configured to communicate with your cluster.
-For example, you can install *minikube* and *kubectl* on a Mac laptop, then start a Kubernetes cluster as follows::
+For example, you can install *minikube* and *kubectl* on a Mac or Linux laptop
+(procedure is given `here <https://kubernetes.io/docs/tasks/tools/install-minikube/>`__).
 
-  minikube start --vm-driver=xhyve
+For MacOSX, start a Minikube cluster as follows::
+
+  minikube start --vm-driver=xhyve # Wait until completion (takes long time)
 
   kubectl config use-context minikube
 
-All Kubernetes files to follow this tutorial are contained in the *kubernetes* sub-dirctory.
+For Linux, start a Minikube cluster with KVM as follows::
+
+  minikube start --vm-driver=kvm2 # Wait until completion (takes long time)
+
+  kubectl config use-context minikube
+
+KVM2 driver is available `here <https://github.com/kubernetes/minikube/blob/master/docs/drivers.md#kvm2-driver>`__.
+
+Remarks:
+
+* All Kubernetes files to follow this tutorial are contained in the *kubernetes*
+  sub-dirctory.
+* Minikube install a 20 Go VM on your disk (located in ~/.minikube)
+* If minikube fails to create a VM or if you get anything wrong, delete the VM:
+
+.. code-block:: bash
+
+  minikube delete 
 
 
 Solr
@@ -47,6 +67,8 @@ To test that the two Solr instances are working, enter the container and query l
   kubectl exec -it esgf-solr-<pod hash-id> -- /bin/bash
   /]# curl 'http://localhost:8983/solr/datasets/select?q=*%3A*&wt=json&indent=true'
   /]# curl 'http://localhost:8984/solr/datasets/select?q=*%3A*&wt=json&indent=true'
+
+
 
 
 Index Node
@@ -79,4 +101,12 @@ Cleanup
 
 To clean up all pods, services and deployments::
 
-  kubectl delete deployment,svc esgf-solr esgf-index-node
+  kubectl delete deploy --all
+
+To shutdown Minikube VM::
+
+  minikube stop
+
+To delete Minikube VM::
+
+  minikube delete

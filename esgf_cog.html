@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>esgf-cog Image &mdash; ESGF-Docker Documentation</title>
+    <title>esgf-cog Image &#8212; ESGF-Docker Documentation</title>
     
     <link rel="stylesheet" href="_static/nature.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -17,13 +17,15 @@
         VERSION:     '1.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
       };
     </script>
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="ESGF-Docker Documentation" href="index.html" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="esgf-solr Image" href="esgf_solr.html" />
     <link rel="prev" title="Git Workflow" href="git_workflow.html" /> 
   </head>
@@ -40,7 +42,7 @@
         <li class="right" >
           <a href="git_workflow.html" title="Git Workflow"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">ESGF-Docker Documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">ESGF-Docker Documentation</a> &#187;</li> 
       </ul>
     </div>  
 
@@ -53,17 +55,17 @@
 <h1>esgf-cog Image<a class="headerlink" href="#esgf-cog-image" title="Permalink to this headline">¶</a></h1>
 <p>This document contains miscellaneous details on how the <em>esgf-cog</em> Docker container is configured and operated.</p>
 <p>In the following, the environment variable <em>ESGF_VERSION</em> must be set to the desired image version, for example:</p>
-<div class="highlight-python"><div class="highlight"><pre>export ESGF_VERSION=latest
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">export</span> <span class="n">ESGF_VERSION</span><span class="o">=</span><span class="n">latest</span>
 </pre></div>
 </div>
 <div class="section" id="starting-the-container">
 <h2>Starting the container<a class="headerlink" href="#starting-the-container" title="Permalink to this headline">¶</a></h2>
 <p>To pre-download the CoG image:</p>
-<div class="highlight-python"><div class="highlight"><pre>docker pull esgfhub/esgf-cog:${ESGF_VERSION}
+<div class="highlight-default"><div class="highlight"><pre><span></span>docker pull esgfhub/esgf-cog:${ESGF_VERSION}
 </pre></div>
 </div>
 <p>To start the container standalone:</p>
-<div class="highlight-python"><div class="highlight"><pre>docker run -ti -p 8000:8000 --name cog esgfhub/esgf-cog:${ESGF_VERSION}
+<div class="highlight-default"><div class="highlight"><pre><span></span>docker run -ti -p 8000:8000 --name cog esgfhub/esgf-cog:${ESGF_VERSION}
 </pre></div>
 </div>
 <ul class="simple">
@@ -74,14 +76,14 @@
 <li>will need to login at the URL: <a class="reference external" href="http://localhost:8000/login2/">http://localhost:8000/login2/</a> with the default username (&#8220;rootAdmin&#8221;) and password (&#8220;changeit&#8221;)</li>
 </ul>
 <p>To start the container standalone, but using a specific hostname:</p>
-<div class="highlight-python"><div class="highlight"><pre>docker run -ti -p 8000:8000 --name cog -e ESGF_HOSTNAME=${ESGF_HOSTNAME} esgfhub/esgf-cog:${ESGF_VERSION} ${ESGF_HOSTNAME} false true
+<div class="highlight-default"><div class="highlight"><pre><span></span>docker run -ti -p 8000:8000 --name cog -e ESGF_HOSTNAME=${ESGF_HOSTNAME} esgfhub/esgf-cog:${ESGF_VERSION} ${ESGF_HOSTNAME} false true
 </pre></div>
 </div>
 <ul class="simple">
 <li>CoG will be accessible at the URL: <a class="reference external" href="http:/">http:/</a>/${ESG_HOSTNAME}:8000/</li>
 </ul>
 <p>To start the container standalone, but using source code from a local directory, for development purposes:</p>
-<div class="highlight-python"><div class="highlight"><pre>docker run -ti -p 8000:8000 --name cog -v ${COG_INSTALL_DIR}:/usr/local/cog/cog_install esgfhub/esgf-cog:${ESGF_VERSION}
+<div class="highlight-default"><div class="highlight"><pre><span></span>docker run -ti -p 8000:8000 --name cog -v ${COG_INSTALL_DIR}:/usr/local/cog/cog_install esgfhub/esgf-cog:${ESGF_VERSION}
 </pre></div>
 </div>
 <ul class="simple">
@@ -90,12 +92,12 @@
 <li>will again run CoG through the Django server</li>
 </ul>
 <p>To run CoG as part of the ESGF software stack, with postgres database and Apache front-end:</p>
-<div class="highlight-python"><div class="highlight"><pre># initialize the $ESGF_CONFIG directory containing all ESGF node configuration
-cd .../esgf-docker
-scripts/esgf_node_init.sh
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="c1"># initialize the $ESGF_CONFIG directory containing all ESGF node configuration</span>
+<span class="n">cd</span> <span class="o">.../</span><span class="n">esgf</span><span class="o">-</span><span class="n">docker</span>
+<span class="n">scripts</span><span class="o">/</span><span class="n">esgf_node_init</span><span class="o">.</span><span class="n">sh</span>
 
-# start CoG and its dependency containers
-docker-compose up esgf-cog esgf-postgres esgf-httpd
+<span class="c1"># start CoG and its dependency containers</span>
+<span class="n">docker</span><span class="o">-</span><span class="n">compose</span> <span class="n">up</span> <span class="n">esgf</span><span class="o">-</span><span class="n">cog</span> <span class="n">esgf</span><span class="o">-</span><span class="n">postgres</span> <span class="n">esgf</span><span class="o">-</span><span class="n">httpd</span>
 </pre></div>
 </div>
 <ul class="simple">
@@ -103,14 +105,14 @@ docker-compose up esgf-cog esgf-postgres esgf-httpd
 <li>the cog container is kept running as a data container, exposing the CoG source directory <em>COG_INSTALL_DIR=/usr/local/cog/cog_install</em> to the httpd container</li>
 </ul>
 <p>After the first startup, the containers can be restarted without re-initializing them as such:</p>
-<div class="highlight-python"><div class="highlight"><pre>export INIT=false
-docker-compose up -d esgf-postgres
-docker-compose up esgf-cog esgf-httpd
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">export</span> <span class="n">INIT</span><span class="o">=</span><span class="n">false</span>
+<span class="n">docker</span><span class="o">-</span><span class="n">compose</span> <span class="n">up</span> <span class="o">-</span><span class="n">d</span> <span class="n">esgf</span><span class="o">-</span><span class="n">postgres</span>
+<span class="n">docker</span><span class="o">-</span><span class="n">compose</span> <span class="n">up</span> <span class="n">esgf</span><span class="o">-</span><span class="n">cog</span> <span class="n">esgf</span><span class="o">-</span><span class="n">httpd</span>
 </pre></div>
 </div>
 <p>To run the full ESGF software stack:</p>
-<div class="highlight-python"><div class="highlight"><pre>cd .../esgf-docker
-docker-compose up
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">cd</span> <span class="o">.../</span><span class="n">esgf</span><span class="o">-</span><span class="n">docker</span>
+<span class="n">docker</span><span class="o">-</span><span class="n">compose</span> <span class="n">up</span>
 </pre></div>
 </div>
 </div>
@@ -139,21 +141,18 @@ docker-compose up
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
-      <li><a href="_sources/esgf_cog.txt"
+      <li><a href="_sources/esgf_cog.rst.txt"
             rel="nofollow">Show Source</a></li>
     </ul>
    </div>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="search.html" method="get">
-      <input type="text" name="q" />
-      <input type="submit" value="Go" />
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
-    <p class="searchtip" style="font-size: 90%">
-    Enter search terms or a module, class or function name.
-    </p>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
@@ -172,12 +171,12 @@ docker-compose up
         <li class="right" >
           <a href="git_workflow.html" title="Git Workflow"
              >previous</a> |</li>
-        <li><a href="index.html">ESGF-Docker Documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">ESGF-Docker Documentation</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &copy; Copyright 2017, ESGF.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3b2.
+        &#169; Copyright 2017, ESGF.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.6.
     </div>
   </body>
 </html>
