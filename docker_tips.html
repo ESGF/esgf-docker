@@ -108,7 +108,7 @@
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">docker</span> <span class="n">image</span> <span class="n">ls</span> <span class="o">-</span><span class="n">f</span> <span class="s2">&quot;dangling=true&quot;</span> <span class="o">|</span> <span class="n">xargs</span> <span class="n">docker</span> <span class="n">image</span> <span class="n">rm</span>
 </pre></div>
 </div>
-<p>Remove all volumes:</p>
+<p>Remove all images:</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">docker</span> <span class="n">image</span> <span class="n">ls</span> <span class="o">-</span><span class="n">q</span> <span class="o">|</span> <span class="n">xargs</span> <span class="n">docker</span> <span class="n">image</span> <span class="n">rm</span> <span class="o">--</span><span class="n">force</span>
 </pre></div>
 </div>

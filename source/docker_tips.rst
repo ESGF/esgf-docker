@@ -61,7 +61,7 @@ Remove dangling images::
 
   docker image ls -f "dangling=true" | xargs docker image rm 
 
-Remove all volumes::
+Remove all images::
 
   docker image ls -q | xargs docker image rm --force
 
