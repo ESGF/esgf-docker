@@ -1,0 +1,19 @@
+#!/bin/bash
+
+set -eo pipefail
+
+echo "****************************"
+echo "** esgf-docker setup tool **"
+echo "****************************"
+echo ""
+echo "The following commands are available:"
+echo ""
+echo "    generate-test-certificates"
+echo "        Generates self-signed certificates for a test installation"
+echo ""
+echo "    generate-secrets"
+echo "        Generates random secret keys and password required for deployment"
+echo ""
+echo "    create-trust-bundles"
+echo "        Creates the required trust bundles from the available certificates"
+echo ""

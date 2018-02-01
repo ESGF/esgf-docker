@@ -20,9 +20,23 @@ info "Interpolating configuration files"
 # Passwords
 #   In production, these would be mounted in as files from secrets, so these
 #   defaults would never take effect
-: ${ESGF_ROOTADMIN_PASSWORD:="changeit"}
-: ${ESGF_DATABASE_PASSWORD:="changeit"}
-: ${ESGF_PUBLISHER_DATABASE_PASSWORD:="changeit"}
+#   If the files already exist, populate the variables from them instead of the
+#   other way round
+if [ -f "/esg/config/.esgf_pass" ]; then
+    ESGF_ROOTADMIN_PASSWORD="$(cat /esg/config/.esgf_pass)"
+else
+    : ${ESGF_ROOTADMIN_PASSWORD:="changeit"}
+fi
+if [ -f "/esg/config/.esg_pg_pass" ]; then
+    ESGF_DATABASE_PASSWORD="$(cat /esg/config/.esg_pg_pass)"
+else
+    : ${ESGF_DATABASE_PASSWORD:="changeit"}
+fi
+if [ -f "/esg/config/.esg_pg_publisher_pass" ]; then
+    ESGF_PUBLISHER_DATABASE_PASSWORD="$(cat /esg/config/.esg_pg_publisher_pass)"
+else
+    : ${ESGF_PUBLISHER_DATABASE_PASSWORD:="changeit"}
+fi
 # Database settings
 [ -z "$ESGF_DATABASE_HOST" ] && error "ESGF_DATABASE_HOST must be set"
 : ${ESGF_DATABASE_NAME:="esgcet"}
@@ -42,8 +56,7 @@ info "Interpolating configuration files"
 : ${ESGF_SLCS_URL:="https://${ESGF_HOSTNAME}/esgf-slcs"}
 
 # Make sure we export all the required configs
-export ESGF_JAVA_KEYSTORE_PASSWORD \
-       ESGF_ROOTADMIN_PASSWORD \
+export ESGF_ROOTADMIN_PASSWORD \
        ESGF_DATABASE_PASSWORD \
        ESGF_PUBLISHER_DATABASE_PASSWORD \
        ESGF_DATABASE_HOST \
@@ -63,7 +76,7 @@ export ESGF_JAVA_KEYSTORE_PASSWORD \
        ESGF_SLCS_URL
 
 info "Using environment:"
-env | grep "ESGF_"
+env | grep "ESGF_" | grep -v "_PASSWORD"
 
 
 ###

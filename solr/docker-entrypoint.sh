@@ -12,21 +12,8 @@ export INIT_SOLR_HOME="yes"
 
 if [ -n "$ZOOKEEPER_HOST" ]; then
     : ${ZOOKEEPER_PORT:="2181"}
-    # Wait up to 5 minutes for zookeeper to become available
-    WAIT=5
-    TRIES=60
-    connected=0
-    for i in $(seq 1 $TRIES); do
-        if echo stat | nc "$ZOOKEEPER_HOST" "$ZOOKEEPER_PORT" | grep Zxid; then
-            connected=1
-            break
-        fi
-        echo "[INFO] Waiting for connection to $ZOOKEEPER_HOST..."
-        sleep $WAIT
-    done
-    if [ "$connected" -eq "1" ]; then
-        echo "[INFO] Connected to $ZOOKEEPER_HOST"
-    else
+    # Try and connect to zookeeper, bailing if it is not available
+    if ! (echo stat | nc "$ZOOKEEPER_HOST" "$ZOOKEEPER_PORT" | grep Zxid); then
         echo "[ERROR] Failed to connect to $ZOOKEEPER_HOST" 1>&2
         exit 1
     fi

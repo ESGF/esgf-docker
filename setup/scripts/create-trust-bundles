@@ -1,0 +1,108 @@
+#!/bin/bash
+
+set -eo pipefail
+
+source "$(dirname "$(realpath "$0")")/functions.sh"
+
+#####
+## This script creates:
+##
+##   1. PEM- and JKS-encoded trust bundles containing CAs that sign user certificates
+##   2. PKCS12-encoded bundle containing the host certificate and private key for SAML signing
+#####
+
+[ -z "$ESGF_HOSTNAME" ] && error "ESGF_HOSTNAME must be set"
+
+CERTS="/esg/certificates"
+
+info "Creating PEM- and JKS-encoded trust bundles"
+
+# Load the JKS bundle password from the deployment secrets
+info "Loading JKS trust bundle password from secrets"
+if [ -f "/esg/secrets/java-trust-bundle-password" ]; then
+    JKS_BUNDLE_PASSWORD="$(cat "/esg/secrets/java-trust-bundle-password")"
+else
+    error "Secret 'java-trust-bundle-password' does not exist"
+fi
+
+PEM_BUNDLE="$CERTS/esg-trust-bundle.pem"
+JKS_BUNDLE="$CERTS/esg-trust-bundle.jks"
+rm -f "$PEM_BUNDLE" "$JKS_BUNDLE"
+
+function pem_bundle_append {
+    info "  Appending $1 to PEM bundle"
+    # Add the hash of the certificate before the certificate itself
+    certhash="$(openssl x509 -hash -noout -in "$1")"
+    echo "${certhash}.0" >> "$PEM_BUNDLE"
+    cat "$1" >> "$PEM_BUNDLE"
+}
+
+function jks_bundle_append {
+    info "  Appending $1 to JKS bundle"
+    # Add the hash of the certificate as the alias
+    certhash="$(openssl x509 -hash -noout -in "$1")"
+    keytool -importcert -trustcacerts -noprompt \
+        -storetype jks \
+        -keystore "$JKS_BUNDLE" \
+        -storepass "$JKS_BUNDLE_PASSWORD" \
+        -file "$1" \
+        -alias "${certhash}.0"
+}
+
+# If the tarball exists, unpack it and add the certificates from it to each bundle
+if [ -f "$CERTS/esg_trusted_certificates.tar" ]; then
+    info "Unpacking existing trustroots"
+    tar -xf "$CERTS/esg_trusted_certificates.tar" -C "$CERTS"
+    for certfile in $(grep -lr -- "-----BEGIN CERTIFICATE-----" "$CERTS/esg_trusted_certificates"); do
+        pem_bundle_append "$certfile"
+        jks_bundle_append "$certfile"
+    done
+    rm -rf "$CERTS/esg_trusted_certificates"
+else
+    warn "esg_trusted_certificates.tar not present"
+fi
+
+# If the SLCS CA certificate is self-signed, add it to the trust bundle
+if [ -f "$CERTS/slcsca/ca.crt" ]; then
+    # To test if the certificate is self-signed, we ask openssl to verify the
+    # certificate with the same file as the CA file
+    # If this is successful then the certificate is self-signed
+    if openssl verify -CAfile "$CERTS/slcsca/ca.crt" "$CERTS/slcsca/ca.crt" > /dev/null 2>&1; then
+        info "Appending self-signed SLCS CA to trust bundles"
+        pem_bundle_append "$CERTS/slcsca/ca.crt"
+        jks_bundle_append "$CERTS/slcsca/ca.crt"
+    else
+        warn "SLCS CA is not self-signed - skipping"
+    fi
+else
+    warn "SLCS CA does not exist - skipping"
+fi
+
+# If the bundles don't exist, emit an error
+[ -f "$PEM_BUNDLE" ] || error "You have no trusted certificates"
+
+# Create a PKCS12 bundle with the host certificate and private key for SAML signing
+# Java understands PKCS12 as a keystore format, so don't bother converting to JKS
+info "Creating PKCS12 bundle for host certificate and private key"
+[ -f "$CERTS/hostcert/hostcert.crt" ] || \
+    error "  \$ESGF_CONFIG/hostcert/hostcert.crt does not exist"
+[ -f "$CERTS/hostcert/hostcert.key" ] || \
+    error "  \$ESGF_CONFIG/hostcert/hostcert.key does not exist"
+
+# Load the hostcert bundle password from the deployment secrets
+info "  Loading host cert trust bundle password from secrets"
+if [ -f "/esg/secrets/java-hostcert-bundle-password" ]; then
+    HOSTCERT_BUNDLE_PASSWORD="$(cat "/esg/secrets/java-hostcert-bundle-password")"
+else
+    error "  Secret 'java-hostcert-bundle-password' does not exist"
+fi
+
+rm -f "$CERTS/esg-hostcert-bundle.p12"
+openssl pkcs12 -export \
+    -name "$ESGF_HOSTNAME" \
+    -out "$CERTS/esg-hostcert-bundle.p12" \
+    -in "$CERTS/hostcert/hostcert.crt" \
+    -inkey "$CERTS/hostcert/hostcert.key" \
+    -password "pass:$HOSTCERT_BUNDLE_PASSWORD"
+
+info "Done"

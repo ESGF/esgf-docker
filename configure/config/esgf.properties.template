@@ -21,6 +21,7 @@ db.managed=no
 db.port=$ESGF_DATABASE_PORT
 db.protocol=jdbc:postgresql:
 db.user=$ESGF_DATABASE_USER
+db.password=$ESGF_DATABASE_PASSWORD
 # esg-orp
 orp.provider.list=/esg/config/esgf_known_providers.xml
 # esg-search
