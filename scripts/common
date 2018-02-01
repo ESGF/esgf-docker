@@ -14,7 +14,7 @@ readonly CANCEL_CODE=2
 readonly DEFAULT_IMAGES_HUB=${ESGF_IMAGES_HUB-esgfhub}
 readonly DEFAULT_PACKAGE_REPO=${ESGF_REPO-"http://distrib-coffee.ipsl.jussieu.fr/pub/esgf"}
 
-readonly ESGF_IMAGE_DIR_NAMES=('node' 'postgres' 'tomcat' 'solr' 'httpd' 'cog' 'tds' 'orp' 'publisher' 'dashboard' 'idp-node' 'index-node' 'slcs' 'auth' 'node-manager')
+readonly ESGF_IMAGE_DIR_NAMES=('minimal-node' 'node' 'postgres' 'tomcat' 'solr' 'httpd' 'cog' 'tds' 'orp' 'publisher' 'dashboard' 'idp-node' 'index-node' 'slcs' 'auth' 'node-manager')
 
 readonly ESGF_IMAGE_PREFIX='esgf-'
 
