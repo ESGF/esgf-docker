@@ -33,9 +33,9 @@ RUN yum groupinstall -y development && \
 # see download string at: http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html
 # run scripts/get_oracle_jdk_linux_x64.sh to identify the correct URL
 
-ENV JAVA_VERSION 8u152
-ENV JAVA_BUILD_VERSION b16
-ENV JAVA_HASH=aa0333dd3019491ca4f6ddbe78cdb6d0
+ENV JAVA_VERSION 8u162
+ENV JAVA_BUILD_VERSION b12
+ENV JAVA_HASH=0da788060d494f5095bf8624735fa2f1
 
 RUN wget -q --no-cookies --no-check-certificate --header "Cookie: oraclelicense=accept-securebackup-cookie" \
     -O /tmp/jdk-8-linux-x64.rpm \
