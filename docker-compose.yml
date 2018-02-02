@@ -204,8 +204,47 @@ services:
       - esgf-django
       - esgf-postgres
 
+  esgf-auth-postgres:
+    image: "postgres:${POSTGRES_VERSION}"
+    restart: always
+    environment:
+      POSTGRES_USER: authuser
+      POSTGRES_PASSWORD_FILE: /esg/secrets/auth-database-password
+      POSTGRES_DB: auth
+      POSTGRES_INITDB_ARGS: "--encoding=UTF-8"
+    volumes:
+      - "$ESGF_CONFIG/secrets/auth-database-password:/esg/secrets/auth-database-password:ro"
+      - "auth-postgres-data:/var/lib/postgresql/data"
+
+  esgf-auth:
+    image: cedadev/esgf-auth
+    build: ./auth
+    restart: "no"
+    environment:
+      <<: *config_env
+      SCRIPT_NAME: /esgf-auth
+      ESGF_AUTH_SECRET_KEY_FILE: /esg/secrets/auth-secret-key
+      ESGF_COOKIE_SECRET_KEY_FILE: /esg/secrets/shared-cookie-secret-key
+      # Database settings
+      DJANGO_DATABASE_DEFAULT_ENGINE: django.db.backends.postgresql
+      DJANGO_DATABASE_DEFAULT_NAME: auth
+      DJANGO_DATABASE_DEFAULT_HOST: esgf-auth-postgres
+      DJANGO_DATABASE_DEFAULT_PORT: "5432"
+      DJANGO_DATABASE_DEFAULT_USER: authuser
+      DJANGO_DATABASE_DEFAULT_PASSWORD_FILE: /esg/secrets/auth-database-password
+    volumes:
+      - "$ESGF_CONFIG/secrets/auth-secret-key:/esg/secrets/auth-secret-key:ro"
+      - "$ESGF_CONFIG/secrets/shared-cookie-secret-key:/esg/secrets/shared-cookie-secret-key:ro"
+      - "$ESGF_CONFIG/secrets/auth-database-password:/esg/secrets/auth-database-password:ro"
+      # Make sure the hostcert is trusted for HTTPS requests
+      - "$ESGF_CONFIG/certificates/hostcert/hostcert.crt:/usr/local/share/ca-certificates/hostcert.crt:ro"
+    depends_on:
+      - esgf-configure
+      - esgf-django
+      - esgf-auth-postgres
+
   esgf-slcs-postgres:
-    image: "postgres:${SLCS_POSTGRES_VERSION}"
+    image: "postgres:${POSTGRES_VERSION}"
     restart: always
     environment:
       POSTGRES_USER: slcsuser
@@ -219,7 +258,7 @@ services:
   esgf-slcs:
     image: cedadev/esgf-slcs
     build: ./slcs
-    restart: "no"
+    restart: always
     environment:
       # Generic Django settings
       SCRIPT_NAME: /esgf-slcs
@@ -269,3 +308,4 @@ volumes:
   tds-content:
   slcs-postgres-data:
   slcs-trustroots:
+  auth-postgres-data:
