@@ -5,25 +5,42 @@ set -eo pipefail
 function info { echo "[INFO] $1"; }
 function error { echo "[ERROR] $1" 1>&2; exit 1; }
 
+#####
+## This script sets up Django before starting the WSGI server
+##
+## The first time this script is executed, it is run as root. It then updates the
+## trust store and runs the customisations as root before re-running itself as
+## the Django user.
+##
+## The second run as the Django user then applies migrations, creates the superuser
+## if required, collects the static files and starts gunicorn.
+#####
+
 # Configure settings module to the first argument
 info "Using DJANGO_SETTINGS_MODULE = $1"
 export DJANGO_SETTINGS_MODULE="$1"
 
-# Make sure the trusted certificates have been updated
-info "Updating trusted certificates"
-update-ca-certificates > /dev/null
-# Make sure Python uses the correct trust bundle
-export SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt
+# If we are running as root, update the certificates and run the customisations
+if [ "$(id -u)" = "0" ]; then
+    # Make sure the trusted certificates have been updated
+    info "Updating trusted certificates"
+    update-ca-certificates > /dev/null
+    # Make sure Python uses the correct trust bundle
+    export SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt
 
-# Execute customisations from /django-init.d before doing anything
-info "Running customisations"
-if [ -d "/django-init.d" ]; then
-    for file in $(find /django-init.d/ -mindepth 1 -type f -executable | sort -n); do
-        case "$file" in
-            *.sh) . $file ;;
-            *) eval $file ;;
-        esac
-    done
+    # Execute customisations from /django-init.d before doing anything
+    info "Running customisations"
+    if [ -d "/django-init.d" ]; then
+        for file in $(find /django-init.d/ -mindepth 1 -type f -executable | sort -n); do
+            case "$file" in
+                *.sh) . $file ;;
+                *) eval $file ;;
+            esac
+        done
+    fi
+
+    # Run this script again as the Django user
+    exec gosu "$DJANGO_USER" "$BASH_SOURCE" "$@"
 fi
 
 # Run database migrations
@@ -39,13 +56,13 @@ if [ "${DJANGO_CREATE_SUPERUSER:-0}" -eq 1 ]; then
         error "DJANGO_SUPERUSER_EMAIL must be set to create superuser"
     # When passed to the Django shell, this command exits with a non-zero exit
     # code if the user already exists
-    superuser_exists_command=<<EOF
+    superuser_exists_command="
 import sys
 from django.contrib.auth import get_user_model
 
 if get_user_model().objects.filter(username='$DJANGO_SUPERUSER_USERNAME').exists():
     sys.exit(1)
-EOF
+"
     # A zero exit status means the user needs to be created
     if django-admin shell <<< "$superuser_exists_command" > /dev/null; then
         info "Creating Django superuser"
@@ -90,7 +107,7 @@ function django_setting {
 }
 # Note that because gunicorn understands SCRIPT_NAME, we need to strip it from
 # the STATIC_URL setting for the static app
-static_url=$(django_setting STATIC_URL)
+static_url="$(django_setting STATIC_URL)"
 cat > /home/gunicorn/paste.ini <<EOF
 [composite:main]
 use = egg:Paste#urlmap
@@ -109,9 +126,9 @@ document_root = $(django_setting STATIC_ROOT)
 use = egg:gunicorn#main
 EOF
 
-# Run the app using gunicorn as the Django user
+# Run the app using gunicorn (we are already the Django user)
 info "Starting gunicorn"
-exec gosu "$DJANGO_USER" gunicorn \
+exec gunicorn \
     --paste /home/gunicorn/paste.ini \
     --bind 0.0.0.0:${GUNICORN_PORT:-8000} \
     --access-logfile '-' \

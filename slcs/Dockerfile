@@ -36,6 +36,8 @@ RUN mkdir /pip-wheels && \
 
 FROM cedadev/esgf-django:${ESGF_DJANGO_VERSION}
 
+MAINTAINER Earth System Grid Federation <esgf-devel@lists.llnl.gov>
+
 # Copy the application and wheels from the build stage
 COPY --from=esgf-slcs-build /application /application
 COPY --from=esgf-slcs-build /pip-wheels  /pip-wheels
@@ -53,9 +55,6 @@ COPY conf/settings.py /application/esgf_slcs_server/
 COPY --chown=1001:1001 conf/onlineca.ini $ONLINECA_PASTEDEPLOY_FILE
 # This is the script that does the interpolating
 COPY scripts/configure-onlineca.py /django-init.d/
-
-# Run as the named Django user
-USER $DJANGO_USER
 
 # The "command" is just the settings file to use
 CMD ["esgf_slcs_server.settings"]

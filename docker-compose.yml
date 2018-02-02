@@ -40,7 +40,7 @@ services:
       - esgf-tds
       - esgf-orp
       - esgf-idp-node
-#      - esgf-slcs
+      - esgf-slcs
 #      - esgf-auth
       - esgf-cog
 
@@ -204,53 +204,60 @@ services:
       - esgf-django
       - esgf-postgres
 
-#  esgf-slcs-postgres:
-#    image: postgres
-#    environment:
-#      POSTGRES_USER: slcsuser
-#      POSTGRES_PASSWORD: "Password456"
-#      POSTGRES_DB: slcs
-#      POSTGRES_INITDB_ARGS: "--encoding=UTF-8"
-#    volumes:
-#      - "slcs-postgres-data:/var/lib/postgresql/data"
+  esgf-slcs-postgres:
+    image: "postgres:${SLCS_POSTGRES_VERSION}"
+    restart: always
+    environment:
+      POSTGRES_USER: slcsuser
+      POSTGRES_PASSWORD_FILE: /esg/secrets/slcs-database-password
+      POSTGRES_DB: slcs
+      POSTGRES_INITDB_ARGS: "--encoding=UTF-8"
+    volumes:
+      - "$ESGF_CONFIG/secrets/slcs-database-password:/esg/secrets/slcs-database-password:ro"
+      - "slcs-postgres-data:/var/lib/postgresql/data"
 
-#  esgf-slcs:
-#    image: cedadev/esgf-slcs
-#    environment:
+  esgf-slcs:
+    image: cedadev/esgf-slcs
+    build: ./slcs
+    restart: "no"
+    environment:
       # Generic Django settings
-      #SCRIPT_NAME: /esgf-slcs
-#      DJANGO_SESSION_COOKIE_SECURE: "0"
-#      DJANGO_CSRF_COOKIE_SECURE: "0"
-#      DJANGO_ALLOWED_HOSTS: localhost
-#      DJANGO_SECRET_KEY: mysecretkey
+      SCRIPT_NAME: /esgf-slcs
+      DJANGO_ALLOWED_HOSTS: $ESGF_HOSTNAME
+      DJANGO_SECRET_KEY_FILE: /esg/secrets/slcs-secret-key
       # SLCS database
-#      DJANGO_DATABASE_DEFAULT_ENGINE: django.db.backends.postgresql
-#      DJANGO_DATABASE_DEFAULT_NAME: slcs
-#      DJANGO_DATABASE_DEFAULT_HOST: esgf-slcs-postgres
-#      DJANGO_DATABASE_DEFAULT_PORT: "5432"
-#      DJANGO_DATABASE_DEFAULT_USER: slcsuser
-#      DJANGO_DATABASE_DEFAULT_PASSWORD: "Password456"
+      DJANGO_DATABASE_DEFAULT_ENGINE: django.db.backends.postgresql
+      DJANGO_DATABASE_DEFAULT_NAME: slcs
+      DJANGO_DATABASE_DEFAULT_HOST: esgf-slcs-postgres
+      DJANGO_DATABASE_DEFAULT_PORT: "5432"
+      DJANGO_DATABASE_DEFAULT_USER: slcsuser
+      DJANGO_DATABASE_DEFAULT_PASSWORD_FILE: /esg/secrets/slcs-database-password
       # ESGF User database
-#      DJANGO_DATABASE_USERDB_ENGINE: django.db.backends.postgresql
-#      DJANGO_DATABASE_USERDB_NAME: esgcet
-#      DJANGO_DATABASE_USERDB_HOST: esgf-postgres
-#      DJANGO_DATABASE_USERDB_PORT: "5432"
-#      DJANGO_DATABASE_USERDB_USER: dbsuper
-#      DJANGO_DATABASE_USERDB_PASSWORD: "Password123"
+      DJANGO_DATABASE_USERDB_ENGINE: django.db.backends.postgresql
+      DJANGO_DATABASE_USERDB_NAME: esgcet
+      DJANGO_DATABASE_USERDB_HOST: esgf-postgres
+      DJANGO_DATABASE_USERDB_PORT: "5432"
+      DJANGO_DATABASE_USERDB_USER: dbsuper
+      DJANGO_DATABASE_USERDB_PASSWORD_FILE: /esg/secrets/database-password
       # Other SLCS-specific settings
-#      ESGF_SLCS_URL: http://localhost:8000
-#      ESGF_SLCS_BASIC_AUTH_REALM: localhost
-#      ONLINECA_CERT_SUBJECT_TEMPLATE: /DC=esgf/CN=$$OPENID
-#      ONLINECA_CERT_FILEPATH: /opt/onlineca/ca/onlineca.pem
-#      ONLINECA_KEY_FILEPATH: /opt/onlineca/ca/onlineca.key
-#      ONLINECA_TRUSTROOTS_DIR: /opt/onlineca/ca/trustroots
-#    volumes:
-#      - "slcs-certificate-authority:/opt/onlineca/ca:ro"
-#    depends_on:
-#      - esgf-django  # Build dependency
-#      - esgf-postgres
-#      - esgf-slcs-postgres
-#      - esgf-slcs-self-signed-ca
+      ESGF_SLCS_URL: "https://${ESGF_HOSTNAME}/esgf-slcs"
+      ESGF_SLCS_BASIC_AUTH_REALM: $ESGF_HOSTNAME
+      ONLINECA_CERT_SUBJECT_TEMPLATE: /DC=esgf/CN=$$OPENID
+      ONLINECA_CERT_FILEPATH: /esg/certificates/slcsca/ca.crt
+      ONLINECA_KEY_FILEPATH: /esg/certificates/slcsca/ca.key
+      ONLINECA_TRUSTROOTS_DIR: /esg/certificates/slcsca/trustroots
+    volumes:
+      - "$ESGF_CONFIG/secrets/slcs-secret-key:/esg/secrets/slcs-secret-key:ro"
+      - "$ESGF_CONFIG/secrets/slcs-database-password:/esg/secrets/slcs-database-password:ro"
+      - "$ESGF_CONFIG/secrets/database-password:/esg/secrets/database-password:ro"
+      - "$ESGF_CONFIG/certificates/slcsca/ca.crt:/esg/certificates/slcsca/ca.crt:ro"
+      - "$ESGF_CONFIG/certificates/slcsca/ca.key:/esg/certificates/slcsca/ca.key:ro"
+      # Just mount an empty volume as the trustroots for now
+      - "slcs-trustroots:/esg/certificates/slcsca/trustroots/:ro"
+    depends_on:
+      - esgf-django
+      - esgf-postgres
+      - esgf-slcs-postgres
 
 
 # Use Docker volumes to store persistent data
@@ -260,4 +267,5 @@ volumes:
   solr-home:
   postgres-data:
   tds-content:
-#  slcs-postgres-data:
+  slcs-postgres-data:
+  slcs-trustroots:
