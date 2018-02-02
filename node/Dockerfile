@@ -2,18 +2,13 @@
 # Supervisor
 # Also includes common, non-site specific ESGF env variables (ESGF_HOME).
 
-FROM centos:6
-
+ARG ESGF_IMAGES_HUB=esgfhub
+ARG ESGF_VERSION=devel
+FROM $ESGF_IMAGES_HUB/esgf-minimal-node:$ESGF_VERSION
 MAINTAINER Earth System Grid Federation <esgf-devel@lists.llnl.gov>
 
-# install GPG keys
-RUN rpm --import http://download.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-6
-RUN rpm --import http://vault.centos.org/RPM-GPG-KEY-CentOS-6
-RUN yum history new # That fix the warning 'Warning: RPMDB altered outside of yum'
-
 # install dependencies with yum
-RUN yum -y update && \
-    yum groupinstall -y development && \
+RUN yum groupinstall -y development && \
     yum install -y \
     yum-utils \
     bzip2-devel \
@@ -34,16 +29,13 @@ RUN yum -y update && \
     libjpeg-turbo-devel \
     yum clean all
 
-# install additional epel repository
-RUN yum -y install epel-release; yum clean all
-
 # install Oracle Java 8
 # see download string at: http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html
 # run scripts/get_oracle_jdk_linux_x64.sh to identify the correct URL
 
-ENV JAVA_VERSION 8u152
-ENV JAVA_BUILD_VERSION b16
-ENV JAVA_HASH=aa0333dd3019491ca4f6ddbe78cdb6d0
+ENV JAVA_VERSION 8u162
+ENV JAVA_BUILD_VERSION b12
+ENV JAVA_HASH=0da788060d494f5095bf8624735fa2f1
 
 RUN wget -q --no-cookies --no-check-certificate --header "Cookie: oraclelicense=accept-securebackup-cookie" \
     -O /tmp/jdk-8-linux-x64.rpm \
@@ -91,30 +83,6 @@ RUN pip install supervisor
 COPY conf/supervisord.conf /etc/supervisord.conf
 COPY conf/supervisord_noothers.conf /etc/supervisord_noothers.conf
 RUN mkdir -p /etc/supervisor/conf.d/
-
-
-# necessary to locate /esg/config/esgf.properties
-
-### ARGS
-
-ARG ESGF_REPO='http://distrib-coffee.ipsl.jussieu.fr/pub/esgf'
-
-### Common ESGF environment variables
-ENV ESGF_HOME='/esg'
-ENV ESGF_REPO=$ESGF_REPO
-ENV ESGF_BACKUP_DIR="$ESGF_HOME/backups"
-ENV ESGF_LOG_DIR="$ESGF_HOME/log"
-ENV ESGF_TOOL_DIR="$ESGF_HOME/tools"
-ENV ESGF_CONFIG_DIR="$ESGF_HOME/config"
-ENV ESGF_CONTENT_DIR="$ESGF_HOME/content"
-ENV ESGF_DEFAULT_TEST_DATA_DIR="$ESGF_HOME/data/test"
-
-# common ESGF directories
-RUN mkdir -p "$ESGF_LOG_DIR"
-RUN mkdir -p "$ESGF_TOOL_DIR"
-RUN mkdir -p "$ESGF_CONFIG_DIR"
-RUN mkdir -p "$ESGF_BACKUP_DIR"
-RUN mkdir -p "$ESGF_CONTENT_DIR"
 
 # default command starts supervisor in non-daemon mode
 # to be overridden by child images
