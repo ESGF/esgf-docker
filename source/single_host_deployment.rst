@@ -30,7 +30,11 @@ Cleanup
 If you are following these instructions *not* for the first time,
 it might be a good idea to completely reset the system so you can start from a clean slate. To do so,
 stop all running containers, and remove all data volumes and all configuration.
-From the top-level *esgf-docker/* directory, issue the commands::
+Make sure that the environment ESGF_CONFIG is set to your previously chosen value, for example::
+   
+    export ESGF_CONFIG=~/esgf_config
+
+Then, from the top-level *esgf-docker/* directory, issue the commands::
 
     docker-compose down
     docker rm $(docker ps -a -q)

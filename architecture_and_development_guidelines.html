@@ -1,16 +1,13 @@
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
     <title>Architecture and Development Guidelines &#8212; ESGF-Docker Documentation</title>
-    
     <link rel="stylesheet" href="_static/nature.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
@@ -29,7 +26,7 @@
     <link rel="next" title="Docker Swarm Setup on MacOSX" href="docker_swarm_setup_on_macosx.html" />
     <link rel="prev" title="Data Publishing" href="data_publishing.html" /> 
   </head>
-  <body role="document">
+  <body>
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
@@ -63,14 +60,14 @@ specific images are derived. This design has several benefits:</p>
 <ul class="simple">
 <li>All images run the same version of the core OS, libraries and engines such
 as Centos, Java, Python, SSL, Tomcat, etc.</li>
-<li>It&#8217;s easy to propagate updates of any of these components to all images.</li>
+<li>It’s easy to propagate updates of any of these components to all images.</li>
 <li>Common building instructions are not repeated, in different form, in different Dockerfiles.</li>
 </ul>
 <p>The current version of the ESGF image hierarchy is shown in the figure below.</p>
 </div>
 <div class="section" id="image-content">
 <h2>Image Content<a class="headerlink" href="#image-content" title="Permalink to this headline">¶</a></h2>
-<p>For maximum flexibility, and conforming to the &#8220;micro-services&#8221;
+<p>For maximum flexibility, and conforming to the “micro-services”
 architecture, each ESGF image should contain only one service,
 interacting with the other ESGF services through publicly exposed
 endpoints. In some cases though a set of services must be co-located as
@@ -98,7 +95,7 @@ this repository.</p>
 </div>
 <div class="section" id="supervisor">
 <h2>Supervisor<a class="headerlink" href="#supervisor" title="Permalink to this headline">¶</a></h2>
-<p>ESGF images should use the Python program &#8220;Supervisor&#8221; to start and
+<p>ESGF images should use the Python program “Supervisor” to start and
 monitor services inside a Docker container. Benefits of using Supervisor
 include:</p>
 <ul class="simple">
@@ -107,7 +104,7 @@ service from inside each container.</li>
 <li>Ability to add services to the
 startup pool by simply dropping configuration files in a standard location.</li>
 <li>Ability to start/stop/restart entire group of services (for example, all Solr shards at once).</li>
-<li>Ability to start services as non-privileged users such as &#8220;tomcat&#8221;, &#8220;apache&#8221;, etc.</li>
+<li>Ability to start services as non-privileged users such as “tomcat”, “apache”, etc.</li>
 </ul>
 <p>Supervisor is installed as part of the <em>esgf-node</em> base image, and started by default unless a child image
 overrides the Docker CMD instruction.</p>
@@ -130,7 +127,7 @@ configuration, such as SSL certificates, hostnames, passwords etc. At
 this time, all site-specific configuration is stored in a directory tree
 rooted at $ESGF_CONFIG/, which is cross-mounted as a shared volume on
 on all containers. In the future, the site-specific configuration might
-be &#8220;pushed&#8221; to the containers via other means.</p>
+be “pushed” to the containers via other means.</p>
 </div>
 <div class="section" id="persistent-data">
 <h2>Persistent Data<a class="headerlink" href="#persistent-data" title="Permalink to this headline">¶</a></h2>
@@ -215,7 +212,7 @@ upgrades.</p>
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright 2017, ESGF.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.6.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.
     </div>
   </body>
 </html>

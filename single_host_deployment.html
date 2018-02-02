@@ -1,16 +1,13 @@
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
     <title>Single Host Deployment &#8212; ESGF-Docker Documentation</title>
-    
     <link rel="stylesheet" href="_static/nature.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
@@ -29,7 +26,7 @@
     <link rel="next" title="Multiple Hosts Deployment" href="multiple_hosts_deployment.html" />
     <link rel="prev" title="Table of Contents:" href="index.html" /> 
   </head>
-  <body role="document">
+  <body>
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
@@ -77,7 +74,11 @@ this time, Docker 1.17.x). Tested on MacOSX (Version 17.09.1-ce-mac42) and Linux
 <p>If you are following these instructions <em>not</em> for the first time,
 it might be a good idea to completely reset the system so you can start from a clean slate. To do so,
 stop all running containers, and remove all data volumes and all configuration.
-From the top-level <em>esgf-docker/</em> directory, issue the commands:</p>
+Make sure that the environment ESGF_CONFIG is set to your previously chosen value, for example:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">export</span> <span class="n">ESGF_CONFIG</span><span class="o">=~/</span><span class="n">esgf_config</span>
+</pre></div>
+</div>
+<p>Then, from the top-level <em>esgf-docker/</em> directory, issue the commands:</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span>docker-compose down
 docker rm $(docker ps -a -q)
 docker volume ls -qf dangling=true | xargs docker volume rm
@@ -178,7 +179,7 @@ for $ESGF_HOSTNAME and populate the $ESGF_CONFIG directory with initial content:
 ls -l $ESGF_CONFIG
 </pre></div>
 </div>
-<p>Note: it&#8217;s been observed that the Docker engine on a mac might not track time correctly
+<p>Note: it’s been observed that the Docker engine on a mac might not track time correctly
 if the mac goes into sleep mode, which may cause problems with the validity of the certificates.
 To bypass this issue, restart the Docker engine after generating the certificates.</p>
 </li>
@@ -353,7 +354,7 @@ interface once <em>rootAdmin</em> is logged in.</p>
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright 2017, ESGF.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.6.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.
     </div>
   </body>
 </html>
