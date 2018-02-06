@@ -31,3 +31,20 @@ spec:
     - ReadWriteOnce
   hostPath:
     path: /esg/data
+---
+# volume holding Solr index
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: solr-index-pv
+  labels:
+    type: local
+    stack: esgf
+    app: solr
+spec:
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: /esg/solr-index

@@ -21,6 +21,20 @@ spec:
     stack: esgf
     app: solr
 ---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: solr-index-pvc
+  labels:
+    stack: esgf
+    app: solr
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---
 apiVersion: apps/v1beta1
 kind: Deployment
 metadata:
@@ -44,4 +58,5 @@ spec:
           mountPath: /esg/solr-index
       volumes:
       - name: solr-index
-        emptyDir: {}
+        persistentVolumeClaim:
+          claimName: solr-index-pvc
