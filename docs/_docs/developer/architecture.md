@@ -1,7 +1,7 @@
 ---
 title: Container Architecture
 category: Developers
-order: 2
+order: 3
 ---
 
 The following text-diagram shows the inheritance hierarchy of the ESGF Docker containers:
@@ -69,8 +69,8 @@ where they are installed.
 
 Mixin images are images that are never intended to be run, and exist purely
 as a way to share files with other images using the `COPY --from=<image>` syntax.
-This is a work-around to the fact that Docker does not allow symlinks in a build
-context.
+This is mainly to work-around the fact that Docker does not allow symlinks in a
+build context.
 
 In particular, the `esgf-configure` container is a mixin container, that exists
 purely to allow other images to `COPY` the default templates for `/esg/config`

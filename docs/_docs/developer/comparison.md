@@ -1,7 +1,7 @@
 ---
 title: Comparison to original implementation
 category: Developers
-order: 3
+order: 4
 ---
 
 This project represents a significant reworking of the original implementation
@@ -82,4 +82,5 @@ server when the JRE is sufficient for running the application.
 
 In this implementation, there is no common base image for every container. Instead,
 the Tomcat and Django containers have their own inheritance hierarchy such that
-Java tooling is not installed in the Django containers and vice-versa.
+Java tooling is not installed in the Django containers and vice-versa. See
+[Container Architecture](../architecture) for details.

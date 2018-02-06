@@ -16,7 +16,6 @@
     font-family: "Font Awesome 5 Free";
     font-weight: 900;
     font-size: 25px;
-    padding-top: 3px;
 }
 .note *:last-child {
     margin-bottom: 0;
@@ -41,4 +40,7 @@
     color: #a94442;
     background-color: #f2dede;
     border-color: #ebccd1;
+}
+.note-danger::before {
+    content: "\f05e";
 }
