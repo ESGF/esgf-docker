@@ -16,7 +16,7 @@ version: '3.4'
 
 services:
   esgf-proxy:
-    image: cedadev/esgf-proxy
+    image: "${ESGF_HUB}/esgf-proxy:${ESGF_VERSION}"
     build: ./proxy
     restart: always
     ports:
@@ -62,7 +62,7 @@ services:
       retries: 3
 
   esgf-solr:
-    image: cedadev/esgf-solr
+    image: "${ESGF_HUB}/esgf-solr:${ESGF_VERSION}"
     build: ./solr
     restart: always
     environment:
@@ -84,7 +84,7 @@ services:
       - esgf-zookeeper
 
   esgf-postgres:
-    image: cedadev/esgf-postgres
+    image: "${ESGF_HUB}/esgf-postgres:${ESGF_VERSION}"
     build: ./postgres
     restart: always
     environment:
@@ -98,7 +98,7 @@ services:
 
   # Build dependency only
   esgf-configure:
-    image: cedadev/esgf-configure
+    image: "${ESGF_HUB}/esgf-configure:${ESGF_VERSION}"
     build: ./configure
     # Use an entrypoint that exits immediately with success
     entrypoint: ["true"]
@@ -111,21 +111,24 @@ services:
 
   # Build dependency only
   esgf-tomcat:
-    image: cedadev/esgf-tomcat
+    image: "${ESGF_HUB}/esgf-tomcat:${ESGF_VERSION}"
     build: ./tomcat
     # Use an entrypoint that exits immediately with success
     entrypoint: ["true"]
 
   # Build dependency only
   esgf-django:
-    image: cedadev/esgf-django
+    image: "${ESGF_HUB}/esgf-django:${ESGF_VERSION}"
     build: ./django
     # Use an entrypoint that exits immediately with success
     entrypoint: ["true"]
 
   esgf-orp:
-    image: cedadev/esgf-orp
-    build: ./orp
+    image: "${ESGF_HUB}/esgf-orp:${ESGF_VERSION}"
+    build:
+      context: ./orp
+      args:
+        ESGF_TOMCAT_VERSION: $ESGF_VERSION
     restart: always
     environment:
       <<: *config_env
@@ -141,8 +144,11 @@ services:
       - esgf-tomcat
 
   esgf-index-node:
-    image: cedadev/esgf-index-node
-    build: ./index-node
+    image: "${ESGF_HUB}/esgf-index-node:${ESGF_VERSION}"
+    build:
+      context: ./index-node
+      args:
+        ESGF_TOMCAT_VERSION: $ESGF_VERSION
     restart: always
     environment:
       <<: *config_env
@@ -153,8 +159,11 @@ services:
       - esgf-orp
 
   esgf-idp-node:
-    image: cedadev/esgf-idp-node
-    build: ./idp-node
+    image: "${ESGF_HUB}/esgf-idp-node:${ESGF_VERSION}"
+    build:
+      context: ./idp-node
+      args:
+        ESGF_TOMCAT_VERSION: $ESGF_VERSION
     restart: always
     environment:
       <<: *config_env
@@ -166,8 +175,11 @@ services:
       - esgf-postgres
 
   esgf-tds:
-    image: cedadev/esgf-tds
-    build: ./tds
+    image: "${ESGF_HUB}/esgf-tds:${ESGF_VERSION}"
+    build:
+      context: ./tds
+      args:
+        ESGF_TOMCAT_VERSION: $ESGF_VERSION
     environment:
       <<: *config_env
       ESGF_TRUSTSTORE_FILE: /esg/certificates/esg-trust-bundle.jks
@@ -186,8 +198,11 @@ services:
       - esgf-postgres
 
   esgf-cog:
-    image: cedadev/esgf-cog
-    build: ./cog
+    image: "${ESGF_HUB}/esgf-cog:${ESGF_VERSION}"
+    build:
+      context: ./cog
+      args:
+        ESGF_DJANGO_VERSION: $ESGF_VERSION
     restart: always
     environment:
       <<: *config_env
@@ -217,9 +232,12 @@ services:
       - "auth-postgres-data:/var/lib/postgresql/data"
 
   esgf-auth:
-    image: cedadev/esgf-auth
-    build: ./auth
-    restart: "no"
+    image: "${ESGF_HUB}/esgf-auth:${ESGF_VERSION}"
+    build:
+      context: ./auth
+      args:
+        ESGF_DJANGO_VERSION: $ESGF_VERSION
+    restart: always
     environment:
       <<: *config_env
       SCRIPT_NAME: /esgf-auth
@@ -256,8 +274,11 @@ services:
       - "slcs-postgres-data:/var/lib/postgresql/data"
 
   esgf-slcs:
-    image: cedadev/esgf-slcs
-    build: ./slcs
+    image: "${ESGF_HUB}/esgf-slcs:${ESGF_VERSION}"
+    build:
+      context: ./slcs
+      args:
+        ESGF_DJANGO_VERSION: $ESGF_VERSION
     restart: always
     environment:
       # Generic Django settings

@@ -73,6 +73,17 @@ $ docker-compose up -d
 This will pull all the images from Docker Hub (unless they are already available
 locally) and launch the containers in order.
 
+Once all the containers are running normally, navigate to `https://$ESGF_HOSTNAME`
+in a browser and you should see the CoG interface.
+
+Try to log in with the OpenID `https://$ESGF_HOSTNAME/esgf-idp/openid/rootAdmin`.
+To find the `rootAdmin` password that was randomly generated for you, run the
+following command:
+
+```sh
+echo "$(cat "$ESGF_CONFIG/secrets/rootadmin-password")"
+```
+
 ## Stopping containers
 
 To stop the containers:
