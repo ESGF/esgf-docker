@@ -1,5 +1,5 @@
 ---
 title: Container Architecture
-category: Developer Documentation
-order: 1
+category: Developers
+order: 2
 ---

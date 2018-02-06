@@ -1,38 +1,13 @@
 ---
-title: Welcome
+title: Introduction
 ---
 
-This is the **Edition** template from [CloudCannon](http://cloudcannon.com/).
-**Edition** is perfect for documenting your product, application or service.
-It's populated with example content to give you some ideas.
+The ESGF Docker project aims to provide [Docker containers](https://www.docker.com/)
+for each of the components of the [ESGF](https://esgf.llnl.gov/) software stack,
+as an alternative to the traditional installer.
 
-ChatApp is a fictional chat application for sending messages and media to others.
-Teams and friend groups would use ChatApp to stay up to date if it existed.
+These components can then be deployed in a single-node configuration using
+[Docker Compose](https://docs.docker.com/compose/), or in a cluster using
+[Docker Swarm](https://docs.docker.com/swarm/) or [Kubernetes](https://kubernetes.io/).
 
-> [Sign up](http://example.com/signup) or learn more about ChatApp at [example.com](http://example.com/).
-
-### Getting Started
-
-Getting a message sent is quick and easy with ChatApp:
-
-1. Sign up for an account
-2. Add your friends from their email addresses
-3. Type a message or send a photo
-
-> Feel free to send us a message at [feedback@example.com](mailto:feedback@example.com) with your feedback.
-
-### Features
-
-Explore more of ChatApp by reading about our features:
-
-#### Media
-
-Send images, videos and other media to people. Sources include your computer, phone and Facebook.
-
-#### Contact Syncing
-
-Sync your contact list with your phone and/or Facebook contacts. Never lose your contacts between devices again!
-
-#### Devices
-
-ChatApp is available everywhere. Find out how to set it up on your all your devices.
+This site provides documentation for using the ESGF Docker containers.

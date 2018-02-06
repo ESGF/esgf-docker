@@ -1,0 +1,44 @@
+.note {
+    display: block;
+    padding: 10px 15px 10px 55px;
+    border-radius: 4px;
+    margin-bottom: 20px;
+    border: 1px solid transparent;
+}
+.note::before {
+    display: inline-block;
+    float: left;
+    margin-left: -40px;
+    font-style: normal;
+    font-variant: normal;
+    text-rendering: auto;
+    -webkit-font-smoothing: antialiased;
+    font-family: "Font Awesome 5 Free";
+    font-weight: 900;
+    font-size: 25px;
+    padding-top: 3px;
+}
+.note *:last-child {
+    margin-bottom: 0;
+}
+.note-info {
+    color: #31708f;
+    background-color: #d9edf7;
+    border-color: #bce8f1;
+}
+.note-info::before {
+    content: "\f05a";
+}
+.note-warning {
+    color: #8a6d3b;
+    background-color: #fcf8e3;
+    border-color: #faebcc;
+}
+.note-warning::before {
+    content: "\f071";
+}
+.note-danger {
+    color: #a94442;
+    background-color: #f2dede;
+    border-color: #ebccd1;
+}

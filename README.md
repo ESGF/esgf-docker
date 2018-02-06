@@ -1,2 +1,3 @@
 # esgf-docker
-ESGF software stack as Docker images
+
+ESGF software stack as Docker images.

@@ -1,5 +1,5 @@
 ---
-title: Comparison with original esgf-docker
-category: Developer Documentation
-order: 2
+title: Comparison to previous implementation
+category: Developers
+order: 3
 ---
