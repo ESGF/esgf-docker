@@ -47,8 +47,7 @@ ADD $ESGF_REPO/dist/filters/XSGroupRole-1.0.0.jar $CATALINA_HOME/webapps/thredds
 ADD $ESGF_REPO/dist/filters/commons-httpclient-3.1.jar $CATALINA_HOME/webapps/thredds/WEB-INF/lib/commons-httpclient-3.1.jar
 ADD $ESGF_REPO/dist/filters/commons-lang-2.6.jar $CATALINA_HOME/webapps/thredds/WEB-INF/lib/commons-lang-2.6.jar
 
-ADD http://distrib-coffee.ipsl.jussieu.fr/pub/esgf/dist/esg-orp/esg-orp-2.9.7.jar $CATALINA_HOME/webapps/thredds/WEB-INF/lib/esg-orp-2.9.7.jar
-#ADD $ESGF_REPO/dist/esg-orp/esg-orp-2.9.6.jar $CATALINA_HOME/webapps/thredds/WEB-INF/lib/esg-orp-2.9.6.jar
+ADD $ESGF_REPO/dist/esg-orp/esg-orp-2.9.7.jar $CATALINA_HOME/webapps/thredds/WEB-INF/lib/esg-orp-2.9.7.jar
 
 ADD $ESGF_REPO/dist/esgf-node-manager/esgf-node-manager-common-1.0.0.jar $CATALINA_HOME/webapps/thredds/WEB-INF/lib/esgf-node-manager-common-1.0.0.jar
 ADD $ESGF_REPO/dist/esgf-node-manager/esgf-node-manager-filters-1.0.0.jar $CATALINA_HOME/webapps/thredds/WEB-INF/lib/esgf-node-manager-filters-1.0.0.jar
