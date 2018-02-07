@@ -8,8 +8,8 @@ metadata:
 spec:
   type: NodePort
   ports:
-  - port: 8983 # host port
-    targetPort: 8983 # container port
+  - port: 8983 
+    targetPort: 8983 
     protocol: TCP
     name: solr-slave
   - port: 8984
