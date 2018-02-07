@@ -58,7 +58,7 @@ RUN adduser nodemgr && \
     usermod -a -G apache nodemgr
 
 # other needed directories
-RUN mkdir /esg/log /esg/tasks
+RUN mkdir -p /esg/log /esg/tasks
 
 # make Python installation available to Apache httpd + mod_wsgi
 VOLUME /opt/esgf/virtual/python

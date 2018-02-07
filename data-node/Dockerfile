@@ -21,7 +21,7 @@ RUN yum -y update; yum -y install libxml2-devel libxslt-devel; yum clean all
 # install Anaconda
 ENV CDAT_HOME=/usr/local/conda
 RUN cd /tmp && rm -rf $CDAT_HOME && \
-    wget --no-check-certificate https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh && \
+    wget -q --no-check-certificate https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh && \
     bash Miniconda2-latest-Linux-x86_64.sh -b -p $CDAT_HOME
 
 # create CDAT virtual environment with Anaconda

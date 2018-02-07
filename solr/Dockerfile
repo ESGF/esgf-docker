@@ -13,7 +13,7 @@ ENV SOLR_HOME /usr/local/solr-home
 ENV SOLR_DATA_DIR /esg/solr-index
 ENV SOLR_INCLUDE=${SOLR_HOME}/solr.in.sh
 
-RUN wget -O /tmp/solr-${SOLR_VERSION}.tgz http://archive.apache.org/dist/lucene/solr/${SOLR_VERSION}/solr-${SOLR_VERSION}.tgz && \
+RUN wget -q -O /tmp/solr-${SOLR_VERSION}.tgz http://archive.apache.org/dist/lucene/solr/${SOLR_VERSION}/solr-${SOLR_VERSION}.tgz && \
     cd /usr/local && \
     tar xzf /tmp/solr-${SOLR_VERSION}.tgz && \
     rm /tmp/solr-${SOLR_VERSION}.tgz && \
@@ -23,7 +23,7 @@ RUN mkdir -p $SOLR_DATA_DIR
 # download template directory structure for shards home
 ARG ESGF_REPO=http://distrib-coffee.ipsl.jussieu.fr/pub/esgf
 RUN cd /usr/local/src && \
-    wget -O solr-home.tar $ESGF_REPO/dist/esg-search/solr-home.tar && \
+    wget -q -O solr-home.tar $ESGF_REPO/dist/esg-search/solr-home.tar && \
     tar xvf /usr/local/src/solr-home.tar
 RUN mkdir -p $SOLR_HOME
 

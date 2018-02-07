@@ -12,7 +12,7 @@ RUN yum -y update \
 
 # install mod_wsgi
 RUN cd /tmp
-RUN wget 'https://pypi.python.org/packages/c3/4e/f9bd165369642344e8fdbe78c7e820143f73d3beabfba71365f27ee5e4d3/mod_wsgi-4.5.3.tar.gz' && \
+RUN wget -q 'https://pypi.python.org/packages/c3/4e/f9bd165369642344e8fdbe78c7e820143f73d3beabfba71365f27ee5e4d3/mod_wsgi-4.5.3.tar.gz' && \
     tar xvf mod_wsgi-4.5.3.tar.gz && \
     cd mod_wsgi-4.5.3 && \
     python setup.py install && \
