@@ -1,0 +1,16 @@
+# Docker compose file to start a Visus server as a distributed stack
+
+version: '3.3'
+
+
+services:
+  visus-server:
+    container_name: visus-server
+    image: visus/visus
+    networks:
+      - default
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints: [node.labels.esgf_front_node == true]
