@@ -24,7 +24,13 @@ if [ "$solr_mode" = "solrcloud" ]; then
         if echo "${existing[@]}" | grep -q "$name"; then
             echo "[INFO]   Collection '$name' already exists - skipping"
         else
-            curl -o /dev/null -fsSL "$ESGF_SOLR_PUBLISH_URL/solr/admin/collections?action=CREATE&name=${name}&collection.configName=esgf&numShards=${ESGF_SOLR_INDEX_NSHARDS:-1}"
+            url="$ESGF_SOLR_PUBLISH_URL/solr/admin/collections?action=CREATE"
+            url="${url}&name=${name}&collection.configName=esgf"
+            url="${url}&numShards=${ESGF_SOLR_COLLECTION_NUM_SHARDS:-1}"
+            url="${url}&replicationFactor=${ESGF_SOLR_COLLECTION_REPLICATION_FACTOR:-1}"
+            url="${url}&maxShardsPerNode=${ESGF_SOLR_COLLECTION_MAX_SHARDS_PER_NODE:-2}"
+            echo "[INFO]   Using URL: $url"
+            curl -o /dev/null -fsSL "$url"
             echo "[INFO]   Created collection '$name'"
         fi
     done
