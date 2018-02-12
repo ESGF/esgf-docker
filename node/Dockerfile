@@ -31,15 +31,13 @@ RUN yum groupinstall -y development && \
 
 # install Oracle Java 8
 # see download string at: http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html
-# run scripts/get_oracle_jdk_linux_x64.sh to identify the correct URL
+# run manually scripts/get_oracle_jdk_linux_x64.sh to identify the correct URL
 
-ENV JAVA_VERSION 8u162
-ENV JAVA_BUILD_VERSION b12
-ENV JAVA_HASH=0da788060d494f5095bf8624735fa2f1
+COPY scripts/get_jdk_rpm_address.sh /tmp
 
-RUN wget -q --no-cookies --no-check-certificate --header "Cookie: oraclelicense=accept-securebackup-cookie" \
-    -O /tmp/jdk-8-linux-x64.rpm \
-    "http://download.oracle.com/otn-pub/java/jdk/${JAVA_VERSION}-${JAVA_BUILD_VERSION}/${JAVA_HASH}/jdk-${JAVA_VERSION}-linux-x64.rpm"
+RUN /tmp/get_jdk_rpm_address.sh | xargs wget -q --no-cookies --no-check-certificate\
+  --header "Cookie: oraclelicense=accept-securebackup-cookie" \
+  -O /tmp/jdk-8-linux-x64.rpm
 
 RUN yum -y install /tmp/jdk-8-linux-x64.rpm && \
     rm /tmp/jdk-8-linux-x64.rpm
@@ -65,14 +63,13 @@ ENV LD_LIBRARY_PATH=/usr/local/lib:/usr/local/bin/python:$LD_LIBRARY_PATH
 
 # install additional core Python packages
 ENV PILLOW_VERSION 2.8.2
-RUN cd /tmp
-RUN wget -q --no-check-certificate https://bootstrap.pypa.io/ez_setup.py
-RUN python ez_setup.py --insecure
-RUN rm -rf ez_setup.py
-RUN easy_install pip
+RUN wget https://bootstrap.pypa.io/get-pip.py -O /tmp/get-pip.py
+RUN python /tmp/get-pip.py
+
 RUN pip install virtualenv
 RUN pip install wheel
 RUN pip install --use-wheel Pillow==${PILLOW_VERSION}
+RUN pip install setuptools
 
 # supervisor
 # executable: /usr/local/bin/supervisord
@@ -83,6 +80,9 @@ RUN pip install supervisor
 COPY conf/supervisord.conf /etc/supervisord.conf
 COPY conf/supervisord_noothers.conf /etc/supervisord_noothers.conf
 RUN mkdir -p /etc/supervisor/conf.d/
+
+# clean tmp directory
+RUN rm -fr /tmp/*
 
 # default command starts supervisor in non-daemon mode
 # to be overridden by child images
