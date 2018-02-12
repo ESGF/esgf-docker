@@ -73,6 +73,6 @@ Remove images tagged "<none>"::
 
   docker image ls | grep "^<none>" | awk '{print $3}' | xargs docker image rm --force
 
-Inspect/connect to an image (ex: esgfhub/esgf-http:devel image)::
+Inspect/connect to an image (ex: esgfhub/esgf-httpd:devel image)::
 
-  docker run --rm -it --entrypoint=/bin/bash esgfhub/esgf-http:devel
+  docker run --rm -it --entrypoint=/bin/bash esgfhub/esgf-httpd:devel

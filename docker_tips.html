@@ -120,8 +120,8 @@
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">docker</span> <span class="n">image</span> <span class="n">ls</span> <span class="o">|</span> <span class="n">grep</span> <span class="s2">&quot;^&lt;none&gt;&quot;</span> <span class="o">|</span> <span class="n">awk</span> <span class="s1">&#39;{print $3}&#39;</span> <span class="o">|</span> <span class="n">xargs</span> <span class="n">docker</span> <span class="n">image</span> <span class="n">rm</span> <span class="o">--</span><span class="n">force</span>
 </pre></div>
 </div>
-<p>Inspect/connect to an image (ex: esgfhub/esgf-http:devel image):</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">docker</span> <span class="n">run</span> <span class="o">--</span><span class="n">rm</span> <span class="o">-</span><span class="n">it</span> <span class="o">--</span><span class="n">entrypoint</span><span class="o">=/</span><span class="nb">bin</span><span class="o">/</span><span class="n">bash</span> <span class="n">esgfhub</span><span class="o">/</span><span class="n">esgf</span><span class="o">-</span><span class="n">http</span><span class="p">:</span><span class="n">devel</span>
+<p>Inspect/connect to an image (ex: esgfhub/esgf-httpd:devel image):</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">docker</span> <span class="n">run</span> <span class="o">--</span><span class="n">rm</span> <span class="o">-</span><span class="n">it</span> <span class="o">--</span><span class="n">entrypoint</span><span class="o">=/</span><span class="nb">bin</span><span class="o">/</span><span class="n">bash</span> <span class="n">esgfhub</span><span class="o">/</span><span class="n">esgf</span><span class="o">-</span><span class="n">httpd</span><span class="p">:</span><span class="n">devel</span>
 </pre></div>
 </div>
 </div>
