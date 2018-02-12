@@ -61,10 +61,10 @@ then a minor version. But some minor versions may be in development at the same
 time as a major version. That is why we should not develop ESGF in a single
 dedicated integration branch with a meaningless name. <strong>The integration branches
 receive the merges from personal branches. No one should push directly into the
-integration branches</strong> as the integration branches are the place for integration
-testing.</p>
+integration branches</strong> as the integration branches reflect the head of the
+development of the software.</p>
 <p><strong>Personal branches are the branches where the developers push their commit</strong>.
-These branches are the place for unit testing.</p>
+These branches are the place for unit testing and integration testing.</p>
 <p><strong>Master branch should always represents the last production/maintenance
 release. We should not push any commit in the master branch</strong>. We should only
 merge commits, from integration branches, that contribute to the last
@@ -98,15 +98,30 @@ represents the version of the software being developed and [PersonalTag] an
 unique tag that is specific to a developer.</li>
 </ul>
 </div>
+<div class="section" id="integration">
+<h2>Integration<a class="headerlink" href="#integration" title="Permalink to this headline">¶</a></h2>
+<p>Developers work on their own development branch and the integration tests must
+be executed in the development branch so as to prevent failures in the
+integration branch. Every time they need to merge
+their contributions into the current integration branch, the following procedure
+applies:</p>
+<ul class="simple">
+<li>Checkout the development branch.</li>
+<li>Merge the integration branch into the devevelopemnt branch.</li>
+<li>Build the docker images, run the images then run the automatic tests.
+If the test pass, continue.</li>
+<li>Push to the remote development branch</li>
+<li>Checkout the integration branch</li>
+<li>Merge the development branch into the integration branch.</li>
+<li>Push to the remote integration branch</li>
+</ul>
+</div>
 <div class="section" id="diagram">
 <h2>Diagram<a class="headerlink" href="#diagram" title="Permalink to this headline">¶</a></h2>
 <p>Schematic representation of how Git branches are created and tagged when working on a specific release.</p>
 <div class="figure">
 <a class="reference internal image-reference" href="_images/ESGF_versioning.png"><img alt="ESGF versioning diagram" src="_images/ESGF_versioning.png" style="width: 1727.0px; height: 733.0px;" /></a>
 </div>
-</div>
-<div class="section" id="merge">
-<h2>Merge<a class="headerlink" href="#merge" title="Permalink to this headline">¶</a></h2>
 </div>
 </div>
 
@@ -122,8 +137,8 @@ unique tag that is specific to a developer.</li>
 <li><a class="reference internal" href="#branches">Branches</a></li>
 <li><a class="reference internal" href="#release-tags">Release/tags</a></li>
 <li><a class="reference internal" href="#naming-rules">Naming rules</a></li>
+<li><a class="reference internal" href="#integration">Integration</a></li>
 <li><a class="reference internal" href="#diagram">Diagram</a></li>
-<li><a class="reference internal" href="#merge">Merge</a></li>
 </ul>
 </li>
 </ul>

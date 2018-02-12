@@ -11,11 +11,11 @@ then a minor version. But some minor versions may be in development at the same
 time as a major version. That is why we should not develop ESGF in a single
 dedicated integration branch with a meaningless name. **The integration branches
 receive the merges from personal branches. No one should push directly into the
-integration branches** as the integration branches are the place for integration
-testing.
+integration branches** as the integration branches reflect the head of the 
+development of the software.
 
 **Personal branches are the branches where the developers push their commit**.
-These branches are the place for unit testing.
+These branches are the place for unit testing and integration testing.
 
 **Master branch should always represents the last production/maintenance
 release. We should not push any commit in the master branch**. We should only
@@ -56,6 +56,25 @@ Recommended naming rules for git:
   unique tag that is specific to a developer.
 
 
+Integration
+===========
+
+Developers work on their own development branch and the integration tests must 
+be executed in the development branch so as to prevent failures in the
+integration branch. Every time they need to merge
+their contributions into the current integration branch, the following procedure
+applies:
+
+- Checkout the development branch.
+- Merge the integration branch into the devevelopemnt branch.
+- Build the docker images, run the images then run the automatic tests.
+  If the test pass, continue.
+- Push to the remote development branch
+- Checkout the integration branch
+- Merge the development branch into the integration branch.
+- Push to the remote integration branch
+
+
 Diagram
 =======
 
@@ -65,6 +84,5 @@ Schematic representation of how Git branches are created and tagged when working
    :scale: 100 %
    :alt: ESGF versioning diagram
    
-Merge
-=====
+
 
