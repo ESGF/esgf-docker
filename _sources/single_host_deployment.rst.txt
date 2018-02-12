@@ -115,10 +115,11 @@ Setup
 * Initialize your node configuration: create a self-signed certificate 
   for $ESGF_HOSTNAME and populate the $ESGF_CONFIG directory with initial content::
   
-  Note: if you are on a Mac, ensure **gtar** and **xz** utilities are installed before running the :code:`esgf_node_init.sh` script::
-    
+     
     ./scripts/esgf_node_init.sh
     ls -l $ESGF_CONFIG
+
+  Note: if you are on a Mac, ensure **gtar** and **xz** utilities are installed before running the :code:`esgf_node_init.sh` script.
 
   Note: it's been observed that the Docker engine on a mac might not track time correctly 
   if the mac goes into sleep mode, which may cause problems with the validity of the certificates. 

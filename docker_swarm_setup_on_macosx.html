@@ -1,13 +1,16 @@
-
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
     <title>Docker Swarm Setup on MacOSX &#8212; ESGF-Docker Documentation</title>
+    
     <link rel="stylesheet" href="_static/nature.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
@@ -26,7 +29,7 @@
     <link rel="next" title="Docker Swarm Setup on Linux" href="docker_swarm_setup_on_linux.html" />
     <link rel="prev" title="Architecture and Development Guidelines" href="architecture_and_development_guidelines.html" /> 
   </head>
-  <body>
+  <body role="document">
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
@@ -75,7 +78,7 @@ deploying ESGF software stack on a multiple-host cluster.</p>
 </pre></div>
 </div>
 </li>
-<li><p class="first">Select one of the nodes to be the Swarm leader, “connect” to it, and
+<li><p class="first">Select one of the nodes to be the Swarm leader, &#8220;connect&#8221; to it, and
 initialize the Swarm, using its IP address (in what follows, we use
 $IP_MANAGER_ADDRESS=192.168.99.100). Save the output of the last
 command, since it will be needed on the other nodes to join the swarm.</p>
@@ -91,7 +94,7 @@ docker swarm join --token \
    192.168.99.100:2377
 </pre></div>
 </div>
-<p>Replace the last command with the output from the “docker swarm init…”
+<p>Replace the last command with the output from the &#8220;docker swarm init...&#8221;
 command issued on the Swarm manager. Repeat this process on all worker nodes
 in the Swarm. Finally, list all nodes in the Swarm:</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">docker</span> <span class="n">node</span> <span class="n">ls</span>
@@ -119,7 +122,7 @@ you intend to use to access the ESGF services. For example if $ESGF_HOSTNAME=my-
 </div>
 <p>Note that because of the Docker Swarm routing mesh capability, the IP
 address above can be that of any node in the Swarm, and that URLs
-starting with http(s)://my-node.esgf.org/… can be used to access any
+starting with http(s)://my-node.esgf.org/... can be used to access any
 of the ESGF services in the stack, no matter on which node they are deployed.</p>
 </li>
 </ul>
@@ -134,7 +137,7 @@ of the ESGF services in the stack, no matter on which node they are deployed.</p
 </li>
 </ul>
 <p>these tools replace the embedded macosx tools, respectively tar and getopt that
-don’t support features used in some scripts. To easly install these tools,</p>
+don&#8217;t support features used in some scripts. To easly install these tools,</p>
 <ol class="arabic">
 <li><p class="first">install <a class="reference external" href="https://brew.sh">homebrew</a>:</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">ruby</span> <span class="o">-</span><span class="n">e</span> <span class="s2">&quot;$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)&quot;</span>
@@ -211,7 +214,7 @@ don’t support features used in some scripts. To easly install these tools,</p>
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright 2017, ESGF.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.6.
     </div>
   </body>
 </html>

@@ -1,13 +1,16 @@
-
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
     <title>Single Host Deployment &#8212; ESGF-Docker Documentation</title>
+    
     <link rel="stylesheet" href="_static/nature.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
@@ -26,7 +29,7 @@
     <link rel="next" title="Multiple Hosts Deployment" href="multiple_hosts_deployment.html" />
     <link rel="prev" title="Table of Contents:" href="index.html" /> 
   </head>
-  <body>
+  <body role="document">
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
@@ -174,12 +177,12 @@ exercise should be <em>esgfhub</em>:</p>
 </li>
 <li><p class="first">Initialize your node configuration: create a self-signed certificate
 for $ESGF_HOSTNAME and populate the $ESGF_CONFIG directory with initial content:</p>
-<p>Note: if you are on a Mac, ensure <strong>gtar</strong> and <strong>xz</strong> utilities are installed before running the <code class="code docutils literal"><span class="pre">esgf_node_init.sh</span></code> script:</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span>./scripts/esgf_node_init.sh
 ls -l $ESGF_CONFIG
 </pre></div>
 </div>
-<p>Note: it’s been observed that the Docker engine on a mac might not track time correctly
+<p>Note: if you are on a Mac, ensure <strong>gtar</strong> and <strong>xz</strong> utilities are installed before running the <code class="code docutils literal"><span class="pre">esgf_node_init.sh</span></code> script.</p>
+<p>Note: it&#8217;s been observed that the Docker engine on a mac might not track time correctly
 if the mac goes into sleep mode, which may cause problems with the validity of the certificates.
 To bypass this issue, restart the Docker engine after generating the certificates.</p>
 </li>
@@ -354,7 +357,7 @@ interface once <em>rootAdmin</em> is logged in.</p>
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright 2017, ESGF.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.6.
     </div>
   </body>
 </html>

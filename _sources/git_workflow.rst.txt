@@ -65,3 +65,6 @@ Schematic representation of how Git branches are created and tagged when working
    :scale: 100 %
    :alt: ESGF versioning diagram
    
+Merge
+=====
+

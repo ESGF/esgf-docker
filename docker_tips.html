@@ -1,13 +1,16 @@
-
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
     <title>Docker Tips &#8212; ESGF-Docker Documentation</title>
+    
     <link rel="stylesheet" href="_static/nature.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
@@ -26,7 +29,7 @@
     <link rel="next" title="Kubernetes for ESGF" href="kubernetes.html" />
     <link rel="prev" title="Testing Guide" href="testing_guide.html" /> 
   </head>
-  <body>
+  <body role="document">
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
@@ -113,7 +116,7 @@
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">docker</span> <span class="n">images</span> <span class="s2">&quot;esgfhub/*:devel&quot;</span> <span class="o">-</span><span class="n">q</span> <span class="o">|</span> <span class="n">xargs</span> <span class="n">docker</span> <span class="n">image</span> <span class="n">rm</span>
 </pre></div>
 </div>
-<p>Remove images tagged “&lt;none&gt;”:</p>
+<p>Remove images tagged &#8220;&lt;none&gt;&#8221;:</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">docker</span> <span class="n">image</span> <span class="n">ls</span> <span class="o">|</span> <span class="n">grep</span> <span class="s2">&quot;^&lt;none&gt;&quot;</span> <span class="o">|</span> <span class="n">awk</span> <span class="s1">&#39;{print $3}&#39;</span> <span class="o">|</span> <span class="n">xargs</span> <span class="n">docker</span> <span class="n">image</span> <span class="n">rm</span> <span class="o">--</span><span class="n">force</span>
 </pre></div>
 </div>
@@ -186,7 +189,7 @@
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright 2017, ESGF.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.6.
     </div>
   </body>
 </html>
