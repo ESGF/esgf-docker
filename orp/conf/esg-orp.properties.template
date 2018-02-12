@@ -4,3 +4,5 @@ keystoreFile=$ESGF_KEYSTORE_FILE
 keystorePassword=$ESGF_KEYSTORE_PASSWORD
 # Alias of keystore entry used to sign the authentication cookie
 keystoreAlias=$ESGF_KEYSTORE_ALIAS
+
+orp.provider.list=/esg/config/esgf_known_providers.xml

@@ -47,8 +47,12 @@ echo "  slcsca.crt: |" >> "$YAML_FILE"
 cat "$CERTS/slcsca/ca.crt" | indent 4 >> "$YAML_FILE"
 echo "  slcsca.key: |" >> "$YAML_FILE"
 cat "$CERTS/slcsca/ca.key" | indent 4 >> "$YAML_FILE"
-#esg-hostcert-bundle.p12
-#esg-trust-bundle.jks
+# Because YAML, and hence Kubernetes configmaps and secrets, can't do binary, we
+# need to base64-encode the Java trust bundles
+echo "  esg-hostcert-bundle.p12.base64: |" >> "$YAML_FILE"
+cat "$CERTS/esg-hostcert-bundle.p12" | base64 | indent 4 >> "$YAML_FILE"
+echo "  esg-trust-bundle.jks.base64: |" >> "$YAML_FILE"
+cat "$CERTS/esg-trust-bundle.jks" | base64 | indent 4 >> "$YAML_FILE"
 echo "" >> "$YAML_FILE"
 
 # Write the secrets YAML file

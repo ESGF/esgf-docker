@@ -20,6 +20,13 @@ fi
 
 export ESGF_KEYSTORE_FILE ESGF_KEYSTORE_ALIAS ESGF_KEYSTORE_PASSWORD
 
+# Because Kubernetes configmaps can't do binary, decode the keystore from base64
+# if the file only exists with a .base64 extension
+BASE64_KEYSTORE_FILE="$ESGF_KEYSTORE_FILE.base64"
+if [ ! -f "$ESGF_KEYSTORE_FILE" ] && [ -f "$BASE64_KEYSTORE_FILE" ]; then
+    base64 --decode < "$BASE64_KEYSTORE_FILE" > "$ESGF_KEYSTORE_FILE"
+fi
+
 echo "[INFO] Creating esg-orp.properties"
 
 # Write the esg-orp.properties file using values from the environment variables

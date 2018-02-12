@@ -21,7 +21,7 @@ mkdir -p /esg/content/thredds/esgcet
 # Sync the skeleton to the actual content directory
 # The --ignore-existing flag should make sure any existing files are not overwritten
 info "Copying any missing configuration files"
-rsync -a --ignore-existing /esg/content/thredds-skel /esg/content/thredds
+rsync -a --ignore-existing /esg/content/thredds-skel/ /esg/content/thredds
 
 # Make sure the Tomcat user owns the THREDDS content root
 info "Transferring ownership of THREDDS content root to Tomcat"
@@ -53,6 +53,13 @@ export ESGF_TRUSTSTORE_FILE \
        ESGF_TRUSTSTORE_PASSWORD \
        ESGF_AUTH_URL \
        ESGF_COOKIE_SECRET_KEY
+
+# Because Kubernetes configmaps can't do binary, decode the truststore from base64
+# if the file only exists with a .base64 extension
+BASE64_TRUSTSTORE_FILE="$ESGF_TRUSTSTORE_FILE.base64"
+if [ ! -f "$ESGF_TRUSTSTORE_FILE" ] && [ -f "$BASE64_TRUSTSTORE_FILE" ]; then
+    base64 --decode < "$BASE64_TRUSTSTORE_FILE" > "$ESGF_TRUSTSTORE_FILE"
+fi
 
 THREDDS_WEB_XML="$CATALINA_HOME/webapps/thredds/WEB-INF/web.xml"
 # If the web.xml already contains the string "esg.orp", assume it has been mounted in
