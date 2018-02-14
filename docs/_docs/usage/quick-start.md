@@ -28,19 +28,24 @@ $ export ESGF_HOSTNAME=local.esgf.org
 $ export ESGF_CONFIG=/path/to/empty/config/directory
 ```
 
-The hostname should be a DNS name pointing to the current machine, or the IP
-address of the current machine. However, because the containers make HTTP calls
-to `ESGF_HOSTNAME`, it **cannot** be `localhost`, `127.0.0.1` or any DNS name that
-has been configured to resolve to `127.0.0.1`, as that would cause the container
-to try to contact itself.
+The hostname should be a DNS name that resolves to the **non-loopback address**
+of the current machine (i.e. **not** `127.0.0.1`). This is because the containers
+make HTTP calls to `ESGF_HOSTNAME`, so it **cannot** be `localhost` or any other
+DNS name that has been configured to resolve to `127.0.0.1`, as that would cause
+the container to try to contact itself.
+
+<div class="note note-warning" markdown="1">
+The Java SSL implementation does not like IP addresses as hostnames, so `ESGF_HOSTNAME`
+**must** be a domain name and not an IP address.
+
+To create a domain name <-> IP mapping on the local machine, just add an entry to
+`/etc/hosts` on Linux, or `/private/etc/hosts` on Mac. Alternatively, you can
+use an [xip.io](http://xip.io/) domain, which are off the form `<ip address>.xip.io`.
+</div>
 
 <div class="note note-info" markdown="1">
 To find out the IP addresses of the current machine, use either `ifconfig` or `ip addr`
 depending on which command is available.
-
-If you prefer to use a domain rather than an IP, you can create a mapping on the
-local machine by adding an entry to `/etc/hosts` on Linux, or `/private/etc/hosts`
-on Mac.
 </div>
 
 <div class="note note-warning" markdown="1">

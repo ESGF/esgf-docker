@@ -139,6 +139,8 @@ services:
       # Mount only the secrets we actually need
       - "$ESGF_CONFIG/certificates/esg-hostcert-bundle.p12:/esg/certificates/esg-hostcert-bundle.p12:ro"
       - "$ESGF_CONFIG/secrets/java-hostcert-bundle-password:/esg/secrets/java-hostcert-bundle-password:ro"
+      # Make sure the hostcert is trusted for HTTPS requests
+      - "$ESGF_CONFIG/certificates/hostcert/hostcert.crt:/usr/local/share/ca-certificates/hostcert.crt:ro"
     depends_on:
       - esgf-configure
       - esgf-tomcat

@@ -107,10 +107,11 @@ private key in `certificates/hostcert`.
 
 The two trust bundles contain the exact same certificates, just in different formats.
 First, the certificates from `certificates/esg_trusted_certificates.tar` are
-included, if it exists. This tar file is as downloaded from an ESGF distribution
-site, i.e. contains a single directory called `esg_trusted_certificates` containing
-all the trusted CAs for the federation. If the SLCS CA is self-signed, it is also
-added to the trust bundles so that the installation can trust its own certificates.
+included, if it exists. This tar file can be downloaded from an ESGF distribution
+site, and should contain a single directory called `esg_trusted_certificates`
+containing all the trusted CAs for the federation. If the SLCS CA is self-signed,
+it is also added to the trust bundles so that the installation can trust its own
+certificates.
 
 The command to create the trust bundles is:
 
