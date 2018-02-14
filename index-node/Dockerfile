@@ -1,7 +1,13 @@
 # ESGF index node:  esgf-search application running inside Tomcat
 
-ARG ESGF_TOMCAT_VERSION=latest
-FROM cedadev/esgf-tomcat:$ESGF_TOMCAT_VERSION
+ARG ESGF_HUB=cedadev
+ARG ESGF_VERSION=latest
+
+# This build stage is required because COPY --from=$ARG is not supported
+# https://github.com/moby/moby/issues/34482
+FROM ${ESGF_HUB}/esgf-configure:${ESGF_VERSION} as configuration
+
+FROM ${ESGF_HUB}/esgf-tomcat:$ESGF_VERSION
 
 MAINTAINER Earth System Grid Federation <esgf-devel@lists.llnl.gov>
 
@@ -16,9 +22,9 @@ ENV ESGF_REPO $ESGF_DIST_URL
 RUN curl -o $CATALINA_HOME/webapps/esg-search.war -sSL $ESGF_REPO/esg-search/esg-search.war
 
 # Install environment customisations
-COPY --from=cedadev/esgf-configure /esg/config /esg/config
+COPY --from=configuration /esg/config /esg/config
 # Make sure the config interpolation runs first by giving it a low ordinal
-COPY --from=cedadev/esgf-configure /opt/esgf-docker/scripts/interpolate-configs.sh /tomcat-init.d/01-interpolate.sh
+COPY --from=configuration /opt/esgf-docker/scripts/interpolate-configs.sh /tomcat-init.d/01-interpolate.sh
 COPY scripts/setenv.sh $CATALINA_HOME/bin/
 # Make sure this runs after the config interpolation
 COPY scripts/create-indices.sh /tomcat-init.d/02-create-indices.sh

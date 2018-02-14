@@ -11,7 +11,12 @@
 ## To get around this, we use a separate build stage with the full JDK to
 ## download and unpack the war, and copy the unpacked folder into the final container.
 
-ARG ESGF_TOMCAT_VERSION=latest
+ARG ESGF_HUB=cedadev
+ARG ESGF_VERSION=latest
+
+# This build stage is required because COPY --from=$ARG is not supported
+# https://github.com/moby/moby/issues/34482
+FROM ${ESGF_HUB}/esgf-configure:${ESGF_VERSION} as configuration
 
 FROM openjdk:8-jdk AS esg-orp-unpack
 
@@ -28,7 +33,7 @@ RUN mkdir /opt/esg-orp && \
 ## Stage 2 ##
 #############
 
-FROM cedadev/esgf-tomcat:$ESGF_TOMCAT_VERSION
+FROM ${ESGF_HUB}/esgf-tomcat:$ESGF_VERSION
 
 MAINTAINER Earth System Grid Federation <esgf-devel@lists.llnl.gov>
 
@@ -39,9 +44,9 @@ COPY --from=esg-orp-unpack --chown=tomcat:tomcat /opt/esg-orp $CATALINA_HOME/web
 RUN chmod -R o-rwx $CATALINA_HOME/webapps/esg-orp
 
 # Copy configuration and utils from esgf-configure
-COPY --from=cedadev/esgf-configure /esg/config /esg/config
+COPY --from=configuration /esg/config /esg/config
 # Make sure this script runs first by giving it a low ordinal
-COPY --from=cedadev/esgf-configure /opt/esgf-docker/scripts/interpolate-configs.sh /tomcat-init.d/01-interpolate.sh
+COPY --from=configuration /opt/esgf-docker/scripts/interpolate-configs.sh /tomcat-init.d/01-interpolate.sh
 # Install esg-orp.properties template
 COPY conf/esg-orp.properties.template $CATALINA_HOME/webapps/esg-orp/WEB-INF/classes/
 # This script interpolates environment variables into esg-orp.properties at runtime before Tomcat runs

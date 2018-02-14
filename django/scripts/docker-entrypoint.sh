@@ -50,9 +50,9 @@ django-admin migrate --no-input > /dev/null
 # Create Django superuser if required
 if [ "${DJANGO_CREATE_SUPERUSER:-0}" -eq 1 ]; then
     # We require that username and email exist
-    [ -z "$DJANGO_SUPERUSER_USERNAME" ] ||
+    [ -z "$DJANGO_SUPERUSER_USERNAME" ] && \
         error "DJANGO_SUPERUSER_USERNAME must be set to create superuser"
-    [ -z "$DJANGO_SUPERUSER_EMAIL" ] ||
+    [ -z "$DJANGO_SUPERUSER_EMAIL" ] && \
         error "DJANGO_SUPERUSER_EMAIL must be set to create superuser"
     # When passed to the Django shell, this command exits with a non-zero exit
     # code if the user already exists

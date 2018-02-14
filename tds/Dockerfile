@@ -10,7 +10,12 @@
 ## To get around this, we use a separate build stage with the full JDK to
 ## download and unpack the wars, and copy the unpacked folder into the final container.
 
-ARG ESGF_TOMCAT_VERSION=latest
+ARG ESGF_HUB=cedadev
+ARG ESGF_VERSION=latest
+
+# This build stage is required because COPY --from=$ARG is not supported
+# https://github.com/moby/moby/issues/34482
+FROM ${ESGF_HUB}/esgf-configure:${ESGF_VERSION} as configuration
 
 FROM openjdk:8-jdk AS esgf-tds-unpack
 
@@ -73,7 +78,7 @@ RUN TMPFILE=$(mktemp) && \
 ## Stage 2 ##
 #############
 
-FROM cedadev/esgf-tomcat:$ESGF_TOMCAT_VERSION
+FROM ${ESGF_HUB}/esgf-tomcat:$ESGF_VERSION
 
 MAINTAINER Earth System Grid Federation <esgf-devel@lists.llnl.gov>
 
@@ -89,9 +94,9 @@ COPY --from=esgf-tds-unpack --chown=tomcat:tomcat /opt/thredds $CATALINA_HOME/we
 RUN chmod -R o-rwx $CATALINA_HOME/webapps/thredds
 
 # Copy configuration and utils from esgf-configure
-COPY --from=cedadev/esgf-configure /esg/config /esg/config
+COPY --from=configuration /esg/config /esg/config
 # Make sure this script runs first by giving it a low ordinal
-COPY --from=cedadev/esgf-configure /opt/esgf-docker/scripts/interpolate-configs.sh /tomcat-init.d/01-interpolate.sh
+COPY --from=configuration /opt/esgf-docker/scripts/interpolate-configs.sh /tomcat-init.d/01-interpolate.sh
 
 # Install environment customisations, config files and templates
 COPY scripts/setenv.sh $CATALINA_HOME/bin/

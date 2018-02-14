@@ -5,7 +5,12 @@
 ## a builder image to check out the code and build wheels for all our dependencies
 #####
 
-ARG ESGF_DJANGO_VERSION=latest
+ARG ESGF_HUB=cedadev
+ARG ESGF_VERSION=latest
+
+# This build stage is required because COPY --from=$ARG is not supported
+# https://github.com/moby/moby/issues/34482
+FROM ${ESGF_HUB}/esgf-configure:${ESGF_VERSION} as configuration
 
 FROM python:2.7-slim AS esgf-cog-build
 
@@ -40,7 +45,7 @@ RUN mkdir /pip-wheels && \
 ## Stage 2 ##
 #############
 
-FROM cedadev/esgf-django:${ESGF_DJANGO_VERSION}
+FROM ${ESGF_HUB}/esgf-django:${ESGF_VERSION}
 
 MAINTAINER Earth System Grid Federation <esgf-devel@lists.llnl.gov>
 
@@ -75,8 +80,8 @@ RUN pip install --no-index --find-links=/pip-wheels -r $COG_INSTALL_DIR/requirem
 COPY python/*.py /usr/local/lib/python2.7/site-packages/
 
 # Install configuration files and scripts
-COPY --from=cedadev/esgf-configure /esg/config /esg/config
-COPY --from=cedadev/esgf-configure /opt/esgf-docker/scripts /opt/esgf-docker/scripts
+COPY --from=configuration /esg/config /esg/config
+COPY --from=configuration /opt/esgf-docker/scripts /opt/esgf-docker/scripts
 COPY conf/cog_settings.cfg.template $COG_CONFIG_DIR/
 COPY scripts/* /django-init.d/
 

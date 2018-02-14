@@ -5,7 +5,12 @@
 ## a builder image to check out the code and build wheels for all our dependencies
 #####
 
-ARG ESGF_DJANGO_VERSION=latest
+ARG ESGF_HUB=cedadev
+ARG ESGF_VERSION=latest
+
+# This build stage is required because COPY --from=$ARG is not supported
+# https://github.com/moby/moby/issues/34482
+FROM ${ESGF_HUB}/esgf-configure:${ESGF_VERSION} as configuration
 
 FROM python:2.7-slim AS esgf-auth-build
 
@@ -33,7 +38,7 @@ RUN mkdir /pip-wheels && \
 ## Stage 2 ##
 #############
 
-FROM cedadev/esgf-django:${ESGF_DJANGO_VERSION}
+FROM ${ESGF_HUB}/esgf-django:${ESGF_VERSION}
 
 MAINTAINER Earth System Grid Federation <esgf-devel@lists.llnl.gov>
 
@@ -56,9 +61,9 @@ COPY python/*.py /usr/local/lib/python2.7/site-packages/
 
 # Install configuration files
 # Start with the known providers file from the configure image
-COPY --from=cedadev/esgf-configure /esg/config/esgf_known_providers.xml /esg/config/
+COPY --from=configuration /esg/config/esgf_known_providers.xml /esg/config/
 # Make sure the config interpolation runs first by giving it a low ordinal
-COPY --from=cedadev/esgf-configure /opt/esgf-docker/scripts/interpolate-configs.sh /django-init.d/01-interpolate.sh
+COPY --from=configuration /opt/esgf-docker/scripts/interpolate-configs.sh /django-init.d/01-interpolate.sh
 # Install the template auth config file
 ENV ESGF_AUTH_CONFIG_FILE /esg/auth/esgf_auth_config.json
 COPY conf/esgf_auth_config.json.template "$ESGF_AUTH_CONFIG_FILE.template"
