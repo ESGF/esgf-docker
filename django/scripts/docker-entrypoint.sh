@@ -24,7 +24,13 @@ export DJANGO_SETTINGS_MODULE="$1"
 if [ "$(id -u)" = "0" ]; then
     # Make sure the trusted certificates have been updated
     info "Updating trusted certificates"
-    update-ca-certificates > /dev/null
+    # Split esg-trusted-bundle.pem into separate certificates in the ca-certificates directory
+    # used by update-ca-certificates
+    # This is required because keytool only imports the first cachain from each file
+    pushd /usr/local/share/ca-certificates
+    csplit -z -f 'cert' -b '%03d.crt' /esg/certificates/esg-trust-bundle.pem "/END CERTIFICATE/1" "{*}"
+    popd
+    update-ca-certificates
     # Make sure Python uses the correct trust bundle
     export SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt
 

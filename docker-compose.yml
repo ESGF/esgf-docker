@@ -133,15 +133,13 @@ services:
     restart: always
     environment:
       <<: *config_env
-      ESGF_KEYSTORE_FILE: /esg/certificates/esg-hostcert-bundle.p12
-      ESGF_KEYSTORE_PASSWORD_FILE: /esg/secrets/java-hostcert-bundle-password
-      ESGF_KEYSTORE_ALIAS: "$ESGF_HOSTNAME"
+      ESGF_SAML_CERT_FILE: /esg/certificates/hostcert/hostcert.crt
+      ESGF_SAML_KEY_FILE: /esg/certificates/hostcert/hostcert.key
     volumes:
-      # Mount only the secrets we actually need
-      - "$ESGF_CONFIG/certificates/esg-hostcert-bundle.p12:/esg/certificates/esg-hostcert-bundle.p12:ro"
-      - "$ESGF_CONFIG/secrets/java-hostcert-bundle-password:/esg/secrets/java-hostcert-bundle-password:ro"
-      # Make sure the hostcert is trusted for HTTPS requests
-      - "$ESGF_CONFIG/certificates/hostcert/hostcert.crt:/usr/local/share/ca-certificates/hostcert.crt:ro"
+      # Mount the host certificate and key for SAML signing
+      - "$ESGF_CONFIG/certificates/hostcert:/esg/certificates/hostcert:ro"
+      # Make sure the trusted certificate bundle is available
+      - "$ESGF_CONFIG/certificates/esg-trust-bundle.pem:/esg/certificates/esg-trust-bundle.pem:ro"
     depends_on:
       - esgf-configure
       - esgf-tomcat
@@ -156,6 +154,9 @@ services:
     restart: always
     environment:
       <<: *config_env
+    volumes:
+      # Make sure the trusted certificate bundle is available
+      - "$ESGF_CONFIG/certificates/esg-trust-bundle.pem:/esg/certificates/esg-trust-bundle.pem:ro"
     depends_on:
       - esgf-configure
       - esgf-tomcat
@@ -174,6 +175,8 @@ services:
       <<: *config_env
     volumes:
       - "$ESGF_CONFIG/secrets/database-password:/esg/config/.esg_pg_pass:ro"
+      # Make sure the trusted certificate bundle is available
+      - "$ESGF_CONFIG/certificates/esg-trust-bundle.pem:/esg/certificates/esg-trust-bundle.pem:ro"
     depends_on:
       - esgf-configure
       - esgf-tomcat
@@ -188,16 +191,14 @@ services:
         ESGF_VERSION: $ESGF_VERSION
     environment:
       <<: *config_env
-      ESGF_TRUSTSTORE_FILE: /esg/certificates/esg-trust-bundle.jks
-      ESGF_TRUSTSTORE_PASSWORD_FILE: /esg/secrets/java-trust-bundle-password
       ESGF_COOKIE_SECRET_KEY_FILE: /esg/secrets/shared-cookie-secret-key
     volumes:
       # Mount only the secrets we actually need
-      - "$ESGF_CONFIG/certificates/esg-trust-bundle.jks:/esg/certificates/esg-trust-bundle.jks:ro"
-      - "$ESGF_CONFIG/secrets/java-trust-bundle-password:/esg/secrets/java-trust-bundle-password:ro"
       - "$ESGF_CONFIG/secrets/shared-cookie-secret-key:/esg/secrets/shared-cookie-secret-key:ro"
       - "tds-content:/esg/content/thredds"
 #      - $ESGF_DATA_DIR:/esg/data
+      # Make sure the trusted certificate bundle is available
+      - "$ESGF_CONFIG/certificates/esg-trust-bundle.pem:/esg/certificates/esg-trust-bundle.pem:ro"
     depends_on:
       - esgf-configure
       - esgf-tomcat
@@ -219,8 +220,8 @@ services:
       - "$ESGF_CONFIG/secrets/database-password:/esg/config/.esg_pg_pass:ro"
       - "$ESGF_CONFIG/secrets/rootadmin-password:/esg/config/.esgf_pass:ro"
       - "$ESGF_CONFIG/secrets/cog-secret-key:/esg/secrets/cog-secret-key:ro"
-      # Make sure the hostcert is trusted for HTTPS requests
-      - "$ESGF_CONFIG/certificates/hostcert/hostcert.crt:/usr/local/share/ca-certificates/hostcert.crt:ro"
+      # Make sure the trusted certificate bundle is available
+      - "$ESGF_CONFIG/certificates/esg-trust-bundle.pem:/esg/certificates/esg-trust-bundle.pem:ro"
     depends_on:
       - esgf-configure
       - esgf-django
@@ -262,8 +263,8 @@ services:
       - "$ESGF_CONFIG/secrets/auth-secret-key:/esg/secrets/auth-secret-key:ro"
       - "$ESGF_CONFIG/secrets/shared-cookie-secret-key:/esg/secrets/shared-cookie-secret-key:ro"
       - "$ESGF_CONFIG/secrets/auth-database-password:/esg/secrets/auth-database-password:ro"
-      # Make sure the hostcert is trusted for HTTPS requests
-      - "$ESGF_CONFIG/certificates/hostcert/hostcert.crt:/usr/local/share/ca-certificates/hostcert.crt:ro"
+      # Make sure the trusted certificate bundle is available
+      - "$ESGF_CONFIG/certificates/esg-trust-bundle.pem:/esg/certificates/esg-trust-bundle.pem:ro"
     depends_on:
       - esgf-configure
       - esgf-django
@@ -327,6 +328,8 @@ services:
       - "$ESGF_CONFIG/certificates/slcsca/ca.key:/esg/certificates/slcsca/ca.key:ro"
       # Just mount an empty volume as the trustroots for now
       - "slcs-trustroots:/esg/certificates/slcsca/trustroots/:ro"
+      # Make sure the trusted certificate bundle is available
+      - "$ESGF_CONFIG/certificates/esg-trust-bundle.pem:/esg/certificates/esg-trust-bundle.pem:ro"
     depends_on:
       - esgf-django
       - esgf-postgres

@@ -81,11 +81,11 @@
     </init-param>
     <init-param>
       <param-name>trustoreFile</param-name>
-      <param-value>$ESGF_TRUSTSTORE_FILE</param-value>
+      <param-value>$JAVA_HOME/lib/security/cacerts</param-value>
     </init-param>
     <init-param>
       <param-name>trustorePassword</param-name>
-      <param-value>$ESGF_TRUSTSTORE_PASSWORD</param-value>
+      <param-value>changeit</param-value>
     </init-param>
     <init-param>
       <param-name>trimURIRegEx</param-name>

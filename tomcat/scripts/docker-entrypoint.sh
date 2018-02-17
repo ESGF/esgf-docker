@@ -8,6 +8,12 @@ function error { echo "[ERROR] $1" 1>&2; exit 1; }
 # Make sure the trusted certificates have been updated
 # The openjdk image should have installed a hook that updates the Java SSL truststore
 info "Updating trusted certificates"
+# Split esg-trusted-bundle.pem into separate certificates in the ca-certificates directory
+# used by update-ca-certificates
+# This is required because keytool only imports the first cachain from each file
+pushd /usr/local/share/ca-certificates
+csplit -z -f 'cert' -b '%03d.crt' /esg/certificates/esg-trust-bundle.pem "/END CERTIFICATE/1" "{*}"
+popd
 update-ca-certificates
 
 # Execute customisations from /tomcat-init.d before doing anything
