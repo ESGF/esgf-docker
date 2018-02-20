@@ -19,6 +19,7 @@ defaults:
       path: ""
     values:
       layout: default
+      toc: true
 #  - scope:
 #      path: ""
 #      type: "docs"

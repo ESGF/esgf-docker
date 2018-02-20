@@ -1,7 +1,7 @@
 ---
 title: Quick Start
 category: Usage
-order: 1
+order: 1.1
 ---
 
 This page describes the steps required to launch a single-node local test instance
@@ -21,11 +21,12 @@ git clone https://github.com/cedadev/esgf-docker.git
 cd esgf-docker
 ```
 
-A single-node test installation requires two environment variables to be set:
+A single-node test installation requires the following environment variables to be set:
 
 ```sh
-$ export ESGF_HOSTNAME=local.esgf.org
-$ export ESGF_CONFIG=/path/to/empty/config/directory
+export ESGF_HOSTNAME=local.esgf.org
+export ESGF_CONFIG=/path/to/empty/config/directory
+export ESGF_DATA=/path/to/data/directory
 ```
 
 The hostname should be a DNS name that resolves to the **non-loopback address**
@@ -38,9 +39,9 @@ the container to try to contact itself.
 The Java SSL implementation does not like IP addresses as hostnames, so `ESGF_HOSTNAME`
 **must** be a domain name and not an IP address.
 
-To create a domain name <-> IP mapping on the local machine, just add an entry to
+To create a domain name to IP mapping on the local machine, just add an entry to
 `/etc/hosts` on Linux, or `/private/etc/hosts` on Mac. Alternatively, you can
-use an [xip.io](http://xip.io/) domain, which are off the form `<ip address>.xip.io`.
+use an [xip.io](http://xip.io/) domain, which are of the form `<ip address>.xip.io`.
 </div>
 
 <div class="note note-info" markdown="1">
@@ -57,13 +58,13 @@ home directory.
 ## Generate configuration
 
 Once you have exported the environment variables, run the following commands to
-generate deployment secrets, self-signed certificates and certificate bundles in
-the various required formats:
+generate deployment secrets, self-signed certificates and the trusted certificate
+bundle:
 
 ```sh
-$ docker run -v "$ESGF_CONFIG":/esg -e ESGF_HOSTNAME cedadev/esgf-setup generate-secrets
-$ docker run -v "$ESGF_CONFIG":/esg -e ESGF_HOSTNAME cedadev/esgf-setup generate-test-certificates
-$ docker run -v "$ESGF_CONFIG":/esg -e ESGF_HOSTNAME cedadev/esgf-setup create-trust-bundles
+docker-compose run esgf-setup generate-secrets
+docker-compose run esgf-setup generate-test-certificates
+docker-compose run esgf-setup create-trust-bundle
 ```
 
 ## Launch containers
@@ -72,14 +73,21 @@ After generating the configuration, you are ready to launch the containers using
 Docker Compose:
 
 ```sh
-$ docker-compose up -d
+docker-compose up -d
 ```
 
 This will pull all the images from Docker Hub (unless they are already available
 locally) and launch the containers in order.
 
 Once all the containers are running normally, navigate to `https://$ESGF_HOSTNAME`
-in a browser and you should see the CoG interface.
+in a browser and you should see the CoG interface. You can view the container
+logs using commands of the form:
+
+```sh
+docker-compose logs [-f] esgf-{cog,index-node,idp-node,orp,slcs,...}
+```
+
+where the optional `-f` means "follow", as in `tail -f`.
 
 Try to log in with the OpenID `https://$ESGF_HOSTNAME/esgf-idp/openid/rootAdmin`.
 To find the `rootAdmin` password that was randomly generated for you, run the
@@ -94,11 +102,11 @@ echo "$(cat "$ESGF_CONFIG/secrets/rootadmin-password")"
 To stop the containers:
 
 ```sh
-$ docker-compose stop
+docker-compose stop
 ```
 
 To remove all the containers and associated data volumes:
 
 ```sh
-$ docker-compose down -v
+docker-compose down -v
 ```

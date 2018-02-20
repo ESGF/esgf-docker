@@ -10,6 +10,7 @@
 		<link href="https://use.fontawesome.com/releases/v5.0.6/css/all.css" rel="stylesheet">
 		<link rel="stylesheet" href="{{ site.baseurl }}/css/main.css">
 		<link rel="icon" type="image/png" href="{{ site.baseurl }}/images/favicon.png">
+		<link rel="stylesheet" href="{{ site.baseurl }}/css/links.css" />
 
 		<title>{{ page.title }} | {{ site.title }}</title>
 	</head>
@@ -64,6 +65,10 @@
 				<h3>{{ page.title }}</h3>
 			</div>
 			<article class="content">
+				{% if page.toc %}
+				<h2>Contents</h2>
+				{% include toc.html html=content id="toc" h_min=2 h_max=3 %}
+				{% endif %}
 				{{ content }}
 			</article>
 		</section>
@@ -73,5 +78,7 @@
 				document.body.classList.toggle("nav-open");
 			});
 		</script>
+		<script src="{{ site.baseurl }}/scripts/toc.js"></script>
+		<script src="{{ site.baseurl }}/scripts/headinglinks.js"></script>
 	</body>
 </html>

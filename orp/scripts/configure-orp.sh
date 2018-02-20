@@ -28,4 +28,6 @@ echo "[INFO] Creating esg-orp.properties"
 
 # Write the esg-orp.properties file using values from the environment variables
 ESG_ORP_PROPS="$CATALINA_HOME/webapps/esg-orp/WEB-INF/classes/esg-orp.properties"
-grep -q '@@keystoreFile@@' "$ESG_ORP_PROPS" && envsubst < "${ESG_ORP_PROPS}.template" > "$ESG_ORP_PROPS"
+if grep -q '@@keystoreFile@@' "$ESG_ORP_PROPS"; then
+    envsubst < "${ESG_ORP_PROPS}.template" > "$ESG_ORP_PROPS"
+fi

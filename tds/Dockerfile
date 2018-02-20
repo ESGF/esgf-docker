@@ -106,8 +106,10 @@ COPY scripts/setup-thredds.sh /tomcat-init.d/02-setup-thredds.sh
 COPY conf/applicationContext.xml $CATALINA_HOME/webapps/thredds/WEB-INF/
 # TDS customized logging (uses DEBUG)
 COPY conf/log4j2.xml $CATALINA_HOME/webapps/thredds/WEB-INF/classes/
-# Template for web.xml - this is interpolated with environment vars at runtime by setup-thredds.sh
+# Template for web.xml - this is interpolated with environment vars at runtime
 COPY conf/web.xml.template $CATALINA_HOME/webapps/thredds/WEB-INF/
+# Template for tomcat-users.xml - interpolated with environment vars at runtime
+COPY conf/tomcat-users.xml.template $CATALINA_HOME/conf/
 
 # Set up a skeleton for the THREDDS content root
 #
@@ -115,8 +117,5 @@ COPY conf/web.xml.template $CATALINA_HOME/webapps/thredds/WEB-INF/
 # directory should be mounted in. However, we cannot rely on the Docker volumes
 # behaviour of copying existing content to an empty volume, as this does not
 # happen with volumes in Kubernetes.
-RUN mkdir -p /esg/content/thredds-skel/esgcet
-COPY conf/threddsConfig.xml /esg/content/thredds-skel/
-COPY conf/catalog.xml /esg/content/thredds-skel/
-COPY conf/catalog.xml /esg/content/thredds-skel/
-COPY conf/esgcet/catalog.xml /esg/content/thredds-skel/esgcet/
+RUN mkdir -p /esg/content/
+COPY conf/thredds-skel /esg/content/thredds-skel

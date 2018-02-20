@@ -1,7 +1,7 @@
 ---
 title: Configuration
 category: Usage
-order: 2
+order: 1.2
 ---
 
 Before running `docker-compose up`, the configuration directory pointed to by

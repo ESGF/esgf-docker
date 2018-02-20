@@ -15,6 +15,67 @@ version: '3.4'
 
 
 services:
+  # Build dependency only
+  esgf-configure:
+    image: "${ESGF_HUB}/esgf-configure:${ESGF_VERSION}"
+    build: ./configure
+    # Use an entrypoint that exits immediately with success
+    entrypoint: ["true"]
+    # Environment variables required for config files
+    # This uses a YAML anchor so that these are easy to reference elsewhere
+    environment: &config_env
+      ESGF_HOSTNAME:
+      ESGF_DATABASE_HOST: esgf-postgres
+      ESGF_SOLR_INTERNAL_URL: "http://esgf-solr:8983"
+
+  # Build dependency only
+  esgf-tomcat:
+    image: "${ESGF_HUB}/esgf-tomcat:${ESGF_VERSION}"
+    build: ./tomcat
+    # Use an entrypoint that exits immediately with success
+    entrypoint: ["true"]
+
+  # Build dependency only
+  esgf-django:
+    image: "${ESGF_HUB}/esgf-django:${ESGF_VERSION}"
+    build: ./django
+    # Use an entrypoint that exits immediately with success
+    entrypoint: ["true"]
+
+  # The setup is included here so it can be used with docker-compose run
+  # The command is modified to a simple quit with 0 exit status
+  esgf-setup:
+    image: "${ESGF_HUB}/esgf-setup:${ESGF_VERSION}"
+    build: ./setup
+    environment:
+      ESGF_HOSTNAME:
+    volumes:
+      - "$ESGF_CONFIG:/esg"
+    # Use a command that exits immediately with success
+    command: ["true"]
+
+  # The publisher is included here so it can be used with docker-compose run
+  # The command is modified to a simple quit with 0 exit status
+  esgf-publisher:
+    image: "${ESGF_HUB}/esgf-publisher:${ESGF_VERSION}"
+    build: ./publisher
+    environment:
+      <<: *config_env
+      ESGF_DATABASE_PASSWORD_FILE: /esg/secrets/database-password
+      ESGF_TDS_USERNAME: rootAdmin
+      ESGF_TDS_PASSWORD_FILE: /esg/secrets/rootadmin-password
+      ESGF_ROOTADMIN_PASSWORD_FILE: /esg/secrets/rootadmin-password
+    volumes:
+      - "$ESGF_DATA:/esg/data:ro"
+      - "tds-content:/esg/content/thredds"
+      # Mount only the secrets we actually need
+      - "$ESGF_CONFIG/secrets/database-password:/esg/secrets/database-password:ro"
+      - "$ESGF_CONFIG/secrets/rootadmin-password:/esg/secrets/rootadmin-password:ro"
+      # Make sure the trusted certificate bundle is available
+      - "$ESGF_CONFIG/certificates/esg-trust-bundle.pem:/esg/certificates/esg-trust-bundle.pem:ro"
+    # Use a command that exits immediately with success, but don't change the entrypoint
+    command: ["true"]
+
   esgf-proxy:
     image: "${ESGF_HUB}/esgf-proxy:${ESGF_VERSION}"
     build: ./proxy
@@ -24,16 +85,18 @@ services:
       - "443:443"
     volumes:
       - "$ESGF_CONFIG/certificates/hostcert:/etc/nginx/ssl:ro"
+      # Make sure the trusted certificate bundle is available
+      - "$ESGF_CONFIG/certificates/esg-trust-bundle.pem:/esg/certificates/esg-trust-bundle.pem:ro"
     environment:
       ESGF_HOSTNAME:
-      ESGF_SOLR_UPSTREAM: esgf-solr:8983
-      ESGF_INDEX_NODE_UPSTREAM: esgf-index-node:8080
-      ESGF_TDS_UPSTREAM: esgf-tds:8080
-      ESGF_COG_UPSTREAM: esgf-cog:8000
-      ESGF_ORP_UPSTREAM: esgf-orp:8080
-      ESGF_IDP_UPSTREAM: esgf-idp-node:8080
-      ESGF_SLCS_UPSTREAM: esgf-slcs:8000
-      ESGF_AUTH_UPSTREAM: esgf-auth:8000
+      ESGF_SOLR_UPSTREAM: http://esgf-solr:8983
+      ESGF_INDEX_NODE_UPSTREAM: http://esgf-index-node:8080
+      ESGF_TDS_UPSTREAM: http://esgf-tds:8080
+      ESGF_COG_UPSTREAM: http://esgf-cog:8000
+      ESGF_ORP_UPSTREAM: http://esgf-orp:8080
+      ESGF_IDP_UPSTREAM: http://esgf-idp-node:8080
+      ESGF_SLCS_UPSTREAM: http://esgf-slcs:8000
+      ESGF_AUTH_UPSTREAM: http://esgf-auth:8000
     depends_on:
       - esgf-solr
       - esgf-index-node
@@ -41,7 +104,7 @@ services:
       - esgf-orp
       - esgf-idp-node
       - esgf-slcs
-#      - esgf-auth
+      - esgf-auth
       - esgf-cog
 
   # Zookeeper is not replicated (yet), but is used to store solr config
@@ -90,38 +153,16 @@ services:
     environment:
       DBSUPER_PASSWORD_FILE: /esg/secrets/database-password
       ESGCET_PASSWORD_FILE: /esg/secrets/database-publisher-password
+      ESGF_ROOTADMIN_EMAIL: "CoG@${ESGF_HOSTNAME}"
+      ESGF_ROOTADMIN_USERNAME: rootAdmin
+      ESGF_ROOTADMIN_OPENID: https://${ESGF_HOSTNAME}/esgf-idp/openid/rootAdmin
+      ESGF_ROOTADMIN_PASSWORD_FILE: /esg/secrets/rootadmin-password
     volumes:
       # Mount only the secrets we actually need
       - "$ESGF_CONFIG/secrets/database-password:/esg/secrets/database-password:ro"
       - "$ESGF_CONFIG/secrets/database-publisher-password:/esg/secrets/database-publisher-password:ro"
+      - "$ESGF_CONFIG/secrets/rootadmin-password:/esg/secrets/rootadmin-password:ro"
       - "postgres-data:/var/lib/pgsql/data"
-
-  # Build dependency only
-  esgf-configure:
-    image: "${ESGF_HUB}/esgf-configure:${ESGF_VERSION}"
-    build: ./configure
-    # Use an entrypoint that exits immediately with success
-    entrypoint: ["true"]
-    # Environment variables required for config files
-    # This uses a YAML anchor so that these are easy to reference elsewhere
-    environment: &config_env
-      ESGF_HOSTNAME:
-      ESGF_DATABASE_HOST: esgf-postgres
-      ESGF_SOLR_INTERNAL_URL: "http://esgf-solr:8983"
-
-  # Build dependency only
-  esgf-tomcat:
-    image: "${ESGF_HUB}/esgf-tomcat:${ESGF_VERSION}"
-    build: ./tomcat
-    # Use an entrypoint that exits immediately with success
-    entrypoint: ["true"]
-
-  # Build dependency only
-  esgf-django:
-    image: "${ESGF_HUB}/esgf-django:${ESGF_VERSION}"
-    build: ./django
-    # Use an entrypoint that exits immediately with success
-    entrypoint: ["true"]
 
   esgf-orp:
     image: "${ESGF_HUB}/esgf-orp:${ESGF_VERSION}"
@@ -192,11 +233,13 @@ services:
     environment:
       <<: *config_env
       ESGF_COOKIE_SECRET_KEY_FILE: /esg/secrets/shared-cookie-secret-key
+      ESGF_TDS_ADMIN_PASSWORD_FILE: /esg/secrets/rootadmin-password
     volumes:
+      - "tds-content:/esg/content/thredds"
+      - "$ESGF_DATA:/esg/data:ro"
       # Mount only the secrets we actually need
       - "$ESGF_CONFIG/secrets/shared-cookie-secret-key:/esg/secrets/shared-cookie-secret-key:ro"
-      - "tds-content:/esg/content/thredds"
-#      - $ESGF_DATA_DIR:/esg/data
+      - "$ESGF_CONFIG/secrets/rootadmin-password:/esg/secrets/rootadmin-password:ro"
       # Make sure the trusted certificate bundle is available
       - "$ESGF_CONFIG/certificates/esg-trust-bundle.pem:/esg/certificates/esg-trust-bundle.pem:ro"
     depends_on:

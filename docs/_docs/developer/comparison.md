@@ -1,7 +1,7 @@
 ---
 title: Comparison to original implementation
 category: Developers
-order: 4
+order: 2.2
 ---
 
 This project represents a significant reworking of the original implementation

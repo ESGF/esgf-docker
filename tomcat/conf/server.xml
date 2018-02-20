@@ -136,6 +136,9 @@
              protocolHeader="x-forwarded-proto"
              protocolHeaderHttpsValue="https" />
 
+      <!-- Tell Tomcat that the proxy is capable of providing an SSL client cert -->
+      <Valve className="org.apache.catalina.valves.SSLValve" />
+
       <!--For clustering, please take a look at documentation at:
           /docs/cluster-howto.html  (simple how to)
           /docs/config/cluster.html (reference documentation) -->
@@ -150,8 +153,9 @@
              resources under the key "UserDatabase".  Any edits
              that are performed against this UserDatabase are immediately
              available for use by the Realm.  -->
-        <Realm className="org.apache.catalina.realm.UserDatabaseRealm"
-               resourceName="UserDatabase"/>
+        <Realm className="org.apache.catalina.realm.UserDatabaseRealm" resourceName="UserDatabase">
+            <CredentialHandler className="org.apache.catalina.realm.MessageDigestCredentialHandler" algorithm="sha-512" />
+        </Realm>
       </Realm>
 
       <Host name="localhost"  appBase="webapps"

@@ -1,0 +1,30 @@
+#back-to-top {
+    position: fixed;
+    right: 30px;
+    bottom: 20px;
+}
+#back-to-top::before {
+    content: "\25b2";
+    font-size: 0.7em;
+    margin-right: 5px;
+}
+.highlight-in {
+    background: #f8f99a;
+    transition: .3s linear all;
+    /* animation: hilite 2.5s; */
+}
+.highlight-out {
+    background: inherit;
+    transition: .8s linear all;
+}
+.heading-link, .heading-link:hover, .heading-link:active, .heading-link:visited {
+    display: none;
+    margin-left: 10px;
+    font-size: 0.75em;
+    line-height: 0.75em;
+    text-decoration: none;
+    color: #cc4400;
+}
+h2:hover .heading-link, h3:hover .heading-link {
+    display: inline;
+}

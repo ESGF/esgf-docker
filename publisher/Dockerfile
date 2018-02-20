@@ -1,50 +1,59 @@
-# Docker image containing the ESGF publisher client
+#####
+# Docker image for the ESGF publisher client
+#####
 
-ARG ESGF_IMAGES_HUB=esgfhub
-ARG ESGF_VERSION=devel
-ARG ESGF_REPO=http://distrib-coffee.ipsl.jussieu.fr/pub/esgf
-FROM $ESGF_IMAGES_HUB/esgf-node:$ESGF_VERSION
-MAINTAINER Earth System Grid Federation <esgf-devel@lists.llnl.gov>
+ARG ESGF_HUB=cedadev
+ARG ESGF_VERSION=latest
 
-# install library pre-requisites
-RUN yum -y update; yum -y install libxml2-devel libxslt-devel; yum clean all
+FROM continuumio/miniconda
 
-# install Anaconda
-ENV CDAT_HOME=/usr/local/conda
-RUN cd /tmp && rm -rf $CDAT_HOME && \
-    wget --no-check-certificate https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh && \
-    bash Miniconda2-latest-Linux-x86_64.sh -b -p $CDAT_HOME
+# Set various environment vars that control the behaviour
+ENV ESGINI /esg/config/esgcet/esg.ini
+ENV UVCDAT_ANONYMOUS_LOG no
 
-# create CDAT virtual environment with Anaconda
-ENV PATH=${CDAT_HOME}/bin:$PATH
-RUN conda create -y -n esgf-pub -c conda-forge -c uvcdat cdutil
+# Install gettext-base for envsubst
+RUN apt-get update && \
+    apt-get install -y gettext-base && \
+    rm -rf /var/lib/apt/lists/*
 
-# activate virtual env and fetch some pre-requisites
-RUN source ${CDAT_HOME}/bin/activate esgf-pub && \
-    conda install -y -c conda-forge lxml requests psycopg2 decorator Tempita myproxyclient
+# Install packages using conda and pip
+RUN conda install -y -c conda-forge -c uvcdat \
+      gcc_linux-64 \
+      cdutil \
+      lxml \
+      requests \
+      psycopg2 \
+      decorator \
+      Tempita \
+      myproxyclient && \
+    pip install \
+      'SQLAlchemy==0.7.10' \
+      sqlalchemy_migrate \
+      esgprep
 
-# install other python pre-requisites
-RUN source ${CDAT_HOME}/bin/activate esgf-pub && \
-    pip install SQLAlchemy==0.7.10 && \
-    pip install sqlalchemy_migrate && \
-    pip install esgprep
-
-# install ESGF publisher
-# location: /usr/local/conda/envs/esgf-pub/
-ENV ESG_PUBLISHER_VERSION=v3.2.7
-RUN source ${CDAT_HOME}/bin/activate esgf-pub && \
-    cd /tmp && \
-    git clone https://github.com/ESGF/esg-publisher.git && \
-    cd esg-publisher && \
+# Install the publisher client from GitHub
+ARG ESG_PUBLISHER_VERSION=v3.2.7
+RUN git clone https://github.com/ESGF/esg-publisher.git /application && \
+    cd /application && \
     git checkout $ESG_PUBLISHER_VERSION && \
     cd src/python/esgcet && \
-    python setup.py install
+    python setup.py install && \
+    cd
 
-# env needed by Python client to trust the data node server certicate
-ENV SSL_CERT_DIR /etc/grid-security/certificates
-ENV ESGINI /esg/config/esgcet/esg.ini
+# Install entrypoint script
+COPY scripts/* /usr/local/bin/
+# Install configuration files and templates
+COPY conf/esgcet /esg/config/esgcet
 
-# startup scripts
-COPY scripts/ /usr/local/bin/
+# Set up a skeleton for the THREDDS content root
+#
+# We need to do this because, in order to be persistent, the THREDDS content
+# directory should be mounted in. However, we cannot rely on the Docker volumes
+# behaviour of copying existing content to an empty volume, as this does not
+# happen with volumes in Kubernetes.
+RUN mkdir -p /esg/content/
+COPY conf/thredds-skel /esg/content/thredds-skel
 
-ENTRYPOINT /usr/local/bin/docker-entrypoint.sh
+WORKDIR /esg/config/esgcet
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
+CMD ["run-publish-scripts"]

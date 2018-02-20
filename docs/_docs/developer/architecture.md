@@ -1,7 +1,8 @@
 ---
 title: Container Architecture
 category: Developers
-order: 3
+order: 2.1
+toc: false
 ---
 
 The following text-diagram shows the inheritance hierarchy of the ESGF Docker containers:
