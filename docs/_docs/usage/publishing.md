@@ -29,7 +29,7 @@ docker-compose run esgf-publisher bash
 
 This should open a bash shell inside a running publisher container that is already
 pre-configured with database access and volumes. It will also ensure that `esginitialize`
-is run and a certificate is generated to allow publishing to the index node.
+is run.
 
 All the remaining commands are executed in this shell.
 
