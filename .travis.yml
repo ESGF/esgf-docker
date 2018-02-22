@@ -6,22 +6,22 @@ services:
 addons:
   apt:
     packages:
-      - docker-ce
+    - docker-ce
 
-# We need to do some hacking to prevent Travis stopping a long-running build
-# We could use travis_wait but it is nice to see the progress...!
+branches:
+  only:
+    - master
+
 script:
-  # Create our own little function to print something to stdout every 60s
   - |
+    export ESGF_VERSION="$(git describe --always --tags)"
+    # Define a bash function that just echos something every 60s
     periodic_echo() {
       while true; do
         sleep 60
         echo "Ensuring execution continues..."
       done
     }
-  # Use the Git version as the tag
-  - |
-    export ESGF_VERSION="$(git describe --always --tags)"
     # Start the build in the background
     docker-compose build &
     build_pid=$!
@@ -34,12 +34,21 @@ script:
     build_status=$?
     # Kill the echo
     kill -9 $echo_pid
-    # Exit with the build status
-    exit $build_status
+    # If the build failed, exit now
+    [ "$build_status" -ne "0" ] && exit $build_status
+    # Only if the branch is master and not a pull request, push to Docker Hub
+    if [ "$TRAVIS_BRANCH" = "master" ] && [ "$TRAVIS_PULL_REQUEST" = "false" ]; then
+      # Log in to Docker Hub
+      docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD"
+      # Push with the git describe tag
+      docker-compose push
+      # Retag with latest and push
+      export ESGF_VERSION=latest
+      docker-compose build
+      docker-compose push
+    fi
 
-
-# If the build was successful, push them to Docker Hub with the Git version tag
-# Then retag with latest and push again only if master
-after_success:
-  - docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD"
-  - docker-compose push
+notifications:
+  email: false
+  slack:
+    secure: b1x8LxhKWKHS+cID+9XkFm3JLwGPviTVnPu91L7K9asBEsjYssYFudS/LCSxHdwVC9lJomoKe0ojy8fKx10NAAKacCb7h2TmVh/niaum38f12VeObhm6IPxUz3kytzcbCPR6OIs5fackkDSTuztR2vT2LlLKphs5mlvIMqkUg0wOPNxbl6KN188YSR9ozHfqt4uALitvYNdhkk5NEDmLZOVS//1cwYYHmDGw2uX6xQUf/nudLx14H7ea7eb0y3CyeQeAg6a7rE2iMEbwxqS35B231WYFD5rEkLPIEz/9h9syQRcK6eLObymbu7Ol9kNHa3GcepgI1RYfDJ71rKjzna1Y0rmqxAlf4M7ZvUGhiwqSasY9xgeWFzNn5dp+PsxhryVRUzHZ9W3JLq6NcVFp1evqPOQx94AE5uXwA8WWF5o/65yi4lQQ2uqXeRlYkYsXot8TPowZWV3HZZdQP859az0bivXKGif+N6Q3Ls56zFwQWJbtRFmVq1vDpa7f4wQ/zZysjxmJsYWfyAXo3hfcY59IGFtddoC96NIVSAaozjlKWOjWpG9GPjSNjZHF+GMNNYb/lBw6rddx5NDpvEvCDl3uNiX3CDjR/vZTg3xNkSAX3Ps5HDg+i7rXJ0Y/fe0Lf9dfx3jRxOLsBWgjE8OyZelr+mcgmakPr/aEhaL/pSc=
