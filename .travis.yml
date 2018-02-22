@@ -1,0 +1,20 @@
+sudo: required
+
+services:
+  - docker
+
+addons:
+  apt:
+    packages:
+      - docker-ce
+
+# Use the Git version as the tag
+script:
+  - export ESGF_VERSION="$(git describe --always --tags)"
+  - docker-compose build
+
+# If the build was successful, push them to Docker Hub with the Git version tag
+# Then retag with latest and push again only if master
+after_success:
+  - docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD"
+  - docker-compose push
