@@ -43,16 +43,7 @@ RUN git clone https://github.com/ESGF/esg-publisher.git /application && \
 # Install entrypoint script
 COPY scripts/* /usr/local/bin/
 # Install configuration files and templates
-COPY conf/esgcet /esg/config/esgcet
-
-# Set up a skeleton for the THREDDS content root
-#
-# We need to do this because, in order to be persistent, the THREDDS content
-# directory should be mounted in. However, we cannot rely on the Docker volumes
-# behaviour of copying existing content to an empty volume, as this does not
-# happen with volumes in Kubernetes.
-RUN mkdir -p /esg/content/
-COPY conf/thredds-skel /esg/content/thredds-skel
+COPY conf /esg/config/esgcet
 
 WORKDIR /esg/config/esgcet
 ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]

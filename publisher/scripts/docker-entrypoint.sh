@@ -103,10 +103,6 @@ done
 # Initialise the THREDDS content
 info "Ensuring THREDDS content root exists"
 mkdir -p /esg/content/thredds/esgcet
-# Sync the skeleton to the actual content directory
-# The --ignore-existing flag should make sure any existing files are not overwritten
-info "Copying any missing THREDDS configuration files"
-rsync -a --ignore-existing /esg/content/thredds-skel/ /esg/content/thredds
 
 # Run esginitialize
 info "Running esginitialize -c"

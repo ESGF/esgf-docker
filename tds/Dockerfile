@@ -111,11 +111,7 @@ COPY conf/web.xml.template $CATALINA_HOME/webapps/thredds/WEB-INF/
 # Template for tomcat-users.xml - interpolated with environment vars at runtime
 COPY conf/tomcat-users.xml.template $CATALINA_HOME/conf/
 
-# Set up a skeleton for the THREDDS content root
-#
-# We need to do this because, in order to be persistent, the THREDDS content
-# directory should be mounted in. However, we cannot rely on the Docker volumes
-# behaviour of copying existing content to an empty volume, as this does not
-# happen with volumes in Kubernetes.
-RUN mkdir -p /esg/content/
-COPY conf/thredds-skel /esg/content/thredds-skel
+# The threddsConfig.xml and root catalog.xml will normally not come from a volume
+# as they don't change with publishing
+# They should come through the same route as regular config files
+COPY conf/thredds/*.xml /esg/content/thredds/

@@ -12,10 +12,18 @@ function error { echo "[ERROR] $1"; exit 1; }
 # Initialise the THREDDS content
 info "Ensuring THREDDS content root exists"
 mkdir -p /esg/content/thredds/esgcet
-# Sync the skeleton to the actual content directory
-# The --ignore-existing flag should make sure any existing files are not overwritten
-info "Copying any missing THREDDS configuration files"
-rsync -a --ignore-existing /esg/content/thredds-skel/ /esg/content/thredds
+# Write an empty esgcet catalog if it doesn't exist
+if [ ! -f "/esg/content/thredds/esgcet/catalog.xml" ]; then
+    cat > /esg/content/thredds/esgcet/catalog.xml <<CATALOG
+<?xml version='1.0' encoding='UTF-8'?>
+<catalog xmlns:xlink="http://www.w3.org/1999/xlink"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns="http://www.unidata.ucar.edu/namespaces/thredds/InvCatalog/v1.0"
+         name="Earth System Grid catalog"
+         xsi:schemaLocation="http://www.unidata.ucar.edu/namespaces/thredds/InvCatalog/v1.0 http://www.unidata.ucar.edu/schemas/thredds/InvCatalog.1.0.2.xsd">
+</catalog>
+CATALOG
+fi
 # Make sure the Tomcat user owns the THREDDS content root
 info "Transferring ownership of THREDDS content root to Tomcat"
 chown -R tomcat:tomcat /esg/content/thredds

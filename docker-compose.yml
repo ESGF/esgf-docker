@@ -66,7 +66,7 @@ services:
       ESGF_ROOTADMIN_PASSWORD_FILE: /esg/secrets/rootadmin-password
     volumes:
       - "$ESGF_DATA:/esg/data:ro"
-      - "tds-content:/esg/content/thredds"
+      - "tds-content:/esg/content/thredds/esgcet"
       # Mount only the secrets we actually need
       - "$ESGF_CONFIG/secrets/database-password:/esg/secrets/database-password:ro"
       - "$ESGF_CONFIG/secrets/rootadmin-password:/esg/secrets/rootadmin-password:ro"
@@ -235,7 +235,7 @@ services:
       ESGF_COOKIE_SECRET_KEY_FILE: /esg/secrets/shared-cookie-secret-key
       ESGF_TDS_ADMIN_PASSWORD_FILE: /esg/secrets/rootadmin-password
     volumes:
-      - "tds-content:/esg/content/thredds"
+      - "tds-content:/esg/content/thredds/esgcet"
       - "$ESGF_DATA:/esg/data:ro"
       # Mount only the secrets we actually need
       - "$ESGF_CONFIG/secrets/shared-cookie-secret-key:/esg/secrets/shared-cookie-secret-key:ro"

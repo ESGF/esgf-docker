@@ -41,7 +41,6 @@ ENV ESGF_HOME /esg
 
 # Copy the unpacked webapp from the previous build stage
 COPY --from=esgf-idp-unpack --chown=tomcat:tomcat /opt/esgf-idp $CATALINA_HOME/webapps/esgf-idp
-
 # Remove all permissions from any user except tomcat on the webapp
 RUN chmod -R o-rwx $CATALINA_HOME/webapps/esgf-idp
 

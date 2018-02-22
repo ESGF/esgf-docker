@@ -55,6 +55,15 @@ This means you need to make sure that the `ESGF_CONFIG` directory is in your
 home directory.
 </div>
 
+## Pull the container images from Docker Hub
+
+You only need to pull the images from Docker Hub when they have changed, or if you
+are deploying for the first time:
+
+```sh
+docker-compose pull
+```
+
 ## Generate configuration
 
 Once you have exported the environment variables, run the following commands to
