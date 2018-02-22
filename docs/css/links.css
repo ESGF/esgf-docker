@@ -1,5 +1,6 @@
 #back-to-top {
     position: fixed;
+    z-index: 99999;
     right: 30px;
     bottom: 20px;
 }
