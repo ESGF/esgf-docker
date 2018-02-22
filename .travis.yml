@@ -11,11 +11,13 @@ addons:
 # We need to do some hacking to prevent Travis stopping a long-running build
 # We could use travis_wait but it is nice to see the progress...!
 script:
-  # Create our own little function to print a "..." to stdout every 60s
+  # Create our own little function to print something to stdout every 60s
   - |
     periodic_echo() {
+      while true; do
         sleep 60
-        echo "..."
+        echo "Ensuring execution continues..."
+      done
     }
   # Use the Git version as the tag
   - |
