@@ -8,10 +8,33 @@ addons:
     packages:
       - docker-ce
 
-# Use the Git version as the tag
+# We need to do some hacking to prevent Travis stopping a long-running build
+# We could use travis_wait but it is nice to see the progress...!
 script:
-  - export ESGF_VERSION="$(git describe --always --tags)"
-  - travis_wait 30 docker-compose build
+  # Create our own little function to print a "..." to stdout every 60s
+  - |
+    periodic_echo() {
+        sleep 60
+        echo "..."
+    }
+  # Use the Git version as the tag
+  - |
+    export ESGF_VERSION="$(git describe --always --tags)"
+    # Start the build in the background
+    docker-compose build &
+    build_pid=$!
+    # Start the periodic echo in the background
+    periodic_echo &
+    echo_pid=$!
+    # Wait for the build to exit
+    wait $build_pid
+    # The final result should be the exit status of the build
+    build_status=$?
+    # Kill the echo
+    kill -9 $echo_pid
+    # Exit with the build status
+    exit $build_status
+
 
 # If the build was successful, push them to Docker Hub with the Git version tag
 # Then retag with latest and push again only if master
