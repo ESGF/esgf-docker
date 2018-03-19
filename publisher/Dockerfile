@@ -5,7 +5,7 @@
 ARG ESGF_HUB=cedadev
 ARG ESGF_VERSION=latest
 
-FROM continuumio/miniconda
+FROM continuumio/miniconda:4.3.27
 
 # Set various environment vars that control the behaviour
 ENV ESGINI /esg/config/esgcet/esg.ini
