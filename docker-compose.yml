@@ -26,6 +26,7 @@ services:
     environment: &config_env
       ESGF_HOSTNAME:
       ESGF_DATABASE_HOST: esgf-postgres
+      ESGF_SOLR_HOSTNAME: esgf-solr:8983
 
   # Build dependency only
   esgf-tomcat:
@@ -193,7 +194,6 @@ services:
     restart: always
     environment:
       <<: *config_env
-      ESGF_SOLR_HOSTNAME: esgf-solr:8983
     volumes:
       # Make sure the trusted certificate bundle is available
       - "$ESGF_CONFIG/certificates/esg-trust-bundle.pem:/esg/certificates/esg-trust-bundle.pem:ro"
