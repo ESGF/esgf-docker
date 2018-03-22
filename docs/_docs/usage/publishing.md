@@ -70,7 +70,7 @@ esgpublish --project test --map mapfiles/test.test.map --service fileservice --n
 ```
 
 After the operation completes, the file should be accessible starting from the TDS
-main catalog page, `http://${ESGF_HOSTNAME}/thredds/catalog/catalog.html`, and
+main catalog page, `https://${ESGF_HOSTNAME}/thredds/catalog/catalog.html`, and
 downloadable using any openid, password combination that is trusted by the data-node.
 
 The authorization required for downloading the file is specified inside the orp
@@ -89,8 +89,8 @@ esgpublish --project test --map mapfiles/test.test.map --service fileservice --n
 
 After about a minute, the dataset and file should be returned when querying Solr:
 
-  * `http://${ESGF_HOSTNAME}/solr/index.html#/datasets/query`
-  * `http://${ESGF_HOSTNAME}/solr/index.html#/files/query`
+  * `https://${ESGF_HOSTNAME}/solr/index.html#/datasets/query`
+  * `https://${ESGF_HOSTNAME}/solr/index.html#/files/query`
 
 Additionally, they should be returned when initiating a search from the CoG user
 interface, if the project has searching enabled: `https://${ESGF_HOSTNAME}/search/testproject/`.

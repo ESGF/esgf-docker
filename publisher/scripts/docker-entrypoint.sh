@@ -49,12 +49,12 @@ if [ -z "$ESGF_HESSIAN_URL" ]; then
 fi
 if [ -z "$ESGF_HESSIAN_METADATA_URL" ]; then
     [ -z "$ESGF_HOSTNAME" ] && error "ESGF_HESSIAN_METADATA_URL or ESGF_HOSTNAME must be set"
-    ESGF_HESSIAN_METADATA_URL="http://${ESGF_HOSTNAME}/esgcet/remote/hessian/guest/remoteMetadataService"
+    ESGF_HESSIAN_METADATA_URL="https://${ESGF_HOSTNAME}/esgcet/remote/hessian/guest/remoteMetadataService"
 fi
 : ${ESGF_TDS_HOSTNAME:="$ESGF_HOSTNAME"}
 if [ -z "$ESGF_TDS_CATALOG_URL" ]; then
     [ -z "$ESGF_TDS_HOSTNAME" ] && error "ESGF_TDS_CATALOG_URL, ESGF_TDS_HOSTNAME or ESGF_HOSTNAME must be set"
-    ESGF_TDS_CATALOG_URL="http://${ESGF_TDS_HOSTNAME}/thredds/catalog/esgcet"
+    ESGF_TDS_CATALOG_URL="https://${ESGF_TDS_HOSTNAME}/thredds/catalog/esgcet"
 fi
 if [ -z "$ESGF_TDS_REINIT_URL" ]; then
     [ -z "$ESGF_TDS_HOSTNAME" ] && error "ESGF_TDS_REINIT_URL, ESGF_TDS_HOSTNAME or ESGF_HOSTNAME must be set"

@@ -63,7 +63,6 @@ services:
       ESGF_DATABASE_PASSWORD_FILE: /esg/secrets/database-password
       ESGF_TDS_USERNAME: rootAdmin
       ESGF_TDS_PASSWORD_FILE: /esg/secrets/rootadmin-password
-      ESGF_ROOTADMIN_PASSWORD_FILE: /esg/secrets/rootadmin-password
     volumes:
       - "$ESGF_DATA:/esg/data:ro"
       - "tds-content:/esg/content/thredds/esgcet"
