@@ -7,8 +7,8 @@ MAINTAINER Earth System Grid Federation <esgf-devel@lists.llnl.gov>
 # Create the tomcat user and group
 ENV TOMCAT_USER tomcat
 ENV TOMCAT_GROUP tomcat
-ENV TOMCAT_UID 501
-ENV TOMCAT_GID 501
+ENV TOMCAT_UID 1001
+ENV TOMCAT_GID 1001
 RUN groupadd -g $TOMCAT_GID $TOMCAT_GROUP &&  \
     useradd -d $CATALINA_HOME -g $TOMCAT_GROUP -s /usr/sbin/nologin -u $TOMCAT_UID $TOMCAT_USER
 
@@ -17,18 +17,9 @@ RUN apt-get update && \
     apt-get install -y gettext-base && \
     rm -rf /var/lib/apt/lists/*
 
-# We want to start containers as root in order to deal with permissions issues
-# on mounted volumes, but we want to run tomcat as an unprivileged user
-# Use gosu for better sudo, as recommended here: https://docs.docker.com/engine/userguide/eng-image/dockerfile_best-practices/#user
-ENV GOSU_VERSION 1.10
-RUN curl -o /usr/local/bin/gosu -sSL "https://github.com/tianon/gosu/releases/download/$GOSU_VERSION/gosu-amd64" && \
-    curl -o /usr/local/bin/gosu.asc -sSL "https://github.com/tianon/gosu/releases/download/$GOSU_VERSION/gosu-amd64.asc" && \
-    export GNUPGHOME="$(mktemp -d)" && \
-    gpg --keyserver keyserver.ubuntu.com --recv-keys B42F6819007F00F88E364FD4036A9C25BF357DD4 && \
-    gpg --batch --verify /usr/local/bin/gosu.asc /usr/local/bin/gosu && \
-    rm -rf "$GNUPGHOME" /usr/local/bin/gosu.asc && \
-    chmod +x /usr/local/bin/gosu && \
-    gosu nobody true
+# Allow the tomcat user and any user in the root group to add trusted CAs
+RUN chown $TOMCAT_UID:0 $JAVA_HOME/lib/security/cacerts && \
+    chmod u+rw,g+rw $JAVA_HOME/lib/security/cacerts
 
 # Remove the default webapps
 RUN rm -rf $CATALINA_HOME/webapps/*
@@ -36,8 +27,13 @@ RUN rm -rf $CATALINA_HOME/webapps/*
 # Install custom server.xml with remote IP valve
 COPY conf/server.xml $CATALINA_HOME/conf/
 
-# Transfer ownership of CATALINA_HOME to TOMCAT_USER
-RUN chown -R $TOMCAT_USER:$TOMCAT_GROUP $CATALINA_HOME
+# We want to allow running as any user in the root group
+# So transfer ownership of CATALINA_HOME to the tomcat user and root group, with
+# rw for both
+# Remove the setgid bit from the conf directory as it prevents the root group using it
+RUN chown -R $TOMCAT_UID:0 $CATALINA_HOME && \
+    chmod g-s+x $CATALINA_HOME/conf && \
+    chmod -R u+rw,g+rw,o= $CATALINA_HOME
 
 # Install custom entrypoint script
 COPY scripts/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh

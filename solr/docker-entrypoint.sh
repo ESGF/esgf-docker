@@ -2,10 +2,19 @@
 
 set -eo pipefail
 
-# Make sure SOLR_HOME is set and has the correct permissions
+# Make sure SOLR_HOME is set
 [ -z "$SOLR_HOME" ] && { echo "[ERROR] SOLR_HOME must be set" 1>&2 ; exit 1; }
-chown -R "$SOLR_USER":"$SOLR_GROUP" "$SOLR_HOME"
-chmod -R 700 "$SOLR_HOME"
+
+# If running as root, set permissions on SOLR_HOME before re-running this script
+# as SOLR_USER
+if [ "$(id -u)" = "0" ]; then
+    chown -R "$SOLR_USER":"$SOLR_GROUP" "$SOLR_HOME"
+    chmod -R 700 "$SOLR_HOME"
+
+    exec gosu "$SOLR_USER" "$BASH_SOURCE" "$@"
+fi
+
+# From here, we know we are running as SOLR_USER
 
 # Opt in to initialisation of SOLR_HOME on first use
 export INIT_SOLR_HOME="yes"
@@ -29,4 +38,4 @@ fi
 
 # Run the given command
 echo "[INFO] Running '$@'"
-exec gosu "$SOLR_USER" /opt/docker-solr/scripts/docker-entrypoint.sh "$@"
+/opt/docker-solr/scripts/docker-entrypoint.sh "$@"

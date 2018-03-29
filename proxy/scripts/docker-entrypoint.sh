@@ -43,5 +43,10 @@ tmpfile="$(mktemp)"
 cp /etc/nginx/conf.d/esgf.conf "$tmpfile"
 envsubst "$(printf '${%s} ' $(bash -c "compgen -A variable" | grep "ESGF_"))" < "$tmpfile" > /etc/nginx/conf.d/esgf.conf
 
-# Run the given command, usually nginx -g daemon off;
-exec "$@"
+# Run the given command, usually nginx -g daemon off;3
+# If we are not root, run the command using authbind to allow binding to 80 and 443
+if [ "$(id -u)" = "0" ]; then
+    exec "$@"
+else
+    exec authbind --deep "$@"
+fi

@@ -11,7 +11,7 @@ echo "[INFO] Checking environment"
 : ${ESGF_KEYSTORE_ALIAS:="$ESGF_HOSTNAME"}
 
 echo "[INFO] Creating PKCS12 bundle for host certificate and private key"
-ESGF_KEYSTORE_FILE="/esg/certificates/hostcert.p12"
+ESGF_KEYSTORE_FILE="$CATALINA_HOME/conf/hostcert.p12"
 # Generate a random keystore password for this container run
 ESGF_KEYSTORE_PASSWORD="$(echo -n "$(tr -dc '[:alnum:]' < /dev/urandom | head -c "20")")"
 openssl pkcs12 -export \
@@ -20,7 +20,6 @@ openssl pkcs12 -export \
     -in "$ESGF_SAML_CERT_FILE" \
     -inkey "$ESGF_SAML_KEY_FILE" \
     -password "pass:$ESGF_KEYSTORE_PASSWORD"
-chmod "g+r,o+r" "$ESGF_KEYSTORE_FILE"
 
 export ESGF_KEYSTORE_FILE ESGF_KEYSTORE_ALIAS ESGF_KEYSTORE_PASSWORD
 

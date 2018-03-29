@@ -2,6 +2,9 @@
 ## Base image for serving Django apps as a self-contained unit (static files and all).
 ##
 ## This uses gunicorn for the WSGI server.
+##
+## This container is designed so that images built from it can be run by any user
+## in the root group.
 #####
 
 # Use the smallest base image we can
@@ -11,29 +14,26 @@ FROM python:2.7-slim
 # the application rather than buffering it.
 ENV PYTHONUNBUFFERED 1
 
-# Configure an unprivileged user for running gunicorn
-ENV DJANGO_USER gunicorn
-ENV DJANGO_GROUP gunicorn
+# Create an unprivileged user to use
+ENV DJANGO_USER django
+ENV DJANGO_GROUP django
 ENV DJANGO_UID 1001
 ENV DJANGO_GID 1001
-RUN groupadd -g $DJANGO_GID $DJANGO_USER &&  \
-    useradd -d /home/gunicorn -m -g $DJANGO_GROUP -s /sbin/nologin -u $DJANGO_UID $DJANGO_USER
+RUN groupadd -g $DJANGO_GID $DJANGO_GROUP && \
+    useradd -M -g $DJANGO_GID -s /sbin/nologin -u $DJANGO_UID $DJANGO_USER
 
 # Install curl and gettext-base (for envsubst)
 RUN apt-get update && \
     apt-get install -y curl gettext-base && \
     rm -rf /var/lib/apt/lists/*
 
-# Use gosu for better sudo, as recommended here: https://docs.docker.com/engine/userguide/eng-image/dockerfile_best-practices/#user
-ENV GOSU_VERSION 1.10
-RUN curl -o /usr/local/bin/gosu -sSL "https://github.com/tianon/gosu/releases/download/$GOSU_VERSION/gosu-amd64" && \
-    curl -o /usr/local/bin/gosu.asc -sSL "https://github.com/tianon/gosu/releases/download/$GOSU_VERSION/gosu-amd64.asc" && \
-    export GNUPGHOME="$(mktemp -d)" && \
-    gpg --keyserver keyserver.ubuntu.com --recv-keys B42F6819007F00F88E364FD4036A9C25BF357DD4 && \
-    gpg --batch --verify /usr/local/bin/gosu.asc /usr/local/bin/gosu && \
-    rm -rf "$GNUPGHOME" /usr/local/bin/gosu.asc && \
-    chmod +x /usr/local/bin/gosu && \
-    gosu nobody true
+# Create a directory for files created at runtime that is owned by the django
+# user but also read-writable by the root group
+ENV DJANGO_STATIC_ROOT /opt/django/static
+RUN mkdir -p /opt/django/conf && \
+    mkdir -p $DJANGO_STATIC_ROOT && \
+    chown -R $DJANGO_UID:0 /opt/django && \
+    chmod -R 775 /opt/django
 
 # Install gunicorn and paste
 RUN pip install gunicorn Paste PasteDeploy

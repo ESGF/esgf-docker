@@ -26,7 +26,8 @@ RUN mkdir /opt/esgf-idp && \
     cd /opt/esgf-idp && \
     TMPFILE=$(mktemp) && \
     curl -o $TMPFILE -fsSL $ESGF_REPO/esgf-idp/esgf-idp.war && \
-    jar xvf $TMPFILE
+    jar xvf $TMPFILE && \
+    chmod -R g+w /opt/esgf-idp
 
 
 #############
@@ -40,15 +41,20 @@ MAINTAINER Earth System Grid Federation <esgf-devel@lists.llnl.gov>
 ENV ESGF_HOME /esg
 
 # Copy the unpacked webapp from the previous build stage
-COPY --from=esgf-idp-unpack --chown=tomcat:tomcat /opt/esgf-idp $CATALINA_HOME/webapps/esgf-idp
-# Remove all permissions from any user except tomcat on the webapp
-RUN chmod -R o-rwx $CATALINA_HOME/webapps/esgf-idp
+# Ensure it is owned by the tomcat user and root group, as we want any user in
+# the root group to be able to run the container
+COPY --from=esgf-idp-unpack --chown=1001:0 /opt/esgf-idp $CATALINA_HOME/webapps/esgf-idp
 
 # Copy configuration and utils from esgf-configure
-COPY --from=configuration /esg/config /esg/config
+# Ensure the config directory is owned by the tomcat user and root group
+RUN mkdir -p /esg/config && chown 1001:0 /esg/config && chmod 775 /esg/config
+COPY --chown=1001:0 --from=configuration /esg/config /esg/config
 COPY --from=configuration /opt/esgf-docker/scripts/interpolate-configs.sh /tomcat-init.d/
 
 # Install environment customisations, config files and templates
 COPY scripts/setenv.sh $CATALINA_HOME/bin/
 # Override Yadis configuration file to use full SLCS URL
 COPY conf/yadis-config.xml $CATALINA_HOME/webapps/esgf-idp/WEB-INF/classes/esg/idp/config/yadis-config.xml
+
+# Run as the tomcat user by default
+USER 1001

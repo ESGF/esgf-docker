@@ -6,18 +6,31 @@ function info { echo "[INFO] $1"; }
 function error { echo "[ERROR] $1" 1>&2; exit 1; }
 
 # Make sure the trusted certificates have been updated
-# The openjdk image should have installed a hook that updates the Java SSL truststore
 info "Updating trusted certificates"
-# Split esg-trusted-bundle.pem into separate certificates in the ca-certificates directory
-# used by update-ca-certificates
+# Split esg-trusted-bundle.pem into separate certificates
 # This is required because keytool only imports the first cachain from each file
-pushd /usr/local/share/ca-certificates
+CERT_DIR=$(mktemp -d)
+pushd $CERT_DIR
 csplit -z -f 'cert' -b '%03d.crt' /esg/certificates/esg-trust-bundle.pem "/END CERTIFICATE/1" "{*}"
 popd
-update-ca-certificates
+# Add each certificate to the Java truststore using keytool using the hash as the alias
+for file in $(find $CERT_DIR -name '*.crt'); do
+    alias="$(openssl x509 -hash -noout -in "$file").0"
+    # Test if the alias already exists in the keystore, do nothing
+    if keytool -list \
+               -keystore $JAVA_HOME/lib/security/cacerts -storepass changeit \
+               -alias $alias > /dev/null 2>&1; then
+        info "  Certificate $alias already imported"
+    else
+        info "  Importing certificate $alias"
+        keytool -import -noprompt \
+                -keystore $JAVA_HOME/lib/security/cacerts -storepass changeit \
+                -alias $alias -file $file
+    fi
+done
+rm -rf $CERT_DIR
 
 # Execute customisations from /tomcat-init.d before doing anything
-# These customisations also run as root, which can be handy
 info "Running customisations"
 if [ -d "/tomcat-init.d" ]; then
     for file in $(find /tomcat-init.d/ -mindepth 1 -type f -executable | sort -n); do
@@ -28,6 +41,6 @@ if [ -d "/tomcat-init.d" ]; then
     done
 fi
 
-# Just run the given command as the tomcat user
+# Just run the given command
 info "Starting tomcat"
-exec gosu "$TOMCAT_USER" "$@"
+exec "$@"

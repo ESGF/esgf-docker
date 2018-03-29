@@ -15,15 +15,10 @@ function error { echo "[ERROR] $1" 1>&2; exit 1; }
 
 # Make sure the trusted certificates have been updated
 info "Updating trusted certificates"
-# Split esg-trusted-bundle.pem into separate certificates in the ca-certificates directory
-# used by update-ca-certificates
-# This is required because keytool only imports the first cachain from each file
-pushd /usr/local/share/ca-certificates
-csplit -z -f 'cert' -b '%03d.crt' /esg/certificates/esg-trust-bundle.pem "/END CERTIFICATE/1" "{*}"
-popd
-update-ca-certificates
-# Make sure Python uses the correct trust bundle
-export SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt
+# Combine the trusted certificates into a single bundle and make sure Python and curl use it
+cat /etc/ssl/certs/ca-certificates.crt > /esg/config/esgcet/trust-bundle.pem
+cat /esg/certificates/esg-trust-bundle.pem >> /esg/config/esgcet/trust-bundle.pem
+export SSL_CERT_FILE=/esg/config/esgcet/trust-bundle.pem
 
 info "Configuring environment"
 ###
@@ -99,10 +94,6 @@ for src in $(find /esg/config/esgcet -type f -name '*.template'); do
     dest="${src%".template"}"
     [ -f "$dest" ] || envsubst < "$src" > "$dest"
 done
-
-# Initialise the THREDDS content
-info "Ensuring THREDDS content root exists"
-mkdir -p /esg/content/thredds/esgcet
 
 # Run esginitialize
 info "Running esginitialize -c"

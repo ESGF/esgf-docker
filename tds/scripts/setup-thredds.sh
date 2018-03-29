@@ -9,25 +9,6 @@ function error { echo "[ERROR] $1"; exit 1; }
 ## This script sets up the THREDDS config files
 #####
 
-# Initialise the THREDDS content
-info "Ensuring THREDDS content root exists"
-mkdir -p /esg/content/thredds/esgcet
-# Write an empty esgcet catalog if it doesn't exist
-if [ ! -f "/esg/content/thredds/esgcet/catalog.xml" ]; then
-    cat > /esg/content/thredds/esgcet/catalog.xml <<CATALOG
-<?xml version='1.0' encoding='UTF-8'?>
-<catalog xmlns:xlink="http://www.w3.org/1999/xlink"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xmlns="http://www.unidata.ucar.edu/namespaces/thredds/InvCatalog/v1.0"
-         name="Earth System Grid catalog"
-         xsi:schemaLocation="http://www.unidata.ucar.edu/namespaces/thredds/InvCatalog/v1.0 http://www.unidata.ucar.edu/schemas/thredds/InvCatalog.1.0.2.xsd">
-</catalog>
-CATALOG
-fi
-# Make sure the Tomcat user owns the THREDDS content root
-info "Transferring ownership of THREDDS content root to Tomcat"
-chown -R tomcat:tomcat /esg/content/thredds
-
 info "Interpolating THREDDS web.xml"
 
 : ${ESGF_AUTH_URL:="https://${ESGF_HOSTNAME}/esgf-auth"}

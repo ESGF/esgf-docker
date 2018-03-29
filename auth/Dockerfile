@@ -60,15 +60,21 @@ ENV PYTHONPATH /application:$PYTHONPATH
 COPY python/*.py /usr/local/lib/python2.7/site-packages/
 
 # Install configuration files
-# Start with the known providers file from the configure image
-COPY --from=configuration /esg/config/esgf_known_providers.xml /esg/config/
+# Ensure the config directory is owned by the Django user and root group
+RUN mkdir -p /esg/config && chown 1001:0 /esg/config && chmod 775 /esg/config
+COPY --chown=1001:0 --from=configuration /esg/config /esg/config
 # Make sure the config interpolation runs first by giving it a low ordinal
 COPY --from=configuration /opt/esgf-docker/scripts/interpolate-configs.sh /django-init.d/01-interpolate.sh
 # Install the template auth config file
 ENV ESGF_AUTH_CONFIG_FILE /esg/auth/esgf_auth_config.json
+# Ensure /esg/auth exists and is owned by the Django user and root group
+RUN mkdir -p /esg/auth && chown 1001:0 /esg/auth && chmod 775 /esg/auth
 COPY conf/esgf_auth_config.json.template "$ESGF_AUTH_CONFIG_FILE.template"
 # This script interpolates the auth config files with additional environment variables
 COPY scripts/auth-configure.sh /django-init.d/02-auth-configure.sh
+
+# Run as the Django user unless otherwise specified
+USER 1001
 
 # The "command" is just the settings module to use
 CMD ["esgf_auth_settings"]

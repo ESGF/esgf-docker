@@ -53,9 +53,14 @@ ENV ONLINECA_PASTEDEPLOY_FILE /opt/onlineca/onlineca.ini
 COPY conf/settings.py /application/esgf_slcs_server/
 # The Paste config file is a template that is interpolated at runtime with values
 # from environment variables
-COPY --chown=1001:1001 conf/onlineca.ini $ONLINECA_PASTEDEPLOY_FILE
+# Make sure the file is owned by the Django user but the root group, allowing
+# any user in the root group to write it
+COPY --chown=1001:0 conf/onlineca.ini $ONLINECA_PASTEDEPLOY_FILE
 # This is the script that does the interpolating
 COPY scripts/configure-onlineca.py /django-init.d/
+
+# Run as the Django user unless otherwise specified
+USER 1001
 
 # The "command" is just the settings file to use
 CMD ["esgf_slcs_server.settings"]

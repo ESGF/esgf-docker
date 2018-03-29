@@ -26,7 +26,8 @@ RUN mkdir /opt/esg-orp && \
     cd /opt/esg-orp && \
     TMPFILE=$(mktemp) && \
     curl -o $TMPFILE -fsSL $ESGF_REPO/esg-orp/esg-orp.war && \
-    jar xvf $TMPFILE
+    jar xvf $TMPFILE && \
+    chmod -R g+w /opt/esg-orp
 
 
 #############
@@ -38,13 +39,14 @@ FROM ${ESGF_HUB}/esgf-tomcat:$ESGF_VERSION
 MAINTAINER Earth System Grid Federation <esgf-devel@lists.llnl.gov>
 
 # Copy the unpacked webapp from the previous build stage
-COPY --from=esg-orp-unpack --chown=tomcat:tomcat /opt/esg-orp $CATALINA_HOME/webapps/esg-orp
-
-# Remove all permissions from any user except tomcat on the orp webapp
-RUN chmod -R o-rwx $CATALINA_HOME/webapps/esg-orp
+# Ensure it is owned by the tomcat user and root group, as we want any user in
+# the root group to be able to run the container
+COPY --from=esg-orp-unpack --chown=1001:0 /opt/esg-orp $CATALINA_HOME/webapps/esg-orp
 
 # Copy configuration and utils from esgf-configure
-COPY --from=configuration /esg/config /esg/config
+# Ensure the config directory is owned by the tomcat user and root group
+RUN mkdir -p /esg/config && chown 1001:0 /esg/config && chmod 775 /esg/config
+COPY --chown=1001:0 --from=configuration /esg/config /esg/config
 # Make sure this script runs first by giving it a low ordinal
 COPY --from=configuration /opt/esgf-docker/scripts/interpolate-configs.sh /tomcat-init.d/01-interpolate.sh
 # Install esg-orp.properties template
@@ -52,3 +54,6 @@ COPY conf/esg-orp.properties.template $CATALINA_HOME/webapps/esg-orp/WEB-INF/cla
 # This script interpolates environment variables into esg-orp.properties at runtime before Tomcat runs
 COPY scripts/configure-orp.sh /tomcat-init.d/02-configure-orp.sh
 COPY scripts/setenv.sh $CATALINA_HOME/bin/setenv.sh
+
+# Run as the tomcat user by default
+USER 1001

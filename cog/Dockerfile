@@ -29,6 +29,8 @@ RUN git clone https://github.com/EarthSystemCoG/COG /application && \
     cd /application && \
     git checkout $ESGF_COG_GIT_VERSION && \
     rm -rf .git && \
+    # It is important that the files are group-writable because of how static files are done in CoG
+    chmod -R g+w . && \
     cd -
 
 # Build wheels from the requirements, including additional dependencies from github
@@ -61,11 +63,12 @@ ENV COG_DIR=/usr/local/cog
 ENV COG_CONFIG_DIR=$COG_DIR/cog_config
 ENV COG_INSTALL_DIR=$COG_DIR/cog_install
 # Create any missing directories
-RUN mkdir -p $COG_CONFIG_DIR
-RUN mkdir -p $COG_INSTALL_DIR
+# Make sure the config directory is owned by the Django user and root group
+RUN mkdir -p $COG_INSTALL_DIR && chown 1001:0 $COG_INSTALL_DIR && chmod 775 $COG_INSTALL_DIR
+RUN mkdir -p $COG_CONFIG_DIR && chown 1001:0 $COG_CONFIG_DIR && chmod 775 $COG_CONFIG_DIR
 
 # Copy artifacts from the build stage
-COPY --from=esgf-cog-build /application $COG_INSTALL_DIR
+COPY --chown=1001:0 --from=esgf-cog-build /application $COG_INSTALL_DIR
 COPY --from=esgf-cog-build /pip-wheels  /pip-wheels
 COPY --from=esgf-cog-build /globus-client/mkproxy/mkproxy \
                            /usr/local/lib/python2.7/site-packages/globusonline/transfer/api_client/x509_proxy/
@@ -80,10 +83,15 @@ RUN pip install --no-index --find-links=/pip-wheels -r $COG_INSTALL_DIR/requirem
 COPY python/*.py /usr/local/lib/python2.7/site-packages/
 
 # Install configuration files and scripts
-COPY --from=configuration /esg/config /esg/config
+# Ensure the config directory is owned by the Django user and root group
+RUN mkdir -p /esg/config && chown 1001:0 /esg/config && chmod 775 /esg/config
+COPY --chown=1001:0 --from=configuration /esg/config /esg/config
 COPY --from=configuration /opt/esgf-docker/scripts /opt/esgf-docker/scripts
 COPY conf/cog_settings.cfg.template $COG_CONFIG_DIR/
 COPY scripts/* /django-init.d/
+
+# Run as the Django user unless otherwise specified
+USER 1001
 
 # The "command" is the settings module to use
 CMD ["cog_settings"]

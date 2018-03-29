@@ -73,6 +73,9 @@ RUN TMPFILE=$(mktemp) && \
     cd - && \
     rm -rf $TMPDIR
 
+# This is important to ensure the created files are writable by the root group later
+RUN chmod -R g+w /opt/thredds
+
 
 #############
 ## Stage 2 ##
@@ -88,13 +91,12 @@ ENV ESGF_HOME /esg
 RUN apt-get update && apt-get install -y rsync && rm -rf /var/lib/apt/lists/*
 
 # Copy the unpacked webapp from the previous build stage
-COPY --from=esgf-tds-unpack --chown=tomcat:tomcat /opt/thredds $CATALINA_HOME/webapps/thredds
-
-# Remove all permissions from any user except tomcat on the webapp
-RUN chmod -R o-rwx $CATALINA_HOME/webapps/thredds
+COPY --from=esgf-tds-unpack --chown=1001:0 /opt/thredds $CATALINA_HOME/webapps/thredds
 
 # Copy configuration and utils from esgf-configure
-COPY --from=configuration /esg/config /esg/config
+# Ensure the config directory is owned by the tomcat user and root group
+RUN mkdir -p /esg/config && chown 1001:0 /esg/config && chmod 775 /esg/config
+COPY --chown=1001:0 --from=configuration /esg/config /esg/config
 # Make sure this script runs first by giving it a low ordinal
 COPY --from=configuration /opt/esgf-docker/scripts/interpolate-configs.sh /tomcat-init.d/01-interpolate.sh
 
@@ -111,7 +113,14 @@ COPY conf/web.xml.template $CATALINA_HOME/webapps/thredds/WEB-INF/
 # Template for tomcat-users.xml - interpolated with environment vars at runtime
 COPY conf/tomcat-users.xml.template $CATALINA_HOME/conf/
 
+# Create the thredds content root owned by tomcat user and root group
+RUN mkdir -p /esg/content/thredds/esgcet && \
+    chown -R 1001:0 /esg/content/thredds && \
+    chmod -R g+w /esg/content/thredds
 # The threddsConfig.xml and root catalog.xml will normally not come from a volume
 # as they don't change with publishing
 # They should come through the same route as regular config files
 COPY conf/thredds/*.xml /esg/content/thredds/
+
+# Run as the tomcat user by default
+USER 1001

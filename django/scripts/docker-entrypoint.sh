@@ -7,47 +7,30 @@ function error { echo "[ERROR] $1" 1>&2; exit 1; }
 
 #####
 ## This script sets up Django before starting the WSGI server
-##
-## The first time this script is executed, it is run as root. It then updates the
-## trust store and runs the customisations as root before re-running itself as
-## the Django user.
-##
-## The second run as the Django user then applies migrations, creates the superuser
-## if required, collects the static files and starts gunicorn.
 #####
 
 # Configure settings module to the first argument
 info "Using DJANGO_SETTINGS_MODULE = $1"
 export DJANGO_SETTINGS_MODULE="$1"
 
-# If we are running as root, update the certificates and run the customisations
-if [ "$(id -u)" = "0" ]; then
-    # Make sure the trusted certificates have been updated
-    info "Updating trusted certificates"
-    # Split esg-trusted-bundle.pem into separate certificates in the ca-certificates directory
-    # used by update-ca-certificates
-    # This is required because keytool only imports the first cachain from each file
-    pushd /usr/local/share/ca-certificates
-    csplit -z -f 'cert' -b '%03d.crt' /esg/certificates/esg-trust-bundle.pem "/END CERTIFICATE/1" "{*}"
-    popd
-    update-ca-certificates
-    # Make sure Python uses the correct trust bundle
-    export SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt
-
-    # Execute customisations from /django-init.d before doing anything
-    info "Running customisations"
-    if [ -d "/django-init.d" ]; then
-        for file in $(find /django-init.d/ -mindepth 1 -type f -executable | sort -n); do
-            case "$file" in
-                *.sh) . $file ;;
-                *) eval $file ;;
-            esac
-        done
-    fi
-
-    # Run this script again as the Django user
-    exec gosu "$DJANGO_USER" "$BASH_SOURCE" "$@"
+# Run the customisations
+info "Running customisations"
+if [ -d "/django-init.d" ]; then
+    for file in $(find /django-init.d/ -mindepth 1 -type f -executable | sort -n); do
+        info "  Running $file"
+        case "$file" in
+            *.sh) . $file ;;
+            *) eval $file ;;
+        esac
+    done
 fi
+
+# Make sure the trusted certificates have been updated
+info "Updating trusted certificates"
+# Combine the trusted certificates into a single bundle and make sure Python uses it
+cat /etc/ssl/certs/ca-certificates.crt > /opt/django/conf/trust-bundle.pem
+cat /esg/certificates/esg-trust-bundle.pem >> /opt/django/conf/trust-bundle.pem
+export SSL_CERT_FILE=/opt/django/conf/trust-bundle.pem
 
 # Run database migrations
 info "Running database migrations"
@@ -114,7 +97,7 @@ function django_setting {
 # Note that because gunicorn understands SCRIPT_NAME, we need to strip it from
 # the STATIC_URL setting for the static app
 static_url="$(django_setting STATIC_URL)"
-cat > /home/gunicorn/paste.ini <<EOF
+cat > /opt/django/conf/paste.ini <<EOF
 [composite:main]
 use = egg:Paste#urlmap
 / = django
@@ -135,7 +118,7 @@ EOF
 # Run the app using gunicorn (we are already the Django user)
 info "Starting gunicorn"
 exec gunicorn \
-    --paste /home/gunicorn/paste.ini \
+    --paste /opt/django/conf/paste.ini \
     --bind 0.0.0.0:${GUNICORN_PORT:-8000} \
     --access-logfile '-' \
     --error-logfile '-' \

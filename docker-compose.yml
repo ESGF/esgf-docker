@@ -74,6 +74,12 @@ services:
       - "$ESGF_CONFIG/certificates/esg-trust-bundle.pem:/esg/certificates/esg-trust-bundle.pem:ro"
     # Use a command that exits immediately with success, but don't change the entrypoint
     command: ["true"]
+    depends_on:
+      - esgf-postgres
+      - esgf-index-node
+      - esgf-idp-node
+      - esgf-orp
+      - esgf-tds
 
   esgf-proxy:
     image: "${ESGF_HUB}/esgf-proxy:${ESGF_VERSION}"
@@ -234,7 +240,7 @@ services:
       ESGF_COOKIE_SECRET_KEY_FILE: /esg/secrets/shared-cookie-secret-key
       ESGF_TDS_ADMIN_PASSWORD_FILE: /esg/secrets/rootadmin-password
     volumes:
-      - "tds-content:/esg/content/thredds/esgcet"
+      - "tds-content:/esg/content/thredds/esgcet:ro"
       - "$ESGF_DATA:/esg/data:ro"
       # Mount only the secrets we actually need
       - "$ESGF_CONFIG/secrets/shared-cookie-secret-key:/esg/secrets/shared-cookie-secret-key:ro"
