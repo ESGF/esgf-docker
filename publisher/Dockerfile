@@ -38,6 +38,7 @@ RUN conda install -y -c conda-forge -c uvcdat \
     pip install \
       'SQLAlchemy==0.7.10' \
       sqlalchemy_migrate \
+      ESGConfigParser==0.1.10 \
       esgprep
 
 # Install the publisher client from GitHub

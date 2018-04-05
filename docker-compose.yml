@@ -25,8 +25,15 @@ services:
     # This uses a YAML anchor so that these are easy to reference elsewhere
     environment: &config_env
       ESGF_HOSTNAME:
-      ESGF_DATABASE_HOST: esgf-postgres
+      ESGF_DATABASE_HOST: esgf-postgres-esgcet
       ESGF_SOLR_HOSTNAME: esgf-solr:8983
+
+  # Build dependency only
+  esgf-postgres:
+    image: "${ESGF_HUB}/esgf-postgres:${ESGF_VERSION}"
+    build: ./postgres
+    # Use an entrypoint that exits immediately with success
+    entrypoint: ["true"]
 
   # Build dependency only
   esgf-tomcat:
@@ -61,21 +68,22 @@ services:
     build: ./publisher
     environment:
       <<: *config_env
-      ESGF_DATABASE_PASSWORD_FILE: /esg/secrets/database-password
+      ESGF_DATABASE_USER: esgcet
+      ESGF_DATABASE_PASSWORD_FILE: /esg/secrets/database-publisher-password
       ESGF_TDS_USERNAME: rootAdmin
       ESGF_TDS_PASSWORD_FILE: /esg/secrets/rootadmin-password
     volumes:
-      - "$ESGF_DATA:/esg/data:ro"
+      - "$ESGF_DATA:/esg/data"
       - "tds-content:/esg/content/thredds/esgcet"
       # Mount only the secrets we actually need
-      - "$ESGF_CONFIG/secrets/database-password:/esg/secrets/database-password:ro"
+      - "$ESGF_CONFIG/secrets/database-publisher-password:/esg/secrets/database-publisher-password:ro"
       - "$ESGF_CONFIG/secrets/rootadmin-password:/esg/secrets/rootadmin-password:ro"
       # Make sure the trusted certificate bundle is available
       - "$ESGF_CONFIG/certificates/esg-trust-bundle.pem:/esg/certificates/esg-trust-bundle.pem:ro"
     # Use a command that exits immediately with success, but don't change the entrypoint
     command: ["true"]
     depends_on:
-      - esgf-postgres
+      - esgf-postgres-esgcet
       - esgf-index-node
       - esgf-idp-node
       - esgf-orp
@@ -151,13 +159,19 @@ services:
     depends_on:
       - esgf-zookeeper
 
-  esgf-postgres:
-    image: "${ESGF_HUB}/esgf-postgres:${ESGF_VERSION}"
-    build: ./postgres
+  esgf-postgres-esgcet:
+    image: "${ESGF_HUB}/esgf-postgres-esgcet:${ESGF_VERSION}"
+    build:
+      context: ./postgres-esgcet
+      args:
+        ESGF_HUB: $ESGF_HUB
+        ESGF_VERSION: $ESGF_VERSION
     restart: always
     environment:
-      DBSUPER_PASSWORD_FILE: /esg/secrets/database-password
-      ESGCET_PASSWORD_FILE: /esg/secrets/database-publisher-password
+      POSTGRESQL_DATABASE: esgcet
+      POSTGRESQL_USER: dbsuper
+      POSTGRESQL_PASSWORD_FILE: /esg/secrets/database-password
+      ESGF_ESGCET_PASSWORD_FILE: /esg/secrets/database-publisher-password
       ESGF_ROOTADMIN_EMAIL: "CoG@${ESGF_HOSTNAME}"
       ESGF_ROOTADMIN_USERNAME: rootAdmin
       ESGF_ROOTADMIN_OPENID: https://${ESGF_HOSTNAME}/esgf-idp/openid/rootAdmin
@@ -167,7 +181,7 @@ services:
       - "$ESGF_CONFIG/secrets/database-password:/esg/secrets/database-password:ro"
       - "$ESGF_CONFIG/secrets/database-publisher-password:/esg/secrets/database-publisher-password:ro"
       - "$ESGF_CONFIG/secrets/rootadmin-password:/esg/secrets/rootadmin-password:ro"
-      - "postgres-data:/var/lib/pgsql/data"
+      - "postgres-esgcet-data:/var/lib/pgsql/data"
 
   esgf-orp:
     image: "${ESGF_HUB}/esgf-orp:${ESGF_VERSION}"
@@ -226,7 +240,7 @@ services:
     depends_on:
       - esgf-configure
       - esgf-tomcat
-      - esgf-postgres
+      - esgf-postgres-esgcet
 
   esgf-tds:
     image: "${ESGF_HUB}/esgf-tds:${ESGF_VERSION}"
@@ -250,6 +264,19 @@ services:
     depends_on:
       - esgf-configure
       - esgf-tomcat
+      - esgf-postgres-esgcet
+
+  esgf-postgres-cog:
+    image: "${ESGF_HUB}/esgf-postgres:${ESGF_VERSION}"
+    restart: always
+    environment:
+      POSTGRESQL_DATABASE: cogdb
+      POSTGRESQL_USER: dbsuper
+      POSTGRESQL_PASSWORD_FILE: /esg/secrets/database-password
+    volumes:
+      - "$ESGF_CONFIG/secrets/database-password:/esg/secrets/database-password:ro"
+      - "postgres-cog-data:/var/lib/pgsql/data"
+    depends_on:
       - esgf-postgres
 
   esgf-cog:
@@ -264,6 +291,11 @@ services:
       <<: *config_env
       ESGF_COG_TIME_ZONE: "Europe/London"
       ESGF_COG_SECRET_KEY_FILE: /esg/secrets/cog-secret-key
+      ESGF_COG_DATABASE_HOST: esgf-postgres-cog
+      ESGF_COG_DATABASE_PORT: "5432"
+      ESGF_COG_DATABASE_NAME: cogdb
+      ESGF_COG_DATABASE_USER: dbsuper
+      ESGF_COG_DATABASE_PASSWORD_FILE: /esg/config/.esg_pg_pass
     volumes:
       - "$ESGF_CONFIG/secrets/database-password:/esg/config/.esg_pg_pass:ro"
       - "$ESGF_CONFIG/secrets/rootadmin-password:/esg/config/.esgf_pass:ro"
@@ -273,19 +305,21 @@ services:
     depends_on:
       - esgf-configure
       - esgf-django
-      - esgf-postgres
+      - esgf-postgres-esgcet
+      - esgf-postgres-cog
 
-  esgf-auth-postgres:
-    image: "postgres:${POSTGRES_VERSION}"
+  esgf-postgres-auth:
+    image: "${ESGF_HUB}/esgf-postgres:${ESGF_VERSION}"
     restart: always
     environment:
-      POSTGRES_USER: authuser
-      POSTGRES_PASSWORD_FILE: /esg/secrets/auth-database-password
-      POSTGRES_DB: auth
-      POSTGRES_INITDB_ARGS: "--encoding=UTF-8"
+      POSTGRESQL_DATABASE: auth
+      POSTGRESQL_USER: authuser
+      POSTGRESQL_PASSWORD_FILE: /esg/secrets/auth-database-password
     volumes:
       - "$ESGF_CONFIG/secrets/auth-database-password:/esg/secrets/auth-database-password:ro"
-      - "auth-postgres-data:/var/lib/postgresql/data"
+      - "postgres-auth-data:/var/lib/pgsql/data"
+    depends_on:
+      - esgf-postgres
 
   esgf-auth:
     image: "${ESGF_HUB}/esgf-auth:${ESGF_VERSION}"
@@ -303,7 +337,7 @@ services:
       # Database settings
       DJANGO_DATABASE_DEFAULT_ENGINE: django.db.backends.postgresql
       DJANGO_DATABASE_DEFAULT_NAME: auth
-      DJANGO_DATABASE_DEFAULT_HOST: esgf-auth-postgres
+      DJANGO_DATABASE_DEFAULT_HOST: esgf-postgres-auth
       DJANGO_DATABASE_DEFAULT_PORT: "5432"
       DJANGO_DATABASE_DEFAULT_USER: authuser
       DJANGO_DATABASE_DEFAULT_PASSWORD_FILE: /esg/secrets/auth-database-password
@@ -316,19 +350,20 @@ services:
     depends_on:
       - esgf-configure
       - esgf-django
-      - esgf-auth-postgres
+      - esgf-postgres-auth
 
-  esgf-slcs-postgres:
-    image: "postgres:${POSTGRES_VERSION}"
+  esgf-postgres-slcs:
+    image: "${ESGF_HUB}/esgf-postgres:${ESGF_VERSION}"
     restart: always
     environment:
-      POSTGRES_USER: slcsuser
-      POSTGRES_PASSWORD_FILE: /esg/secrets/slcs-database-password
-      POSTGRES_DB: slcs
-      POSTGRES_INITDB_ARGS: "--encoding=UTF-8"
+      POSTGRESQL_DATABASE: slcs
+      POSTGRESQL_USER: slcsuser
+      POSTGRESQL_PASSWORD_FILE: /esg/secrets/slcs-database-password
     volumes:
       - "$ESGF_CONFIG/secrets/slcs-database-password:/esg/secrets/slcs-database-password:ro"
-      - "slcs-postgres-data:/var/lib/postgresql/data"
+      - "postgres-slcs-data:/var/lib/pgsql/data"
+    depends_on:
+      - esgf-postgres
 
   esgf-slcs:
     image: "${ESGF_HUB}/esgf-slcs:${ESGF_VERSION}"
@@ -346,14 +381,14 @@ services:
       # SLCS database
       DJANGO_DATABASE_DEFAULT_ENGINE: django.db.backends.postgresql
       DJANGO_DATABASE_DEFAULT_NAME: slcs
-      DJANGO_DATABASE_DEFAULT_HOST: esgf-slcs-postgres
+      DJANGO_DATABASE_DEFAULT_HOST: esgf-postgres-slcs
       DJANGO_DATABASE_DEFAULT_PORT: "5432"
       DJANGO_DATABASE_DEFAULT_USER: slcsuser
       DJANGO_DATABASE_DEFAULT_PASSWORD_FILE: /esg/secrets/slcs-database-password
       # ESGF User database
       DJANGO_DATABASE_USERDB_ENGINE: django.db.backends.postgresql
       DJANGO_DATABASE_USERDB_NAME: esgcet
-      DJANGO_DATABASE_USERDB_HOST: esgf-postgres
+      DJANGO_DATABASE_USERDB_HOST: esgf-postgres-esgcet
       DJANGO_DATABASE_USERDB_PORT: "5432"
       DJANGO_DATABASE_USERDB_USER: dbsuper
       DJANGO_DATABASE_USERDB_PASSWORD_FILE: /esg/secrets/database-password
@@ -380,8 +415,8 @@ services:
       - "$ESGF_CONFIG/certificates/esg-trust-bundle.pem:/esg/certificates/esg-trust-bundle.pem:ro"
     depends_on:
       - esgf-django
-      - esgf-postgres
-      - esgf-slcs-postgres
+      - esgf-postgres-esgcet
+      - esgf-postgres-slcs
 
 
 # Use Docker volumes to store persistent data
@@ -389,8 +424,9 @@ volumes:
   zk-data:
   zk-datalog:
   solr-home:
-  postgres-data:
+  postgres-auth-data:
+  postgres-cog-data:
+  postgres-esgcet-data:
+  postgres-slcs-data:
   tds-content:
-  slcs-postgres-data:
   slcs-trustroots:
-  auth-postgres-data:
