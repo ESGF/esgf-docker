@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 set -eo pipefail
 
@@ -15,7 +15,7 @@ if ${PG_INITIALIZED:-false} ; then
     "${psql[@]}" --command "CREATE USER esgcet;"
     # Load ESGF schemas
     psql+=( --dbname "$POSTGRESQL_DATABASE" )
-    sqldir="$(dirname "$BASH_SOURCE[0]")"
+    sqldir="$(dirname "$BASH_SOURCE")"
     "${psql[@]}" -f "${sqldir}/esgf_esgcet.sql"
     "${psql[@]}" -f "${sqldir}/esgf_node_manager.sql"
     "${psql[@]}" -f "${sqldir}/esgf_security.sql"

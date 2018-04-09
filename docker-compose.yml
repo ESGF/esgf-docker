@@ -26,12 +26,18 @@ services:
     environment: &config_env
       ESGF_HOSTNAME:
       ESGF_DATABASE_HOST: esgf-postgres-esgcet
-      ESGF_SOLR_HOSTNAME: esgf-solr:8983
 
   # Build dependency only
   esgf-postgres:
     image: "${ESGF_HUB}/esgf-postgres:${ESGF_VERSION}"
     build: ./postgres
+    # Use an entrypoint that exits immediately with success
+    entrypoint: ["true"]
+
+  # Build dependency only
+  esgf-solr:
+    image: "${ESGF_HUB}/esgf-solr:${ESGF_VERSION}"
+    build: ./solr
     # Use an entrypoint that exits immediately with success
     entrypoint: ["true"]
 
@@ -102,7 +108,7 @@ services:
       - "$ESGF_CONFIG/certificates/esg-trust-bundle.pem:/esg/certificates/esg-trust-bundle.pem:ro"
     environment:
       ESGF_HOSTNAME:
-      ESGF_SOLR_UPSTREAM: http://esgf-solr:8983
+      ESGF_SOLR_UPSTREAM: http://esgf-solr-slave:8983
       ESGF_INDEX_NODE_UPSTREAM: http://esgf-index-node:8080
       ESGF_TDS_UPSTREAM: http://esgf-tds:8080
       ESGF_COG_UPSTREAM: http://esgf-cog:8000
@@ -111,7 +117,7 @@ services:
       ESGF_SLCS_UPSTREAM: http://esgf-slcs:8000
       ESGF_AUTH_UPSTREAM: http://esgf-auth:8000
     depends_on:
-      - esgf-solr
+      - esgf-solr-slave
       - esgf-index-node
       - esgf-tds
       - esgf-orp
@@ -120,44 +126,27 @@ services:
       - esgf-auth
       - esgf-cog
 
-  # Zookeeper is not replicated (yet), but is used to store solr config
-  esgf-zookeeper:
-    image: "zookeeper:${ZOOKEEPER_VERSION}"
-    restart: always
-    expose:
-      - "2181"
-      - "2888"
-      - "3888"
-    volumes:
-      - "zk-data:/data"
-      - "zk-datalog:/datalog"
-    healthcheck:
-      test: ["CMD-SHELL", "echo ruok | nc 127.0.0.1 2181 | grep imok"]
-      interval: 10s
-      timeout: 5s
-      retries: 3
-
-  esgf-solr:
+  esgf-solr-master:
     image: "${ESGF_HUB}/esgf-solr:${ESGF_VERSION}"
-    build: ./solr
     restart: always
     environment:
       SOLR_HOME: /esg/solr-home
       SOLR_HEAP: 1g
-      ZOOKEEPER_HOST: esgf-zookeeper
-    command:
-      - "solr-foreground"
-      - "-c"
-      - "-p"
-      - "8983"
-      - "-z"
-      - "esgf-zookeeper:2181"
-      - "-s"
-      - "/esg/solr-home"
     volumes:
-      - "solr-home:/esg/solr-home"
+      - "solr-master-home:/esg/solr-home"
+
+  esgf-solr-slave:
+    image: "${ESGF_HUB}/esgf-solr:${ESGF_VERSION}"
+    restart: always
+    environment:
+      SOLR_HOME: /esg/solr-home
+      SOLR_HEAP: 1g
+      ESGF_SOLR_ENABLE_SLAVE: "1"
+      ESGF_SOLR_MASTER_URL: http://esgf-solr-master:8983
+    volumes:
+      - "solr-slave-home:/esg/solr-home"
     depends_on:
-      - esgf-zookeeper
+      - esgf-solr-master
 
   esgf-postgres-esgcet:
     image: "${ESGF_HUB}/esgf-postgres-esgcet:${ESGF_VERSION}"
@@ -214,13 +203,16 @@ services:
     restart: always
     environment:
       <<: *config_env
+      ESGF_SOLR_QUERY_URL: "http://esgf-solr-slave:8983"
+      ESGF_SOLR_PUBLISH_URL: "http://esgf-solr-master:8983"
     volumes:
       # Make sure the trusted certificate bundle is available
       - "$ESGF_CONFIG/certificates/esg-trust-bundle.pem:/esg/certificates/esg-trust-bundle.pem:ro"
     depends_on:
       - esgf-configure
       - esgf-tomcat
-      - esgf-solr
+      - esgf-solr-master
+      - esgf-solr-slave
       - esgf-orp
 
   esgf-idp-node:
@@ -423,7 +415,8 @@ services:
 volumes:
   zk-data:
   zk-datalog:
-  solr-home:
+  solr-master-home:
+  solr-slave-home:
   postgres-auth-data:
   postgres-cog-data:
   postgres-esgcet-data:

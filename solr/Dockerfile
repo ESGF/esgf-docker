@@ -6,29 +6,31 @@ FROM solr:5.5
 
 MAINTAINER Earth System Grid Federation <esgf-devel@lists.llnl.gov>
 
-# In order to consistently resolve permissions issues with volumes, we need to be root
+# We need to be root to make our modifications
 USER root
 
-# Install netcat so we can check if zookeeper is up
-RUN apt-get update && apt-get install -y netcat && rm -rf /var/lib/apt/lists/*
+# Make sure solr home initialises correctly
+ENV INIT_SOLR_HOME="yes"
 
-# But we want to run the solr command as the solr user
-# Use gosu for better sudo, as recommended here: https://docs.docker.com/engine/userguide/eng-image/dockerfile_best-practices/#user
-ENV GOSU_VERSION 1.10
-RUN curl -o /usr/local/bin/gosu -sSL "https://github.com/tianon/gosu/releases/download/$GOSU_VERSION/gosu-amd64" && \
-    curl -o /usr/local/bin/gosu.asc -sSL "https://github.com/tianon/gosu/releases/download/$GOSU_VERSION/gosu-amd64.asc" && \
-    export GNUPGHOME="$(mktemp -d)" && \
-    gpg --keyserver keyserver.ubuntu.com --recv-keys B42F6819007F00F88E364FD4036A9C25BF357DD4 && \
-    gpg --batch --verify /usr/local/bin/gosu.asc /usr/local/bin/gosu && \
-    rm -rf "$GNUPGHOME" /usr/local/bin/gosu.asc && \
-    chmod +x /usr/local/bin/gosu && \
-    gosu nobody true
+# Install the Solr home template from the distribution site
+ARG ESGF_REPO=http://dist.ceda.ac.uk/esgf
+RUN mkdir -p /esg/solr-core-config && \
+    curl -fsSL $ESGF_REPO/dist/esg-search/solr-home.tar | \
+      tar -x -C /esg/solr-core-config --strip-components=2 solr-home/mycore && \
+    rm -rf /esg/solr-core-config/core.properties && \
+    sed -i \
+      "s/http:\/\/localhost:8984/\${esgf.solr.master.url}/g" \
+      /esg/solr-core-config/conf/solrconfig.xml
 
-# Install the ESGF configset
-COPY config /esg/solr-config
+# Correct the permissions on /opt/solr so that any user in the root group can use it
+RUN chown -R 8983:0 /opt/solr && chmod -R g+w /opt/solr
 
-# Install the Docker entrypoint script that sets up the environment and switches to solr user
-COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+# Create /esg/solr-home with the correct permissions
+RUN mkdir -p /esg/solr-home && chown 8983:0 /esg/solr-home && chmod 775 /esg/solr-home
+VOLUME /esg/solr-home
 
-ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
-CMD ["solr-foreground"]
+# Install the initialisation scripts
+COPY initdb.d/* /docker-entrypoint-initdb.d/
+
+# Revert to the solr user
+USER 8983
