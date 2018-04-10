@@ -1,112 +1,97 @@
-# ESGF node with CoG web application
-#
-# To run CoG standalone on localhost:
-# docker run -ti -p 8000:8000 --name cog $ESGF_IMAGES_HUB/esgf-cog:${ESGF_VERSION}
-# To run CoG standalone with a specific hostname:
-# docker run -ti -p 8000:8000 --name cog -e ESGF_HOSTNAME=${ESGF_HOSTNAME} $ESGF_IMAGES_HUB/esgf-cog:${ESGF_VERSION} ${ESGF_HOSTNAME} false true
-# To map the local source directory:
-# docker run -ti -p 8000:8000 --name cog -v /Users/cinquini/Documents/workspace/cog:/usr/local/cog/cog_install $ESGF_IMAGES_HUB/esgf-cog:${ESGF_VERSION}
+#####
+## Image for running the ESGF CoG application
+##
+## To avoid including unnecessary build dependencies in the final image, we use
+## a builder image to check out the code and build wheels for all our dependencies
+#####
 
-ARG ESGF_IMAGES_HUB=esgfhub
-ARG ESGF_VERSION=devel
-FROM $ESGF_IMAGES_HUB/esgf-node:$ESGF_VERSION
+ARG ESGF_HUB=cedadev
+ARG ESGF_VERSION=latest
+
+# This build stage is required because COPY --from=$ARG is not supported
+# https://github.com/moby/moby/issues/34482
+FROM ${ESGF_HUB}/esgf-configure:${ESGF_VERSION} as configuration
+
+FROM python:2.7-slim AS esgf-cog-build
+
+# Install apt dependencies
+#   * git so we can pull stuff from github
+#   * build-essential for gcc
+#   * libpq-dev for psycopg2
+#   * libsqlite3-dev for pysqlite
+RUN apt-get update && \
+    apt-get install -y git build-essential libpq-dev libsqlite3-dev && \
+    rm -rf /var/lib/apt/lists/*
+
+# Clone the github repo and checkout the specified version
+ARG ESGF_COG_GIT_VERSION=v3.9.7
+RUN git clone https://github.com/EarthSystemCoG/COG /application && \
+    cd /application && \
+    git checkout $ESGF_COG_GIT_VERSION && \
+    rm -rf .git && \
+    # It is important that the files are group-writable because of how static files are done in CoG
+    chmod -R g+w . && \
+    cd -
+
+# Build wheels from the requirements, including additional dependencies from github
+# This includes manually building the mkproxy executable for the globus-client
+RUN mkdir /pip-wheels && \
+    pip wheel --wheel-dir /pip-wheels -r /application/requirements.txt && \
+    pip wheel --wheel-dir /pip-wheels --no-deps git+https://github.com/EarthSystemCoG/django-openid-auth.git && \
+    git clone https://github.com/globusonline/transfer-api-client-python.git /globus-client && \
+    pip wheel --wheel-dir /pip-wheels /globus-client && \
+    make -C /globus-client/mkproxy
+
+
+#############
+## Stage 2 ##
+#############
+
+FROM ${ESGF_HUB}/esgf-django:${ESGF_VERSION}
+
 MAINTAINER Earth System Grid Federation <esgf-devel@lists.llnl.gov>
 
-# choose CoG version
-ENV COG_TAG=v3.9.7
-
-# env variable to execute CoG initialization
-# may be overridden from command line after first container startup
-ENV INIT=true
+# Install postgresql-client for shared objects for psycopg2
+RUN mkdir -p /usr/share/man/man1 && \
+    mkdir -p /usr/share/man/man7 && \
+    apt-get update && \
+    apt-get install -y postgresql-client && \
+    rm -rf /var/lib/apt/lists/*
 
 # setup CoG environment
 ENV COG_DIR=/usr/local/cog
-RUN mkdir -p $COG_DIR
 ENV COG_CONFIG_DIR=$COG_DIR/cog_config
-RUN mkdir -p $COG_CONFIG_DIR
 ENV COG_INSTALL_DIR=$COG_DIR/cog_install
-RUN mkdir -p $COG_INSTALL_DIR
-ENV LD_LIBRARY_PATH=/usr/local/lib
+# Create any missing directories
+# Make sure the config directory is owned by the Django user and root group
+RUN mkdir -p $COG_INSTALL_DIR && chown 1001:0 $COG_INSTALL_DIR && chmod 775 $COG_INSTALL_DIR
+RUN mkdir -p $COG_CONFIG_DIR && chown 1001:0 $COG_CONFIG_DIR && chmod 775 $COG_CONFIG_DIR
 
-# install Python virtual environment
-RUN cd $COG_DIR && \
-    virtualenv venv
+# Copy artifacts from the build stage
+COPY --chown=1001:0 --from=esgf-cog-build /application $COG_INSTALL_DIR
+COPY --from=esgf-cog-build /pip-wheels  /pip-wheels
+COPY --from=esgf-cog-build /globus-client/mkproxy/mkproxy \
+                           /usr/local/lib/python2.7/site-packages/globusonline/transfer/api_client/x509_proxy/
 
-# download CoG specific tag or branch
-RUN cd $COG_DIR && \
-    git clone https://github.com/EarthSystemCoG/COG cog_install && \
-    cd cog_install && \
-    git checkout $COG_TAG
-    #git checkout -b devel origin/devel
+# Install the application + wheels (remove the wheels when we are done)
+RUN pip install --no-index --find-links=/pip-wheels -r $COG_INSTALL_DIR/requirements.txt && \
+    pip install --no-index --find-links=/pip-wheels django-openid-auth globusonline-transfer-api-client && \
+    pip install --no-deps -e $COG_INSTALL_DIR && \
+    rm -rf /pip-wheels
 
-# install CoG dependencies
-RUN cd $COG_INSTALL_DIR && \
-    source $COG_DIR/venv/bin/activate && \
-    pip install -r requirements.txt
+# Install CoG WSGI application and settings wrappers
+COPY python/*.py /usr/local/lib/python2.7/site-packages/
 
-# setup CoG database and configuration
-RUN cd $COG_INSTALL_DIR && \
-    source $COG_DIR/venv/bin/activate && \
-    python setup.py install
+# Install configuration files and scripts
+# Ensure the config directory is owned by the Django user and root group
+RUN mkdir -p /esg/config && chown 1001:0 /esg/config && chmod 775 /esg/config
+COPY --chown=1001:0 --from=configuration /esg/config /esg/config
+COPY --from=configuration /opt/esgf-docker/scripts /opt/esgf-docker/scripts
+COPY conf/cog_settings.cfg.template $COG_CONFIG_DIR/
+COPY scripts/* /django-init.d/
 
-# manually install additional dependencies
-RUN cd $COG_DIR && \
-    source $COG_DIR/venv/bin/activate && \
-    git clone https://github.com/EarthSystemCoG/django-openid-auth.git && \
-    cd django-openid-auth && \
-    python setup.py install
+# Run as the Django user unless otherwise specified
+USER 1001
 
-RUN cd $COG_DIR && \
-    git clone https://github.com/globusonline/transfer-api-client-python.git && \
-    cd transfer-api-client-python && \
-    source $COG_DIR/venv/bin/activate && \
-    python setup.py install && \
-    git pull && \
-    cd mkproxy && \
-    make  && \
-    cp mkproxy $COG_DIR/venv/lib/python2.7/site-packages/globusonline/transfer/api_client/x509_proxy/.
-
-# collect static files to ./static directory
-# must use a minimal settings file (configured with sqllite3 database)
-COPY conf/cog_settings.cfg /usr/local/cog/cog_config/cog_settings.cfg
-RUN cd $COG_INSTALL_DIR && \
-    source $COG_DIR/venv/bin/activate && \
-    python manage.py collectstatic --no-input && \
-    rm /usr/local/cog/cog_config/cog_settings.cfg
-    #python setup.py -q setup_cog --esgf=false
-
-# for some unknown reason, must reinstall captcha
-#RUN source $COG_DIR/venv/bin/activate && \
-#    pip uninstall -y django-simple-captcha && \
-#    pip install django-simple-captcha==0.5.1
-
-# expose default django port
-EXPOSE 8000
-
-# create non-privileged user to run django
-RUN groupadd -r cogadmin && \
-    useradd -r -g cogadmin cogadmin && \
-    mkdir -p ~cogadmin && \
-    chown cogadmin:cogadmin ~cogadmin
-
-# change user prompt
-RUN echo 'export PS1="[\u@\h]\$ "' >> ~cogadmin/.bashrc
-
-# change ownership of application directories
-#RUN chown -R cogadmin:cogadmin $COG_DIR
-
-# expose software installation directories
-# needed by apache httpd running cog through mod_wsgi
-VOLUME $COG_DIR/venv
-VOLUME $COG_INSTALL_DIR
-
-# startup
-COPY  scripts/ /usr/local/bin/
-COPY  conf/supervisord.cog.conf /etc/supervisor/conf.d/supervisord.cog.conf
-#COPY  scripts/wait_for_postgres.sh /usr/local/bin/wait_for_postgres.sh
-#COPY  scripts/process_esgf_config_archive.sh /usr/local/bin/process_esgf_config_archive.sh
-
-# wait for Postgred connection to be ready
-ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
-# will override these CMD options at run time
-CMD ["localhost", "false", "true"]
+# The "command" is the settings module to use
+CMD ["cog_settings"]

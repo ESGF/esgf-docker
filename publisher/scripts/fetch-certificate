@@ -1,0 +1,43 @@
+#!/bin/bash
+
+set -eo pipefail
+
+function info { echo "[INFO] $1"; }
+function error { echo "[ERROR] $1" 1>&2; exit 1; }
+
+#####
+## This script fetches a certificate from the SLCS for the given username and password
+#####
+
+[ -z "$ESGF_SLCS_CERTIFICATE_URL" ] && \
+    [ -z "$ESGF_SLCS_URL" ] && \
+    [ -z "$ESGF_HOSTNAME" ] && \
+    error "ESGF_SLCS_CERTIFICATE_URL, ESGF_SLCS_URL or ESGF_HOSTNAME must be set"
+: ${ESGF_SLCS_URL:="https://${ESGF_HOSTNAME}/esgf-slcs"}
+: ${ESGF_SLCS_CERTIFICATE_URL:="${ESGF_SLCS_URL}/onlineca/certificate/"}
+
+info "Fetching short-lived certificate from $ESGF_SLCS_CERTIFICATE_URL"
+
+username="$1"
+[ -z "$username" ] && read -p "Username: " username
+password="$2"
+[ -z "$password" ] && read -s -p "Password: " password
+echo
+
+CERTFILE="/esg/config/esgcet/.globus/certificate-file"
+mkdir -p /esg/config/esgcet/.globus
+
+info "  Generating private key and CSR"
+KEYFILE="$(mktemp)"
+CSRFILE="$(mktemp)"
+openssl req -new -nodes -batch -sha256 -newkey rsa:2048 -keyout "$KEYFILE" -out "$CSRFILE" >/dev/null 2>&1
+
+info "  Fetching certificate"
+curl -fsS -X POST \
+    --user "$username:$password" \
+    --data-urlencode "certificate_request@$CSRFILE" \
+    "$ESGF_SLCS_CERTIFICATE_URL" > "$CERTFILE"
+cat "$KEYFILE" >> "$CERTFILE"
+rm "$KEYFILE" "$CSRFILE"
+
+info "Complete"

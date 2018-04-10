@@ -11,327 +11,415 @@
 #       example: export ESGF_VERSION=1.0
 # ESGF_DATA_DIR: root of ESGF data directories
 
-version: '2.1'
+version: '3.4'
 
-networks:
-  # network to keep postgres database isolated
-  dbnetwork:
 
 services:
+  # Build dependency only
+  esgf-configure:
+    image: "${ESGF_HUB}/esgf-configure:${ESGF_VERSION}"
+    build: ./configure
+    # Use an entrypoint that exits immediately with success
+    entrypoint: ["true"]
+    # Environment variables required for config files
+    # This uses a YAML anchor so that these are easy to reference elsewhere
+    environment: &config_env
+      ESGF_HOSTNAME:
+      ESGF_DATABASE_HOST: esgf-postgres-esgcet
 
-  # data container holding site-specific ESGF configuration
-  # this container stops after the volumes are initialized
-  # only include configuration common to more than one container
-  esgf-config:
-    image: centos:6
-    container_name: esgf-config
-    volumes:
-     - $ESGF_CONFIG/httpd/certs/:/etc/certs/
-     - $ESGF_CONFIG/httpd/conf/esgf-httpd.conf:/etc/httpd/conf.d/esgf-httpd.conf
-     - $ESGF_CONFIG/archives/grid_security_certs.tar.xz:/root/archives/grid_security_certs.tar.xz
-     - $ESGF_CONFIG/archives/esgf_config.tar.xz:/root/archives/esgf_config.tar.xz
-
-  # ESGF postgres database
+  # Build dependency only
   esgf-postgres:
-     image: esgfhub/esgf-postgres:${ESGF_VERSION}
-     expose:
-       - "5432"
-     ports:
-       - "5432:5432"
-     container_name: postgres
-     networks:
-       - dbnetwork
-     volumes:
-       - pg_data:/var/lib/pgsql/data
+    image: "${ESGF_HUB}/esgf-postgres:${ESGF_VERSION}"
+    build: ./postgres
+    # Use an entrypoint that exits immediately with success
+    entrypoint: ["true"]
 
-  # ESGF Openid Relying Party
-  esgf-orp:
-    image: esgfhub/esgf-orp:${ESGF_VERSION}
-    container_name: orp
-    expose:
-      - "8080"
-      - "8443"
-    ports:
-      - "8083:8080"
-      - "8446:8443"
-    networks:
-      - default
-    volumes_from:
-      - esgf-config
-    environment:
-     - ESGF_HOSTNAME
-
-  # THREDDS Data Server
-  esgf-tds:
-    image: esgfhub/esgf-tds:${ESGF_VERSION}
-    container_name: tds
-    expose:
-      - "8080"
-      - "8443"
-    ports:
-      - "8084:8080"
-      - "8447:8443"
-    networks:
-      - default
-      - dbnetwork
-    volumes:
-      - tds_data:/esg/content/thredds
-      - $ESGF_CONFIG/webapps/thredds/WEB-INF/web.xml:/usr/local/tomcat/webapps/thredds/WEB-INF/web.xml
-      - $ESGF_DATA_DIR:/esg/data
-    volumes_from:
-      - esgf-config
-    environment:
-     - ESGF_HOSTNAME
-    depends_on:
-      - esgf-postgres
-
-  # ESGF Publisher Client
-  esgf-publisher:
-    image: esgfhub/esgf-publisher:${ESGF_VERSION}
-    container_name: publisher
-    networks:
-      - default
-      - dbnetwork
-    volumes:
-      - tds_data:/esg/content/thredds
-      - $ESGF_DATA_DIR:/esg/data
-    volumes_from:
-      - esgf-config
-    environment:
-     - SSL_CERT_DIR=/etc/grid-security/certificates
-     #- SSL_CERT_FILE=/etc/certs/esgf-ca-bundle.crt
-     - ESGF_HOSTNAME
-    depends_on:
-      - esgf-postgres
-
-  # ESGF Dashboard
-  esgf-dashboard:
-    image: esgfhub/esgf-dashboard:${ESGF_VERSION}
-    container_name: dashboard
-    networks:
-      - default
-      - dbnetwork
-    volumes_from:
-      - esgf-config
-    ports:
-      - "8085:8080"
-      - "8448:8443"
-    depends_on:
-      - esgf-postgres
-
-  # ESGF-Auth client
-  esgf-auth:
-    image: esgfhub/esgf-auth:${ESGF_VERSION}
-    container_name: esgf-auth
-    volumes:
-      - esgf_auth_install:/usr/local/esgf-auth
-
-  # ESGF Identity Provider
-  esgf-idp-node:
-    image: esgfhub/esgf-idp-node:${ESGF_VERSION}
-    container_name: idp-node
-    expose:
-      - "8080"
-      - "8443"
-    ports:
-      - "8082:8080"
-      - "8445:8443"
-    networks:
-      - default
-      - dbnetwork
-    volumes_from:
-      - esgf-config
-    depends_on:
-      - esgf-postgres
-
-  # Solr engine running within Jetty
+  # Build dependency only
   esgf-solr:
-    image: esgfhub/esgf-solr:${ESGF_VERSION}
-    container_name: solr
-    expose:
-      - "8983"
-      - "8984"
-    ports:
-      - "8983:8983"
-      - "8984:8984" 
+    image: "${ESGF_HUB}/esgf-solr:${ESGF_VERSION}"
+    build: ./solr
+    # Use an entrypoint that exits immediately with success
+    entrypoint: ["true"]
+
+  # Build dependency only
+  esgf-tomcat:
+    image: "${ESGF_HUB}/esgf-tomcat:${ESGF_VERSION}"
+    build: ./tomcat
+    # Use an entrypoint that exits immediately with success
+    entrypoint: ["true"]
+
+  # Build dependency only
+  esgf-django:
+    image: "${ESGF_HUB}/esgf-django:${ESGF_VERSION}"
+    build: ./django
+    # Use an entrypoint that exits immediately with success
+    entrypoint: ["true"]
+
+  # The setup is included here so it can be used with docker-compose run
+  # The command is modified to a simple quit with 0 exit status
+  esgf-setup:
+    image: "${ESGF_HUB}/esgf-setup:${ESGF_VERSION}"
+    build: ./setup
+    environment:
+      ESGF_HOSTNAME:
     volumes:
-      - solr_data:/esg/solr-index
-    volumes_from:
-      - esgf-config
-    networks:
-      - default
+      - "$ESGF_CONFIG:/esg"
+    # Use a command that exits immediately with success
+    command: ["true"]
 
-  # ESGF Index Node
-  # note the non-standard ports used on the host
-  # (since the standard ports are used by the data-node service)
-  esgf-index-node:
-    image: esgfhub/esgf-index-node:${ESGF_VERSION}
-    container_name: index-node
-    expose:
-      - "8080"
-      - "8443"
-    ports:
-      - "8081:8080"
-      - "8444:8443"
+  # The publisher is included here so it can be used with docker-compose run
+  # The command is modified to a simple quit with 0 exit status
+  esgf-publisher:
+    image: "${ESGF_HUB}/esgf-publisher:${ESGF_VERSION}"
+    build: ./publisher
+    environment:
+      <<: *config_env
+      ESGF_DATABASE_USER: esgcet
+      ESGF_DATABASE_PASSWORD_FILE: /esg/secrets/database-publisher-password
+      ESGF_TDS_USERNAME: rootAdmin
+      ESGF_TDS_PASSWORD_FILE: /esg/secrets/rootadmin-password
+    volumes:
+      - "$ESGF_DATA:/esg/data"
+      - "tds-content:/esg/content/thredds/esgcet"
+      # Mount only the secrets we actually need
+      - "$ESGF_CONFIG/secrets/database-publisher-password:/esg/secrets/database-publisher-password:ro"
+      - "$ESGF_CONFIG/secrets/rootadmin-password:/esg/secrets/rootadmin-password:ro"
+      # Make sure the trusted certificate bundle is available
+      - "$ESGF_CONFIG/certificates/esg-trust-bundle.pem:/esg/certificates/esg-trust-bundle.pem:ro"
+    # Use a command that exits immediately with success, but don't change the entrypoint
+    command: ["true"]
     depends_on:
-      - esgf-solr
-    volumes_from:
-      - esgf-config
-    networks:
-      - default
+      - esgf-postgres-esgcet
+      - esgf-index-node
+      - esgf-idp-node
+      - esgf-orp
+      - esgf-tds
 
-  # CoG
-  # data container to hold CoG source code and python virtual environment
-  # this container stops after the volume 'cog_data' is initialized
+  esgf-proxy:
+    image: "${ESGF_HUB}/esgf-proxy:${ESGF_VERSION}"
+    build: ./proxy
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - "$ESGF_CONFIG/certificates/hostcert:/etc/nginx/ssl:ro"
+      # Make sure the trusted certificate bundle is available
+      - "$ESGF_CONFIG/certificates/esg-trust-bundle.pem:/esg/certificates/esg-trust-bundle.pem:ro"
+    environment:
+      ESGF_HOSTNAME:
+      ESGF_SOLR_UPSTREAM: http://esgf-solr-slave:8983
+      ESGF_INDEX_NODE_UPSTREAM: http://esgf-index-node:8080
+      ESGF_TDS_UPSTREAM: http://esgf-tds:8080
+      ESGF_COG_UPSTREAM: http://esgf-cog:8000
+      ESGF_ORP_UPSTREAM: http://esgf-orp:8080
+      ESGF_IDP_UPSTREAM: http://esgf-idp-node:8080
+      ESGF_SLCS_UPSTREAM: http://esgf-slcs:8000
+      ESGF_AUTH_UPSTREAM: http://esgf-auth:8000
+    depends_on:
+      - esgf-solr-slave
+      - esgf-index-node
+      - esgf-tds
+      - esgf-orp
+      - esgf-idp-node
+      - esgf-slcs
+      - esgf-auth
+      - esgf-cog
+
+  esgf-solr-master:
+    image: "${ESGF_HUB}/esgf-solr:${ESGF_VERSION}"
+    restart: always
+    environment:
+      SOLR_HOME: /esg/solr-home
+      SOLR_HEAP: 1g
+    volumes:
+      - "solr-master-home:/esg/solr-home"
+
+  esgf-solr-slave:
+    image: "${ESGF_HUB}/esgf-solr:${ESGF_VERSION}"
+    restart: always
+    environment:
+      SOLR_HOME: /esg/solr-home
+      SOLR_HEAP: 1g
+      ESGF_SOLR_ENABLE_SLAVE: "1"
+      ESGF_SOLR_MASTER_URL: http://esgf-solr-master:8983
+    volumes:
+      - "solr-slave-home:/esg/solr-home"
+    depends_on:
+      - esgf-solr-master
+
+  esgf-postgres-esgcet:
+    image: "${ESGF_HUB}/esgf-postgres-esgcet:${ESGF_VERSION}"
+    build:
+      context: ./postgres-esgcet
+      args:
+        ESGF_HUB: $ESGF_HUB
+        ESGF_VERSION: $ESGF_VERSION
+    restart: always
+    environment:
+      POSTGRESQL_DATABASE: esgcet
+      POSTGRESQL_USER: dbsuper
+      POSTGRESQL_PASSWORD_FILE: /esg/secrets/database-password
+      ESGF_ESGCET_PASSWORD_FILE: /esg/secrets/database-publisher-password
+      ESGF_ROOTADMIN_EMAIL: "CoG@${ESGF_HOSTNAME}"
+      ESGF_ROOTADMIN_USERNAME: rootAdmin
+      ESGF_ROOTADMIN_OPENID: https://${ESGF_HOSTNAME}/esgf-idp/openid/rootAdmin
+      ESGF_ROOTADMIN_PASSWORD_FILE: /esg/secrets/rootadmin-password
+    volumes:
+      # Mount only the secrets we actually need
+      - "$ESGF_CONFIG/secrets/database-password:/esg/secrets/database-password:ro"
+      - "$ESGF_CONFIG/secrets/database-publisher-password:/esg/secrets/database-publisher-password:ro"
+      - "$ESGF_CONFIG/secrets/rootadmin-password:/esg/secrets/rootadmin-password:ro"
+      - "postgres-esgcet-data:/var/lib/pgsql/data"
+
+  esgf-orp:
+    image: "${ESGF_HUB}/esgf-orp:${ESGF_VERSION}"
+    build:
+      context: ./orp
+      args:
+        ESGF_HUB: $ESGF_HUB
+        ESGF_VERSION: $ESGF_VERSION
+    restart: always
+    environment:
+      <<: *config_env
+      ESGF_SAML_CERT_FILE: /esg/certificates/hostcert/hostcert.crt
+      ESGF_SAML_KEY_FILE: /esg/certificates/hostcert/hostcert.key
+    volumes:
+      # Mount the host certificate and key for SAML signing
+      - "$ESGF_CONFIG/certificates/hostcert:/esg/certificates/hostcert:ro"
+      # Make sure the trusted certificate bundle is available
+      - "$ESGF_CONFIG/certificates/esg-trust-bundle.pem:/esg/certificates/esg-trust-bundle.pem:ro"
+    depends_on:
+      - esgf-configure
+      - esgf-tomcat
+
+  esgf-index-node:
+    image: "${ESGF_HUB}/esgf-index-node:${ESGF_VERSION}"
+    build:
+      context: ./index-node
+      args:
+        ESGF_HUB: $ESGF_HUB
+        ESGF_VERSION: $ESGF_VERSION
+    restart: always
+    environment:
+      <<: *config_env
+      ESGF_SOLR_QUERY_URL: "http://esgf-solr-slave:8983"
+      ESGF_SOLR_PUBLISH_URL: "http://esgf-solr-master:8983"
+    volumes:
+      # Make sure the trusted certificate bundle is available
+      - "$ESGF_CONFIG/certificates/esg-trust-bundle.pem:/esg/certificates/esg-trust-bundle.pem:ro"
+    depends_on:
+      - esgf-configure
+      - esgf-tomcat
+      - esgf-solr-master
+      - esgf-solr-slave
+      - esgf-orp
+
+  esgf-idp-node:
+    image: "${ESGF_HUB}/esgf-idp-node:${ESGF_VERSION}"
+    build:
+      context: ./idp-node
+      args:
+        ESGF_HUB: $ESGF_HUB
+        ESGF_VERSION: $ESGF_VERSION
+    restart: always
+    environment:
+      <<: *config_env
+    volumes:
+      - "$ESGF_CONFIG/secrets/database-password:/esg/config/.esg_pg_pass:ro"
+      # Make sure the trusted certificate bundle is available
+      - "$ESGF_CONFIG/certificates/esg-trust-bundle.pem:/esg/certificates/esg-trust-bundle.pem:ro"
+    depends_on:
+      - esgf-configure
+      - esgf-tomcat
+      - esgf-postgres-esgcet
+
+  esgf-tds:
+    image: "${ESGF_HUB}/esgf-tds:${ESGF_VERSION}"
+    build:
+      context: ./tds
+      args:
+        ESGF_HUB: $ESGF_HUB
+        ESGF_VERSION: $ESGF_VERSION
+    environment:
+      <<: *config_env
+      ESGF_COOKIE_SECRET_KEY_FILE: /esg/secrets/shared-cookie-secret-key
+      ESGF_TDS_ADMIN_PASSWORD_FILE: /esg/secrets/rootadmin-password
+    volumes:
+      - "tds-content:/esg/content/thredds/esgcet:ro"
+      - "$ESGF_DATA:/esg/data:ro"
+      # Mount only the secrets we actually need
+      - "$ESGF_CONFIG/secrets/shared-cookie-secret-key:/esg/secrets/shared-cookie-secret-key:ro"
+      - "$ESGF_CONFIG/secrets/rootadmin-password:/esg/secrets/rootadmin-password:ro"
+      # Make sure the trusted certificate bundle is available
+      - "$ESGF_CONFIG/certificates/esg-trust-bundle.pem:/esg/certificates/esg-trust-bundle.pem:ro"
+    depends_on:
+      - esgf-configure
+      - esgf-tomcat
+      - esgf-postgres-esgcet
+
+  esgf-postgres-cog:
+    image: "${ESGF_HUB}/esgf-postgres:${ESGF_VERSION}"
+    restart: always
+    environment:
+      POSTGRESQL_DATABASE: cogdb
+      POSTGRESQL_USER: dbsuper
+      POSTGRESQL_PASSWORD_FILE: /esg/secrets/database-password
+    volumes:
+      - "$ESGF_CONFIG/secrets/database-password:/esg/secrets/database-password:ro"
+      - "postgres-cog-data:/var/lib/pgsql/data"
+    depends_on:
+      - esgf-postgres
+
   esgf-cog:
-     image: esgfhub/esgf-cog:${ESGF_VERSION}
-     container_name: cog
-     expose:
-       - "8000"
-     ports:
-       - "8000:8000"
-     volumes:
-       - cog_data:/usr/local/cog/cog_config
-     volumes_from:
-      - esgf-config
-     #command: $ESGF_HOSTNAME true true # ESGF=true, keep django server runnining on port 8000
-     command: $ESGF_HOSTNAME true false # ESGF=false, django server running on port 8000 = false
-     depends_on:
-       - esgf-postgres
-     networks:
-       - dbnetwork
-     environment:
-       - COG_DIR=/usr/local/cog
-       - COG_INSTALL_DIR=/usr/local/cog/cog_install
-       - COG_CONFIG_DIR=/usr/local/cog/cog_config
-       - ESGF_HOSTNAME
-       # flag to execute CoG initialization, defaults to true, may be overridden from shell environment before starting docker-compose
-       - ${INIT:-true}
+    image: "${ESGF_HUB}/esgf-cog:${ESGF_VERSION}"
+    build:
+      context: ./cog
+      args:
+        ESGF_HUB: $ESGF_HUB
+        ESGF_VERSION: $ESGF_VERSION
+    restart: always
+    environment:
+      <<: *config_env
+      ESGF_COG_TIME_ZONE: "Europe/London"
+      ESGF_COG_SECRET_KEY_FILE: /esg/secrets/cog-secret-key
+      ESGF_COG_DATABASE_HOST: esgf-postgres-cog
+      ESGF_COG_DATABASE_PORT: "5432"
+      ESGF_COG_DATABASE_NAME: cogdb
+      ESGF_COG_DATABASE_USER: dbsuper
+      ESGF_COG_DATABASE_PASSWORD_FILE: /esg/config/.esg_pg_pass
+    volumes:
+      - "$ESGF_CONFIG/secrets/database-password:/esg/config/.esg_pg_pass:ro"
+      - "$ESGF_CONFIG/secrets/rootadmin-password:/esg/config/.esgf_pass:ro"
+      - "$ESGF_CONFIG/secrets/cog-secret-key:/esg/secrets/cog-secret-key:ro"
+      # Make sure the trusted certificate bundle is available
+      - "$ESGF_CONFIG/certificates/esg-trust-bundle.pem:/esg/certificates/esg-trust-bundle.pem:ro"
+    depends_on:
+      - esgf-configure
+      - esgf-django
+      - esgf-postgres-esgcet
+      - esgf-postgres-cog
 
-  esgf-httpd:
-   image: esgfhub/esgf-httpd:${ESGF_VERSION}
-   container_name: httpd
-   entrypoint: /usr/local/bin/docker-entrypoint.sh
-   volumes:
-     - cog_data:/usr/local/cog/cog_config
-     - esgf_auth_install:/usr/local/esgf-auth
-     - $ESGF_CONFIG/esgf-auth/settings.py:/usr/local/esgf-auth/src/esgf-auth/esgf_auth/settings.py
-   # - $ESGF_CONFIG/esgf-auth/db.sqlite3:/tmp/db.sqlite3
-   volumes_from:
-     - esgf-config
-     - esgf-cog
-   # - esgf-node-manager
-   # - esgf-data-node
-   environment:
-     - SSL_CERT_DIR=/etc/grid-security/certificates
-     - SSL_CERT_FILE=/etc/certs/esgf-ca-bundle.crt
-     - COG_CONFIG_DIR=/usr/local/cog/cog_config
-     - ESGF_HOSTNAME
-   ports:
-     - "80:80"
-     - "443:443"
-   depends_on:
-     - esgf-cog
-     - esgf-auth
-   #  - esgf-node-manager
-   healthcheck:
-     test: 'curl --fail "https://${ESGF_HOSTNAME}/" || exit 1'
-   # httpd URLs must use hostname=$ESGF_HOSTNAME
-   networks:
-     default:
-       aliases:
-         - "${ESGF_HOSTNAME}"
-     dbnetwork: {}
+  esgf-postgres-auth:
+    image: "${ESGF_HUB}/esgf-postgres:${ESGF_VERSION}"
+    restart: always
+    environment:
+      POSTGRESQL_DATABASE: auth
+      POSTGRESQL_USER: authuser
+      POSTGRESQL_PASSWORD_FILE: /esg/secrets/auth-database-password
+    volumes:
+      - "$ESGF_CONFIG/secrets/auth-database-password:/esg/secrets/auth-database-password:ro"
+      - "postgres-auth-data:/var/lib/pgsql/data"
+    depends_on:
+      - esgf-postgres
 
-  esgf-node-manager:
-   image: esgfhub/esgf-node-manager:${ESGF_VERSION}
-   container_name: node-manager
-   volumes_from:
-     - esgf-config
-   environment:
-     - SSL_CERT_DIR=/etc/grid-security/certificates
-     - SSL_CERT_FILE=/etc/certs/esgf-ca-bundle.crt
-     - ESGF_HOSTNAME
-   depends_on:
-     - esgf-postgres
-   networks:
-     default: {}
-     dbnetwork: {}
+  esgf-auth:
+    image: "${ESGF_HUB}/esgf-auth:${ESGF_VERSION}"
+    build:
+      context: ./auth
+      args:
+        ESGF_HUB: $ESGF_HUB
+        ESGF_VERSION: $ESGF_VERSION
+    restart: always
+    environment:
+      <<: *config_env
+      SCRIPT_NAME: /esgf-auth
+      ESGF_AUTH_SECRET_KEY_FILE: /esg/secrets/auth-secret-key
+      ESGF_COOKIE_SECRET_KEY_FILE: /esg/secrets/shared-cookie-secret-key
+      # Database settings
+      DJANGO_DATABASE_DEFAULT_ENGINE: django.db.backends.postgresql
+      DJANGO_DATABASE_DEFAULT_NAME: auth
+      DJANGO_DATABASE_DEFAULT_HOST: esgf-postgres-auth
+      DJANGO_DATABASE_DEFAULT_PORT: "5432"
+      DJANGO_DATABASE_DEFAULT_USER: authuser
+      DJANGO_DATABASE_DEFAULT_PASSWORD_FILE: /esg/secrets/auth-database-password
+    volumes:
+      - "$ESGF_CONFIG/secrets/auth-secret-key:/esg/secrets/auth-secret-key:ro"
+      - "$ESGF_CONFIG/secrets/shared-cookie-secret-key:/esg/secrets/shared-cookie-secret-key:ro"
+      - "$ESGF_CONFIG/secrets/auth-database-password:/esg/secrets/auth-database-password:ro"
+      # Make sure the trusted certificate bundle is available
+      - "$ESGF_CONFIG/certificates/esg-trust-bundle.pem:/esg/certificates/esg-trust-bundle.pem:ro"
+    depends_on:
+      - esgf-configure
+      - esgf-django
+      - esgf-postgres-auth
+
+  esgf-postgres-slcs:
+    image: "${ESGF_HUB}/esgf-postgres:${ESGF_VERSION}"
+    restart: always
+    environment:
+      POSTGRESQL_DATABASE: slcs
+      POSTGRESQL_USER: slcsuser
+      POSTGRESQL_PASSWORD_FILE: /esg/secrets/slcs-database-password
+    volumes:
+      - "$ESGF_CONFIG/secrets/slcs-database-password:/esg/secrets/slcs-database-password:ro"
+      - "postgres-slcs-data:/var/lib/pgsql/data"
+    depends_on:
+      - esgf-postgres
 
   esgf-slcs:
-    command: ["-sn", "$ESGF_HOSTNAME", "-ds", "rootAdmin", "-sdn", "slcs", "-sdh", "slcs-postgres", "-sdu", "dbsuper", "-udn", "esgcet", "-udh", "esgf-postgres", "-udu", "dbsuper", "--static-url", "https://$ESGF_HOSTNAME/slcs-static/", "--url-prefix", "esgf-slcs", "--use-x-forwarded-host"]
-    container_name: esgf-slcs
-    depends_on:
-      - slcs-postgres
-      - slcs-nginx
-      - esgf-postgres
-    expose:
-      - "5000"
-    image: esgfhub/esgf-slcs:${ESGF_VERSION}
-    networks:
-      - default
-      - dbnetwork
-    ports:
-      - "5000:5000"
-    volumes:
-      - slcs_static_web:/var/www/static
-      - $ESGF_CONFIG/slcs/conf/db/:/usr/local/esgf-slcs-server/conf/db
-      - $ESGF_CONFIG/slcs/conf/ca/:/usr/local/esgf-slcs-server/conf/ca
-
-  slcs-nginx:
-    container_name: slcs-nginx
-    expose:
-      - "443"
-      - "80"
-    image: nginx
-    networks:
-      - default
-      - dbnetwork
-    volumes:
-      - "slcs_static_web:/usr/share/nginx/html"
-      - "$ESGF_CONFIG/slcs/conf/nginx/nginx.conf:/etc/nginx/conf.d/default.conf"
-
-  slcs-postgres:
-    container_name: slcs-postgres
+    image: "${ESGF_HUB}/esgf-slcs:${ESGF_VERSION}"
+    build:
+      context: ./slcs
+      args:
+        ESGF_HUB: $ESGF_HUB
+        ESGF_VERSION: $ESGF_VERSION
+    restart: always
     environment:
-      - POSTGRES_PASSWORD=changeit
-      - POSTGRES_USER=dbsuper
-      - POSTGRES_DB=slcs
-      - POSTGRES_INITDB_ARGS=--encoding=UTF-8
-    expose:
-      - 5432
-    image: postgres
-    networks:
-      - default
-      - dbnetwork
+      # Generic Django settings
+      SCRIPT_NAME: /esgf-slcs
+      DJANGO_ALLOWED_HOSTS: $ESGF_HOSTNAME
+      DJANGO_SECRET_KEY_FILE: /esg/secrets/slcs-secret-key
+      # SLCS database
+      DJANGO_DATABASE_DEFAULT_ENGINE: django.db.backends.postgresql
+      DJANGO_DATABASE_DEFAULT_NAME: slcs
+      DJANGO_DATABASE_DEFAULT_HOST: esgf-postgres-slcs
+      DJANGO_DATABASE_DEFAULT_PORT: "5432"
+      DJANGO_DATABASE_DEFAULT_USER: slcsuser
+      DJANGO_DATABASE_DEFAULT_PASSWORD_FILE: /esg/secrets/slcs-database-password
+      # ESGF User database
+      DJANGO_DATABASE_USERDB_ENGINE: django.db.backends.postgresql
+      DJANGO_DATABASE_USERDB_NAME: esgcet
+      DJANGO_DATABASE_USERDB_HOST: esgf-postgres-esgcet
+      DJANGO_DATABASE_USERDB_PORT: "5432"
+      DJANGO_DATABASE_USERDB_USER: dbsuper
+      DJANGO_DATABASE_USERDB_PASSWORD_FILE: /esg/secrets/database-password
+      # Make the rootAdmin account a superuser
+      DJANGO_CREATE_SUPERUSER: "1"
+      DJANGO_SUPERUSER_USERNAME: "rootAdmin"
+      DJANGO_SUPERUSER_EMAIL: "CoG@${ESGF_HOSTNAME}"
+      # Other SLCS-specific settings
+      ESGF_SLCS_URL: "https://${ESGF_HOSTNAME}/esgf-slcs"
+      ESGF_SLCS_BASIC_AUTH_REALM: $ESGF_HOSTNAME
+      ONLINECA_CERT_SUBJECT_TEMPLATE: /DC=esgf/CN=$$OPENID
+      ONLINECA_CERT_FILEPATH: /esg/certificates/slcsca/ca.crt
+      ONLINECA_KEY_FILEPATH: /esg/certificates/slcsca/ca.key
+      ONLINECA_TRUSTROOTS_DIR: /esg/certificates/slcsca/trustroots
+    volumes:
+      - "$ESGF_CONFIG/secrets/slcs-secret-key:/esg/secrets/slcs-secret-key:ro"
+      - "$ESGF_CONFIG/secrets/slcs-database-password:/esg/secrets/slcs-database-password:ro"
+      - "$ESGF_CONFIG/secrets/database-password:/esg/secrets/database-password:ro"
+      - "$ESGF_CONFIG/certificates/slcsca/ca.crt:/esg/certificates/slcsca/ca.crt:ro"
+      - "$ESGF_CONFIG/certificates/slcsca/ca.key:/esg/certificates/slcsca/ca.key:ro"
+      # Just mount an empty volume as the trustroots for now
+      - "slcs-trustroots:/esg/certificates/slcsca/trustroots/:ro"
+      # Make sure the trusted certificate bundle is available
+      - "$ESGF_CONFIG/certificates/esg-trust-bundle.pem:/esg/certificates/esg-trust-bundle.pem:ro"
+    depends_on:
+      - esgf-django
+      - esgf-postgres-esgcet
+      - esgf-postgres-slcs
 
-  # FTP server
-  #esgf-ftp:
-  # image: esgfhub/esgf-vsftp:${ESGF_VERSION}
-  # container_name: ftp 
-  # ports:
-  #   - "20:20"
-  #   - "21:21"
-  #   - "12020-12025:12020-12025" 
-  # networks:
-  #   - default
-  # volumes:
-  #   - $ESGF_DATA_DIR:/var/ftp/pub
-   
 
-# use Docker volumes to store persistent data
-# (which survives when the containers are removed)
+# Use Docker volumes to store persistent data
 volumes:
-  # postgres data and configuration
-  pg_data:
-  # cog data directory
-  cog_data:
-  # contains Solr index data
-  solr_data:
-  # contains TDS configuration, catalogs, cache, and logs
-  # (directory below -Dtds.content.root.path=/esg/content)
-  tds_data:
-  # static web files for SLCS server
-  slcs_static_web:
-  # esgf-auth installation directory, including python virtual environment
-  esgf_auth_install:
+  zk-data:
+  zk-datalog:
+  solr-master-home:
+  solr-slave-home:
+  postgres-auth-data:
+  postgres-cog-data:
+  postgres-esgcet-data:
+  postgres-slcs-data:
+  tds-content:
+  slcs-trustroots:

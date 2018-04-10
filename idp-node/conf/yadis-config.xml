@@ -6,34 +6,34 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.1.xsd
                            http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-4.1.xsd
                            http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.1.xsd">
-                               
-    
+
+
     <!-- Configurable properties -->
 	<bean id="propertyConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
 		<!-- <property name="location" value="classpath:esg/idp/config/application.properties" /> -->
 		<property name="location" value="file:///esg/config/esgf.properties" />
 	</bean>
-    
+
     <!-- Yadis -->
  	<context:component-scan base-package="esg.idp.yadis"/>
- 	
+
  	<!-- URL-controller mappings -->
 	<bean id="openidYadisMapping" class="org.springframework.web.servlet.handler.SimpleUrlHandlerMapping">
 		<property name="order" value="1" />
 		<property name="mappings">
-			<props>				
+			<props>
 				<prop key="*">yadisController</prop>
 			</props>
 		</property>
 	</bean>
-	
+
 	<!-- additional endpoints discovered by Yadis service -->
 	<util:map id="yadisEndpoints">
         <entry key="http://specs.openid.net/auth/2.0/server" value="${idp.service.endpoint}"/>
-        <entry key="urn:esg:security:oauth:endpoint:authorize" value="https://${short.lived.certificate.server}/esgf-slcs/oauth/authorize"/>
-        <entry key="urn:esg:security:oauth:endpoint:access" value="https://${short.lived.certificate.server}/esgf-slcs/oauth/access_token"/>
-        <entry key="urn:esg:security:oauth:endpoint:resource" value="https://${short.lived.certificate.server}/esgf-slcs/oauth/certificate"/>
-    	<entry key="urn:esg:security:myproxy-service" value="socket://${myproxy.endpoint}:${myproxy.port}"/>
+        <entry key="urn:esg:security:oauth:endpoint:authorize" value="${short.lived.certificate.server}/oauth/authorize"/>
+        <entry key="urn:esg:security:oauth:endpoint:access" value="${short.lived.certificate.server}/oauth/access_token"/>
+        <entry key="urn:esg:security:oauth:endpoint:resource" value="${short.lived.certificate.server}/oauth/certificate"/>
+    	<!--<entry key="urn:esg:security:myproxy-service" value="socket://${myproxy.endpoint}:${myproxy.port}"/>-->
     	<entry key="urn:esg:security:attribute-service" value="${idp.security.attribute.service.endpoint}"/>
 	</util:map>
 

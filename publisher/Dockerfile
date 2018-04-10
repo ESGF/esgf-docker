@@ -1,50 +1,72 @@
-# Docker image containing the ESGF publisher client
+#####
+# Docker image for the ESGF publisher client
+#####
 
-ARG ESGF_IMAGES_HUB=esgfhub
-ARG ESGF_VERSION=devel
-ARG ESGF_REPO=http://distrib-coffee.ipsl.jussieu.fr/pub/esgf
-FROM $ESGF_IMAGES_HUB/esgf-node:$ESGF_VERSION
-MAINTAINER Earth System Grid Federation <esgf-devel@lists.llnl.gov>
+ARG ESGF_HUB=cedadev
+ARG ESGF_VERSION=latest
 
-# install library pre-requisites
-RUN yum -y update; yum -y install libxml2-devel libxslt-devel; yum clean all
+FROM continuumio/miniconda:4.3.27
 
-# install Anaconda
-ENV CDAT_HOME=/usr/local/conda
-RUN cd /tmp && rm -rf $CDAT_HOME && \
-    wget --no-check-certificate https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh && \
-    bash Miniconda2-latest-Linux-x86_64.sh -b -p $CDAT_HOME
+# Create an unprivileged user to use
+ENV PUBLISH_USER publish
+ENV PUBLISH_GROUP publish
+# It is IMPORTANT that the UID is the same as the tomcat user in the TDS container
+ENV PUBLISH_UID 1001
+ENV PUBLISH_GID 1001
+RUN groupadd -g $PUBLISH_GID $PUBLISH_GROUP && \
+    useradd -M -g $PUBLISH_GID -s /sbin/nologin -u $PUBLISH_UID $PUBLISH_USER
 
-# create CDAT virtual environment with Anaconda
-ENV PATH=${CDAT_HOME}/bin:$PATH
-RUN conda create -y -n esgf-pub -c conda-forge -c uvcdat cdutil
+# Set environment vars that control the behaviour
+ENV ESGINI /esg/config/esgcet/esg.ini
+ENV UVCDAT_ANONYMOUS_LOG no
 
-# activate virtual env and fetch some pre-requisites
-RUN source ${CDAT_HOME}/bin/activate esgf-pub && \
-    conda install -y -c conda-forge lxml requests psycopg2 decorator Tempita myproxyclient
+# Install gettext-base for envsubst
+RUN apt-get update && \
+    apt-get install -y gettext-base && \
+    rm -rf /var/lib/apt/lists/*
 
-# install other python pre-requisites
-RUN source ${CDAT_HOME}/bin/activate esgf-pub && \
-    pip install SQLAlchemy==0.7.10 && \
-    pip install sqlalchemy_migrate && \
-    pip install esgprep
+# Install packages using conda and pip
+RUN conda install -y -c conda-forge -c uvcdat \
+      gcc_linux-64 \
+      cdutil \
+      lxml \
+      requests \
+      psycopg2 \
+      decorator \
+      Tempita \
+      myproxyclient && \
+    pip install \
+      'SQLAlchemy==0.7.10' \
+      sqlalchemy_migrate \
+      ESGConfigParser==0.1.10 \
+      esgprep
 
-# install ESGF publisher
-# location: /usr/local/conda/envs/esgf-pub/
-ENV ESG_PUBLISHER_VERSION=v3.2.7
-RUN source ${CDAT_HOME}/bin/activate esgf-pub && \
-    cd /tmp && \
-    git clone https://github.com/ESGF/esg-publisher.git && \
-    cd esg-publisher && \
+# Install the publisher client from GitHub
+ARG ESG_PUBLISHER_VERSION=v3.2.7
+RUN git clone https://github.com/ESGF/esg-publisher.git /application && \
+    cd /application && \
     git checkout $ESG_PUBLISHER_VERSION && \
     cd src/python/esgcet && \
-    python setup.py install
+    python setup.py install && \
+    cd
 
-# env needed by Python client to trust the data node server certicate
-ENV SSL_CERT_DIR /etc/grid-security/certificates
-ENV ESGINI /esg/config/esgcet/esg.ini
+# Install entrypoint script
+COPY scripts/* /usr/local/bin/
+# Install configuration files and templates
+# Make the configuration files owned by the publish user and root group
+# This means the container can be run by any user in the root group (e.g. on OpenShift)
+RUN mkdir -p /esg/config/esgcet && \
+    chown 1001:0 /esg/config/esgcet && \
+    chmod 775 /esg/config/esgcet
+COPY --chown=1001:0 conf /esg/config/esgcet
+# Create the thredds content root owned by publish user and root group
+RUN mkdir -p /esg/content/thredds/esgcet && \
+    chown -R 1001:0 /esg/content/thredds && \
+    chmod -R g+w /esg/content/thredds
 
-# startup scripts
-COPY scripts/ /usr/local/bin/
+WORKDIR /esg/config/esgcet
 
-ENTRYPOINT /usr/local/bin/docker-entrypoint.sh
+# Run as the publish user
+USER 1001
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
+CMD ["run-publish-scripts"]
