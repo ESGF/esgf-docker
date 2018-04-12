@@ -1,44 +1,42 @@
-# ESGF node with Tomcat configured for ESGF services:
-# o Tomcat keystore, truststore files located in /esg/config/tomcat
-# o startup with ESGF specific env variables defined in bin/setenv.sh
+# Official tomcat container but running with an unprivileged user
 
-ARG ESGF_IMAGES_HUB=esgfhub
-ARG ESGF_VERSION=devel
-FROM $ESGF_IMAGES_HUB/esgf-node:$ESGF_VERSION
+FROM tomcat:8
+
 MAINTAINER Earth System Grid Federation <esgf-devel@lists.llnl.gov>
 
-# Tomcat 8
-ENV TOMCAT_VERSION 8.5.23
+# Create the tomcat user and group
+ENV TOMCAT_USER tomcat
+ENV TOMCAT_GROUP tomcat
+ENV TOMCAT_UID 1001
+ENV TOMCAT_GID 1001
+RUN groupadd -g $TOMCAT_GID $TOMCAT_GROUP &&  \
+    useradd -d $CATALINA_HOME -g $TOMCAT_GROUP -s /usr/sbin/nologin -u $TOMCAT_UID $TOMCAT_USER
 
-RUN wget -O /tmp/apache-tomcat-${TOMCAT_VERSION}.tar.gz http://archive.apache.org/dist/tomcat/tomcat-8/v${TOMCAT_VERSION}/bin/apache-tomcat-${TOMCAT_VERSION}.tar.gz && \
-    cd /usr/local && tar xzf /tmp/apache-tomcat-${TOMCAT_VERSION}.tar.gz && \
-    ln -s /usr/local/apache-tomcat-${TOMCAT_VERSION} /usr/local/tomcat && \
-    rm /tmp/apache-tomcat-${TOMCAT_VERSION}.tar.gz
-ENV CATALINA_HOME /usr/local/tomcat
+# Install gettext-base (for envsubst)
+RUN apt-get update && \
+    apt-get install -y gettext-base && \
+    rm -rf /var/lib/apt/lists/*
 
-# remove Tomcat example applications
-RUN cd /usr/local/tomcat/webapps && \
-    rm -rf docs examples host-manager manager
+# Allow the tomcat user and any user in the root group to add trusted CAs
+RUN chown $TOMCAT_UID:0 $JAVA_HOME/lib/security/cacerts && \
+    chmod u+rw,g+rw $JAVA_HOME/lib/security/cacerts
 
-# copy custom configuration
-# server.xml: includes references to keystore, truststore in /esg/config/tomcat
-# context.xml: increases the Tomcat cache to avoid flood of warning messages
-COPY conf/server.xml /usr/local/tomcat/conf/server.xml
-COPY conf/context.xml /usr/local/tomcat/conf/context.xml
-COPY certs/ /esg/config/tomcat/
+# Remove the default webapps
+RUN rm -rf $CATALINA_HOME/webapps/*
 
-# custom env variables for starting Tomcat
-COPY conf/setenv.sh $CATALINA_HOME/bin
+# Install custom server.xml with remote IP valve
+COPY conf/server.xml $CATALINA_HOME/conf/
 
-# create non-privilged user to run Tomcat
-RUN groupadd tomcat
-RUN useradd -s /sbin/nologin -g tomcat -d /usr/local/tomcat tomcat
-RUN chown -R tomcat:tomcat /usr/local/apache-tomcat-${TOMCAT_VERSION}
-RUN chmod 775 /usr/local/tomcat/webapps
+# We want to allow running as any user in the root group
+# So transfer ownership of CATALINA_HOME to the tomcat user and root group, with
+# rw for both
+# Remove the setgid bit from the conf directory as it prevents the root group using it
+RUN chown -R $TOMCAT_UID:0 $CATALINA_HOME && \
+    chmod g-s+x $CATALINA_HOME/conf && \
+    chmod -R u+rw,g+rw,o= $CATALINA_HOME
 
-EXPOSE 8080
-EXPOSE 8443
+# Install custom entrypoint script
+COPY scripts/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 
-# startup
-COPY conf/supervisord.tomcat.conf /etc/supervisor/conf.d/supervisord.tomcat.conf
-CMD ["supervisord", "--nodaemon", "-c", "/etc/supervisord.conf"]
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
+CMD ["catalina.sh", "run"]

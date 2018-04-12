@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+
+<!--
+  File that may contain custom attribute service and registration
+  endpoints in addition to those contained in the file esgf_ats.xml.
+  This file is supposed to be maintained by the local system
+  administrators, while the file esgf_ats.xml is dynamically generated
+  by the node manager.
+-->
+
+<ats_whitelist xmlns="http://www.esgf.org/whitelist">
+</ats_whitelist>

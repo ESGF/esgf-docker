@@ -1,0 +1,21 @@
+#!/bin/bash
+
+set -eo pipefail
+
+function info { echo "[INFO] $1"; }
+function error { echo "[ERROR] $1" 1>&2; exit 1; }
+
+#####
+## This script runs all the publish scripts from /publish.d/
+#####
+
+info "Executing scripts from /publish.d"
+if [ -d "/publish.d" ]; then
+    for file in $(find /publish.d/ -mindepth 1 -type f -executable | sort -n); do
+        info "  Executing $file"
+        case "$file" in
+            *.sh) . $file ;;
+            *) eval $file || exit 1 ;;
+        esac
+    done
+fi
