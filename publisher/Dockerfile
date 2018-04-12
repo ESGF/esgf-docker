@@ -2,9 +2,6 @@
 # Docker image for the ESGF publisher client
 #####
 
-ARG ESGF_HUB=cedadev
-ARG ESGF_VERSION=latest
-
 FROM continuumio/miniconda:4.3.27
 
 # Create an unprivileged user to use

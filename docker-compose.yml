@@ -17,7 +17,7 @@ version: '3.4'
 services:
   # Build dependency only
   esgf-configure:
-    image: "${ESGF_HUB}/esgf-configure:${ESGF_VERSION}"
+    image: "${ESGF_HUB}/${ESGF_PREFIX}configure:${ESGF_VERSION}"
     build: ./configure
     # Use an entrypoint that exits immediately with success
     entrypoint: ["true"]
@@ -29,28 +29,28 @@ services:
 
   # Build dependency only
   esgf-postgres:
-    image: "${ESGF_HUB}/esgf-postgres:${ESGF_VERSION}"
+    image: "${ESGF_HUB}/${ESGF_PREFIX}postgres:${ESGF_VERSION}"
     build: ./postgres
     # Use an entrypoint that exits immediately with success
     entrypoint: ["true"]
 
   # Build dependency only
   esgf-solr:
-    image: "${ESGF_HUB}/esgf-solr:${ESGF_VERSION}"
+    image: "${ESGF_HUB}/${ESGF_PREFIX}solr:${ESGF_VERSION}"
     build: ./solr
     # Use an entrypoint that exits immediately with success
     entrypoint: ["true"]
 
   # Build dependency only
   esgf-tomcat:
-    image: "${ESGF_HUB}/esgf-tomcat:${ESGF_VERSION}"
+    image: "${ESGF_HUB}/${ESGF_PREFIX}tomcat:${ESGF_VERSION}"
     build: ./tomcat
     # Use an entrypoint that exits immediately with success
     entrypoint: ["true"]
 
   # Build dependency only
   esgf-django:
-    image: "${ESGF_HUB}/esgf-django:${ESGF_VERSION}"
+    image: "${ESGF_HUB}/${ESGF_PREFIX}django:${ESGF_VERSION}"
     build: ./django
     # Use an entrypoint that exits immediately with success
     entrypoint: ["true"]
@@ -58,7 +58,7 @@ services:
   # The setup is included here so it can be used with docker-compose run
   # The command is modified to a simple quit with 0 exit status
   esgf-setup:
-    image: "${ESGF_HUB}/esgf-setup:${ESGF_VERSION}"
+    image: "${ESGF_HUB}/${ESGF_PREFIX}setup:${ESGF_VERSION}"
     build: ./setup
     environment:
       ESGF_HOSTNAME:
@@ -70,7 +70,7 @@ services:
   # The publisher is included here so it can be used with docker-compose run
   # The command is modified to a simple quit with 0 exit status
   esgf-publisher:
-    image: "${ESGF_HUB}/esgf-publisher:${ESGF_VERSION}"
+    image: "${ESGF_HUB}/${ESGF_PREFIX}publisher:${ESGF_VERSION}"
     build: ./publisher
     environment:
       <<: *config_env
@@ -96,7 +96,7 @@ services:
       - esgf-tds
 
   esgf-proxy:
-    image: "${ESGF_HUB}/esgf-proxy:${ESGF_VERSION}"
+    image: "${ESGF_HUB}/${ESGF_PREFIX}proxy:${ESGF_VERSION}"
     build: ./proxy
     restart: always
     ports:
@@ -127,16 +127,18 @@ services:
       - esgf-cog
 
   esgf-solr-master:
-    image: "${ESGF_HUB}/esgf-solr:${ESGF_VERSION}"
+    image: "${ESGF_HUB}/${ESGF_PREFIX}solr:${ESGF_VERSION}"
     restart: always
     environment:
       SOLR_HOME: /esg/solr-home
       SOLR_HEAP: 1g
     volumes:
       - "solr-master-home:/esg/solr-home"
+    depends_on:
+      - esgf-solr
 
   esgf-solr-slave:
-    image: "${ESGF_HUB}/esgf-solr:${ESGF_VERSION}"
+    image: "${ESGF_HUB}/${ESGF_PREFIX}solr:${ESGF_VERSION}"
     restart: always
     environment:
       SOLR_HOME: /esg/solr-home
@@ -146,14 +148,16 @@ services:
     volumes:
       - "solr-slave-home:/esg/solr-home"
     depends_on:
+      - esgf-solr
       - esgf-solr-master
 
   esgf-postgres-esgcet:
-    image: "${ESGF_HUB}/esgf-postgres-esgcet:${ESGF_VERSION}"
+    image: "${ESGF_HUB}/${ESGF_PREFIX}postgres-esgcet:${ESGF_VERSION}"
     build:
       context: ./postgres-esgcet
       args:
         ESGF_HUB: $ESGF_HUB
+        ESGF_PREFIX: $ESGF_PREFIX
         ESGF_VERSION: $ESGF_VERSION
     restart: always
     environment:
@@ -171,13 +175,16 @@ services:
       - "$ESGF_CONFIG/secrets/database-publisher-password:/esg/secrets/database-publisher-password:ro"
       - "$ESGF_CONFIG/secrets/rootadmin-password:/esg/secrets/rootadmin-password:ro"
       - "postgres-esgcet-data:/var/lib/pgsql/data"
+    depends_on:
+      - esgf-postgres
 
   esgf-orp:
-    image: "${ESGF_HUB}/esgf-orp:${ESGF_VERSION}"
+    image: "${ESGF_HUB}/${ESGF_PREFIX}orp:${ESGF_VERSION}"
     build:
       context: ./orp
       args:
         ESGF_HUB: $ESGF_HUB
+        ESGF_PREFIX: $ESGF_PREFIX
         ESGF_VERSION: $ESGF_VERSION
     restart: always
     environment:
@@ -194,11 +201,12 @@ services:
       - esgf-tomcat
 
   esgf-index-node:
-    image: "${ESGF_HUB}/esgf-index-node:${ESGF_VERSION}"
+    image: "${ESGF_HUB}/${ESGF_PREFIX}index-node:${ESGF_VERSION}"
     build:
       context: ./index-node
       args:
         ESGF_HUB: $ESGF_HUB
+        ESGF_PREFIX: $ESGF_PREFIX
         ESGF_VERSION: $ESGF_VERSION
     restart: always
     environment:
@@ -216,11 +224,12 @@ services:
       - esgf-orp
 
   esgf-idp-node:
-    image: "${ESGF_HUB}/esgf-idp-node:${ESGF_VERSION}"
+    image: "${ESGF_HUB}/${ESGF_PREFIX}idp-node:${ESGF_VERSION}"
     build:
       context: ./idp-node
       args:
         ESGF_HUB: $ESGF_HUB
+        ESGF_PREFIX: $ESGF_PREFIX
         ESGF_VERSION: $ESGF_VERSION
     restart: always
     environment:
@@ -235,11 +244,12 @@ services:
       - esgf-postgres-esgcet
 
   esgf-tds:
-    image: "${ESGF_HUB}/esgf-tds:${ESGF_VERSION}"
+    image: "${ESGF_HUB}/${ESGF_PREFIX}tds:${ESGF_VERSION}"
     build:
       context: ./tds
       args:
         ESGF_HUB: $ESGF_HUB
+        ESGF_PREFIX: $ESGF_PREFIX
         ESGF_VERSION: $ESGF_VERSION
     environment:
       <<: *config_env
@@ -259,7 +269,7 @@ services:
       - esgf-postgres-esgcet
 
   esgf-postgres-cog:
-    image: "${ESGF_HUB}/esgf-postgres:${ESGF_VERSION}"
+    image: "${ESGF_HUB}/${ESGF_PREFIX}postgres:${ESGF_VERSION}"
     restart: always
     environment:
       POSTGRESQL_DATABASE: cogdb
@@ -272,11 +282,12 @@ services:
       - esgf-postgres
 
   esgf-cog:
-    image: "${ESGF_HUB}/esgf-cog:${ESGF_VERSION}"
+    image: "${ESGF_HUB}/${ESGF_PREFIX}cog:${ESGF_VERSION}"
     build:
       context: ./cog
       args:
         ESGF_HUB: $ESGF_HUB
+        ESGF_PREFIX: $ESGF_PREFIX
         ESGF_VERSION: $ESGF_VERSION
     restart: always
     environment:
@@ -301,7 +312,7 @@ services:
       - esgf-postgres-cog
 
   esgf-postgres-auth:
-    image: "${ESGF_HUB}/esgf-postgres:${ESGF_VERSION}"
+    image: "${ESGF_HUB}/${ESGF_PREFIX}postgres:${ESGF_VERSION}"
     restart: always
     environment:
       POSTGRESQL_DATABASE: auth
@@ -314,11 +325,12 @@ services:
       - esgf-postgres
 
   esgf-auth:
-    image: "${ESGF_HUB}/esgf-auth:${ESGF_VERSION}"
+    image: "${ESGF_HUB}/${ESGF_PREFIX}auth:${ESGF_VERSION}"
     build:
       context: ./auth
       args:
         ESGF_HUB: $ESGF_HUB
+        ESGF_PREFIX: $ESGF_PREFIX
         ESGF_VERSION: $ESGF_VERSION
     restart: always
     environment:
@@ -345,7 +357,7 @@ services:
       - esgf-postgres-auth
 
   esgf-postgres-slcs:
-    image: "${ESGF_HUB}/esgf-postgres:${ESGF_VERSION}"
+    image: "${ESGF_HUB}/${ESGF_PREFIX}postgres:${ESGF_VERSION}"
     restart: always
     environment:
       POSTGRESQL_DATABASE: slcs
@@ -358,11 +370,12 @@ services:
       - esgf-postgres
 
   esgf-slcs:
-    image: "${ESGF_HUB}/esgf-slcs:${ESGF_VERSION}"
+    image: "${ESGF_HUB}/${ESGF_PREFIX}slcs:${ESGF_VERSION}"
     build:
       context: ./slcs
       args:
         ESGF_HUB: $ESGF_HUB
+        ESGF_PREFIX: $ESGF_PREFIX
         ESGF_VERSION: $ESGF_VERSION
     restart: always
     environment:
@@ -413,8 +426,6 @@ services:
 
 # Use Docker volumes to store persistent data
 volumes:
-  zk-data:
-  zk-datalog:
   solr-master-home:
   solr-slave-home:
   postgres-auth-data:

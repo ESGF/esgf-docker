@@ -5,7 +5,8 @@
 ## a builder image to check out the code and build wheels for all our dependencies
 #####
 
-ARG ESGF_HUB=cedadev
+ARG ESGF_HUB=esgfhub
+ARG ESGF_PREFIX=
 ARG ESGF_VERSION=latest
 
 FROM python:2.7-slim AS esgf-slcs-build
@@ -35,7 +36,7 @@ RUN mkdir /pip-wheels && \
 ## Stage 2 ##
 #############
 
-FROM ${ESGF_HUB}/esgf-django:${ESGF_VERSION}
+FROM ${ESGF_HUB}/${ESGF_PREFIX}django:${ESGF_VERSION}
 
 MAINTAINER Earth System Grid Federation <esgf-devel@lists.llnl.gov>
 

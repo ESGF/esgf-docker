@@ -6,49 +6,54 @@ services:
 addons:
   apt:
     packages:
-    - docker-ce
+      - docker-ce
 
 branches:
   only:
     - master
+    - devel
 
 script:
   - |
-    export ESGF_VERSION="$(git describe --always --tags)"
-    # Define a bash function that just echos something every 60s
-    periodic_echo() {
-      while true; do
-        sleep 60
-        echo "Ensuring execution continues..."
-      done
+    function periodic_echo {
+        while true; do
+            sleep 60
+            echo "Ensuring execution continues..."
+        done
     }
-    # Start the build in the background
-    docker-compose build &
-    build_pid=$!
-    # Start the periodic echo in the background
-    periodic_echo &
-    echo_pid=$!
-    # Wait for the build to exit
-    wait $build_pid
-    # The final result should be the exit status of the build
-    build_status=$?
-    # Kill the echo
-    kill -9 $echo_pid
-    # If the build failed, exit now
-    [ "$build_status" -ne "0" ] && exit $build_status
-    # Only if the branch is master and not a pull request, push to Docker Hub
-    if [ "$TRAVIS_BRANCH" = "master" ] && [ "$TRAVIS_PULL_REQUEST" = "false" ]; then
-      # Log in to Docker Hub
-      docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD"
-      # Push with the git describe tag
-      docker-compose push
-      # Retag with latest and push
-      export ESGF_VERSION=latest
-      docker-compose build
-      docker-compose push
+    function keep_alive {
+        periodic_echo &
+        local echo_pid=$!
+        $@ &
+        local command_pid=$!
+        wait $command_pid
+        local command_status=$?
+        kill -9 $echo_pid
+        [ "$command_status" -ne "0" ] && exit $command_status
+    }
+    # If the build is for a tag, use that as the image tag
+    # If not, use the output of git-describe
+    export ESGF_VERSION="${TRAVIS_TAG:-"$(git describe --always --tags)"}"
+    keep_alive docker-compose build
+    # If this is a pull request, we are done - all we wanted to do is check it builds
+    [ "$TRAVIS_PULL_REQUEST" = "false" ] || exit
+    # If it is not a pull request, then push the tag to Docker Hub
+    docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD"
+    keep_alive docker-compose push
+    # If building master, retag with "latest" and push to Docker Hub
+    # If building devel, retag with "devel" and push to Docker Hub
+    # Any other branch (which shouldn't happen due to the whitelist above), we are done
+    if [ "$TRAVIS_BRANCH" = "master" ]; then
+        export ESGF_VERSION="latest"
+    elif [ "$TRAVIS_BRANCH" = "devel" ]; then
+        export ESGF_VERSION="devel"
+    else
+        exit
     fi
+    keep_alive docker-compose build
+    keep_alive docker-compose push
 
 notifications:
   email: false
   slack:
-    secure: b1x8LxhKWKHS+cID+9XkFm3JLwGPviTVnPu91L7K9asBEsjYssYFudS/LCSxHdwVC9lJomoKe0ojy8fKx10NAAKacCb7h2TmVh/niaum38f12VeObhm6IPxUz3kytzcbCPR6OIs5fackkDSTuztR2vT2LlLKphs5mlvIMqkUg0wOPNxbl6KN188YSR9ozHfqt4uALitvYNdhkk5NEDmLZOVS//1cwYYHmDGw2uX6xQUf/nudLx14H7ea7eb0y3CyeQeAg6a7rE2iMEbwxqS35B231WYFD5rEkLPIEz/9h9syQRcK6eLObymbu7Ol9kNHa3GcepgI1RYfDJ71rKjzna1Y0rmqxAlf4M7ZvUGhiwqSasY9xgeWFzNn5dp+PsxhryVRUzHZ9W3JLq6NcVFp1evqPOQx94AE5uXwA8WWF5o/65yi4lQQ2uqXeRlYkYsXot8TPowZWV3HZZdQP859az0bivXKGif+N6Q3Ls56zFwQWJbtRFmVq1vDpa7f4wQ/zZysjxmJsYWfyAXo3hfcY59IGFtddoC96NIVSAaozjlKWOjWpG9GPjSNjZHF+GMNNYb/lBw6rddx5NDpvEvCDl3uNiX3CDjR/vZTg3xNkSAX3Ps5HDg+i7rXJ0Y/fe0Lf9dfx3jRxOLsBWgjE8OyZelr+mcgmakPr/aEhaL/pSc=
+    secure: v3c0zFQbSa5D+tE6CpMZwztWCt7jYeMZeQlgwCrGHCTWduCQhbeeHjzjWLyqqEag/ecvm2k40zWOSFF9HBDwStnXDaW0LmRRhtAQgapNlCvtAxa5IQhTcPtMfki0CrA8xj58SCfHdGbVDRquwNUuvahlhg45ddJBO1mw8hrMS1KRutE3AAZUVTdVJ2N7D6x7qA7i2hKVKjGfGlmHN+eA5ja/nW0J28XRKRXX6ztfelWIy7RNMWnhy/bsjkHNeiaIV6UztTKRi0mIzZSu/DXGM9VvrUleNUTqn/w/CumNnIh+Oboktl1jarGojnW0njRPqZbQ0Xm9mxc/vAcA0vFjLUVdae/fTNKojW2j8GZ2dOf9bFabdLflup6KAlF1+8PoSW9vDtSquYt8Ez1KpTm5YxkwGtf74KklEzDNqVoCrOK8uZWYOd05g0A32FbRZDlPGdouk1oz8Tw0ShOTtUd96pd69l8PsViXN7PkLh8UQ3yQv8E/A3Y7SHYUnFbQPN0uANwhqE9S0m9X/FQHRL2KGNXdnBTUKXaa7nRGxol57lXwWTIQbRwyBfYQf174yfMroZZO12lhmdBDzau5gtKBnPt33lbbjoGQBgRrF2zWukRKuMWOg8H8UiHMgJhcK6MFfMQeB/B0SOw/3t3sLGNm/1grbkiS/8lOOs1d2ZBdK5s=

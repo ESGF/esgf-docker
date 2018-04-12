@@ -2,10 +2,11 @@
 ## PostgreSQL container with ESGF databases pre-configured
 #####
 
-ARG ESGF_HUB=cedadev
+ARG ESGF_HUB=esgfhub
+ARG ESGF_PREFIX=
 ARG ESGF_VERSION=latest
 
-FROM ${ESGF_HUB}/esgf-postgres:${ESGF_VERSION}
+FROM ${ESGF_HUB}/${ESGF_PREFIX}postgres:${ESGF_VERSION}
 
 MAINTAINER Earth System Grid Federation <esgf-devel@lists.llnl.gov>
 

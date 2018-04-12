@@ -10,12 +10,13 @@
 ## To get around this, we use a separate build stage with the full JDK to
 ## download and unpack the wars, and copy the unpacked folder into the final container.
 
-ARG ESGF_HUB=cedadev
+ARG ESGF_HUB=esgfhub
+ARG ESGF_PREFIX=
 ARG ESGF_VERSION=latest
 
 # This build stage is required because COPY --from=$ARG is not supported
 # https://github.com/moby/moby/issues/34482
-FROM ${ESGF_HUB}/esgf-configure:${ESGF_VERSION} as configuration
+FROM ${ESGF_HUB}/${ESGF_PREFIX}configure:${ESGF_VERSION} as configuration
 
 FROM openjdk:8-jdk AS esgf-tds-unpack
 
@@ -81,7 +82,7 @@ RUN chmod -R g+w /opt/thredds
 ## Stage 2 ##
 #############
 
-FROM ${ESGF_HUB}/esgf-tomcat:$ESGF_VERSION
+FROM ${ESGF_HUB}/${ESGF_PREFIX}tomcat:$ESGF_VERSION
 
 MAINTAINER Earth System Grid Federation <esgf-devel@lists.llnl.gov>
 
