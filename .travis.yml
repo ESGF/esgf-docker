@@ -44,7 +44,7 @@ script:
         exit
     fi
     # If it is not a pull request, then push the tag to Docker Hub
-    docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD"
+    echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
     keep_alive docker-compose push
     # If building master, retag with "latest" and push to Docker Hub
     # If building devel, retag with "devel" and push to Docker Hub
