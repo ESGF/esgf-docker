@@ -29,14 +29,21 @@ script:
         wait $command_pid
         local command_status=$?
         kill -9 $echo_pid
-        [ "$command_status" -ne "0" ] && exit $command_status
+        echo "COMMAND STATUS: " "$command_status"
+        if [ "$command_status" -ne "0" ]; then
+            exit $command_status
+        fi
+        return 0
     }
     # If the build is for a tag, use that as the image tag
     # If not, use the output of git-describe
     export ESGF_VERSION="${TRAVIS_TAG:-"$(git describe --always --tags)"}"
     keep_alive docker-compose build
+    echo "BUILD COMPLETE"
     # If this is a pull request, we are done - all we wanted to do is check it builds
-    [ "$TRAVIS_PULL_REQUEST" = "false" ] || exit
+    if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then
+        exit
+    fi
     # If it is not a pull request, then push the tag to Docker Hub
     docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD"
     keep_alive docker-compose push
