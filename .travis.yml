@@ -1,0 +1,65 @@
+sudo: required
+
+services:
+  - docker
+
+addons:
+  apt:
+    packages:
+      - docker-ce
+
+branches:
+  only:
+    - master
+    - devel
+
+script:
+  - |
+    function periodic_echo {
+        while true; do
+            sleep 60
+            echo "Ensuring execution continues..."
+        done
+    }
+    function keep_alive {
+        periodic_echo &
+        local echo_pid=$!
+        $@ &
+        local command_pid=$!
+        wait $command_pid
+        local command_status=$?
+        kill -9 $echo_pid
+        if [ "$command_status" -ne "0" ]; then
+            exit $command_status
+        fi
+        return 0
+    }
+    # If the build is for a tag, use that as the image tag
+    # If not, use the output of git-describe
+    export ESGF_VERSION="${TRAVIS_TAG:-"$(git describe --always --tags)"}"
+    keep_alive docker-compose build
+    # If this is a pull request, we are done - all we wanted to do is check it builds
+    if [ "$TRAVIS_PULL_REQUEST" != "false" ]; then
+        echo "PR #${TRAVIS_PULL_REQUEST} built successfully - exiting"
+        exit
+    fi
+    # If it is not a pull request, then push the tag to Docker Hub
+    echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+    keep_alive docker-compose push
+    # If building master, retag with "latest" and push to Docker Hub
+    # If building devel, retag with "devel" and push to Docker Hub
+    # Any other branch (which shouldn't happen due to the whitelist above), we are done
+    if [ "$TRAVIS_BRANCH" = "master" ]; then
+        export ESGF_VERSION="latest"
+    elif [ "$TRAVIS_BRANCH" = "devel" ]; then
+        export ESGF_VERSION="devel"
+    else
+        exit
+    fi
+    keep_alive docker-compose build
+    keep_alive docker-compose push
+
+notifications:
+  email: false
+  slack:
+    secure: v3c0zFQbSa5D+tE6CpMZwztWCt7jYeMZeQlgwCrGHCTWduCQhbeeHjzjWLyqqEag/ecvm2k40zWOSFF9HBDwStnXDaW0LmRRhtAQgapNlCvtAxa5IQhTcPtMfki0CrA8xj58SCfHdGbVDRquwNUuvahlhg45ddJBO1mw8hrMS1KRutE3AAZUVTdVJ2N7D6x7qA7i2hKVKjGfGlmHN+eA5ja/nW0J28XRKRXX6ztfelWIy7RNMWnhy/bsjkHNeiaIV6UztTKRi0mIzZSu/DXGM9VvrUleNUTqn/w/CumNnIh+Oboktl1jarGojnW0njRPqZbQ0Xm9mxc/vAcA0vFjLUVdae/fTNKojW2j8GZ2dOf9bFabdLflup6KAlF1+8PoSW9vDtSquYt8Ez1KpTm5YxkwGtf74KklEzDNqVoCrOK8uZWYOd05g0A32FbRZDlPGdouk1oz8Tw0ShOTtUd96pd69l8PsViXN7PkLh8UQ3yQv8E/A3Y7SHYUnFbQPN0uANwhqE9S0m9X/FQHRL2KGNXdnBTUKXaa7nRGxol57lXwWTIQbRwyBfYQf174yfMroZZO12lhmdBDzau5gtKBnPt33lbbjoGQBgRrF2zWukRKuMWOg8H8UiHMgJhcK6MFfMQeB/B0SOw/3t3sLGNm/1grbkiS/8lOOs1d2ZBdK5s=

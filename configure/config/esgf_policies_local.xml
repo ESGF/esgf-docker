@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+
+<!-- This file is intended to be edited and maintained by the local Node admnistrators.
+     It should contain only policies specific to data served by the local Node.
+     It will not be overridden by a software update. -->
+<policies xmlns="http://www.esgf.org/security">
+</policies>
