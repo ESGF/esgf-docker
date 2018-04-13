@@ -48,9 +48,7 @@ as it means:
 
 With this implementation of ESGF Docker, each Tomcat and Django application runs
 entirely in its own container. The `esgf-httpd` container has been replaced with
-a pure-HTTP proxy using Nginx. When deployed using Kubernetes, the proxy will not
-be used at all, with each application managing its own
-[Ingress resources](https://kubernetes.io/docs/concepts/services-networking/ingress/).
+a pure-HTTP proxy using Nginx.
 
 ## Container dependencies
 
@@ -63,12 +61,16 @@ source installations, as it can be error-prone.
 
 Instead, this implementation takes the decision to use officially supported and
 maintained base images where possible. This means that it now uses the following
-images from the Docker Hub Library as the basis for `esgf-*` containers:
+images from the Docker Hub Library as the basis for `esgfhub/*` containers:
 
+  * `centos/postgresql-96-centos7`
+  * `nginx`
   * `solr:5.5`
+  * `alpine`
+  * `python:2.7-slim`
   * `openjdk:8-{jre,jdk}`
   * `tomcat:8`
-  * `python:2.7-slim`
+  * `continuumio/miniconda`
 
 In the original implementation, there was also an `esgf-node` image that served
 as a base image for all other ESGF containers. As well as containing supervisor,

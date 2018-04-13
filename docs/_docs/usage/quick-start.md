@@ -17,7 +17,7 @@ on the host system.
 First, clone the repository:
 
 ```sh
-git clone https://github.com/cedadev/esgf-docker.git
+git clone https://github.com/ESGF/esgf-docker.git
 cd esgf-docker
 ```
 
@@ -55,7 +55,7 @@ This means you need to make sure that the `ESGF_CONFIG` directory is in your
 home directory.
 </div>
 
-## Pull the container images from Docker Hub
+## Pull the container images from Docker Hub
 
 You only need to pull the images from Docker Hub when they have changed, or if you
 are deploying for the first time:
