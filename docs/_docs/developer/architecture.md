@@ -8,22 +8,24 @@ toc: false
 The following text-diagram shows the inheritance hierarchy of the ESGF Docker containers:
 
 ```
-centos:6 -> esgf-postgres
+centos/postgresql-96-centos7 -> esgfhub/postgres -> esgfhub/postgres-esgcet
 
-nginx -> esgf-proxy
+nginx -> esgfhub/proxy
 
-solr:5.5 -> esgf-solr
+solr:5.5 -> esgfhub/solr
 
-alpine -> esgf-configure
+alpine -> esgfhub/configure
 
-python:2.7-slim -> esgf-django -> esgf-auth
-                               -> esgf-cog
-                               -> esgf-slcs
+python:2.7-slim -> esgfhub/django -> esgfhub/auth
+                                  -> esgfhub/cog
+                                  -> esgfhub/slcs
 
-openjdk:8-jre -> tomcat:8 -> esgf-tomcat -> esgf-idp-node
-                                         -> esgf-index-node
-                                         -> esgf-orp
-                                         -> esgf-tds
+openjdk:8-jre -> tomcat:8 -> esgfhub/tomcat -> esgfhub/idp-node
+                                            -> esgfhub/index-node
+                                            -> esgfhub/orp
+                                            -> esgfhub/tds
+
+continuumio/miniconda -> esgfhub/publisher
 ```
 
 ## Configuration
@@ -59,8 +61,8 @@ allows us to install the minimum amount of software required to run an applicati
 in the final image, reducing container bloat and potential attack surface.
 
 A build image can include dependencies that are only required when building
-that are not required in the final image - for example, the build image for the
-[esgf-slcs](https://github.com/cedadev/esgf-docker/blob/master/slcs/Dockerfile)
+that are not required in the final image - for example, the build image for
+[esgfhub/slcs](https://github.com/ESGF/esgf-docker/blob/master/slcs/Dockerfile)
 installs `build-essential` (for GCC) and the header files for OpenSSL, neither
 of which are required to actually run the application. The resulting
 [Python wheels](https://pythonwheels.com/) are copied into the application image,
@@ -73,6 +75,6 @@ as a way to share files with other images using the `COPY --from=<image>` syntax
 This is mainly to work-around the fact that Docker does not allow symlinks in a
 build context.
 
-In particular, the `esgf-configure` container is a mixin container, that exists
+In particular, the `esgfhub/configure` image is a mixin image that exists
 purely to allow other images to `COPY` the default templates for `/esg/config`
 and some useful scripts.
