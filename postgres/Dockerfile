@@ -18,5 +18,6 @@ FROM centos/postgresql-96-centos7
 MAINTAINER Earth System Grid Federation <esgf-devel@lists.llnl.gov>
 
 # Install a pre-start hook to set password variables from file
-RUN mkdir -p "${APP_DATA}/src/postgresql-pre-start"
-COPY passwords-from-file.sh $APP_DATA/src/postgresql-pre-start/
+COPY --chown=postgres:0 ./pre-start $APP_DATA/src/postgresql-pre-start
+# Install a start hook that applies any .sql schema files when a database is created
+COPY --chown=postgres:0 ./start $APP_DATA/src/postgresql-start

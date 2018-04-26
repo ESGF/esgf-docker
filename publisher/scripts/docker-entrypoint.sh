@@ -95,6 +95,15 @@ for src in $(find /esg/config/esgcet -type f -name '*.template'); do
     [ -f "$dest" ] || envsubst < "$src" > "$dest"
 done
 
+# Initialise the schema migration
+info "Enabling schema versioning"
+DB_URL=${ESGF_DATABASE_PROTOCOL:-postgresql}://${ESGF_DATABASE_USER}:${ESGF_DATABASE_PASSWORD}@${ESGF_DATABASE_HOST}:${ESGF_DATABASE_PORT}/${ESGF_DATABASE_NAME}
+if python -m esgcet.schema_migration.manage db_version "${DB_URL}" 1>/dev/null 2>&1; then
+    info "  Schema versioning already enabled - skipping"
+else
+    python -m esgcet.schema_migration.manage version_control "${DB_URL}"
+fi
+
 # Run esginitialize
 info "Running esginitialize -c"
 esginitialize -c

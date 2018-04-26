@@ -13,10 +13,8 @@ MAINTAINER Earth System Grid Federation <esgf-devel@lists.llnl.gov>
 # Install the ESGF customisations
 
 # This installs a script that checks our extra environment variables are present
-RUN mkdir -p "${APP_DATA}/src/postgresql-pre-start"
+# and creates the esgf_security_data.sql start file
 COPY ./pre-start/* $APP_DATA/src/postgresql-pre-start/
 
-# These need to run after the database is created - this means we must use the
-# "start" hook rather than "init"
-RUN mkdir -p "${APP_DATA}/src/postgresql-start"
-COPY ./start/* $APP_DATA/src/postgresql-start/
+# Install schemas to be used to populate database
+COPY ./start/esgf_security.sql $APP_DATA/src/postgresql-start/01-esgf_security.sql
