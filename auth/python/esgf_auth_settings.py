@@ -22,7 +22,10 @@ for name, value in os.environ.items():
 
 
 # Configure staticfiles app
+STATICFILES_DIRS = [
+    os.environ['ESGF_AUTH_INSTALL_DIR'] + '/static',
+]
 STATIC_ROOT = os.environ['DJANGO_STATIC_ROOT']
 # Check if we are running under a prefix
 if 'SCRIPT_NAME' in os.environ:
-    STATIC_URL = os.environ['SCRIPT_NAME'] + STATIC_URL
+    STATIC_URL = STATIC_URL.replace('/esgf-auth', os.environ['SCRIPT_NAME'])
