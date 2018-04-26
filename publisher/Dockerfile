@@ -36,7 +36,7 @@ RUN conda install -y -c conda-forge -c uvcdat \
       'SQLAlchemy==0.7.10' \
       sqlalchemy_migrate \
       ESGConfigParser==0.1.10 \
-      esgprep
+      esgprep==2.7.40
 
 # Install the publisher client from GitHub
 ARG ESG_PUBLISHER_VERSION=v3.2.7
