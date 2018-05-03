@@ -1,7 +1,7 @@
 ---
 title: Docker Tips
 category: Usage
-order: 1.4
+order: 1.5
 ---
 
 The following page gives some useful tips on docker and swarm managment.
