@@ -1,6 +1,5 @@
 // SYSTEM SETTINGS
 WAITING_TIME=240 // in seconds.
-// enable slack notifications. Don't forget to setup the Slack settings.
 
 INFO_TAG='[INFO]'
 ERROR_TAG='[ERROR]'
