@@ -91,7 +91,7 @@ pipeline
           env.ESGF_VERSION='devel'
         }
 
-        msg = String.format("ESGF-test-suite #%s: testing commit '%s' from branch %s (<%s|build link>)", env.BUILD_ID, env.GIT_COMMIT, env.BRANCH_NAME, env.BUILD_URL)
+        msg = String.format("ESGF-test-suite <%s|#%s>: testing commit '%s' from branch %s", env.BUILD_URL, env.BUILD_ID, env.GIT_COMMIT, env.BRANCH_NAME)
 
         info(msg)
         slack_send(msg, Colors.BLUE)
