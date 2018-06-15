@@ -82,6 +82,9 @@ pipeline
       
       script
       {
+        // As variables declared in the environment statement are
+        // unmutable, ESGF_VERSION has to be declared this way, so as to be
+        // modified later into latest or devel.
         if(env.BRANCH_NAME=='master')
         {
           env.ESGF_VERSION='latest'
@@ -153,7 +156,7 @@ pipeline
       {
         script
         {
-          // We must export the env var otherwise orp, slcs and auth keep restarting.
+          // We must 'export' these env var otherwise orp, slcs and auth keep restarting.
           return_code = sh(returnStatus: true, script: """
             set +x
             export ESGF_CONFIG=${ESGF_CONFIG}
