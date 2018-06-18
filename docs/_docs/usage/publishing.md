@@ -1,7 +1,7 @@
 ---
 title: Data Publishing
 category: Usage
-order: 1.3
+order: 1.4
 ---
 
 ## Test publication

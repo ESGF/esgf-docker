@@ -6,3 +6,4 @@
 **/*.jar
 **/*.gz
 _site/
+.project

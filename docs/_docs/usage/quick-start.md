@@ -71,9 +71,16 @@ generate deployment secrets, self-signed certificates and the trusted certificat
 bundle:
 
 ```sh
-docker-compose run esgf-setup generate-secrets
-docker-compose run esgf-setup generate-test-certificates
-docker-compose run esgf-setup create-trust-bundle
+docker-compose run -u $UID esgf-setup generate-secrets
+docker-compose run -u $UID esgf-setup generate-test-certificates
+docker-compose run -u $UID esgf-setup create-trust-bundle
+```
+Execute chmod instructions only if you experience permission issues 
+while esgf-orp and esgf-slcs running:
+
+```
+chmod +r "${ESGF_CONFIG}/certificates/hostcert/hostcert.key"
+chmod +r "${ESGF_CONFIG}/certificates/slcsca/ca.key"
 ```
 
 ## Launch containers
