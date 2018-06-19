@@ -20,7 +20,7 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 
 # Clone the github repo and checkout the specified version
-ARG ESGF_SLCS_GIT_VERSION=master
+ARG ESGF_SLCS_GIT_VERSION=issue/3/remove-django-wsgi
 RUN git clone https://github.com/ESGF/esgf-slcs-server.git /application && \
     cd /application && \
     git checkout $ESGF_SLCS_GIT_VERSION && \
@@ -45,7 +45,8 @@ COPY --from=esgf-slcs-build /application /application
 COPY --from=esgf-slcs-build /pip-wheels  /pip-wheels
 
 # Install the application + wheels (remove the wheels when we are done)
-RUN pip install --no-index --find-links=/pip-wheels -r /application/requirements.txt && \
+RUN cd /pip-wheels && \
+    pip install --no-deps $(find /pip-wheels -type f -name '*.whl') && \
     pip install --no-deps -e /application && \
     rm -rf /pip-wheels
 

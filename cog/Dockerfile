@@ -20,8 +20,9 @@ FROM python:2.7-slim AS esgf-cog-build
 #   * build-essential for gcc
 #   * libpq-dev for psycopg2
 #   * libsqlite3-dev for pysqlite
+#   * libssl-dev for globus-client
 RUN apt-get update && \
-    apt-get install -y git build-essential libpq-dev libsqlite3-dev && \
+    apt-get install -y git build-essential libpq-dev libsqlite3-dev libssl-dev && \
     rm -rf /var/lib/apt/lists/*
 
 # Clone the github repo and checkout the specified version
