@@ -88,7 +88,7 @@ pipeline
     ESGF_DATA="${env.WORKSPACE}/data"
 
     /*** DOCKERHUB ***/
-    DOCKERHUB_CREDENTIAL_ID='dockerhub_esgf-docker_account'
+    DOCKERHUB_CREDENTIAL_ID='esgfci-dockerhub'
     
     /*** ESGF TEST SUITE ***/
     ESGF_TEST_SUITE_REPO_URL='https://github.com/ESGF/esgf-test-suite.git'
