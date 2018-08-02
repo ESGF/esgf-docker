@@ -14,6 +14,7 @@
 ARG ESGF_HUB=esgfhub
 ARG ESGF_PREFIX=
 ARG ESGF_VERSION=latest
+ARG ESGF_HUB_ALT=esgfhublc
 
 # This build stage is required because COPY --from=$ARG is not supported
 # https://github.com/moby/moby/issues/34482
@@ -35,7 +36,7 @@ RUN mkdir /opt/esg-orp && \
 ## Stage 2 ##
 #############
 
-FROM ${ESGF_HUB}/${ESGF_PREFIX}tomcat:$ESGF_VERSION
+FROM ${ESGF_HUB_ALT}/${ESGF_PREFIX}tomcat:$ESGF_VERSION
 
 MAINTAINER Earth System Grid Federation <esgf-devel@lists.llnl.gov>
 
