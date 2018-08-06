@@ -76,14 +76,14 @@ services:
       ESGF_HOSTNAME:
       ESGF_DATABASE_HOST: esgf-postgres-esgcet
       ESGF_DATABASE_USER: esgcet
-      ESGF_DATABASE_PASSWORD_FILE: /esg/secrets/database-publisher-password
+      ESGF_DATABASE_PASSWORD_FILE: /esg/secrets/esgcet-database-password
       ESGF_TDS_USERNAME: rootAdmin
       ESGF_TDS_PASSWORD_FILE: /esg/secrets/rootadmin-password
     volumes:
       - "$ESGF_DATA:/esg/data"
       - "tds-content:/esg/content/thredds/esgcet"
       # Mount only the secrets we actually need
-      - "$ESGF_CONFIG/secrets/database-publisher-password:/esg/secrets/database-publisher-password:ro"
+      - "$ESGF_CONFIG/secrets/esgcet-database-password:/esg/secrets/esgcet-database-password:ro"
       - "$ESGF_CONFIG/secrets/rootadmin-password:/esg/secrets/rootadmin-password:ro"
       # Make sure the trusted certificate bundle is available
       - "$ESGF_CONFIG/certificates/esg-trust-bundle.pem:/esg/certificates/esg-trust-bundle.pem:ro"
@@ -158,9 +158,9 @@ services:
     environment:
       POSTGRESQL_DATABASE: esgcet
       POSTGRESQL_USER: esgcet
-      POSTGRESQL_PASSWORD_FILE: /esg/secrets/database-publisher-password
+      POSTGRESQL_PASSWORD_FILE: /esg/secrets/esgcet-database-password
     volumes:
-      - "$ESGF_CONFIG/secrets/database-publisher-password:/esg/secrets/database-publisher-password:ro"
+      - "$ESGF_CONFIG/secrets/esgcet-database-password:/esg/secrets/esgcet-database-password:ro"
       - "postgres-esgcet-data:/var/lib/pgsql/data"
     depends_on:
       - esgf-postgres
@@ -177,14 +177,14 @@ services:
     environment:
       POSTGRESQL_DATABASE: esgcet
       POSTGRESQL_USER: dbsuper
-      POSTGRESQL_PASSWORD_FILE: /esg/secrets/database-password
+      POSTGRESQL_PASSWORD_FILE: /esg/secrets/security-database-password
       ESGF_ROOTADMIN_EMAIL: "CoG@${ESGF_HOSTNAME}"
       ESGF_ROOTADMIN_USERNAME: rootAdmin
       ESGF_ROOTADMIN_OPENID: https://${ESGF_HOSTNAME}/esgf-idp/openid/rootAdmin
       ESGF_ROOTADMIN_PASSWORD_FILE: /esg/secrets/rootadmin-password
     volumes:
       # Mount only the secrets we actually need
-      - "$ESGF_CONFIG/secrets/database-password:/esg/secrets/database-password:ro"
+      - "$ESGF_CONFIG/secrets/security-database-password:/esg/secrets/security-database-password:ro"
       - "$ESGF_CONFIG/secrets/rootadmin-password:/esg/secrets/rootadmin-password:ro"
       - "postgres-security-data:/var/lib/pgsql/data"
     depends_on:
@@ -247,7 +247,7 @@ services:
     environment:
       <<: *config_env
     volumes:
-      - "$ESGF_CONFIG/secrets/database-password:/esg/config/.esg_pg_pass:ro"
+      - "$ESGF_CONFIG/secrets/security-database-password:/esg/config/.esg_pg_pass:ro"
       # Make sure the trusted certificate bundle is available
       - "$ESGF_CONFIG/certificates/esg-trust-bundle.pem:/esg/certificates/esg-trust-bundle.pem:ro"
     depends_on:
@@ -285,9 +285,9 @@ services:
     environment:
       POSTGRESQL_DATABASE: cogdb
       POSTGRESQL_USER: dbsuper
-      POSTGRESQL_PASSWORD_FILE: /esg/secrets/database-password
+      POSTGRESQL_PASSWORD_FILE: /esg/secrets/cog-database-password
     volumes:
-      - "$ESGF_CONFIG/secrets/database-password:/esg/secrets/database-password:ro"
+      - "$ESGF_CONFIG/secrets/cog-database-password:/esg/secrets/cog-database-password:ro"
       - "postgres-cog-data:/var/lib/pgsql/data"
     depends_on:
       - esgf-postgres
@@ -309,9 +309,10 @@ services:
       ESGF_COG_DATABASE_PORT: "5432"
       ESGF_COG_DATABASE_NAME: cogdb
       ESGF_COG_DATABASE_USER: dbsuper
-      ESGF_COG_DATABASE_PASSWORD_FILE: /esg/config/.esg_pg_pass
+      ESGF_COG_DATABASE_PASSWORD_FILE: /esg/secrets/cog-database-password
     volumes:
-      - "$ESGF_CONFIG/secrets/database-password:/esg/config/.esg_pg_pass:ro"
+      - "$ESGF_CONFIG/secrets/security-database-password:/esg/config/.esg_pg_pass:ro"
+      - "$ESGF_CONFIG/secrets/cog-database-password:/esg/secrets/cog-database-password:ro"
       - "$ESGF_CONFIG/secrets/rootadmin-password:/esg/config/.esgf_pass:ro"
       - "$ESGF_CONFIG/secrets/cog-secret-key:/esg/secrets/cog-secret-key:ro"
       # Make sure the trusted certificate bundle is available
@@ -407,7 +408,7 @@ services:
       DJANGO_DATABASE_USERDB_HOST: esgf-postgres-security
       DJANGO_DATABASE_USERDB_PORT: "5432"
       DJANGO_DATABASE_USERDB_USER: dbsuper
-      DJANGO_DATABASE_USERDB_PASSWORD_FILE: /esg/secrets/database-password
+      DJANGO_DATABASE_USERDB_PASSWORD_FILE: /esg/secrets/security-database-password
       # Make the rootAdmin account a superuser
       DJANGO_CREATE_SUPERUSER: "1"
       DJANGO_SUPERUSER_USERNAME: "rootAdmin"
@@ -415,14 +416,14 @@ services:
       # Other SLCS-specific settings
       ESGF_SLCS_URL: "https://${ESGF_HOSTNAME}/esgf-slcs"
       ESGF_SLCS_BASIC_AUTH_REALM: $ESGF_HOSTNAME
-      ONLINECA_CERT_SUBJECT_TEMPLATE: /DC=esgf/CN=$$OPENID
-      ONLINECA_CERT_FILEPATH: /esg/certificates/slcsca/ca.crt
-      ONLINECA_KEY_FILEPATH: /esg/certificates/slcsca/ca.key
+      ONLINECA_SUBJECT_NAME_TEMPLATE: "/DC=esgf/CN={user}"
+      ONLINECA_CERT_PATH: /esg/certificates/slcsca/ca.crt
+      ONLINECA_KEY_PATH: /esg/certificates/slcsca/ca.key
       ONLINECA_TRUSTROOTS_DIR: /esg/certificates/slcsca/trustroots
     volumes:
       - "$ESGF_CONFIG/secrets/slcs-secret-key:/esg/secrets/slcs-secret-key:ro"
       - "$ESGF_CONFIG/secrets/slcs-database-password:/esg/secrets/slcs-database-password:ro"
-      - "$ESGF_CONFIG/secrets/database-password:/esg/secrets/database-password:ro"
+      - "$ESGF_CONFIG/secrets/security-database-password:/esg/secrets/security-database-password:ro"
       - "$ESGF_CONFIG/certificates/slcsca/ca.crt:/esg/certificates/slcsca/ca.crt:ro"
       - "$ESGF_CONFIG/certificates/slcsca/ca.key:/esg/certificates/slcsca/ca.key:ro"
       # Just mount an empty volume as the trustroots for now

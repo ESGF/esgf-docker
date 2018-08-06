@@ -15,6 +15,6 @@ FROM openjdk:8-jdk
 COPY scripts /opt/esgf-docker/setup-scripts
 ENV PATH /opt/esgf-docker/setup-scripts:$PATH
 
-# By default, run the full setup
+# By default, list the available commands
 ENTRYPOINT ["docker-entrypoint.sh"]
 CMD ["available-commands"]
