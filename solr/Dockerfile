@@ -2,7 +2,7 @@
 ## Standard Solr container with setup of ESGF cores built-in
 #####
 
-FROM solr:5.5
+FROM solr:6.6
 
 MAINTAINER Earth System Grid Federation <esgf-devel@lists.llnl.gov>
 
