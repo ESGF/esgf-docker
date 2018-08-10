@@ -1,0 +1,35 @@
+#!/bin/bash
+
+set -eo pipefail
+
+. "$(dirname $BASH_SOURCE)/functions.sh"
+
+
+#####
+## This script downloads static configurations from the esgf-config Github repo
+#####
+
+profile="${1:-"esgf-prod"}"
+config_files=(
+    "esgf_ats_static.xml"
+    "esgf_cogs.xml"
+    "esgf_endpoints.xml"
+    "esgf_idp_static.xml"
+    "esgf_known_providers.xml"
+    "esgf_search_aliases.xml"
+)
+
+info "Ensuring config directory exists"
+mkdir -p /esg/config
+
+info "Downloading config files"
+for i in "${!config_files[@]}"; do
+    config_file="${config_files[$i]}"
+    info "[$((i + 1))/${#config_files[@]}] $config_file"
+    curl -o "/esg/config/$config_file" -fsSL "https://raw.githubusercontent.com/ESGF/esgf-config/master/${profile}/xml/${config_file}"
+done
+
+info "Downloading trusted certificates tarball"
+curl -o "/esg/certificates/esg_trusted_certificates.tar" -fsSL "${ESGF_DIST:-"http://dist.ceda.ac.uk/esgf/dist"}/certs/esg_trusted_certificates.tar"
+
+info "Done"

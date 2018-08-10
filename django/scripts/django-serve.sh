@@ -29,6 +29,8 @@ info "Updating trusted certificates"
 cat /etc/ssl/certs/ca-certificates.crt > /var/run/django/conf/trust-bundle.pem
 cat /esg/certificates/esg-trust-bundle.pem >> /var/run/django/conf/trust-bundle.pem
 export SSL_CERT_FILE=/var/run/django/conf/trust-bundle.pem
+# Also set the requests-specific environment variable, as it doesn't respect SSL_CERT_FILE
+export REQUESTS_CA_BUNDLE="${SSL_CERT_FILE}"
 
 # Run database migrations
 info "Running database migrations"
@@ -122,4 +124,4 @@ exec gunicorn \
     --access-logfile '-' \
     --error-logfile '-' \
     --log-level ${GUNICORN_LOG_LEVEL:-info} \
-    --workers ${GUNICORN_WORKERS:-1}
+    --workers ${GUNICORN_WORKERS:-4}
