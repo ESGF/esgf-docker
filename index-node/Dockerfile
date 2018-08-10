@@ -19,6 +19,7 @@ ARG ESGF_VERSION=latest
 # https://github.com/moby/moby/issues/34482
 FROM ${ESGF_HUB}/${ESGF_PREFIX}configure:${ESGF_VERSION} as configuration
 
+
 #############
 ## Stage 1 ##
 #############
@@ -53,15 +54,12 @@ RUN sed -i \
       "s/\/esg\/config\/esgf_shards_static\.xml/\/esg\/config\/esgf_shards\.xml, \0/g" \
       $CATALINA_HOME/webapps/esg-search/WEB-INF/classes/esg/search/config/application-context.xml
 
+# Copy configuration and utils from esgf-configure
+COPY --chown=1001:0 --from=configuration /esg /esg
+# Install initialisation script
+COPY ./scripts/configure.sh /tomcat-init.d/
 # Install environment customisations
-# Make sure this runs before the config interpolation
-COPY scripts/check-variables.sh /tomcat-init.d/01-check-variables.sh
-# Ensure the config directory is owned by the tomcat user and root group
-RUN mkdir -p /esg/config && chown 1001:0 /esg/config && chmod 775 /esg/config
-COPY --chown=1001:0 --from=configuration /esg/config /esg/config
-# Make sure the config interpolation runs first by giving it a low ordinal
-COPY --from=configuration /opt/esgf-docker/scripts/interpolate-configs.sh /tomcat-init.d/02-interpolate.sh
-COPY scripts/setenv.sh $CATALINA_HOME/bin/
+COPY ./scripts/setenv.sh $CATALINA_HOME/bin/
 
 # Run as the tomcat user by default
 USER 1001

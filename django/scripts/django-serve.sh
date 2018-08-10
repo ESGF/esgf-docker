@@ -1,4 +1,4 @@
-#! /usr/bin/env bash
+#!/usr/bin/env bash
 
 set -eo pipefail
 
@@ -9,9 +9,7 @@ function error { echo "[ERROR] $1" 1>&2; exit 1; }
 ## This script sets up Django before starting the WSGI server
 #####
 
-# Configure settings module to the first argument
-info "Using DJANGO_SETTINGS_MODULE = $1"
-export DJANGO_SETTINGS_MODULE="$1"
+[ -z "$DJANGO_SETTINGS_MODULE" ] && error "DJANGO_SETTINGS_MODULE must be set"
 
 # Run the customisations
 info "Running customisations"
@@ -28,9 +26,9 @@ fi
 # Make sure the trusted certificates have been updated
 info "Updating trusted certificates"
 # Combine the trusted certificates into a single bundle and make sure Python uses it
-cat /etc/ssl/certs/ca-certificates.crt > /opt/django/conf/trust-bundle.pem
-cat /esg/certificates/esg-trust-bundle.pem >> /opt/django/conf/trust-bundle.pem
-export SSL_CERT_FILE=/opt/django/conf/trust-bundle.pem
+cat /etc/ssl/certs/ca-certificates.crt > /var/run/django/conf/trust-bundle.pem
+cat /esg/certificates/esg-trust-bundle.pem >> /var/run/django/conf/trust-bundle.pem
+export SSL_CERT_FILE=/var/run/django/conf/trust-bundle.pem
 
 # Run database migrations
 info "Running database migrations"
@@ -97,11 +95,12 @@ function django_setting {
 # Note that because gunicorn understands SCRIPT_NAME, we need to strip it from
 # the STATIC_URL setting for the static app
 static_url="$(django_setting STATIC_URL)"
-cat > /opt/django/conf/paste.ini <<EOF
+static_url="${static_url#"${SCRIPT_NAME:-""}"}"
+cat > /var/run/django/conf/paste.ini <<EOF
 [composite:main]
 use = egg:Paste#urlmap
 / = django
-${static_url#"$SCRIPT_NAME"} = static
+${static_url} = static
 
 [app:django]
 use = call:django_paste:app_factory
@@ -118,7 +117,7 @@ EOF
 # Run the app using gunicorn (we are already the Django user)
 info "Starting gunicorn"
 exec gunicorn \
-    --paste /opt/django/conf/paste.ini \
+    --paste /var/run/django/conf/paste.ini \
     --bind 0.0.0.0:${GUNICORN_PORT:-8000} \
     --access-logfile '-' \
     --error-logfile '-' \

@@ -13,6 +13,11 @@ ARG ESGF_VERSION=latest
 # https://github.com/moby/moby/issues/34482
 FROM ${ESGF_HUB}/${ESGF_PREFIX}configure:${ESGF_VERSION} as configuration
 
+
+#############
+## Stage 1 ##
+#############
+
 FROM python:2.7-slim AS esgf-auth-build
 
 # Install git for checking out the source code and pulling dependencies
@@ -61,24 +66,21 @@ ENV ESGF_AUTH_INSTALL_DIR /application
 # Install ESGF Auth settings wrapper
 COPY python/*.py /usr/local/lib/python2.7/site-packages/
 
+# Tell Django which settings module to use
+ENV DJANGO_SETTINGS_MODULE esgf_auth_settings
+
 # Install configuration files
-# Ensure the config directory is owned by the Django user and root group
-RUN mkdir -p /esg/config && chown 1001:0 /esg/config && chmod 775 /esg/config
-COPY --chown=1001:0 --from=configuration /esg/config /esg/config
-# Make sure the config interpolation runs first by giving it a low ordinal
-COPY --from=configuration /opt/esgf-docker/scripts/interpolate-configs.sh /django-init.d/01-interpolate.sh
-# Install the template auth config file
+# First, start with the /esg directory from esgf-configure
+COPY --chown=1001:0 --from=configuration /esg /esg
+# Install the default auth configuration
 ENV ESGF_AUTH_CONFIG_FILE /esg/auth/esgf_auth_config.json
 ENV ESGF_OAUTH2_SECRET_FILE /esg/auth/esgf_oauth2.json
-# Ensure /esg/auth exists and is owned by the Django user and root group
-RUN mkdir -p /esg/auth && chown 1001:0 /esg/auth && chmod 775 /esg/auth
-COPY conf/esgf_auth_config.json.template "$ESGF_AUTH_CONFIG_FILE.template"
-RUN echo "{}" > $ESGF_OAUTH2_SECRET_FILE
-# This script interpolates the auth config files with additional environment variables
-COPY scripts/auth-configure.sh /django-init.d/02-auth-configure.sh
+COPY ./conf  /esg/auth/.defaults
+# Correct the permissions on /esg/auth so that non-root users in the root group can write to it
+RUN chown 1001:0 /esg/auth && chmod 755 /esg/auth
+
+# Install initialisation scripts
+COPY ./scripts /django-init.d
 
 # Run as the Django user unless otherwise specified
 USER 1001
-
-# The "command" is just the settings module to use
-CMD ["esgf_auth_settings"]

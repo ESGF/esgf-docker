@@ -53,8 +53,8 @@ RUN cd /pip-wheels && \
 # Install Django settings
 COPY conf/settings.py /application/esgf_slcs_server/
 
+# Set the settings module to use
+ENV DJANGO_SETTINGS_MODULE "esgf_slcs_server.settings"
+
 # Run as the Django user unless otherwise specified
 USER 1001
-
-# The "command" is just the settings file to use
-CMD ["esgf_slcs_server.settings"]

@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <tomcat-users>
   <role rolename="tdsConfig"/>
-  <user username="$ESGF_TDS_ADMIN_USERNAME"
-        password="$ESGF_TDS_ADMIN_PASSWORD_DIGEST"
+  <user username="{{ .Env.ESGF_TDS_ADMIN_USERNAME }}"
+        password="{{ .Env.ESGF_TDS_ADMIN_PASSWORD_DIGEST }}"
         roles="tdsConfig"/>
 </tomcat-users>

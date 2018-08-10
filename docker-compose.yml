@@ -21,11 +21,26 @@ services:
     build: ./configure
     # Use an entrypoint that exits immediately with success
     entrypoint: ["true"]
-    # Environment variables required for config files
-    # This uses a YAML anchor so that these are easy to reference elsewhere
-    environment: &config_env
+    # This is the common configuration for esgf.properties
+    # It is included here purely as a place to set the YAML anchor that conforms with the Docker Compose schema
+    environment: &esgf_properties
       ESGF_HOSTNAME:
+      ESGF_PEER_GROUP: esgf-test
+      ESGF_ATTRIBUTE_SERVICE_ENDPOINT: "https://$ESGF_HOSTNAME/esgf-idp/saml/soap/secure/attributeService.htm"
+      ESGF_REGISTRATION_SERVICE_ENDPOINT: "https://$ESGF_HOSTNAME/esgf-idp/secure/registrationService.htm"
+      ESGF_OPENID_ENDPOINT: "https://$ESGF_HOSTNAME/esgf-idp/idp/openidServer.htm"
       ESGF_DATABASE_HOST: esgf-postgres-security
+      ESGF_DATABASE_PORT: "5432"
+      ESGF_DATABASE_USER: dbsuper
+      ESGF_DATABASE_NAME: esgcet
+      ESGF_SEARCH_SERVICE_ENDPOINT: "https://$ESGF_HOSTNAME/esg-search/search"
+      ESGF_IDP_PEER: $ESGF_HOSTNAME
+      ESGF_INDEX_PEER: $ESGF_HOSTNAME
+      ESGF_PUBLISH_SERVICE_ENDPOINT: "https://$ESGF_HOSTNAME/esg-search/remote/secure/client-cert/hessian/publishingService"
+      ESGF_SOLR_QUERY_URL: "http://esgf-solr-slave:8983/solr"
+      ESGF_SOLR_PUBLISH_URL: "http://esgf-solr-master:8983/solr"
+      ESGF_AUTHORIZATION_SERVICE_ENDPOINT: "https://$ESGF_HOSTNAME/esg-orp/saml/soap/secure/authorizationService.htm"
+      ESGF_SLCS_ENDPOINT: "https://$ESGF_HOSTNAME/esgf-slcs"
 
   # Build dependency only
   esgf-postgres:
@@ -118,6 +133,7 @@ services:
       ESGF_SLCS_UPSTREAM: http://esgf-slcs:8000
       ESGF_AUTH_UPSTREAM: http://esgf-auth:8000
     depends_on:
+      - esgf-configure
       - esgf-solr-slave
       - esgf-index-node
       - esgf-tds
@@ -200,7 +216,8 @@ services:
         ESGF_VERSION: $ESGF_VERSION
     restart: always
     environment:
-      <<: *config_env
+      <<: *esgf_properties
+      ESGF_KEYSTORE_ALIAS: $ESGF_HOSTNAME
       ESGF_SAML_CERT_FILE: /esg/certificates/hostcert/hostcert.crt
       ESGF_SAML_KEY_FILE: /esg/certificates/hostcert/hostcert.key
     volumes:
@@ -222,9 +239,8 @@ services:
         ESGF_VERSION: $ESGF_VERSION
     restart: always
     environment:
-      <<: *config_env
-      ESGF_SOLR_QUERY_URL: "http://esgf-solr-slave:8983"
-      ESGF_SOLR_PUBLISH_URL: "http://esgf-solr-master:8983"
+      <<: *esgf_properties
+      ESGF_SOLR_SHARDS: "esgf-solr-slave:8983/solr"
     volumes:
       # Make sure the trusted certificate bundle is available
       - "$ESGF_CONFIG/certificates/esg-trust-bundle.pem:/esg/certificates/esg-trust-bundle.pem:ro"
@@ -245,9 +261,11 @@ services:
         ESGF_VERSION: $ESGF_VERSION
     restart: always
     environment:
-      <<: *config_env
+      <<: *esgf_properties
+      ESGF_DATABASE_PASSWORD_FILE: /esg/config/.esg_pg_pass
     volumes:
       - "$ESGF_CONFIG/secrets/security-database-password:/esg/config/.esg_pg_pass:ro"
+      - "$ESGF_CONFIG/secrets/rootadmin-password:/esg/config/.esgf_pass:ro"
       # Make sure the trusted certificate bundle is available
       - "$ESGF_CONFIG/certificates/esg-trust-bundle.pem:/esg/certificates/esg-trust-bundle.pem:ro"
     depends_on:
@@ -264,15 +282,19 @@ services:
         ESGF_PREFIX: $ESGF_PREFIX
         ESGF_VERSION: $ESGF_VERSION
     environment:
-      <<: *config_env
+      <<: *esgf_properties
+      ESGF_ORP_HOME_ENDPOINT: "https://$ESGF_HOSTNAME/esg-orp/home.htm"
+      ESGF_AUTH_HOME_ENDPOINT: "https://$ESGF_HOSTNAME/esgf-auth/home/"
+      ESGF_REGISTRATION_RELAY_ENDPOINT: "https://$ESGF_HOSTNAME/esg-orp/registration-request.htm"
       ESGF_COOKIE_SECRET_KEY_FILE: /esg/secrets/shared-cookie-secret-key
-      ESGF_TDS_ADMIN_PASSWORD_FILE: /esg/secrets/rootadmin-password
+      ESGF_TDS_ADMIN_USERNAME: rootAdmin
+      ESGF_TDS_ADMIN_PASSWORD_FILE: /esg/config/.esgf_pass
     volumes:
       - "tds-content:/esg/content/thredds/esgcet:ro"
       - "$ESGF_DATA:/esg/data:ro"
       # Mount only the secrets we actually need
       - "$ESGF_CONFIG/secrets/shared-cookie-secret-key:/esg/secrets/shared-cookie-secret-key:ro"
-      - "$ESGF_CONFIG/secrets/rootadmin-password:/esg/secrets/rootadmin-password:ro"
+      - "$ESGF_CONFIG/secrets/rootadmin-password:/esg/config/.esgf_pass:ro"
       # Make sure the trusted certificate bundle is available
       - "$ESGF_CONFIG/certificates/esg-trust-bundle.pem:/esg/certificates/esg-trust-bundle.pem:ro"
     depends_on:
@@ -302,7 +324,9 @@ services:
         ESGF_VERSION: $ESGF_VERSION
     restart: always
     environment:
-      <<: *config_env
+      <<: *esgf_properties
+      ESGF_COG_SITE_NAME: "Local CoG"
+      ESGF_COG_HOME_PROJECT: TestProject
       ESGF_COG_TIME_ZONE: "Europe/London"
       ESGF_COG_SECRET_KEY_FILE: /esg/secrets/cog-secret-key
       ESGF_COG_DATABASE_HOST: esgf-postgres-cog
@@ -346,7 +370,7 @@ services:
         ESGF_VERSION: $ESGF_VERSION
     restart: always
     environment:
-      <<: *config_env
+      <<: *esgf_properties
       SCRIPT_NAME: /esgf-auth
       ESGF_AUTH_SECRET_KEY_FILE: /esg/secrets/auth-secret-key
       ESGF_COOKIE_SECRET_KEY_FILE: /esg/secrets/shared-cookie-secret-key
