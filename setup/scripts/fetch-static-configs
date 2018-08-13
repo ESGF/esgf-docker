@@ -10,6 +10,12 @@ set -eo pipefail
 #####
 
 profile="${1:-"esgf-prod"}"
+
+info "Ensuring config directory exists"
+mkdir -p /esg/config
+
+# Download the static config files
+info "Downloading static configs"
 config_files=(
     "esgf_ats_static.xml"
     "esgf_cogs.xml"
@@ -18,17 +24,19 @@ config_files=(
     "esgf_known_providers.xml"
     "esgf_search_aliases.xml"
 )
-
-info "Ensuring config directory exists"
-mkdir -p /esg/config
-
-info "Downloading config files"
 for i in "${!config_files[@]}"; do
     config_file="${config_files[$i]}"
     info "[$((i + 1))/${#config_files[@]}] $config_file"
     curl -o "/esg/config/$config_file" -fsSL "https://raw.githubusercontent.com/ESGF/esgf-config/master/${profile}/xml/${config_file}"
 done
 
+# Download esgf_shards_static.xml, removing the entry for localhost
+info "Downloading esgf_shards_static.xml"
+curl -fsSL "https://raw.githubusercontent.com/ESGF/esgf-config/master/${profile}/xml/esgf_shards_static.xml" | \
+  grep -v "localhost/solr" \
+  > "/esg/config/esgf_shards_static.xml"
+
+# Download the trusted certs
 info "Downloading trusted certificates tarball"
 curl -o "/esg/certificates/esg_trusted_certificates.tar" -fsSL "${ESGF_DIST:-"http://dist.ceda.ac.uk/esgf/dist"}/certs/esg_trusted_certificates.tar"
 
