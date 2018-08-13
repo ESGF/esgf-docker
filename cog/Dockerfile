@@ -26,7 +26,7 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 
 # Clone the github repo and checkout the specified version
-ARG ESGF_COG_GIT_VERSION=v3.11
+ARG ESGF_COG_GIT_VERSION=v3.12.1
 RUN git clone https://github.com/EarthSystemCoG/COG /application && \
     cd /application && \
     git checkout $ESGF_COG_GIT_VERSION && \
