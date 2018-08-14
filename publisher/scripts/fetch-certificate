@@ -1,20 +1,12 @@
 #!/bin/bash
 
-set -eo pipefail
+set -euo pipefail
 
-function info { echo "[INFO] $1"; }
-function error { echo "[ERROR] $1" 1>&2; exit 1; }
+. /esg/bin/functions.sh
 
 #####
 ## This script fetches a certificate from the SLCS for the given username and password
 #####
-
-[ -z "$ESGF_SLCS_CERTIFICATE_URL" ] && \
-    [ -z "$ESGF_SLCS_URL" ] && \
-    [ -z "$ESGF_HOSTNAME" ] && \
-    error "ESGF_SLCS_CERTIFICATE_URL, ESGF_SLCS_URL or ESGF_HOSTNAME must be set"
-: ${ESGF_SLCS_URL:="https://${ESGF_HOSTNAME}/esgf-slcs"}
-: ${ESGF_SLCS_CERTIFICATE_URL:="${ESGF_SLCS_URL}/onlineca/certificate/"}
 
 info "Fetching short-lived certificate from $ESGF_SLCS_CERTIFICATE_URL"
 

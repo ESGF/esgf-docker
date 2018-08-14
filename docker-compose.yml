@@ -88,12 +88,19 @@ services:
     image: "${ESGF_HUB}/${ESGF_PREFIX}publisher:${ESGF_VERSION}"
     build: ./publisher
     environment:
-      ESGF_HOSTNAME:
       ESGF_DATABASE_HOST: esgf-postgres-esgcet
+      ESGF_DATABASE_PORT: "5432"
       ESGF_DATABASE_USER: esgcet
       ESGF_DATABASE_PASSWORD_FILE: /esg/secrets/esgcet-database-password
+      ESGF_DATABASE_NAME: esgcet
+      ESGF_HESSIAN_METADATA_URL: "https://${ESGF_HOSTNAME}/esgcet/remote/hessian/guest/remoteMetadataService"
+      ESGF_HESSIAN_URL: "https://${ESGF_HOSTNAME}/esg-search/remote/secure/client-cert/hessian/publishingService"
+      ESGF_TDS_CATALOG_URL: "https://${ESGF_HOSTNAME}/thredds/catalog/esgcet"
+      ESGF_TDS_REINIT_URL: "https://${ESGF_HOSTNAME}/thredds/admin/debug?Catalogs/recheck"
+      ESGF_TDS_REINIT_ERROR_URL: "https://${ESGF_HOSTNAME}/thredds/admin/content/logs/catalogInit.log"
       ESGF_TDS_USERNAME: rootAdmin
       ESGF_TDS_PASSWORD_FILE: /esg/secrets/rootadmin-password
+      ESGF_SLCS_CERTIFICATE_URL: "https://${ESGF_HOSTNAME}/esgf-slcs/onlineca/certificate/"
     volumes:
       - "$ESGF_DATA:/esg/data"
       - "tds-content:/esg/content/thredds/esgcet"
@@ -102,6 +109,8 @@ services:
       - "$ESGF_CONFIG/secrets/rootadmin-password:/esg/secrets/rootadmin-password:ro"
       # Make sure the trusted certificate bundle is available
       - "$ESGF_CONFIG/certificates/esg-trust-bundle.pem:/esg/certificates/esg-trust-bundle.pem:ro"
+      # Allow the publisher configuration to be overridden
+      - "$ESGF_CONFIG/publisher:/esg/config/esgcet/.overrides:ro"
     # Use a command that exits immediately with success, but don't change the entrypoint
     command: ["true"]
     depends_on:
