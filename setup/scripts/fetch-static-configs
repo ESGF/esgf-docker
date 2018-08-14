@@ -30,12 +30,6 @@ for i in "${!config_files[@]}"; do
     curl -o "/esg/config/$config_file" -fsSL "https://raw.githubusercontent.com/ESGF/esgf-config/master/${profile}/xml/${config_file}"
 done
 
-# Download esgf_shards_static.xml, removing the entry for localhost
-info "Downloading esgf_shards_static.xml"
-curl -fsSL "https://raw.githubusercontent.com/ESGF/esgf-config/master/${profile}/xml/esgf_shards_static.xml" | \
-  grep -v "localhost/solr" \
-  > "/esg/config/esgf_shards_static.xml"
-
 # Download the trusted certs
 info "Downloading trusted certificates tarball"
 curl -o "/esg/certificates/esg_trusted_certificates.tar" -fsSL "${ESGF_DIST:-"http://dist.ceda.ac.uk/esgf/dist"}/certs/esg_trusted_certificates.tar"

@@ -151,8 +151,7 @@ services:
     image: "${ESGF_HUB}/${ESGF_PREFIX}solr:${ESGF_VERSION}"
     restart: always
     environment:
-      SOLR_HOME: /esg/solr-home
-      SOLR_HEAP: 1g
+      ESGF_SOLR_ROLE: master
     volumes:
       - "solr-master-home:/esg/solr-home"
     depends_on:
@@ -162,15 +161,24 @@ services:
     image: "${ESGF_HUB}/${ESGF_PREFIX}solr:${ESGF_VERSION}"
     restart: always
     environment:
-      SOLR_HOME: /esg/solr-home
-      SOLR_HEAP: 1g
-      ESGF_SOLR_ENABLE_SLAVE: "1"
       ESGF_SOLR_MASTER_URL: http://esgf-solr-master:8983
+      # Use a shorter replication interval for the local slave than the default
+      ESGF_SOLR_REPLICATION_INTERVAL: "00:00:60"
     volumes:
       - "solr-slave-home:/esg/solr-home"
     depends_on:
       - esgf-solr
       - esgf-solr-master
+
+  # Example remote-replica configuration
+  # The replica would also need to be added to the ESGF_SOLR_SHARDS environment variable for esgf-index-node
+#  esgf-solr-nasa-jpl:
+#    image: "${ESGF_HUB}/${ESGF_PREFIX}solr:${ESGF_VERSION}"
+#    restart: always
+#    environment:
+#      ESGF_SOLR_MASTER_URL: http://esgf-node.jpl.nasa.gov:80
+#    depends_on:
+#      - esgf-solr
 
   esgf-postgres-esgcet:
     image: "${ESGF_HUB}/${ESGF_PREFIX}postgres:${ESGF_VERSION}"
@@ -247,6 +255,8 @@ services:
     environment:
       <<: *esgf_properties
       ESGF_SOLR_SHARDS: "esgf-solr-slave:8983/solr"
+      # Example of configuring additional shards
+#     ESGF_SOLR_SHARDS: "esgf-solr-slave:8983/solr,esgf-solr-nasa-jpl:8983/solr"
     volumes:
       # Make sure the trusted certificate bundle is available
       - "$ESGF_CONFIG/certificates/esg-trust-bundle.pem:/esg/certificates/esg-trust-bundle.pem:ro"
