@@ -21,7 +21,7 @@ RUN mkdir -p /esg/solr-core-config && \
       tar -x -C /esg/solr-core-config --strip-components=2 solr-home/mycore && \
     rm -rf /esg/solr-core-config/core.properties && \
     sed -i \
-      "s/http:\/\/localhost:8984/\${esgf.solr.master.url:}/g" \
+      "s/http:\/\/localhost:8984\/solr/\${esgf.solr.master.url:}/g" \
       /esg/solr-core-config/conf/solrconfig.xml && \
     sed -i \
       "s/00:00:60/\${esgf.solr.replication.interval:}/g" \

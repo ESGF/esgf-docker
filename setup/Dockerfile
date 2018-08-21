@@ -8,6 +8,15 @@
 ## on the host
 #####
 
+ARG ESGF_HUB=esgfhub
+ARG ESGF_PREFIX=
+ARG ESGF_VERSION=latest
+
+# This build stage is required because COPY --from=$ARG is not supported
+# https://github.com/moby/moby/issues/34482
+FROM ${ESGF_HUB}/${ESGF_PREFIX}configure:${ESGF_VERSION} as configuration
+
+
 # Base container is the JDK, which has openssl and keytool
 FROM openjdk:8-jdk
 
@@ -15,6 +24,9 @@ FROM openjdk:8-jdk
 ARG COMPOSE_VERSION=1.22.0
 RUN curl -fsSL https://github.com/docker/compose/releases/download/${COMPOSE_VERSION}/docker-compose-$(uname -s)-$(uname -m) -o /usr/local/bin/docker-compose && \
     chmod +x /usr/local/bin/docker-compose
+
+# Copy the gomplate binary from esgf-configure
+COPY --from=configuration /esg/bin/gomplate /usr/local/bin/gomplate
 
 # Copy the scripts into the container
 COPY scripts/* /usr/local/bin/

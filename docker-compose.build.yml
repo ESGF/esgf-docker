@@ -33,8 +33,15 @@ services:
 
   esgf-setup:
     image: "${ESGF_HUB}/${ESGF_PREFIX}setup:${ESGF_VERSION}"
-    build: ./setup
+    build:
+      context: ./setup
+      args:
+        ESGF_HUB: $ESGF_HUB
+        ESGF_PREFIX: $ESGF_PREFIX
+        ESGF_VERSION: $ESGF_VERSION
     entrypoint: ["true"]
+    depends_on:
+      - esgf-configure
 
   esgf-publisher:
     image: "${ESGF_HUB}/${ESGF_PREFIX}publisher:${ESGF_VERSION}"

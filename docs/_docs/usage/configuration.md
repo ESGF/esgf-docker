@@ -32,6 +32,10 @@ $ESGF_CONFIG
 ├── environment
 |
 |   # OPTIONAL
+|   # YAML file containing information about the remote Solr shards to deploy
+├── solr_shards.yaml
+|
+|   # OPTIONAL
 |   # Configuration overrides for esgf-auth
 ├── auth
 |   |   # OPTIONAL
@@ -157,7 +161,7 @@ By default, an ESGF Docker deployment will be self-contained, i.e. it does not
 attempt to participate in a federation. In order to participate in a federation,
 details of other federation members need to be specified via a set of XML files,
 and the certificates for the federation need to be trusted (configuration of
-Solr shards is more complex, and is addressed later).
+Solr shards is more complex, and is [addressed later](#solr-replica-shard-configuration)).
 
 ESGF Docker allows individual configuration files to be overridden in containers
 by dropping files into the optional directories under `$ESGF_CONFIG`. Any files
@@ -205,3 +209,38 @@ The command to create the trust bundle is:
 ```sh
 ./bin/esgf-setup create-trust-bundle
 ```
+
+
+## Solr replica shard configuration
+
+Rather than running all the Solr replica shards in one place using separate ports, as in a
+"traditional" ESGF deployment, ESGF Docker uses a separate Docker container for each
+replica shard.
+
+The deployed Solr replica shards are configured by placing a `solr_shards.yaml` file at
+`$ESGF_CONFIG/solr_shards.yaml`. This file has the following structure:
+
+```yaml
+# YAML list of the shards
+shards:
+  - url: http://esgf.remote.site/solr  # REQUIRED - The URL to replicate
+    name: remote-site  # OPTIONAL - The service name to use, derived from URL if not given
+    replicationInterval: "06:00:00"  # OPTIONAL - The replication interval, default 01:00:00
+
+  - url: "..."
+```
+
+The `./bin/esgf-compose` command ensures that the Docker Compose configuration for the
+replica shards is correctly passed to `docker-compose`.
+
+<div class="note note-warning" markdown="1">
+Remember to use `./bin/esgf-compose` whenever you would normally use `docker-compose`.
+This ensures that the shard configurations are included in the Docker Compose configuration
+that is used.
+</div>
+
+<div class="note note-info" markdown="1">
+To see the generated Docker Compose configuration, you can use the command `./bin/esgf-setup compose-file`.
+`./bin/esgf-compose` uses this command to generate the Docker Compose configuration before passing it
+to `docker-compose` automatically, so it is not normally necessary to use it directly.
+</div>
