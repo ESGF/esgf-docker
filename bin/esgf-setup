@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+
+#####
+# This script just executes the esgf/setup container
+#####
+
+if [ -z "$ESGF_CONFIG" ]; then
+    echo "ESGF_CONFIG is not set"
+fi
+
+# Set the same defaults for these as used by the compose files
+: ${ESGF_HUB:=esgfhub}
+: ${ESGF_PREFIX:=}
+: ${ESGF_VERSION:=latest}
+
+# Run the given command in the docker container with the required environment variables and volumes
+# It requires:
+#   * The actual value of the ESGF_CONFIG variable for interpolation
+#   * The $ESGF_CONFIG directory mounted at /esg
+#   * The esgf-docker installation mounted at /opt/esgf-docker
+exec docker run --rm -it -u $UID \
+  -e ESGF_CONFIG \
+  -v "$ESGF_CONFIG:/esg" \
+  -v "$(realpath "$(dirname "$BASH_SOURCE")/.."):/opt/esgf-docker" \
+  "${ESGF_HUB}/${ESGF_PREFIX}setup:${ESGF_VERSION}" \
+  "$@"

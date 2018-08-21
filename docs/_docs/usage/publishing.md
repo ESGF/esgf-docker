@@ -1,5 +1,5 @@
 ---
-title: Data Publishing
+title: Publication
 category: Usage
 order: 1.4
 ---
@@ -24,7 +24,7 @@ wget -O "$ESGF_DATA/test/sftlf.nc" http://distrib-coffee.ipsl.jussieu.fr/pub/esg
 For an ad-hoc publish, create an instance of the publisher container to use:
 
 ```sh
-docker-compose run esgf-publisher bash
+./bin/esgf-compose run esgf-publisher bash
 ```
 
 This should open a bash shell inside a running publisher container that is already

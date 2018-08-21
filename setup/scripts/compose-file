@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+
+#####
+## This script is a wrapper for docker-compose that makes sure the
+## environment for the deployment has been imported
+#####
+
+set -eu
+
+exec docker-compose config

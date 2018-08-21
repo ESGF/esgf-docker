@@ -1,87 +1,42 @@
-# Docker Compose file to start a full ESGF node.
+#####
+# Docker Compose file to start a full ESGF node
 #
-# Required env variables:
-#
-# ESGF_HOSTNAME: Host name for the deployment
-# ESGF_CONFIG : Directory containing configuration
-# ESGF_DATA: Directory containing ESGF data files
+# Required environment variables:
+#   ESGF_CONFIG : Directory containing configuration
+#   ESGF_HOSTNAME: Host name for the deployment
+#   ESGF_DATA: Directory containing ESGF data files
+###
 
 version: '3.4'
 
 
+# Use a YAML anchor to define common properties
+#   The "x-" prefix means Compose will treat this element as an extension and not throw a syntax error
+x-esgf-properties: &esgf_properties
+  ESGF_HOSTNAME:
+  ESGF_PEER_GROUP: esgf-test
+  ESGF_ATTRIBUTE_SERVICE_ENDPOINT: "https://$ESGF_HOSTNAME/esgf-idp/saml/soap/secure/attributeService.htm"
+  ESGF_REGISTRATION_SERVICE_ENDPOINT: "https://$ESGF_HOSTNAME/esgf-idp/secure/registrationService.htm"
+  ESGF_OPENID_ENDPOINT: "https://$ESGF_HOSTNAME/esgf-idp/idp/openidServer.htm"
+  ESGF_DATABASE_HOST: esgf-postgres-security
+  ESGF_DATABASE_PORT: "5432"
+  ESGF_DATABASE_USER: dbsuper
+  ESGF_DATABASE_NAME: esgcet
+  ESGF_SEARCH_SERVICE_ENDPOINT: "https://$ESGF_HOSTNAME/esg-search/search"
+  ESGF_IDP_PEER: $ESGF_HOSTNAME
+  ESGF_INDEX_PEER: $ESGF_HOSTNAME
+  ESGF_PUBLISH_SERVICE_ENDPOINT: "https://$ESGF_HOSTNAME/esg-search/remote/secure/client-cert/hessian/publishingService"
+  ESGF_SOLR_QUERY_URL: "http://esgf-solr-slave:8983/solr"
+  ESGF_SOLR_PUBLISH_URL: "http://esgf-solr-master:8983/solr"
+  ESGF_AUTHORIZATION_SERVICE_ENDPOINT: "https://$ESGF_HOSTNAME/esg-orp/saml/soap/secure/authorizationService.htm"
+  ESGF_SLCS_ENDPOINT: "https://$ESGF_HOSTNAME/esgf-slcs"
+
+
 services:
-  # Build dependency only
-  esgf-configure:
-    image: "${ESGF_HUB}/${ESGF_PREFIX}configure:${ESGF_VERSION}"
-    build: ./configure
-    # Use an entrypoint that exits immediately with success
-    entrypoint: ["true"]
-    # This is the common configuration for esgf.properties
-    # It is included here purely as a place to set the YAML anchor that conforms with the Docker Compose schema
-    environment: &esgf_properties
-      ESGF_HOSTNAME:
-      ESGF_PEER_GROUP: esgf-test
-      ESGF_ATTRIBUTE_SERVICE_ENDPOINT: "https://$ESGF_HOSTNAME/esgf-idp/saml/soap/secure/attributeService.htm"
-      ESGF_REGISTRATION_SERVICE_ENDPOINT: "https://$ESGF_HOSTNAME/esgf-idp/secure/registrationService.htm"
-      ESGF_OPENID_ENDPOINT: "https://$ESGF_HOSTNAME/esgf-idp/idp/openidServer.htm"
-      ESGF_DATABASE_HOST: esgf-postgres-security
-      ESGF_DATABASE_PORT: "5432"
-      ESGF_DATABASE_USER: dbsuper
-      ESGF_DATABASE_NAME: esgcet
-      ESGF_SEARCH_SERVICE_ENDPOINT: "https://$ESGF_HOSTNAME/esg-search/search"
-      ESGF_IDP_PEER: $ESGF_HOSTNAME
-      ESGF_INDEX_PEER: $ESGF_HOSTNAME
-      ESGF_PUBLISH_SERVICE_ENDPOINT: "https://$ESGF_HOSTNAME/esg-search/remote/secure/client-cert/hessian/publishingService"
-      ESGF_SOLR_QUERY_URL: "http://esgf-solr-slave:8983/solr"
-      ESGF_SOLR_PUBLISH_URL: "http://esgf-solr-master:8983/solr"
-      ESGF_AUTHORIZATION_SERVICE_ENDPOINT: "https://$ESGF_HOSTNAME/esg-orp/saml/soap/secure/authorizationService.htm"
-      ESGF_SLCS_ENDPOINT: "https://$ESGF_HOSTNAME/esgf-slcs"
-
-  # Build dependency only
-  esgf-postgres:
-    image: "${ESGF_HUB}/${ESGF_PREFIX}postgres:${ESGF_VERSION}"
-    build: ./postgres
-    # Use an entrypoint that exits immediately with success
-    entrypoint: ["true"]
-
-  # Build dependency only
-  esgf-solr:
-    image: "${ESGF_HUB}/${ESGF_PREFIX}solr:${ESGF_VERSION}"
-    build: ./solr
-    # Use an entrypoint that exits immediately with success
-    entrypoint: ["true"]
-
-  # Build dependency only
-  esgf-tomcat:
-    image: "${ESGF_HUB}/${ESGF_PREFIX}tomcat:${ESGF_VERSION}"
-    build: ./tomcat
-    # Use an entrypoint that exits immediately with success
-    entrypoint: ["true"]
-
-  # Build dependency only
-  esgf-django:
-    image: "${ESGF_HUB}/${ESGF_PREFIX}django:${ESGF_VERSION}"
-    build: ./django
-    # Use an entrypoint that exits immediately with success
-    entrypoint: ["true"]
-
-  # The setup is included here so it can be used with docker-compose run
-  # The command is modified to a simple quit with 0 exit status
-  esgf-setup:
-    image: "${ESGF_HUB}/${ESGF_PREFIX}setup:${ESGF_VERSION}"
-    build: ./setup
-    environment:
-      ESGF_HOSTNAME:
-    volumes:
-      - "$ESGF_CONFIG:/esg"
-    # Use a command that exits immediately with success
-    command: ["true"]
-
-  # The publisher is included here so it can be used with docker-compose run
-  # The command is modified to a simple quit with 0 exit status
+  # The publisher is included here so it can be used with docker-compose run
+  # The command is modified to a simple quit with 0 exit status
   esgf-publisher:
     image: "${ESGF_HUB}/${ESGF_PREFIX}publisher:${ESGF_VERSION}"
-    build: ./publisher
     environment:
       ESGF_DATABASE_HOST: esgf-postgres-esgcet
       ESGF_DATABASE_PORT: "5432"
@@ -99,14 +54,14 @@ services:
     volumes:
       - "$ESGF_DATA:/esg/data"
       - "tds-content:/esg/content/thredds/esgcet"
-      # Mount only the secrets we actually need
+      # Mount only the secrets we actually need
       - "$ESGF_CONFIG/secrets/esgcet-database-password:/esg/secrets/esgcet-database-password:ro"
       - "$ESGF_CONFIG/secrets/rootadmin-password:/esg/secrets/rootadmin-password:ro"
-      # Make sure the trusted certificate bundle is available
+      # Make sure the trusted certificate bundle is available
       - "$ESGF_CONFIG/certificates/esg-trust-bundle.pem:/esg/certificates/esg-trust-bundle.pem:ro"
-      # Allow the publisher configuration to be overridden
+      # Allow the publisher configuration to be overridden
       - "$ESGF_CONFIG/publisher:/esg/config/esgcet/.overrides:ro"
-    # Use a command that exits immediately with success, but don't change the entrypoint
+    # Use a command that exits immediately with success, but don't change the entrypoint
     command: ["true"]
     depends_on:
       - esgf-postgres-esgcet
@@ -117,14 +72,13 @@ services:
 
   esgf-proxy:
     image: "${ESGF_HUB}/${ESGF_PREFIX}proxy:${ESGF_VERSION}"
-    build: ./proxy
     restart: always
     ports:
       - "80:80"
       - "443:443"
     volumes:
       - "$ESGF_CONFIG/certificates/hostcert:/etc/nginx/ssl:ro"
-      # Make sure the trusted certificate bundle is available
+      # Make sure the trusted certificate bundle is available
       - "$ESGF_CONFIG/certificates/esg-trust-bundle.pem:/esg/certificates/esg-trust-bundle.pem:ro"
     environment:
       ESGF_HOSTNAME:
@@ -137,7 +91,6 @@ services:
       ESGF_SLCS_UPSTREAM: http://esgf-slcs:8000
       ESGF_AUTH_UPSTREAM: http://esgf-auth:8000
     depends_on:
-      - esgf-configure
       - esgf-solr-slave
       - esgf-index-node
       - esgf-tds
@@ -154,8 +107,6 @@ services:
       ESGF_SOLR_ROLE: master
     volumes:
       - "solr-master-home:/esg/solr-home"
-    depends_on:
-      - esgf-solr
 
   esgf-solr-slave:
     image: "${ESGF_HUB}/${ESGF_PREFIX}solr:${ESGF_VERSION}"
@@ -167,7 +118,6 @@ services:
     volumes:
       - "solr-slave-home:/esg/solr-home"
     depends_on:
-      - esgf-solr
       - esgf-solr-master
 
   # Example remote-replica configuration
@@ -177,8 +127,6 @@ services:
 #    restart: always
 #    environment:
 #      ESGF_SOLR_MASTER_URL: http://esgf-node.jpl.nasa.gov:80
-#    depends_on:
-#      - esgf-solr
 
   esgf-postgres-esgcet:
     image: "${ESGF_HUB}/${ESGF_PREFIX}postgres:${ESGF_VERSION}"
@@ -190,17 +138,9 @@ services:
     volumes:
       - "$ESGF_CONFIG/secrets/esgcet-database-password:/esg/secrets/esgcet-database-password:ro"
       - "postgres-esgcet-data:/var/lib/pgsql/data"
-    depends_on:
-      - esgf-postgres
 
   esgf-postgres-security:
     image: "${ESGF_HUB}/${ESGF_PREFIX}postgres-security:${ESGF_VERSION}"
-    build:
-      context: ./postgres-security
-      args:
-        ESGF_HUB: $ESGF_HUB
-        ESGF_PREFIX: $ESGF_PREFIX
-        ESGF_VERSION: $ESGF_VERSION
     restart: always
     environment:
       POSTGRESQL_DATABASE: esgcet
@@ -211,21 +151,13 @@ services:
       ESGF_ROOTADMIN_OPENID: https://${ESGF_HOSTNAME}/esgf-idp/openid/rootAdmin
       ESGF_ROOTADMIN_PASSWORD_FILE: /esg/secrets/rootadmin-password
     volumes:
-      # Mount only the secrets we actually need
+      # Mount only the secrets we actually need
       - "$ESGF_CONFIG/secrets/security-database-password:/esg/secrets/security-database-password:ro"
       - "$ESGF_CONFIG/secrets/rootadmin-password:/esg/secrets/rootadmin-password:ro"
       - "postgres-security-data:/var/lib/pgsql/data"
-    depends_on:
-      - esgf-postgres
 
   esgf-orp:
     image: "${ESGF_HUB}/${ESGF_PREFIX}orp:${ESGF_VERSION}"
-    build:
-      context: ./orp
-      args:
-        ESGF_HUB: $ESGF_HUB
-        ESGF_PREFIX: $ESGF_PREFIX
-        ESGF_VERSION: $ESGF_VERSION
     restart: always
     environment:
       <<: *esgf_properties
@@ -233,24 +165,15 @@ services:
       ESGF_SAML_CERT_FILE: /esg/certificates/hostcert/hostcert.crt
       ESGF_SAML_KEY_FILE: /esg/certificates/hostcert/hostcert.key
     volumes:
-      # Mount the host certificate and key for SAML signing
+      # Mount the host certificate and key for SAML signing
       - "$ESGF_CONFIG/certificates/hostcert:/esg/certificates/hostcert:ro"
-      # Make sure the trusted certificate bundle is available
+      # Make sure the trusted certificate bundle is available
       - "$ESGF_CONFIG/certificates/esg-trust-bundle.pem:/esg/certificates/esg-trust-bundle.pem:ro"
-      # Allow the main ESGF configuration to be overridden
+      # Allow the main ESGF configuration to be overridden
       - "$ESGF_CONFIG/config:/esg/config/.overrides:ro"
-    depends_on:
-      - esgf-configure
-      - esgf-tomcat
 
   esgf-index-node:
     image: "${ESGF_HUB}/${ESGF_PREFIX}index-node:${ESGF_VERSION}"
-    build:
-      context: ./index-node
-      args:
-        ESGF_HUB: $ESGF_HUB
-        ESGF_PREFIX: $ESGF_PREFIX
-        ESGF_VERSION: $ESGF_VERSION
     restart: always
     environment:
       <<: *esgf_properties
@@ -258,25 +181,17 @@ services:
       # Example of configuring additional shards
 #     ESGF_SOLR_SHARDS: "esgf-solr-slave:8983/solr,esgf-solr-nasa-jpl:8983/solr"
     volumes:
-      # Make sure the trusted certificate bundle is available
+      # Make sure the trusted certificate bundle is available
       - "$ESGF_CONFIG/certificates/esg-trust-bundle.pem:/esg/certificates/esg-trust-bundle.pem:ro"
-      # Allow the main ESGF configuration to be overridden
+      # Allow the main ESGF configuration to be overridden
       - "$ESGF_CONFIG/config:/esg/config/.overrides:ro"
     depends_on:
-      - esgf-configure
-      - esgf-tomcat
       - esgf-solr-master
       - esgf-solr-slave
       - esgf-orp
 
   esgf-idp-node:
     image: "${ESGF_HUB}/${ESGF_PREFIX}idp-node:${ESGF_VERSION}"
-    build:
-      context: ./idp-node
-      args:
-        ESGF_HUB: $ESGF_HUB
-        ESGF_PREFIX: $ESGF_PREFIX
-        ESGF_VERSION: $ESGF_VERSION
     restart: always
     environment:
       <<: *esgf_properties
@@ -284,23 +199,15 @@ services:
     volumes:
       - "$ESGF_CONFIG/secrets/security-database-password:/esg/config/.esg_pg_pass:ro"
       - "$ESGF_CONFIG/secrets/rootadmin-password:/esg/config/.esgf_pass:ro"
-      # Make sure the trusted certificate bundle is available
+      # Make sure the trusted certificate bundle is available
       - "$ESGF_CONFIG/certificates/esg-trust-bundle.pem:/esg/certificates/esg-trust-bundle.pem:ro"
-      # Allow the main ESGF configuration to be overridden
+      # Allow the main ESGF configuration to be overridden
       - "$ESGF_CONFIG/config:/esg/config/.overrides:ro"
     depends_on:
-      - esgf-configure
-      - esgf-tomcat
       - esgf-postgres-security
 
   esgf-tds:
     image: "${ESGF_HUB}/${ESGF_PREFIX}tds:${ESGF_VERSION}"
-    build:
-      context: ./tds
-      args:
-        ESGF_HUB: $ESGF_HUB
-        ESGF_PREFIX: $ESGF_PREFIX
-        ESGF_VERSION: $ESGF_VERSION
     environment:
       <<: *esgf_properties
       ESGF_ORP_HOME_ENDPOINT: "https://$ESGF_HOSTNAME/esg-orp/home.htm"
@@ -312,19 +219,16 @@ services:
     volumes:
       - "tds-content:/esg/content/thredds/esgcet:ro"
       - "$ESGF_DATA:/esg/data:ro"
-      # Mount only the secrets we actually need
+      # Mount only the secrets we actually need
       - "$ESGF_CONFIG/secrets/shared-cookie-secret-key:/esg/secrets/shared-cookie-secret-key:ro"
       - "$ESGF_CONFIG/secrets/rootadmin-password:/esg/config/.esgf_pass:ro"
-      # Make sure the trusted certificate bundle is available
+      # Make sure the trusted certificate bundle is available
       - "$ESGF_CONFIG/certificates/esg-trust-bundle.pem:/esg/certificates/esg-trust-bundle.pem:ro"
-      # Allow the main ESGF configuration to be overridden
+      # Allow the main ESGF configuration to be overridden
       - "$ESGF_CONFIG/config:/esg/config/.overrides:ro"
-      # Allow the THREDDS config XML and root catalog to be overridden
-      # Note that this is separate to the esgcet catalog being generated by the publisher
+      # Allow the THREDDS config XML and root catalog to be overridden
+      # Note that this is separate to the esgcet catalog being generated by the publisher
       - "$ESGF_CONFIG/thredds:/esg/content/thredds/.overrides:ro"
-    depends_on:
-      - esgf-configure
-      - esgf-tomcat
 
   esgf-postgres-cog:
     image: "${ESGF_HUB}/${ESGF_PREFIX}postgres:${ESGF_VERSION}"
@@ -336,17 +240,9 @@ services:
     volumes:
       - "$ESGF_CONFIG/secrets/cog-database-password:/esg/secrets/cog-database-password:ro"
       - "postgres-cog-data:/var/lib/pgsql/data"
-    depends_on:
-      - esgf-postgres
 
   esgf-cog:
     image: "${ESGF_HUB}/${ESGF_PREFIX}cog:${ESGF_VERSION}"
-    build:
-      context: ./cog
-      args:
-        ESGF_HUB: $ESGF_HUB
-        ESGF_PREFIX: $ESGF_PREFIX
-        ESGF_VERSION: $ESGF_VERSION
     restart: always
     environment:
       <<: *esgf_properties
@@ -364,13 +260,11 @@ services:
       - "$ESGF_CONFIG/secrets/cog-database-password:/esg/secrets/cog-database-password:ro"
       - "$ESGF_CONFIG/secrets/rootadmin-password:/esg/config/.esgf_pass:ro"
       - "$ESGF_CONFIG/secrets/cog-secret-key:/esg/secrets/cog-secret-key:ro"
-      # Make sure the trusted certificate bundle is available
+      # Make sure the trusted certificate bundle is available
       - "$ESGF_CONFIG/certificates/esg-trust-bundle.pem:/esg/certificates/esg-trust-bundle.pem:ro"
-      # Allow the main ESGF configuration to be overridden
+      # Allow the main ESGF configuration to be overridden
       - "$ESGF_CONFIG/config:/esg/config/.overrides:ro"
     depends_on:
-      - esgf-configure
-      - esgf-django
       - esgf-postgres-security
       - esgf-postgres-cog
 
@@ -384,17 +278,9 @@ services:
     volumes:
       - "$ESGF_CONFIG/secrets/auth-database-password:/esg/secrets/auth-database-password:ro"
       - "postgres-auth-data:/var/lib/pgsql/data"
-    depends_on:
-      - esgf-postgres
 
   esgf-auth:
     image: "${ESGF_HUB}/${ESGF_PREFIX}auth:${ESGF_VERSION}"
-    build:
-      context: ./auth
-      args:
-        ESGF_HUB: $ESGF_HUB
-        ESGF_PREFIX: $ESGF_PREFIX
-        ESGF_VERSION: $ESGF_VERSION
     restart: always
     environment:
       <<: *esgf_properties
@@ -412,16 +298,14 @@ services:
       - "$ESGF_CONFIG/secrets/auth-secret-key:/esg/secrets/auth-secret-key:ro"
       - "$ESGF_CONFIG/secrets/shared-cookie-secret-key:/esg/secrets/shared-cookie-secret-key:ro"
       - "$ESGF_CONFIG/secrets/auth-database-password:/esg/secrets/auth-database-password:ro"
-      # Make sure the trusted certificate bundle is available
+      # Make sure the trusted certificate bundle is available
       - "$ESGF_CONFIG/certificates/esg-trust-bundle.pem:/esg/certificates/esg-trust-bundle.pem:ro"
-      # Allow the main ESGF configuration to be overridden
+      # Allow the main ESGF configuration to be overridden
       - "$ESGF_CONFIG/config:/esg/config/.overrides:ro"
-      # Allow the ESGF auth configuration to be overridden
-      # In particular, this allows an esgf_oauth2.json to be dropped in with OAuth2 credentials
+      # Allow the ESGF auth configuration to be overridden
+      # In particular, this allows an esgf_oauth2.json to be dropped in with OAuth2 credentials
       - "$ESGF_CONFIG/auth:/esg/auth/.overrides:ro"
     depends_on:
-      - esgf-configure
-      - esgf-django
       - esgf-postgres-auth
 
   esgf-postgres-slcs:
@@ -434,38 +318,30 @@ services:
     volumes:
       - "$ESGF_CONFIG/secrets/slcs-database-password:/esg/secrets/slcs-database-password:ro"
       - "postgres-slcs-data:/var/lib/pgsql/data"
-    depends_on:
-      - esgf-postgres
 
   esgf-slcs:
     image: "${ESGF_HUB}/${ESGF_PREFIX}slcs:${ESGF_VERSION}"
-    build:
-      context: ./slcs
-      args:
-        ESGF_HUB: $ESGF_HUB
-        ESGF_PREFIX: $ESGF_PREFIX
-        ESGF_VERSION: $ESGF_VERSION
     restart: always
     environment:
-      # Generic Django settings
+      # Generic Django settings
       SCRIPT_NAME: /esgf-slcs
       DJANGO_ALLOWED_HOSTS: $ESGF_HOSTNAME
       DJANGO_SECRET_KEY_FILE: /esg/secrets/slcs-secret-key
-      # SLCS database
+      # SLCS database
       DJANGO_DATABASE_DEFAULT_ENGINE: django.db.backends.postgresql
       DJANGO_DATABASE_DEFAULT_NAME: slcs
       DJANGO_DATABASE_DEFAULT_HOST: esgf-postgres-slcs
       DJANGO_DATABASE_DEFAULT_PORT: "5432"
       DJANGO_DATABASE_DEFAULT_USER: slcsuser
       DJANGO_DATABASE_DEFAULT_PASSWORD_FILE: /esg/secrets/slcs-database-password
-      # ESGF User database
+      # ESGF User database
       DJANGO_DATABASE_USERDB_ENGINE: django.db.backends.postgresql
       DJANGO_DATABASE_USERDB_NAME: esgcet
       DJANGO_DATABASE_USERDB_HOST: esgf-postgres-security
       DJANGO_DATABASE_USERDB_PORT: "5432"
       DJANGO_DATABASE_USERDB_USER: dbsuper
       DJANGO_DATABASE_USERDB_PASSWORD_FILE: /esg/secrets/security-database-password
-      # Make the rootAdmin account a superuser
+      # Make the rootAdmin account a superuser
       DJANGO_CREATE_SUPERUSER: "1"
       DJANGO_SUPERUSER_USERNAME: "rootAdmin"
       DJANGO_SUPERUSER_EMAIL: "CoG@${ESGF_HOSTNAME}"
@@ -482,12 +358,11 @@ services:
       - "$ESGF_CONFIG/secrets/security-database-password:/esg/secrets/security-database-password:ro"
       - "$ESGF_CONFIG/certificates/slcsca/ca.crt:/esg/certificates/slcsca/ca.crt:ro"
       - "$ESGF_CONFIG/certificates/slcsca/ca.key:/esg/certificates/slcsca/ca.key:ro"
-      # Just mount an empty volume as the trustroots for now
+      # Just mount an empty volume as the trustroots for now
       - "slcs-trustroots:/esg/certificates/slcsca/trustroots/:ro"
-      # Make sure the trusted certificate bundle is available
+      # Make sure the trusted certificate bundle is available
       - "$ESGF_CONFIG/certificates/esg-trust-bundle.pem:/esg/certificates/esg-trust-bundle.pem:ro"
     depends_on:
-      - esgf-django
       - esgf-postgres-security
       - esgf-postgres-slcs
 

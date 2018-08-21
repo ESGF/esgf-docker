@@ -4,29 +4,44 @@ category: Usage
 order: 1.1
 ---
 
-This page describes the steps required to launch a single-node local test instance
-using self-signed certificates.
+This page describes the steps required to launch a test environment using
+[Docker Compose](https://docs.docker.com/compose/) that is:
+
+  * A full, self-contained node (all components deployed and wired to talk to each other)
+  * Not part of a federation
+  * Using self-signed certificates
 
 ## Pre-requisites
 
-The only pre-requisites are a recent version of Docker Engine and Docker Compose
-on the host system.
+The only pre-requisites are a Bash shell and recent versions of Docker Engine and
+Docker Compose on the host system.
 
 ## Configure environment
 
-First, clone the repository:
+First, clone the `esgf-docker` repository:
 
 ```sh
 git clone https://github.com/ESGF/esgf-docker.git
 cd esgf-docker
 ```
 
-A single-node test installation requires the following environment variables to be set:
+Next, create an empty directory to store the configuration for the deployment and set
+the `ESGF_CONFIG` environment variable to point to it:
 
 ```sh
-export ESGF_HOSTNAME=local.esgf.org
-export ESGF_CONFIG=/path/to/empty/config/directory
-export ESGF_DATA=/path/to/data/directory
+export ESGF_CONFIG=/path/to/config/directory
+mkdir -p $ESGF_CONFIG
+```
+
+Create an `environment` file in `ESGF_CONFIG` that configures the required environment
+variables for the deployment. In this case, only the hostname and data directory are
+required:
+
+```sh
+cat > "$ESGF_CONFIG/environment" <<EOF
+ESGF_HOSTNAME=local.esgf.org
+ESGF_DATA=/path/to/data/directory
+EOF
 ```
 
 The hostname should be a DNS name that resolves to the **non-loopback address**
@@ -51,18 +66,9 @@ depending on which command is available.
 
 <div class="note note-warning" markdown="1">
 On a Mac, the Docker daemon can only mount files in your home directory into containers.
-This means you need to make sure that the `ESGF_CONFIG` directory is in your
-home directory.
+This means you need to make sure that the `ESGF_CONFIG` and `ESGF_DATA` directories are
+in your home directory.
 </div>
-
-## Pull the container images from Docker Hub
-
-You only need to pull the images from Docker Hub when they have changed, or if you
-are deploying for the first time:
-
-```sh
-docker-compose pull
-```
 
 ## Generate configuration
 
@@ -71,14 +77,14 @@ generate deployment secrets, self-signed certificates and the trusted certificat
 bundle:
 
 ```sh
-docker-compose run -u $UID esgf-setup generate-secrets
-docker-compose run -u $UID esgf-setup generate-test-certificates
-docker-compose run -u $UID esgf-setup create-trust-bundle
+./bin/esgf-setup generate-secrets
+./bin/esgf-setup generate-test-certificates
+./bin/esgf-setup create-trust-bundle
 ```
-Execute chmod instructions only if you experience permission issues 
-while esgf-orp and esgf-slcs running:
 
-```
+If you experience permissions issues you can run:
+
+```sh
 chmod +r "${ESGF_CONFIG}/certificates/hostcert/hostcert.key"
 chmod +r "${ESGF_CONFIG}/certificates/slcsca/ca.key"
 ```
@@ -89,7 +95,7 @@ After generating the configuration, you are ready to launch the containers using
 Docker Compose:
 
 ```sh
-docker-compose up -d
+./bin/esgf-compose up -d
 ```
 
 This will pull all the images from Docker Hub (unless they are already available
@@ -100,7 +106,7 @@ in a browser and you should see the CoG interface. You can view the container
 logs using commands of the form:
 
 ```sh
-docker-compose logs [-f] esgf-{cog,index-node,idp-node,orp,slcs,...}
+./bin/esgf-compose logs [-f] esgf-{cog,index-node,idp-node,orp,slcs,...}
 ```
 
 where the optional `-f` means "follow", as in `tail -f`.
@@ -113,16 +119,16 @@ following command:
 echo "$(cat "$ESGF_CONFIG/secrets/rootadmin-password")"
 ```
 
-## Stopping containers
+## Stop containers
 
 To stop the containers:
 
 ```sh
-docker-compose stop
+./bin/esgf-compose stop
 ```
 
 To remove all the containers and associated data volumes:
 
 ```sh
-docker-compose down -v
+./bin/esgf-compose down -v
 ```

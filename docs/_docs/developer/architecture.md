@@ -8,11 +8,11 @@ toc: false
 The following text-diagram shows the inheritance hierarchy of the ESGF Docker containers:
 
 ```
-centos/postgresql-96-centos7 -> esgfhub/postgres -> esgfhub/postgres-esgcet
+centos/postgresql-96-centos7 -> esgfhub/postgres -> esgfhub/postgres-security
 
 nginx -> esgfhub/proxy
 
-solr:5.5 -> esgfhub/solr
+solr:6.6 -> esgfhub/solr
 
 alpine -> esgfhub/configure
 
@@ -30,17 +30,28 @@ continuumio/miniconda -> esgfhub/publisher
 
 ## Configuration
 
-A big effort has been made to make each container capable of configuring itself
-using environment variables. Each container image includes a copy of all the
-configuration files it requires to start. Some of these configuration files are
-"static", i.e. they do not depend on environment variables, and others are
-"templates", where values from environment variables are substituted in at runtime.
-If an environment variable is required but not given, the container will fail to start.
+A big effort has been made to make each container capable of being configured
+using environment variables and minimal mounts (e.g. secrets and certificates).
+Each container image includes a copy of all the configuration files it requires
+to start. Some of these configuration files are "static", i.e. they do not depend
+on environment variables, and others are "templates", where values from environment
+variables are substituted in at runtime. If an environment variable is required but
+not given, the container will fail to start.
 
-Individual configuration files or templates can be replaced by mounting in an
-alternative, for example to specify other members in a federation. However, the
-containers are all capable of configuring themselves in a "standalone"
-configuration, i.e. without any other federation members, without mounting anything.
+Templating of configuration files is done using [gomplate](https://gomplate.hairyhenderson.ca/),
+a lightweight tool that enables the use of the [Go template language](https://golang.org/pkg/text/template/)
+with some useful extensions. This tool was chosen because it is lightweight, yet enables a
+more expressive template language than something like `envsubst`, including loops and conditionals.
+
+Individual files or templates in a configuration directory can be replaced by mounting
+a directory of override files. For example, to specify other members in a federation
+by overriding files in `/esg/config`, a directory containing override files would be
+mounted at `/esg/config/.overrides`. The containers know to merge these files with the
+existing defaults.
+
+However, the containers are all capable of configuring themselves in a "standalone"
+configuration, i.e. without any other federation members, using only environment
+variables.
 
 ## Build and "mixin" images
 
