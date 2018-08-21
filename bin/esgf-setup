@@ -18,7 +18,7 @@ fi
 #   * The actual value of the ESGF_CONFIG variable for interpolation
 #   * The $ESGF_CONFIG directory mounted at /esg
 #   * The esgf-docker installation mounted at /opt/esgf-docker
-exec docker run --rm -it -u $UID \
+exec docker run --rm -u $UID \
   -e ESGF_CONFIG \
   -v "$ESGF_CONFIG:/esg" \
   -v "$(realpath "$(dirname "$BASH_SOURCE")/.."):/opt/esgf-docker" \
