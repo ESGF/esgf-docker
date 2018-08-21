@@ -239,7 +239,7 @@ pipeline
             dir(ESGF_DOCKER_REPO_PATH)
             {
               info("building esgf-docker images with the tag '${env.ESGF_VERSION}' and hub '${ESGF_HUB}'")
-              sh('docker-compose -f docker-compose.build.yml build')
+              sh('docker-compose -f docker-compose.build.yml build --no-cache')
             }
 
             end_block('build')
