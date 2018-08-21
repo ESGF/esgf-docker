@@ -19,7 +19,7 @@ fi
 #   * The $ESGF_CONFIG directory mounted at /esg
 #   * The esgf-docker installation mounted at /opt/esgf-docker
 exec docker run --rm -u $UID \
-  -e ESGF_CONFIG \
+  -e ESGF_CONFIG -e ESGF_HUB -e ESGF_PREFIX -e ESGF_VERSION \
   -v "$ESGF_CONFIG:/esg" \
   -v "$(realpath "$(dirname "$BASH_SOURCE")/.."):/opt/esgf-docker" \
   "${ESGF_HUB}/${ESGF_PREFIX}setup:${ESGF_VERSION}" \
