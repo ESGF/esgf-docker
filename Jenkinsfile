@@ -255,11 +255,8 @@ pipeline
             info('delete the previous configuration files of ESGF docker')
             sh 'rm -fr "${ESGF_CONFIG}" ; mkdir -p "${ESGF_CONFIG}"; mkdir -p "${ESGF_DATA}"'
             // Write $ESGF_CONFIG/environment config file
-            sh '''cat > "${ESGF_CONFIG}/environment" <<EOF
-            ESGF_HOSTNAME=$(hostname)
-            ESGF_DATA=${ESGF_DATA}
-            EOF
-            '''
+            sh 'echo -e "ESGF_HOSTNAME=$(hostname)\nESGF_DATA=${ESGF_DATA}" > "${ESGF_CONFIG}/environment"'
+            sh 'cat "${ESGF_CONFIG}/environment"'
             dir(ESGF_DOCKER_REPO_PATH)
             {
               info('generating esgf secrets')
