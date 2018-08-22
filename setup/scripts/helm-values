@@ -4,24 +4,18 @@ set -eo pipefail
 
 . "$(dirname $BASH_SOURCE)/functions.sh"
 
-
 #####
-## This script outputs YAML configuration for use with the esgf-helm Helm chart
+## This script outputs YAML configuration for use with the esgf-helm Helm chart
 #####
 
 CERTS="/esg/certificates"
 SECRETS="/esg/secrets"
 
-info "Writing YAML for use with esgf-helm chart" 1>&2
-
-[ -z "$ESGF_HOSTNAME" ] && error "ESGF_HOSTNAME must be set"
-
-# First write the hostname
+# First write the hostname
 echo "hostname: $ESGF_HOSTNAME"
 echo ""
 
-# Write the certificates YAML file
-info "  Writing certificates" 1>&2
+# Write the certificates YAML file
 echo "certificates:"
 echo "  esg-trust-bundle.pem: |"
 cat "$CERTS/esg-trust-bundle.pem" | indent 4
@@ -35,11 +29,9 @@ echo "  slcsca.key: |"
 cat "$CERTS/slcsca/ca.key" | indent 4
 echo ""
 
-# Write the secrets YAML file
-info "  Writing secrets" 1>&2
+# Write the secrets YAML file
 echo "secrets:"
 for file in $(find "$SECRETS" -type f -maxdepth 1); do
     echo "  ${file#"$SECRETS/"}: $(cat "$file")"
 done
 
-info "Done" 1>&2

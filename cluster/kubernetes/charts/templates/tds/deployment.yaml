@@ -1,0 +1,86 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: "{{ template "fullname" . }}-tds"
+  labels:
+{{ include "default-labels" . | indent 4 }}
+    component: tds
+spec:
+  replicas: {{ .Values.tds.replicas }}
+  # Select pods on release and component only, rather than all labels
+  # This means that the selector will match all pods from all versions of the chart when upgrading
+  selector:
+    matchLabels:
+      release: {{ .Release.Name }}
+      component: tds
+  template:
+    metadata:
+      labels:
+{{ include "default-labels" . | indent 8 }}
+        component: tds
+      annotations:
+        checksum/secrets: {{ include (print $.Template.BasePath "/configuration/secrets.yaml") . | sha256sum }}
+        checksum/trust-bundle: {{ include (print $.Template.BasePath "/configuration/trust-bundle.yaml") . | sha256sum }}
+    spec:
+      containers:
+        - name: tds
+          image: "{{ .Values.tds.image.repository }}:{{ .Values.tds.image.tag }}"
+          imagePullPolicy: {{ default "" .Values.tds.image.pullPolicy | quote }}
+          ports:
+            - name: http
+              containerPort: 8080
+          # The readiness and liveness probes run the same thing, but the liveness
+          # probe just waits a while before kicking in whereas the readiness probe
+          # starts straight away
+          readinessProbe: &probe
+            httpGet:
+              path: /thredds
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            <<: *probe
+            initialDelaySeconds: 600
+          envFrom:
+            - configMapRef:
+                name: "{{ template "fullname" . }}-environment-common"
+          env:
+            - name: ESGF_ORP_HOME_ENDPOINT
+              value: "https://{{ .Values.hostname }}/esg-orp/home.htm"
+            - name: ESGF_AUTH_HOME_ENDPOINT
+              value: "https://{{ .Values.hostname }}/esgf-auth/home/"
+            - name: ESGF_REGISTRATION_RELAY_ENDPOINT
+              value: "https://{{ .Values.hostname }}/esg-orp/registration-request.htm"
+            - name: ESGF_COOKIE_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ template "fullname" . }}-secrets"
+                  key: "shared-cookie-secret-key"
+            - name: ESGF_TDS_ADMIN_USERNAME
+              value: rootAdmin
+            - name: ESGF_TDS_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ template "fullname" . }}-secrets"
+                  key: "rootadmin-password"
+          volumeMounts:
+            - mountPath: /esg/content/thredds/esgcet
+              name: tds-content
+            - mountPath: /esg/data
+              name: tds-data
+              readOnly: true
+            - mountPath: /esg/certificates/esg-trust-bundle.pem
+              name: trust-bundle
+              subPath: esg-trust-bundle.pem
+          resources:
+{{ toYaml .Values.tds.resources | indent 12 }}
+      volumes:
+        - name: tds-content
+          persistentVolumeClaim:
+            claimName: "{{ template "fullname" . }}-tds-content"
+        - name: tds-data
+          persistentVolumeClaim:
+            claimName: "{{ template "fullname" . }}-tds-data"
+        - name: trust-bundle
+          configMap:
+            name: "{{ template "fullname" . }}-trust-bundle"

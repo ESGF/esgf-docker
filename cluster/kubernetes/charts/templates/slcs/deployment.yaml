@@ -1,0 +1,220 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: "{{ template "fullname" . }}-slcs"
+  labels:
+{{ include "default-labels" . | indent 4 }}
+    component: slcs
+    slcs-role: frontend
+spec:
+  replicas: {{ .Values.slcs.replicas }}
+  # Select pods on release and component only, rather than all labels
+  # This means that the selector will match all pods from all versions of the chart when upgrading
+  selector:
+    matchLabels:
+      release: {{ .Release.Name }}
+      component: slcs
+      slcs-role: frontend
+  template:
+    metadata:
+      labels:
+{{ include "default-labels" . | indent 8 }}
+        component: slcs
+        slcs-role: frontend
+      annotations:
+        checksum/secrets: {{ include (print $.Template.BasePath "/configuration/secrets.yaml") . | sha256sum }}
+        checksum/slcs-ca: {{ include (print $.Template.BasePath "/configuration/slcs-ca.yaml") . | sha256sum }}
+        checksum/trust-bundle: {{ include (print $.Template.BasePath "/configuration/trust-bundle.yaml") . | sha256sum }}
+    spec:
+      initContainers:
+        # Wait for databases to become available before starting
+        - name: ensure-postgres-slcs
+          image: "{{ .Values.slcs.postgres.image.repository }}:{{ .Values.slcs.postgres.image.tag }}"
+          imagePullPolicy: {{ default "" .Values.slcs.postgres.image.pullPolicy | quote }}
+          env:
+            - name: PGHOST
+              value: "{{ template "fullname" . }}-postgres-slcs"
+            - name: PGPORT
+              value: "5432"
+            - name: PGUSER
+              value: slcsuser
+            - name: PGPASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ template "fullname" . }}-secrets"
+                  key: "slcs-database-password"
+            - name: PGDATABASE
+              value: slcs
+          command:
+            # Try every 5 seconds for no longer than 10 mins
+            - bash
+            - -c
+            - |
+              for i in $(seq 120); do
+                sleep 5
+                echo "Attempt $i of 120"
+                if pg_isready; then exit 0; fi
+              done
+              exit 1
+        - name: ensure-postgres-security
+          image: "{{ .Values.slcs.postgres.image.repository }}:{{ .Values.slcs.postgres.image.tag }}"
+          imagePullPolicy: {{ default "" .Values.slcs.postgres.image.pullPolicy | quote }}
+          env:
+            - name: PGHOST
+              valueFrom:
+                configMapKeyRef:
+                  name: "{{ template "fullname" . }}-environment-common"
+                  key: ESGF_DATABASE_HOST
+            - name: PGPORT
+              valueFrom:
+                configMapKeyRef:
+                  name: "{{ template "fullname" . }}-environment-common"
+                  key: ESGF_DATABASE_PORT
+            - name: PGUSER
+              valueFrom:
+                configMapKeyRef:
+                  name: "{{ template "fullname" . }}-environment-common"
+                  key: ESGF_DATABASE_USER
+            - name: PGPASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ template "fullname" . }}-secrets"
+                  key: "security-database-password"
+            - name: PGDATABASE
+              valueFrom:
+                configMapKeyRef:
+                  name: "{{ template "fullname" . }}-environment-common"
+                  key: ESGF_DATABASE_NAME
+          command:
+            # Try every 5 seconds for no longer than 10 mins
+            - bash
+            - -c
+            - |
+              for i in $(seq 120); do
+                sleep 5
+                echo "Attempt $i of 120"
+                if pg_isready; then exit 0; fi
+              done
+              exit 1
+      containers:
+        - name: slcs
+          image: "{{ .Values.slcs.image.repository }}:{{ .Values.slcs.image.tag }}"
+          imagePullPolicy: {{ default "" .Values.slcs.image.pullPolicy | quote }}
+          ports:
+            - name: http
+              containerPort: 8000
+          # The readiness and liveness probes run the same thing, but the liveness
+          # probe just waits a while before kicking in whereas the readiness probe
+          # starts straight away
+          readinessProbe: &probe
+            httpGet:
+              path: /esgf-slcs
+              port: 8000
+              # The ALLOWED_HOSTS setting means that the app will only accept
+              # requests from the correct host
+              httpHeaders:
+                - name: Host
+                  value: "{{ .Values.hostname }}"
+                - name: X-Forwarded-Host
+                  value: "{{ .Values.hostname }}"
+                - name: X-Forwarded-Proto
+                  value: https
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            <<: *probe
+            initialDelaySeconds: 600
+          env:
+            # Generic Django settings
+            - name: SCRIPT_NAME
+              value: /esgf-slcs
+            - name: DJANGO_ALLOWED_HOSTS
+              value: "{{ .Values.hostname }}"
+            - name: DJANGO_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ template "fullname" . }}-secrets"
+                  key: "slcs-secret-key"
+            # SLCS database
+            - name: DJANGO_DATABASE_DEFAULT_ENGINE
+              value: django.db.backends.postgresql
+            - name: DJANGO_DATABASE_DEFAULT_HOST
+              value: "{{ template "fullname" . }}-postgres-slcs"
+            - name: DJANGO_DATABASE_DEFAULT_PORT
+              value: "5432"
+            - name: DJANGO_DATABASE_DEFAULT_USER
+              value: slcsuser
+            - name: DJANGO_DATABASE_DEFAULT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ template "fullname" . }}-secrets"
+                  key: "slcs-database-password"
+            - name: DJANGO_DATABASE_DEFAULT_NAME
+              value: slcs
+            # ESGF User database
+            - name: DJANGO_DATABASE_USERDB_ENGINE
+              value: django.db.backends.postgresql
+            - name: DJANGO_DATABASE_USERDB_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: "{{ template "fullname" . }}-environment-common"
+                  key: ESGF_DATABASE_HOST
+            - name: DJANGO_DATABASE_USERDB_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: "{{ template "fullname" . }}-environment-common"
+                  key: ESGF_DATABASE_PORT
+            - name: DJANGO_DATABASE_USERDB_USER
+              valueFrom:
+                configMapKeyRef:
+                  name: "{{ template "fullname" . }}-environment-common"
+                  key: ESGF_DATABASE_USER
+            - name: DJANGO_DATABASE_USERDB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ template "fullname" . }}-secrets"
+                  key: "security-database-password"
+            - name: DJANGO_DATABASE_USERDB_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: "{{ template "fullname" . }}-environment-common"
+                  key: ESGF_DATABASE_NAME
+            # Make the rootAdmin account a superuser
+            - name: DJANGO_CREATE_SUPERUSER
+              value: "1"
+            - name: DJANGO_SUPERUSER_USERNAME
+              value: "rootAdmin"
+            - name: DJANGO_SUPERUSER_EMAIL
+              value: "CoG@{{ .Values.hostname }}"
+            # Other SLCS-specific settings
+            - name: ESGF_SLCS_URL
+              value: "https://{{ .Values.hostname }}/esgf-slcs"
+            - name: ESGF_SLCS_BASIC_AUTH_REALM
+              value: "{{ .Values.hostname }}"
+            - name: ONLINECA_SUBJECT_NAME_TEMPLATE
+              value: "/DC=esgf/CN={user}"
+            - name: ONLINECA_CERT_PATH
+              value: /esg/certificates/slcsca/ca.crt
+            - name: ONLINECA_KEY_PATH
+              value: /esg/certificates/slcsca/ca.key
+            - name: ONLINECA_TRUSTROOTS_DIR
+              value: /esg/certificates/slcsca/trustroots
+          volumeMounts:
+            - mountPath: /esg/certificates/slcsca
+              name: slcsca
+            - mountPath: /esg/certificates/slcsca-trustroots
+              name: trustroots
+            - mountPath: /esg/certificates/esg-trust-bundle.pem
+              name: trust-bundle
+              subPath: esg-trust-bundle.pem
+          resources:
+{{ toYaml .Values.slcs.resources | indent 12 }}
+      volumes:
+        - name: slcsca
+          secret:
+            secretName: "{{ template "fullname" . }}-slcs-ca"
+        - name: trustroots
+          emptyDir: {}
+        - name: trust-bundle
+          configMap:
+            name: "{{ template "fullname" . }}-trust-bundle"

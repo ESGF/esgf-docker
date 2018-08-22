@@ -1,0 +1,25 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: "{{ template "fullname" . }}-environment-common"
+  labels:
+{{ include "default-labels" . | indent 4 }}
+    component: configuration
+data:
+  ESGF_HOSTNAME: "{{ .Values.hostname }}"
+  ESGF_PEER_GROUP: esgf-test
+  ESGF_ATTRIBUTE_SERVICE_ENDPOINT: "https://{{ .Values.hostname }}/esgf-idp/saml/soap/secure/attributeService.htm"
+  ESGF_REGISTRATION_SERVICE_ENDPOINT: "https://{{ .Values.hostname }}/esgf-idp/secure/registrationService.htm"
+  ESGF_OPENID_ENDPOINT: "https://{{ .Values.hostname }}/esgf-idp/idp/openidServer.htm"
+  ESGF_DATABASE_HOST: "{{ template "fullname" . }}-postgres-security"
+  ESGF_DATABASE_PORT: "5432"
+  ESGF_DATABASE_USER: dbsuper
+  ESGF_DATABASE_NAME: esgcet
+  ESGF_SEARCH_SERVICE_ENDPOINT: "https://{{ .Values.hostname }}/esg-search/search"
+  ESGF_IDP_PEER: "{{ .Values.hostname }}"
+  ESGF_INDEX_PEER: "{{ .Values.hostname }}"
+  ESGF_PUBLISH_SERVICE_ENDPOINT: "https://{{ .Values.hostname }}/esg-search/remote/secure/client-cert/hessian/publishingService"
+  ESGF_SOLR_QUERY_URL: "http://{{ template "fullname" . }}-solr-slave:8983/solr"
+  ESGF_SOLR_PUBLISH_URL: "http://{{ template "fullname" . }}-solr-master:8983/solr"
+  ESGF_AUTHORIZATION_SERVICE_ENDPOINT: "https://{{ .Values.hostname }}/esg-orp/saml/soap/secure/authorizationService.htm"
+  ESGF_SLCS_ENDPOINT: "https://{{ .Values.hostname }}/esgf-slcs"

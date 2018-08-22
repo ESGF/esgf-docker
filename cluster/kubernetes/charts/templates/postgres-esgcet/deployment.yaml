@@ -1,0 +1,64 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: "{{ template "fullname" . }}-postgres-esgcet"
+  labels:
+{{ include "default-labels" . | indent 4 }}
+    component: postgres-esgcet
+spec:
+  replicas: 1
+  # Select pods on release and component only, rather than all labels
+  # This means that the selector will match all pods from all versions of the chart when upgrading
+  selector:
+    matchLabels:
+      release: {{ .Release.Name }}
+      component: postgres-esgcet
+  template:
+    metadata:
+      labels:
+{{ include "default-labels" . | indent 8 }}
+        component: postgres-esgcet
+      annotations:
+        checksum/secrets: {{ include (print $.Template.BasePath "/configuration/secrets.yaml") . | sha256sum }}
+    spec:
+      containers:
+        - name: postgres-esgcet
+          image: "{{ .Values.postgresEsgcet.image.repository }}:{{ .Values.postgresEsgcet.image.tag }}"
+          imagePullPolicy: {{ default "" .Values.postgresEsgcet.image.pullPolicy | quote }}
+          ports:
+            - name: postgres
+              containerPort: 5432
+          # The readiness and liveness probes run the same thing, but the liveness
+          # probe just waits a while before kicking in whereas the readiness probe
+          # starts straight away
+          readinessProbe: &probe
+            tcpSocket:
+              port: 5432
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            <<: *probe
+            initialDelaySeconds: 600
+          env:
+            - name: POSTGRESQL_DATABASE
+              value: esgcet
+            - name: POSTGRESQL_USER
+              value: esgcet
+            - name: POSTGRESQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ template "fullname" . }}-secrets"
+                  key: "esgcet-database-password"
+          volumeMounts:
+            - name: postgres-data
+              mountPath: /var/lib/pgsql/data
+          resources:
+{{ toYaml .Values.postgresEsgcet.resources | indent 12 }}
+      volumes:
+        - name: postgres-data
+{{- if .Values.postgresEsgcet.persistence.enabled }}
+          persistentVolumeClaim:
+            claimName: "{{ template "fullname" . }}-postgres-esgcet"
+{{- else }}
+          emptyDir: {}
+{{- end }}

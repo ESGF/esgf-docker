@@ -1,0 +1,132 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: "{{ template "fullname" . }}-publisher"
+  labels:
+{{ include "default-labels" . | indent 4 }}
+    component: publisher
+spec:
+  # Every time the publisher deployment is rolled out, the number of replicas is set to zero
+  # To perform a publish, scale up the deployment to 1 replica, perform the publish and scale back down to 0
+  replicas: 0
+  # Select pods on release and component only, rather than all labels
+  # This means that the selector will match all pods from all versions of the chart when upgrading
+  selector:
+    matchLabels:
+      release: {{ .Release.Name }}
+      component: publisher
+  template:
+    metadata:
+      labels:
+{{ include "default-labels" . | indent 8 }}
+        component: publisher
+      annotations:
+        checksum/secrets: {{ include (print $.Template.BasePath "/configuration/secrets.yaml") . | sha256sum }}
+        checksum/trust-bundle: {{ include (print $.Template.BasePath "/configuration/trust-bundle.yaml") . | sha256sum }}
+    spec:
+      initContainers:
+        # Wait for postgres-esgcet to become available before starting
+        - name: ensure-postgres-esgcet
+          image: "{{ .Values.postgresEsgcet.image.repository }}:{{ .Values.postgresEsgcet.image.tag }}"
+          imagePullPolicy: {{ default "" .Values.postgresEsgcet.image.pullPolicy | quote }}
+          env:
+            - name: PGHOST
+              value: "{{ template "fullname" . }}-postgres-esgcet"
+            - name: PGPORT
+              value: "5432"
+            - name: PGUSER
+              value: esgcet
+            - name: PGPASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ template "fullname" . }}-secrets"
+                  key: "esgcet-database-password"
+            - name: PGDATABASE
+              value: esgcet
+          command:
+            # Try every 5 seconds for no longer than 10 mins
+            - bash
+            - -c
+            - |
+              for i in $(seq 120); do
+                sleep 5
+                echo "Attempt $i of 120"
+                if pg_isready; then exit 0; fi
+              done
+              exit 1
+        # Ensure the index node is up before starting
+        - name: ensure-index-node
+          image: radial/busyboxplus:curl
+          command:
+            # Try every 5 seconds for no longer than 10 mins
+            - sh
+            - -c
+            - |
+              for i in $(seq 120); do
+                sleep 5
+                echo "Attempt $i of 120"
+                if curl -k -m 1 -fsSL https://{{ .Values.hostname }}/esg-search/search; then exit 0; fi
+              done
+              exit 1
+      containers:
+        - name: publisher
+          image: "{{ .Values.publisher.image.repository }}:{{ .Values.publisher.image.tag }}"
+          imagePullPolicy: {{ default "" .Values.publisher.image.pullPolicy | quote }}
+          # Just sit and wait for somebody to connect via exec
+          args:
+            - "bash"
+            - "-c"
+            - "sleep infinity"
+          env:
+            - name: ESGF_DATABASE_HOST
+              value: "{{ template "fullname" . }}-postgres-esgcet"
+            - name: ESGF_DATABASE_PORT
+              value: "5432"
+            - name: ESGF_DATABASE_USER
+              value: esgcet
+            - name: ESGF_DATABASE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ template "fullname" . }}-secrets"
+                  key: "esgcet-database-password"
+            - name: ESGF_DATABASE_NAME
+              value: esgcet
+            - name: ESGF_HESSIAN_METADATA_URL
+              value: "https://{{ .Values.hostname }}/esgcet/remote/hessian/guest/remoteMetadataService"
+            - name: ESGF_HESSIAN_URL
+              value: "https://{{ .Values.hostname }}/esg-search/remote/secure/client-cert/hessian/publishingService"
+            - name: ESGF_TDS_CATALOG_URL
+              value: "https://{{ .Values.hostname }}/thredds/catalog/esgcet"
+            - name: ESGF_TDS_REINIT_URL
+              value: "https://{{ .Values.hostname }}/thredds/admin/debug?Catalogs/recheck"
+            - name: ESGF_TDS_REINIT_ERROR_URL
+              value: "https://{{ .Values.hostname }}/thredds/admin/content/logs/catalogInit.log"
+            - name: ESGF_TDS_USERNAME
+              value: rootAdmin
+            - name: ESGF_TDS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ template "fullname" . }}-secrets"
+                  key: "rootadmin-password"
+            - name: ESGF_SLCS_CERTIFICATE_URL
+              value: "https://{{ .Values.hostname }}/esgf-slcs/onlineca/certificate/"
+          volumeMounts:
+            - mountPath: /esg/content/thredds/esgcet
+              name: tds-content
+            - mountPath: /esg/data
+              name: tds-data
+            - mountPath: /esg/certificates/esg-trust-bundle.pem
+              name: trust-bundle
+              subPath: esg-trust-bundle.pem
+          resources:
+{{ toYaml .Values.publisher.resources | indent 12 }}
+      volumes:
+        - name: tds-content
+          persistentVolumeClaim:
+            claimName: "{{ template "fullname" . }}-tds-content"
+        - name: tds-data
+          persistentVolumeClaim:
+            claimName: "{{ template "fullname" . }}-tds-data"
+        - name: trust-bundle
+          configMap:
+            name: "{{ template "fullname" . }}-trust-bundle"

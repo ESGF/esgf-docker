@@ -1,0 +1,67 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: "{{ template "fullname" . }}-postgres-slcs"
+  labels:
+{{ include "default-labels" . | indent 4 }}
+    component: slcs
+    slcs-role: database
+spec:
+  replicas: 1
+  # Select pods on release and component only, rather than all labels
+  # This means that the selector will match all pods from all versions of the chart when upgrading
+  selector:
+    matchLabels:
+      release: {{ .Release.Name }}
+      component: slcs
+      slcs-role: database
+  template:
+    metadata:
+      labels:
+{{ include "default-labels" . | indent 8 }}
+        component: slcs
+        slcs-role: database
+      annotations:
+        checksum/secrets: {{ include (print $.Template.BasePath "/configuration/secrets.yaml") . | sha256sum }}
+    spec:
+      containers:
+        - name: postgres-slcs
+          image: "{{ .Values.slcs.postgres.image.repository }}:{{ .Values.slcs.postgres.image.tag }}"
+          imagePullPolicy: {{ default "" .Values.slcs.postgres.image.pullPolicy | quote }}
+          ports:
+            - name: postgres
+              containerPort: 5432
+          # The readiness and liveness probes run the same thing, but the liveness
+          # probe just waits a while before kicking in whereas the readiness probe
+          # starts straight away
+          readinessProbe: &probe
+            tcpSocket:
+              port: 5432
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            <<: *probe
+            initialDelaySeconds: 600
+          env:
+            - name: POSTGRESQL_DATABASE
+              value: slcs
+            - name: POSTGRESQL_USER
+              value: slcsuser
+            - name: POSTGRESQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ template "fullname" . }}-secrets"
+                  key: "slcs-database-password"
+          volumeMounts:
+            - name: postgres-data
+              mountPath: /var/lib/pgsql/data
+          resources:
+{{ toYaml .Values.slcs.postgres.resources | indent 12 }}
+      volumes:
+        - name: postgres-data
+{{- if .Values.slcs.postgres.persistence.enabled }}
+          persistentVolumeClaim:
+            claimName: "{{ template "fullname" . }}-postgres-slcs"
+{{- else }}
+          emptyDir: {}
+{{- end }}

@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: "{{ template "fullname" . }}-postgres-slcs"
+  labels:
+{{ include "default-labels" . | indent 4 }}
+    component: slcs
+    slcs-role: database
+spec:
+  ports:
+    - name: postgres
+      port: 5432
+  selector:
+    release: {{ .Release.Name }}
+    component: slcs
+    slcs-role: database

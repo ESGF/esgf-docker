@@ -1,0 +1,59 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: "{{ template "fullname" . }}-solr-master"
+  labels:
+{{ include "default-labels" . | indent 4 }}
+    component: solr
+    solr-role: master
+spec:
+  # Select pods on release and component only, rather than all labels
+  # This means that the selector will match all pods from all versions of the chart when upgrading
+  selector:
+    matchLabels:
+      release: {{ .Release.Name }}
+      component: solr
+      solr-role: master
+  replicas: 1
+  template:
+    metadata:
+      labels:
+{{ include "default-labels" . | indent 8 }}
+        component: solr
+        solr-role: master
+    spec:
+      containers:
+        - name: solr-master
+          image: "{{ .Values.solr.image.repository }}:{{ .Values.solr.image.tag }}"
+          imagePullPolicy: {{ default "" .Values.solr.image.pullPolicy | quote }}
+          ports:
+            - name: solr
+              containerPort: 8983
+          # The readiness and liveness probes run the same thing, but the liveness
+          # probe just waits a while before kicking in whereas the readiness probe
+          # starts straight away
+          readinessProbe: &probe
+            httpGet:
+              path: /solr/admin/info/system?wt=json
+              port: 8983
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            <<: *probe
+            initialDelaySeconds: 600
+          env:
+            - name: ESGF_SOLR_ROLE
+              value: master
+          resources:
+{{ toYaml .Values.solr.master.resources | indent 12 }}
+          volumeMounts:
+            - name: solr-home
+              mountPath: /esg/solr-home
+      volumes:
+        - name: solr-home
+{{- if .Values.solr.master.persistence.enabled }}
+          persistentVolumeClaim:
+            claimName: "{{ template "fullname" . }}-solr-master"
+{{- else }}
+          emptyDir: {}
+{{- end }}

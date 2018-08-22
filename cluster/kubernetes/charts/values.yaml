@@ -1,0 +1,195 @@
+solr:
+  image:
+#    repository: esgfhub/solr
+    repository: cedadev/esgf-solr
+    tag: latest
+    # pullPolicy:  "IfNotPresent"
+  master:
+    # The resources available to the Solr master
+    resources: {}
+    persistence:
+      # Set this to true to use a PVC with the following properties
+      enabled: false
+      # storageClass: ""
+      size: 10Gi
+      selector: {}
+  slave:
+    # The resources available to the Solr slave
+    resources: {}
+    persistence:
+      # Set this to true to use a PVC with the following properties
+      enabled: false
+      # storageClass: ""
+      size: 10Gi
+      selector: {}
+  shards:
+    # The resources available to each Solr shard
+    resources: {}
+    persistence:
+      # Set this to true to use a PVC with the following properties
+      enabled: false
+      # storageClass: ""
+      size: 10Gi
+      selector: {}
+    shardList: []
+
+postgresEsgcet:
+  image: &postgresImage
+    # repository: esgfhub/postgres
+    repository: cedadev/esgf-postgres
+    tag: latest
+    # pullPolicy:  "IfNotPresent"
+  # The resources available to the postgres-esgcet container
+  resources: {}
+  persistence:
+    # Set this to true to use a PVC with the following properties
+    enabled: false
+    # storageClass: ""
+    size: 10Gi
+    selector: {}
+
+postgresSecurity:
+  image:
+    <<: *postgresImage
+    repository: cedadev/esgf-postgres-security
+  # The resources available to the postgres-security container
+  resources: {}
+  persistence:
+    # Set this to true to use a PVC with the following properties
+    enabled: false
+    # storageClass: ""
+    size: 10Gi
+    selector: {}
+
+orp:
+  image:
+#    repository: esgfhub/orp
+    repository: cedadev/esgf-orp
+    tag: latest
+    # pullPolicy:  "IfNotPresent"
+  replicas: 1
+  # The resources available to each ORP container
+  resources: {}
+
+indexNode:
+  image:
+#    repository: esgfhub/index-node
+    repository: cedadev/esgf-index-node
+    tag: latest
+    # pullPolicy:  "IfNotPresent"
+  replicas: 1
+  # The resources available to each index node container
+  resources: {}
+
+idpNode:
+  image:
+#    repository: esgfhub/idp-node
+    repository: cedadev/esgf-idp-node
+    tag: latest
+    # pullPolicy:  "IfNotPresent"
+  replicas: 1
+  # The resources available to each IDP container
+  resources: {}
+
+tds:
+  image:
+#    repository: esgfhub/tds
+    repository: cedadev/esgf-tds
+    tag: latest
+    # pullPolicy:  "IfNotPresent"
+  replicas: 1
+  # The resources available to each TDS container
+  resources: {}
+  # Information for the data PVC
+  data:
+    # storageClass: ""
+    size: 10Gi
+    selector: {}
+  # Information for the catalog PVC
+  content:
+    # storageClass: ""
+    size: 10Gi
+    selector: {}
+
+cog:
+  image:
+#    repository: esgfhub/cog
+    repository: cedadev/esgf-cog
+    tag: latest
+    # pullPolicy:  "IfNotPresent"
+  replicas: 1
+  # The resources available to each cog container
+  resources: {}
+  # The postgres used by CoG
+  postgres:
+    image: *postgresImage
+    resources: {}
+    persistence:
+      # Set this to true to use a PVC with the following properties
+      enabled: false
+      # storageClass: ""
+      size: 10Gi
+      selector: {}
+
+auth:
+  image:
+#    repository: esgfhub/auth
+    repository: cedadev/esgf-auth
+    tag: latest
+    # pullPolicy:  "IfNotPresent"
+  replicas: 1
+  # The resources available to each auth container
+  resources: {}
+  # The postgres for use by esgf-auth
+  postgres:
+    image: *postgresImage
+    resources: {}
+    persistence:
+      # Set this to true to use a PVC with the following properties
+      enabled: false
+      # storageClass: ""
+      size: 10Gi
+      selector: {}
+
+slcs:
+  image:
+#    repository: esgfhub/slcs
+    repository: cedadev/esgf-slcs
+    tag: latest
+    # pullPolicy:  "IfNotPresent"
+  replicas: 1
+  # The resources available to each SLCS container
+  resources: {}
+  # The postgres for use by the SLCS
+  postgres:
+    image: *postgresImage
+    resources: {}
+    persistence:
+      # Set this to true to use a PVC with the following properties
+      enabled: false
+      # storageClass: ""
+      size: 10Gi
+      selector: {}
+
+proxy:
+  image:
+#    repository: esgfhub/proxy
+    repository: cedadev/esgf-proxy
+    tag: latest
+    # pullPolicy:  "IfNotPresent"
+  replicas: 1
+  # Use this to set the resources available to each index node container
+  resources: {}
+  ingress:
+    # Set this to false to disable ingress rules
+    enabled: true
+    # The ingress mode - one of "kubernetes" (Ingress resource) or "openshift" (Route resource)
+    mode: kubernetes
+
+publisher:
+  image:
+#    repository: esgfhub/publisher
+    repository: cedadev/esgf-publisher
+    tag: latest
+    # pullPolicy:  "IfNotPresent"
+  resources: {}

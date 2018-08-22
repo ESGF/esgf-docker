@@ -1,0 +1,127 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: "{{ template "fullname" . }}-auth"
+  labels:
+{{ include "default-labels" . | indent 4 }}
+    component: auth
+    auth-role: frontend
+spec:
+  replicas: {{ .Values.auth.replicas }}
+  # Select pods on release and component only, rather than all labels
+  # This means that the selector will match all pods from all versions of the chart when upgrading
+  selector:
+    matchLabels:
+      release: {{ .Release.Name }}
+      component: auth
+      auth-role: frontend
+  template:
+    metadata:
+      labels:
+{{ include "default-labels" . | indent 8 }}
+        component: auth
+        auth-role: frontend
+      annotations:
+        checksum/secrets: {{ include (print $.Template.BasePath "/configuration/secrets.yaml") . | sha256sum }}
+        checksum/trust-bundle: {{ include (print $.Template.BasePath "/configuration/trust-bundle.yaml") . | sha256sum }}
+    spec:
+      initContainers:
+        # Wait for postgres to become available before starting
+        - name: ensure-postgres
+          image: "{{ .Values.auth.postgres.image.repository }}:{{ .Values.auth.postgres.image.tag }}"
+          imagePullPolicy: {{ default "" .Values.auth.postgres.image.pullPolicy | quote }}
+          env:
+            - name: PGHOST
+              value: "{{ template "fullname" . }}-postgres-auth"
+            - name: PGPORT
+              value: "5432"
+            - name: PGUSER
+              value: authuser
+            - name: PGPASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ template "fullname" . }}-secrets"
+                  key: "auth-database-password"
+            - name: PGDATABASE
+              value: auth
+          command:
+            # Try every 5 seconds for no longer than 10 mins
+            - bash
+            - -c
+            - |
+              for i in $(seq 120); do
+                sleep 5
+                echo "Attempt $i of 120"
+                if pg_isready; then exit 0; fi
+              done
+              exit 1
+      containers:
+        - name: auth
+          image: "{{ .Values.auth.image.repository }}:{{ .Values.auth.image.tag }}"
+          imagePullPolicy: {{ default "" .Values.auth.image.pullPolicy | quote }}
+          ports:
+            - name: http
+              containerPort: 8000
+          # The readiness and liveness probes run the same thing, but the liveness
+          # probe just waits a while before kicking in whereas the readiness probe
+          # starts straight away
+          readinessProbe: &probe
+            httpGet:
+              path: /esgf-auth/home/
+              port: 8000
+              # The ALLOWED_HOSTS setting means that the app will only accept
+              # requests from the correct host
+              httpHeaders:
+                - name: Host
+                  value: "{{ .Values.hostname }}"
+                - name: X-Forwarded-Host
+                  value: "{{ .Values.hostname }}"
+                - name: X-Forwarded-Proto
+                  value: https
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            <<: *probe
+            initialDelaySeconds: 600
+          envFrom:
+            - configMapRef:
+                name: "{{ template "fullname" . }}-environment-common"
+          env:
+            - name: SCRIPT_NAME
+              value: /esgf-auth
+            - name: ESGF_AUTH_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ template "fullname" . }}-secrets"
+                  key: "auth-secret-key"
+            - name: ESGF_COOKIE_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ template "fullname" . }}-secrets"
+                  key: "shared-cookie-secret-key"
+            # Database settings
+            - name: DJANGO_DATABASE_DEFAULT_ENGINE
+              value: django.db.backends.postgresql
+            - name: DJANGO_DATABASE_DEFAULT_NAME
+              value: auth
+            - name: DJANGO_DATABASE_DEFAULT_HOST
+              value: "{{ template "fullname" . }}-postgres-auth"
+            - name: DJANGO_DATABASE_DEFAULT_PORT
+              value: "5432"
+            - name: DJANGO_DATABASE_DEFAULT_USER
+              value: authuser
+            - name: DJANGO_DATABASE_DEFAULT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ template "fullname" . }}-secrets"
+                  key: "auth-database-password"
+          volumeMounts:
+            - mountPath: /esg/certificates/esg-trust-bundle.pem
+              name: trust-bundle
+              subPath: esg-trust-bundle.pem
+          resources:
+{{ toYaml .Values.auth.resources | indent 12 }}
+      volumes:
+        - name: trust-bundle
+          configMap:
+            name: "{{ template "fullname" . }}-trust-bundle"
