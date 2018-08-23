@@ -18,6 +18,11 @@ ARG ESGF_VERSION=latest
 # https://github.com/moby/moby/issues/34482
 FROM ${ESGF_HUB}/${ESGF_PREFIX}configure:${ESGF_VERSION} as configuration
 
+
+#############
+## Stage 1 ##
+#############
+
 FROM openjdk:8-jdk AS esgf-tds-unpack
 
 ARG ESGF_REPO=http://dist.ceda.ac.uk/esgf
@@ -95,24 +100,20 @@ RUN apt-get update && apt-get install -y rsync && rm -rf /var/lib/apt/lists/*
 COPY --from=esgf-tds-unpack --chown=1001:0 /opt/thredds $CATALINA_HOME/webapps/thredds
 
 # Copy configuration and utils from esgf-configure
-# Ensure the config directory is owned by the tomcat user and root group
-RUN mkdir -p /esg/config && chown 1001:0 /esg/config && chmod 775 /esg/config
-COPY --chown=1001:0 --from=configuration /esg/config /esg/config
-# Make sure this script runs first by giving it a low ordinal
-COPY --from=configuration /opt/esgf-docker/scripts/interpolate-configs.sh /tomcat-init.d/01-interpolate.sh
+COPY --chown=1001:0 --from=configuration /esg /esg
 
 # Install environment customisations, config files and templates
 COPY scripts/setenv.sh $CATALINA_HOME/bin/
 # Make sure this script runs after the settings are interpolated
-COPY scripts/setup-thredds.sh /tomcat-init.d/02-setup-thredds.sh
+COPY scripts/configure-thredds.sh /tomcat-init.d/
 # TDS customized applicationContext.xml file with ESGF authorizer
 COPY conf/applicationContext.xml $CATALINA_HOME/webapps/thredds/WEB-INF/
 # TDS customized logging (uses DEBUG)
 COPY conf/log4j2.xml $CATALINA_HOME/webapps/thredds/WEB-INF/classes/
 # Template for web.xml - this is interpolated with environment vars at runtime
-COPY conf/web.xml.template $CATALINA_HOME/webapps/thredds/WEB-INF/
+COPY conf/web.xml $CATALINA_HOME/webapps/thredds/WEB-INF/.defaults/web.xml
 # Template for tomcat-users.xml - interpolated with environment vars at runtime
-COPY conf/tomcat-users.xml.template $CATALINA_HOME/conf/
+COPY conf/tomcat-users.xml $CATALINA_HOME/conf/.defaults/tomcat-users.xml
 
 # Create the thredds content root owned by tomcat user and root group
 RUN mkdir -p /esg/content/thredds/esgcet && \
@@ -120,8 +121,9 @@ RUN mkdir -p /esg/content/thredds/esgcet && \
     chmod -R g+w /esg/content/thredds
 # The threddsConfig.xml and root catalog.xml will normally not come from a volume
 # as they don't change with publishing
-# They should come through the same route as regular config files
-COPY conf/thredds/*.xml /esg/content/thredds/
+# However, we might want to override them, so they should still come through the
+# .defaults/.overrides mechanism
+COPY conf/thredds /esg/content/thredds/.defaults
 
 # Run as the tomcat user by default
 USER 1001

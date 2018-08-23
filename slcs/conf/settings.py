@@ -117,8 +117,13 @@ OAUTH2_PROVIDER = {
 BASIC_AUTH_REALM = os.environ['ESGF_SLCS_BASIC_AUTH_REALM']
 
 
-# Configuration for the Online CA WSGI application
-# This is instantiated using the PasteDeploy app_factory, so the configuration below
-# corresponds to the global and local configs expected by that function
-ONLINECA_PASTEDEPLOY_CONF = 'config:{0}'.format(os.environ['ONLINECA_PASTEDEPLOY_FILE'])
-ONLINECA_DJANGO_USER_TO_OPENID = 'esgf_auth.openid.django_user_to_openid'
+# OnlineCA settings
+ONLINECA = {
+    'TRUSTROOTS_DIR': os.environ['ONLINECA_TRUSTROOTS_DIR'],
+    'USER_TO_STRING_MAPPER': 'esgf_auth.openid.django_user_to_openid',
+    'SUBJECT_NAME_TEMPLATE': os.environ['ONLINECA_SUBJECT_NAME_TEMPLATE'],
+    'CA_CERT_PATH': os.environ['ONLINECA_CERT_PATH'],
+    'CA_KEY_PATH': os.environ['ONLINECA_KEY_PATH'],
+}
+if 'ONLINECA_CERT_CHAIN_PATHS' in os.environ:
+    ONLINECA['CA_CERT_CHAIN_PATHS'] = os.environ['ONLINECA_CERT_CHAIN_PATHS'].split(',')

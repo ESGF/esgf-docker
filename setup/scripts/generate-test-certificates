@@ -2,7 +2,8 @@
 
 set -eo pipefail
 
-source "$(dirname "$(realpath "$0")")/functions.sh"
+. "$(dirname $BASH_SOURCE)/functions.sh"
+
 
 #####
 ## This script generates test certificates for a local test installation. These

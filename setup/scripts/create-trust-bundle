@@ -2,7 +2,7 @@
 
 set -eo pipefail
 
-source "$(dirname "$(realpath "$0")")/functions.sh"
+. "$(dirname $BASH_SOURCE)/functions.sh"
 
 #####
 ## This script creates a PEM-encoded trust bundle containing the following certificates:
@@ -26,8 +26,10 @@ touch "$BUNDLE"
 if [ -f "$CERTS/esg_trusted_certificates.tar" ]; then
     info "Unpacking existing trustroots"
     tar -xf "$CERTS/esg_trusted_certificates.tar" -C "$CERTS"
-    for certfile in $(grep -lr -- "-----BEGIN CERTIFICATE-----" "$CERTS/esg_trusted_certificates"); do
-        info "  Appending $certfile to bundle"
+    certfiles=($(grep -lr -- "-----BEGIN CERTIFICATE-----" "$CERTS/esg_trusted_certificates"))
+    for i in "${!certfiles[@]}"; do
+        certfile="${certfiles[$i]}"
+        info "[$((i + 1))/${#certfiles[@]}] Appending $certfile to bundle"
         cat "$certfile" >> "$BUNDLE"
     done
     rm -rf "$CERTS/esg_trusted_certificates"

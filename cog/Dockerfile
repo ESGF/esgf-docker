@@ -13,6 +13,11 @@ ARG ESGF_VERSION=latest
 # https://github.com/moby/moby/issues/34482
 FROM ${ESGF_HUB}/${ESGF_PREFIX}configure:${ESGF_VERSION} as configuration
 
+
+#############
+## Stage 1 ##
+#############
+
 FROM python:2.7-slim AS esgf-cog-build
 
 # Install apt dependencies
@@ -84,16 +89,16 @@ RUN pip install --no-index --find-links=/pip-wheels -r $COG_INSTALL_DIR/requirem
 # Install CoG WSGI application and settings wrappers
 COPY python/*.py /usr/local/lib/python2.7/site-packages/
 
+# Tell Django which settings module to use
+ENV DJANGO_SETTINGS_MODULE cog_settings
+
 # Install configuration files and scripts
-# Ensure the config directory is owned by the Django user and root group
-RUN mkdir -p /esg/config && chown 1001:0 /esg/config && chmod 775 /esg/config
-COPY --chown=1001:0 --from=configuration /esg/config /esg/config
-COPY --from=configuration /opt/esgf-docker/scripts /opt/esgf-docker/scripts
-COPY conf/cog_settings.cfg.template $COG_CONFIG_DIR/
-COPY scripts/* /django-init.d/
+# Start by installing the /esg tree from esgf-configure, but owned by the Django user
+COPY --chown=1001:0 --from=configuration /esg /esg
+# Then install the default CoG configuration templates
+COPY ./conf $COG_CONFIG_DIR/.defaults
+# Install initialisation scripts
+COPY ./scripts /django-init.d
 
 # Run as the Django user unless otherwise specified
 USER 1001
-
-# The "command" is the settings module to use
-CMD ["cog_settings"]

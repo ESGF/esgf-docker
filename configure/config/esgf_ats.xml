@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<ats_whitelist xmlns="http://www.esgf.org/whitelist">
+    {{ $attribute_service := getenv "ESGF_ATTRIBUTE_SERVICE_ENDPOINT" -}}
+    {{ if $attribute_service -}}
+    <attribute type="wheel" attributeService="{{ $attribute_service }}" description="Administrator Group"/>
+    {{- end }}
+</ats_whitelist>

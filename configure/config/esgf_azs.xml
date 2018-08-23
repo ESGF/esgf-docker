@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<azs_whitelist xmlns="http://www.esgf.org/whitelist">
+    {{ $auth_service := getenv "ESGF_AUTHORIZATION_SERVICE_ENDPOINT" -}}
+    {{ if $auth_service -}}
+    <value>{{ $auth_service }}</value>
+    {{- end }}
+</azs_whitelist>
