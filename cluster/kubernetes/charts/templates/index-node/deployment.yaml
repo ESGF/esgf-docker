@@ -20,6 +20,7 @@ spec:
         component: index-node
       annotations:
         checksum/trust-bundle: {{ include (print $.Template.BasePath "/configuration/trust-bundle.yaml") . | sha256sum }}
+        checksum/environment-common: {{ include (print $.Template.BasePath "/configuration/environment-common.yaml") . | sha256sum }}
     spec:
       initContainers:
         # Make sure Solr is up before starting

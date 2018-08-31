@@ -24,6 +24,7 @@ spec:
       annotations:
         checksum/secrets: {{ include (print $.Template.BasePath "/configuration/secrets.yaml") . | sha256sum }}
         checksum/trust-bundle: {{ include (print $.Template.BasePath "/configuration/trust-bundle.yaml") . | sha256sum }}
+        checksum/environment-common: {{ include (print $.Template.BasePath "/configuration/environment-common.yaml") . | sha256sum }}
     spec:
       initContainers:
         # Wait for postgres to become available before starting
