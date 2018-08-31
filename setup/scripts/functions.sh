@@ -22,10 +22,10 @@ function indent {
 }
 
 function yaml2json {
-    python -c 'import sys, yaml, json; print json.dumps(yaml.load(sys.stdin))'
+    gomplate -i '{{ ds "input" | toJSON }}' -d input=stdin:?type=application/yaml
 }
 function json2yaml {
-    python -c 'import sys, yaml, json; print yaml.safe_dump(json.load(sys.stdin), default_style="|", default_flow_style=False)'
+    gomplate -i '{{ ds "input" | toYAML }}' -d input=stdin:?type=application/json
 }
 function merge_yaml {
     # Convert the source files to JSON
