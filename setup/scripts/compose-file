@@ -1,9 +1,8 @@
 #!/usr/bin/env bash
 
 #####
-## This script is a wrapper for docker-compose that makes sure the
-## environment for the deployment has been imported and injects
-## Solr shard configuration
+## This script injects Solr shard configuration into the main docker-compose.yml
+## based on a solr_shards.yaml in $ESGF_CONFIG
 #####
 
 set -eu

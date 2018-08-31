@@ -21,6 +21,10 @@ spec:
       annotations:
         checksum/secrets: {{ include (print $.Template.BasePath "/configuration/secrets.yaml") . | sha256sum }}
     spec:
+      # Setting fsGroup for the pod allows some provisioners to chown mounted volumes to the given group
+      #   The postgres group is 26 inside our container
+      securityContext:
+        fsGroup: 26
       containers:
         - name: postgres-esgcet
           image: "{{ .Values.postgresEsgcet.image.repository }}:{{ .Values.postgresEsgcet.image.tag }}"

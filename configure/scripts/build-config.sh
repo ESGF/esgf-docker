@@ -5,26 +5,23 @@ set -eo pipefail
 . "$(dirname $BASH_SOURCE)/functions.sh"
 
 #####
-## This script takes a single config directory as it's argument
+## This script takes a single config directory as it's argument
 ##
-## Inside that directory, it looks for special folders named ".defaults" and ".overrides"
+## Inside that directory, it looks for special folders named ".defaults" and ".overrides"
 ##
-## The config directory is then populated by first templating each file in ".defaults",
-## then templating each file in ".overrides", using gomplate
+## The config directory is then populated by first templating each file in ".defaults",
+## then templating each file in ".overrides", using gomplate
 #####
 
 # First, check that we got an argument
 [ -z "$1" ] && error "No config directory given"
 
-# Pass the argument through realpath to canonicalise it
+# Pass the argument through realpath to canonicalise it
 config_dir="$(realpath "$1")"
 
 info "Building configuration in $config_dir"
 
-info "Using environment:"
-env | grep -v "_PASSWORD$"
-
-# First, process the .defaults directory in the root, then the same with .overrides
+# First, process the .defaults directory in the root, then the same with .overrides
 sources=(".defaults"  ".overrides")
 for source in "${sources[@]}"; do
     source_dir="$config_dir/$source"

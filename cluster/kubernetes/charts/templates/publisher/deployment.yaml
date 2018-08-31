@@ -24,6 +24,10 @@ spec:
         checksum/secrets: {{ include (print $.Template.BasePath "/configuration/secrets.yaml") . | sha256sum }}
         checksum/trust-bundle: {{ include (print $.Template.BasePath "/configuration/trust-bundle.yaml") . | sha256sum }}
     spec:
+      # Setting fsGroup for the pod allows some provisioners to chown mounted volumes to the given group
+      #   The publish group is 1001 inside the container
+      securityContext:
+        fsGroup: 1001
       initContainers:
         # Wait for postgres-esgcet to become available before starting
         - name: ensure-postgres-esgcet
@@ -73,7 +77,7 @@ spec:
           image: "{{ .Values.publisher.image.repository }}:{{ .Values.publisher.image.tag }}"
           imagePullPolicy: {{ default "" .Values.publisher.image.pullPolicy | quote }}
           # Just sit and wait for somebody to connect via exec
-          args:
+          command:
             - "bash"
             - "-c"
             - "sleep infinity"

@@ -1,6 +1,6 @@
 ---
 title: Publication
-category: Usage
+category: Docker Compose
 order: 1.4
 ---
 

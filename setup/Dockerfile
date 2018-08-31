@@ -20,10 +20,15 @@ FROM ${ESGF_HUB}/${ESGF_PREFIX}configure:${ESGF_VERSION} as configuration
 # Base container is the JDK, which has openssl and keytool
 FROM openjdk:8-jdk
 
-# Install docker-compose for config generation
+# Install docker-compose for Compose config generation
 ARG COMPOSE_VERSION=1.22.0
 RUN curl -fsSL https://github.com/docker/compose/releases/download/${COMPOSE_VERSION}/docker-compose-$(uname -s)-$(uname -m) -o /usr/local/bin/docker-compose && \
     chmod +x /usr/local/bin/docker-compose
+
+# Install jq and PyYAML
+RUN apt-get update && \
+    apt-get install -y jq python-yaml && \
+    rm -rf /var/lib/apt/lists/*
 
 # Copy the gomplate binary from esgf-configure
 COPY --from=configuration /esg/bin/gomplate /usr/local/bin/gomplate

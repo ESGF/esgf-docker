@@ -22,6 +22,10 @@ spec:
         component: solr
         solr-role: master
     spec:
+      # Setting fsGroup for the pod allows some provisioners to chown mounted volumes to the given group
+      #   The solr group is 8983 inside the container
+      securityContext:
+        fsGroup: 8983
       containers:
         - name: solr-master
           image: "{{ .Values.solr.image.repository }}:{{ .Values.solr.image.tag }}"

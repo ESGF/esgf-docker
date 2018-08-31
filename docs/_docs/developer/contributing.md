@@ -1,7 +1,7 @@
 ---
 title: Contributing
 category: Developers
-order: 2.3
+order: 3.3
 toc: false
 ---
 

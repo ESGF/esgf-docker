@@ -1,0 +1,48 @@
+# For GKE, enable persistence by default and set sensible storage classes
+solr:
+  master:
+    persistence:
+      enabled: true
+      storageClass: standard
+  slave:
+    persistence:
+      enabled: true
+      storageClass: standard
+  shards:
+    persistence:
+      enabled: true
+      storageClass: standard
+
+postgresEsgcet:
+  persistence:
+    enabled: true
+    storageClass: standard
+
+postgresSecurity:
+  persistence:
+    enabled: true
+    storageClass: standard
+
+tds:
+  data:
+    storageClass: standard-rwx
+  content:
+    storageClass: standard-rwx
+
+cog:
+  postgres:
+    persistence:
+      enabled: true
+      storageClass: standard
+
+auth:
+  postgres:
+    persistence:
+      enabled: true
+      storageClass: standard
+
+slcs:
+  postgres:
+    persistence:
+      enabled: true
+      storageClass: standard

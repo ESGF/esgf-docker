@@ -66,6 +66,7 @@ spec:
           volumeMounts:
             - mountPath: /esg/content/thredds/esgcet
               name: tds-content
+              readOnly: true
             - mountPath: /esg/data
               name: tds-data
               readOnly: true

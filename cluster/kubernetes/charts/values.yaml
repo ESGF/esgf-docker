@@ -1,7 +1,6 @@
 solr:
   image:
-#    repository: esgfhub/solr
-    repository: cedadev/esgf-solr
+    repository: esgfhub/solr
     tag: latest
     # pullPolicy:  "IfNotPresent"
   master:
@@ -34,9 +33,8 @@ solr:
     shardList: []
 
 postgresEsgcet:
-  image: &postgresImage
-    # repository: esgfhub/postgres
-    repository: cedadev/esgf-postgres
+  image:
+    repository: esgfhub/postgres
     tag: latest
     # pullPolicy:  "IfNotPresent"
   # The resources available to the postgres-esgcet container
@@ -50,8 +48,9 @@ postgresEsgcet:
 
 postgresSecurity:
   image:
-    <<: *postgresImage
-    repository: cedadev/esgf-postgres-security
+    repository: esgfhub/postgres-security
+    tag: latest
+    # pullPolicy:  "IfNotPresent"
   # The resources available to the postgres-security container
   resources: {}
   persistence:
@@ -63,8 +62,7 @@ postgresSecurity:
 
 orp:
   image:
-#    repository: esgfhub/orp
-    repository: cedadev/esgf-orp
+    repository: esgfhub/orp
     tag: latest
     # pullPolicy:  "IfNotPresent"
   replicas: 1
@@ -73,8 +71,7 @@ orp:
 
 indexNode:
   image:
-#    repository: esgfhub/index-node
-    repository: cedadev/esgf-index-node
+    repository: esgfhub/index-node
     tag: latest
     # pullPolicy:  "IfNotPresent"
   replicas: 1
@@ -83,8 +80,7 @@ indexNode:
 
 idpNode:
   image:
-#    repository: esgfhub/idp-node
-    repository: cedadev/esgf-idp-node
+    repository: esgfhub/idp-node
     tag: latest
     # pullPolicy:  "IfNotPresent"
   replicas: 1
@@ -93,8 +89,7 @@ idpNode:
 
 tds:
   image:
-#    repository: esgfhub/tds
-    repository: cedadev/esgf-tds
+    repository: esgfhub/tds
     tag: latest
     # pullPolicy:  "IfNotPresent"
   replicas: 1
@@ -113,8 +108,7 @@ tds:
 
 cog:
   image:
-#    repository: esgfhub/cog
-    repository: cedadev/esgf-cog
+    repository: esgfhub/cog
     tag: latest
     # pullPolicy:  "IfNotPresent"
   replicas: 1
@@ -122,7 +116,10 @@ cog:
   resources: {}
   # The postgres used by CoG
   postgres:
-    image: *postgresImage
+    image:
+      repository: esgfhub/postgres
+      tag: latest
+      # pullPolicy:  "IfNotPresent"
     resources: {}
     persistence:
       # Set this to true to use a PVC with the following properties
@@ -133,8 +130,7 @@ cog:
 
 auth:
   image:
-#    repository: esgfhub/auth
-    repository: cedadev/esgf-auth
+    repository: esgfhub/auth
     tag: latest
     # pullPolicy:  "IfNotPresent"
   replicas: 1
@@ -142,7 +138,10 @@ auth:
   resources: {}
   # The postgres for use by esgf-auth
   postgres:
-    image: *postgresImage
+    image:
+      repository: esgfhub/postgres
+      tag: latest
+      # pullPolicy:  "IfNotPresent"
     resources: {}
     persistence:
       # Set this to true to use a PVC with the following properties
@@ -153,8 +152,7 @@ auth:
 
 slcs:
   image:
-#    repository: esgfhub/slcs
-    repository: cedadev/esgf-slcs
+    repository: esgfhub/slcs
     tag: latest
     # pullPolicy:  "IfNotPresent"
   replicas: 1
@@ -162,7 +160,10 @@ slcs:
   resources: {}
   # The postgres for use by the SLCS
   postgres:
-    image: *postgresImage
+    image:
+      repository: esgfhub/postgres
+      tag: latest
+      # pullPolicy:  "IfNotPresent"
     resources: {}
     persistence:
       # Set this to true to use a PVC with the following properties
@@ -173,8 +174,7 @@ slcs:
 
 proxy:
   image:
-#    repository: esgfhub/proxy
-    repository: cedadev/esgf-proxy
+    repository: esgfhub/proxy
     tag: latest
     # pullPolicy:  "IfNotPresent"
   replicas: 1
@@ -188,8 +188,7 @@ proxy:
 
 publisher:
   image:
-#    repository: esgfhub/publisher
-    repository: cedadev/esgf-publisher
+    repository: esgfhub/publisher
     tag: latest
     # pullPolicy:  "IfNotPresent"
   resources: {}

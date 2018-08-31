@@ -6,12 +6,12 @@ set -eo pipefail
 
 
 #####
-## This script generates test certificates for a local test installation. These
-## certificates should obviously not be used in production.
+## This script generates test certificates for a local test installation. These
+## certificates should obviously not be used in production.
 ##
 ## The following certificates are generated, unless they already exist:
 ##
-##   1. A self-signed CA for the SLCS
+##   1. A self-signed CA for the SLCS
 ##   2. A self-signed host certificate for SSL
 #####
 

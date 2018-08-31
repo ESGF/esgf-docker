@@ -20,8 +20,8 @@ export SSL_CERT_FILE=/esg/config/esgcet/trust-bundle.pem
 
 # Compose the database URL
 # Using gomplate here allows us to benefit from _FILE fallback
-ESGF_DATABASE_PASSWORD="$(/esg/bin/gomplate -i '{{ getenv "ESGF_DATABASE_PASSWORD" }}')"
-export DATABASE_URL="postgresql://${ESGF_DATABASE_USER}:${ESGF_DATABASE_PASSWORD}@${ESGF_DATABASE_HOST}:${ESGF_DATABASE_PORT}/${ESGF_DATABASE_NAME}"
+DB_PASS="$(/esg/bin/gomplate -i '{{ getenv "ESGF_DATABASE_PASSWORD" }}')"
+export DATABASE_URL="postgresql://${ESGF_DATABASE_USER}:${DB_PASS}@${ESGF_DATABASE_HOST}:${ESGF_DATABASE_PORT}/${ESGF_DATABASE_NAME}"
 
 ###
 # Build the configuration directory

@@ -16,6 +16,8 @@ spec:
   resources:
     requests:
       storage: {{ .Values.solr.master.persistence.size }}
+{{- if .Values.solr.master.persistence.selector }}
   selector:
 {{ toYaml .Values.solr.master.persistence.selector | indent 4 }}
+{{- end }}
 {{- end }}

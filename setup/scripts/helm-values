@@ -5,33 +5,113 @@ set -eo pipefail
 . "$(dirname $BASH_SOURCE)/functions.sh"
 
 #####
-## This script outputs YAML configuration for use with the esgf-helm Helm chart
+# This script outputs YAML configuration for use with the ESGF Helm chart
+#
+# This process comes in two parts:
+#   1. Configuration from $ESGF_CONFIG
+#   2. Overrides for the specified cluster type
 #####
 
+CLUSTER_TYPE="$1"
+[ -z "$CLUSTER_TYPE" ] && error "Please specify a cluster type"
+
+#####
+## ESGF_CONFIG as YAML
+#####
+ESGF_CONFIG_VALUES="$(mktemp)"
+
+# Hostname and image information
+cat > "$ESGF_CONFIG_VALUES" <<EOF
+hostname: ${ESGF_HOSTNAME}
+solr:
+  image:
+    repository: ${ESGF_HUB}/${ESGF_PREFIX}solr
+    tag: ${ESGF_VERSION}
+postgresEsgcet:
+  image:
+    repository: ${ESGF_HUB}/${ESGF_PREFIX}postgres
+    tag: ${ESGF_VERSION}
+postgresSecurity:
+  image:
+    repository: ${ESGF_HUB}/${ESGF_PREFIX}postgres-security
+    tag: ${ESGF_VERSION}
+orp:
+  image:
+    repository: ${ESGF_HUB}/${ESGF_PREFIX}orp
+    tag: ${ESGF_VERSION}
+indexNode:
+  image:
+    repository: ${ESGF_HUB}/${ESGF_PREFIX}index-node
+    tag: ${ESGF_VERSION}
+idpNode:
+  image:
+    repository: ${ESGF_HUB}/${ESGF_PREFIX}idp-node
+    tag: ${ESGF_VERSION}
+tds:
+  image:
+    repository: ${ESGF_HUB}/${ESGF_PREFIX}tds
+    tag: ${ESGF_VERSION}
+cog:
+  image:
+    repository: ${ESGF_HUB}/${ESGF_PREFIX}cog
+    tag: ${ESGF_VERSION}
+  postgres:
+    image:
+      repository: ${ESGF_HUB}/${ESGF_PREFIX}postgres
+      tag: ${ESGF_VERSION}
+auth:
+  image:
+    repository: ${ESGF_HUB}/${ESGF_PREFIX}auth
+    tag: ${ESGF_VERSION}
+  postgres:
+    image:
+      repository: ${ESGF_HUB}/${ESGF_PREFIX}postgres
+      tag: ${ESGF_VERSION}
+slcs:
+  image:
+    repository: ${ESGF_HUB}/${ESGF_PREFIX}slcs
+    tag: ${ESGF_VERSION}
+  postgres:
+    image:
+      repository: ${ESGF_HUB}/${ESGF_PREFIX}postgres
+      tag: ${ESGF_VERSION}
+proxy:
+  image:
+    repository: ${ESGF_HUB}/${ESGF_PREFIX}proxy
+    tag: ${ESGF_VERSION}
+publisher:
+  image:
+    repository: ${ESGF_HUB}/${ESGF_PREFIX}publisher
+    tag: ${ESGF_VERSION}
+EOF
+
+# Certificates
 CERTS="/esg/certificates"
+echo "certificates:" >> "$ESGF_CONFIG_VALUES"
+echo "  esg-trust-bundle.pem: |" >> "$ESGF_CONFIG_VALUES"
+indent 4 < "$CERTS/esg-trust-bundle.pem" >> "$ESGF_CONFIG_VALUES"
+echo "  hostcert.crt: |" >> "$ESGF_CONFIG_VALUES"
+indent 4 < "$CERTS/hostcert/hostcert.crt" >> "$ESGF_CONFIG_VALUES"
+echo "  hostcert.key: |" >> "$ESGF_CONFIG_VALUES"
+indent 4 < "$CERTS/hostcert/hostcert.key" >> "$ESGF_CONFIG_VALUES"
+echo "  slcsca.crt: |" >> "$ESGF_CONFIG_VALUES"
+indent 4 < "$CERTS/slcsca/ca.crt" >> "$ESGF_CONFIG_VALUES"
+echo "  slcsca.key: |" >> "$ESGF_CONFIG_VALUES"
+indent 4 < "$CERTS/slcsca/ca.key" >> "$ESGF_CONFIG_VALUES"
+
+# Finally, write the available secrets
 SECRETS="/esg/secrets"
-
-# First write the hostname
-echo "hostname: $ESGF_HOSTNAME"
-echo ""
-
-# Write the certificates YAML file
-echo "certificates:"
-echo "  esg-trust-bundle.pem: |"
-cat "$CERTS/esg-trust-bundle.pem" | indent 4
-echo "  hostcert.crt: |"
-cat "$CERTS/hostcert/hostcert.crt" | indent 4
-echo "  hostcert.key: |"
-cat "$CERTS/hostcert/hostcert.key" | indent 4
-echo "  slcsca.crt: |"
-cat "$CERTS/slcsca/ca.crt" | indent 4
-echo "  slcsca.key: |"
-cat "$CERTS/slcsca/ca.key" | indent 4
-echo ""
-
-# Write the secrets YAML file
-echo "secrets:"
+echo "secrets:" >> "$ESGF_CONFIG_VALUES"
 for file in $(find "$SECRETS" -type f -maxdepth 1); do
-    echo "  ${file#"$SECRETS/"}: $(cat "$file")"
+    echo "  ${file#"$SECRETS/"}: $(cat "$file")" >> "$ESGF_CONFIG_VALUES"
 done
 
+#####
+## Work out if there are cluster type overrides to include
+#####
+CLUSTER_TYPE_OVERRIDES="cluster/kubernetes/${CLUSTER_TYPE}/helm-overrides.yaml"
+if [ -f "$CLUSTER_TYPE_OVERRIDES" ]; then
+    merge_yaml "$ESGF_CONFIG_VALUES" "$CLUSTER_TYPE_OVERRIDES"
+else
+    cat "$ESGF_CONFIG_VALUES"
+fi

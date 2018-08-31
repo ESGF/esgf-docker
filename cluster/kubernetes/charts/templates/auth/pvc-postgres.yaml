@@ -16,6 +16,8 @@ spec:
   resources:
     requests:
       storage: {{ .Values.auth.postgres.persistence.size }}
+{{- if .Values.auth.postgres.persistence.selector }}
   selector:
 {{ toYaml .Values.auth.postgres.persistence.selector | indent 4 }}
+{{- end }}
 {{- end }}

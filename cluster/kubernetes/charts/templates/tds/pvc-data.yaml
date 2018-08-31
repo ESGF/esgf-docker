@@ -14,5 +14,7 @@ spec:
   resources:
     requests:
       storage: {{ .Values.tds.data.size }}
+{{- if .Values.tds.data.selector }}
   selector:
 {{ toYaml .Values.tds.data.selector | indent 4 }}
+{{- end }}
