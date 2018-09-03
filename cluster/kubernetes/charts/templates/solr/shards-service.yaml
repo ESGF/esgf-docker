@@ -1,0 +1,21 @@
+{{- range $shard := .Values.solr.shards.shardList }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: "{{ template "fullname" . }}-solr-{{ $shard.name }}"
+  labels:
+{{ include "default-labels" . | indent 4 }}
+    component: solr
+    solr-role: shard
+    shard-name: "{{ $shard.name }}"
+spec:
+  ports:
+    - name: solr
+      port: 8983
+  selector:
+    release: {{ .Release.Name }}
+    component: solr
+    solr-role: shard
+    shard-name: "{{ $shard.name }}"
+{{- end }}

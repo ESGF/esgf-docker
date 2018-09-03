@@ -1,0 +1,27 @@
+{{- if .Values.solr.shards.persistence.enabled }}
+{{- range $shard := .Values.solr.shards.shardList }}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: "{{ template "fullname" . }}-solr-{{ $shard.name }}"
+  labels:
+{{ include "default-labels" . | indent 4 }}
+    component: solr
+    solr-role: shard
+    shard-name: "{{ $shard.name }}"
+spec:
+  accessModes:
+    - ReadWriteOnce
+{{- if .Values.solr.shards.persistence.storageClass }}
+  storageClassName: "{{ .Values.solr.shards.persistence.storageClass }}"
+{{- end }}
+  resources:
+    requests:
+      storage: {{ .Values.solr.shards.persistence.size }}
+{{- if .Values.solr.shards.persistence.selector }}
+  selector:
+{{ toYaml .Values.solr.shards.persistence.selector | indent 4 }}
+{{- end }}
+{{- end }}
+{{- end }}
