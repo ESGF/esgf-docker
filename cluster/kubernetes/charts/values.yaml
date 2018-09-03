@@ -1,5 +1,3 @@
-esgConfigOverrides: {}
-
 solr:
   image:
     repository: esgfhub/solr

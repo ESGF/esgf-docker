@@ -23,6 +23,7 @@ spec:
       annotations:
         checksum/secrets: {{ include (print $.Template.BasePath "/configuration/secrets.yaml") . | sha256sum }}
         checksum/trust-bundle: {{ include (print $.Template.BasePath "/configuration/trust-bundle.yaml") . | sha256sum }}
+        checksum/esgcet-overrides: {{ include (print $.Template.BasePath "/configuration/esgcet-overrides.yaml") . | sha256sum }}
     spec:
       # Setting fsGroup for the pod allows some provisioners to chown mounted volumes to the given group
       #   The publish group is 1001 inside the container
@@ -122,6 +123,10 @@ spec:
             - mountPath: /esg/certificates/esg-trust-bundle.pem
               name: trust-bundle
               subPath: esg-trust-bundle.pem
+              readOnly: true
+            - mountPath: /esg/config/esgcet/.overrides
+              name: esgcet-overrides
+              readOnly: true
           resources:
 {{ toYaml .Values.publisher.resources | indent 12 }}
       volumes:
@@ -134,3 +139,6 @@ spec:
         - name: trust-bundle
           configMap:
             name: "{{ template "fullname" . }}-trust-bundle"
+        - name: esgcet-overrides
+          configMap:
+            name: "{{ template "fullname" . }}-esgcet-overrides"
