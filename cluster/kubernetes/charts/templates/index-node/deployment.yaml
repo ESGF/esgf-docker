@@ -21,6 +21,7 @@ spec:
       annotations:
         checksum/trust-bundle: {{ include (print $.Template.BasePath "/configuration/trust-bundle.yaml") . | sha256sum }}
         checksum/environment-common: {{ include (print $.Template.BasePath "/configuration/environment-common.yaml") . | sha256sum }}
+        checksum/esg-config-overrides: {{ include (print $.Template.BasePath "/configuration/esg-config-overrides.yaml") . | sha256sum }}
     spec:
       initContainers:
         # Make sure Solr is up before starting
@@ -66,9 +67,16 @@ spec:
             - mountPath: /esg/certificates/esg-trust-bundle.pem
               name: trust-bundle
               subPath: esg-trust-bundle.pem
+              readOnly: true
+            - mountPath: /esg/config/.overrides
+              name: esg-config-overrides
+              readOnly: true
           resources:
 {{ toYaml .Values.indexNode.resources | indent 12 }}
       volumes:
         - name: trust-bundle
           configMap:
             name: "{{ template "fullname" . }}-trust-bundle"
+        - name: esg-config-overrides
+          configMap:
+            name: "{{ template "fullname" . }}-esg-config-overrides"

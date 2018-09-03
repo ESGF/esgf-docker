@@ -25,6 +25,7 @@ spec:
         checksum/secrets: {{ include (print $.Template.BasePath "/configuration/secrets.yaml") . | sha256sum }}
         checksum/trust-bundle: {{ include (print $.Template.BasePath "/configuration/trust-bundle.yaml") . | sha256sum }}
         checksum/environment-common: {{ include (print $.Template.BasePath "/configuration/environment-common.yaml") . | sha256sum }}
+        checksum/esg-config-overrides: {{ include (print $.Template.BasePath "/configuration/esg-config-overrides.yaml") . | sha256sum }}
     spec:
       initContainers:
         # Wait for databases to become available before starting
@@ -153,15 +154,22 @@ spec:
             - mountPath: /esg/certificates/esg-trust-bundle.pem
               name: trust-bundle
               subPath: esg-trust-bundle.pem
+              readOnly: true
             - mountPath: /esg/config/.esg_pg_pass
               name: esg-secrets
               subPath: security-database-password
+              readOnly: true
             - mountPath: /esg/secrets/cog-database-password
               name: esg-secrets
               subPath: cog-database-password
+              readOnly: true
             - mountPath: /esg/config/.esgf_pass
               name: esg-secrets
               subPath: rootadmin-password
+              readOnly: true
+            - mountPath: /esg/config/.overrides
+              name: esg-config-overrides
+              readOnly: true
           resources:
 {{ toYaml .Values.cog.resources | indent 12 }}
       volumes:
@@ -171,3 +179,6 @@ spec:
         - name: esg-secrets
           secret:
             secretName: "{{ template "fullname" . }}-secrets"
+        - name: esg-config-overrides
+          configMap:
+            name: "{{ template "fullname" . }}-esg-config-overrides"
