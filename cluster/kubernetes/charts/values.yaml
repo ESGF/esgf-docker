@@ -1,3 +1,7 @@
+# These will be overridden by the helm-values command of esgf-setup based on the contents
+# of directories under $ESGF_CONFIG
+configuration: {}
+
 solr:
   image:
     repository: esgfhub/solr

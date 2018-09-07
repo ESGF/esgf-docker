@@ -28,11 +28,18 @@ function json2yaml {
     gomplate -i '{{ ds "input" | toYAML }}' -d input=stdin:?type=application/json
 }
 function merge_yaml {
-    # Convert the source files to JSON
-    JSON1="$(mktemp)"
-    JSON2="$(mktemp)"
-    yaml2json < "$1" > "$JSON1"
-    yaml2json < "$2" > "$JSON2"
-    # Merge the JSON sources using jq and convert the result back to YAML
-    jq -s '.[0] * .[1]' "$JSON1" "$JSON2" | json2yaml
+    # Convert the input YAML to JSON
+    JSONIN1="$(mktemp)"
+    JSONIN2="$(mktemp)"
+    JSONOUT="$(mktemp)"
+    yaml2json <<< "$1" > "$JSONIN1"
+    shift
+    for yaml in "$@"; do
+        [ -z "$yaml" ] && continue
+        yaml2json <<< "$yaml" > "$JSONIN2"
+        # Merge the JSON sources using jq
+        jq -s '.[0] * .[1]' "$JSONIN1" "$JSONIN2" > "$JSONOUT"
+        cp "$JSONOUT" "$JSONIN1"
+    done
+    json2yaml < "$JSONIN1"
 }

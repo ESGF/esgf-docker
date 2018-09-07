@@ -23,13 +23,31 @@ spec:
       annotations:
         checksum/secrets: {{ include (print $.Template.BasePath "/configuration/secrets.yaml") . | sha256sum }}
         checksum/trust-bundle: {{ include (print $.Template.BasePath "/configuration/trust-bundle.yaml") . | sha256sum }}
-        checksum/esgcet-overrides: {{ include (print $.Template.BasePath "/configuration/esgcet-overrides.yaml") . | sha256sum }}
+        checksum/config-overrides: {{ include (print $.Template.BasePath "/configuration/config-overrides.yaml") . | sha256sum }}
     spec:
       # Setting fsGroup for the pod allows some provisioners to chown mounted volumes to the given group
       #   The publish group is 1001 inside the container
       securityContext:
         fsGroup: 1001
       initContainers:
+        # Unpack the required config overrides from the base64-encoded tarballs in the configmap
+        # This process is required because configmaps cannot contain nested directory structures
+        - name: unpack-config-overrides
+          image: busybox
+          command:
+            - "sh"
+            - "-c"
+            - |
+              set -eo pipefail
+              if [ -f /esg/tarballs/publisher-overrides.tar.gz.b64 ]; then
+                  base64 -d /esg/tarballs/publisher-overrides.tar.gz.b64 | tar -xz -C /esg/publisher
+              fi
+          volumeMounts:
+            - mountPath: /esg/publisher
+              name: esgcet-overrides
+            - mountPath: /esg/tarballs
+              name: override-tarballs
+              readOnly: true
         # Wait for postgres-esgcet to become available before starting
         - name: ensure-postgres-esgcet
           image: "{{ .Values.postgresEsgcet.image.repository }}:{{ .Values.postgresEsgcet.image.tag }}"
@@ -140,5 +158,7 @@ spec:
           configMap:
             name: "{{ template "fullname" . }}-trust-bundle"
         - name: esgcet-overrides
+          emptyDir: {}
+        - name: override-tarballs
           configMap:
-            name: "{{ template "fullname" . }}-esgcet-overrides"
+            name: "{{ template "fullname" . }}-config-overrides"

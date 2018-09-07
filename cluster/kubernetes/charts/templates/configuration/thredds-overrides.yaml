@@ -1,9 +1,0 @@
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: "{{ template "fullname" . }}-thredds-overrides"
-  labels:
-{{ include "default-labels" . | indent 4 }}
-    component: configuration
-data:
-{{ toYaml .Values.threddsOverrides | indent 2 }}

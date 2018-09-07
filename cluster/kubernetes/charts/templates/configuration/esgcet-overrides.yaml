@@ -1,9 +1,0 @@
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: "{{ template "fullname" . }}-esgcet-overrides"
-  labels:
-{{ include "default-labels" . | indent 4 }}
-    component: configuration
-data:
-{{ toYaml .Values.esgcetOverrides | indent 2 }}

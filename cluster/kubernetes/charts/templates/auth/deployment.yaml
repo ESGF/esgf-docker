@@ -25,10 +25,32 @@ spec:
         checksum/secrets: {{ include (print $.Template.BasePath "/configuration/secrets.yaml") . | sha256sum }}
         checksum/trust-bundle: {{ include (print $.Template.BasePath "/configuration/trust-bundle.yaml") . | sha256sum }}
         checksum/environment-common: {{ include (print $.Template.BasePath "/configuration/environment-common.yaml") . | sha256sum }}
-        checksum/esg-config-overrides: {{ include (print $.Template.BasePath "/configuration/esg-config-overrides.yaml") . | sha256sum }}
-        checksum/auth-overrides: {{ include (print $.Template.BasePath "/configuration/auth-overrides.yaml") . | sha256sum }}
+        checksum/config-overrides: {{ include (print $.Template.BasePath "/configuration/config-overrides.yaml") . | sha256sum }}
     spec:
       initContainers:
+        # Unpack the required config overrides from the base64-encoded tarballs in the configmap
+        # This process is required because configmaps cannot contain nested directory structures
+        - name: unpack-config-overrides
+          image: busybox
+          command:
+            - "sh"
+            - "-c"
+            - |
+              set -eo pipefail
+              if [ -f /esg/tarballs/auth-overrides.tar.gz.b64 ]; then
+                  base64 -d /esg/tarballs/auth-overrides.tar.gz.b64 | tar -xz -C /esg/auth
+              fi
+              if [ -f /esg/tarballs/esg-config-overrides.tar.gz.b64 ]; then
+                  base64 -d /esg/tarballs/esg-config-overrides.tar.gz.b64 | tar -xz -C /esg/config
+              fi
+          volumeMounts:
+            - mountPath: /esg/auth
+              name: auth-overrides
+            - mountPath: /esg/config
+              name: esg-config-overrides
+            - mountPath: /esg/tarballs
+              name: override-tarballs
+              readOnly: true
         # Wait for postgres to become available before starting
         - name: ensure-postgres
           image: "{{ .Values.auth.postgres.image.repository }}:{{ .Values.auth.postgres.image.tag }}"
@@ -136,8 +158,9 @@ spec:
           configMap:
             name: "{{ template "fullname" . }}-trust-bundle"
         - name: esg-config-overrides
-          configMap:
-            name: "{{ template "fullname" . }}-esg-config-overrides"
+          emptyDir: {}
         - name: auth-overrides
+          emptyDir: {}
+        - name: override-tarballs
           configMap:
-            name: "{{ template "fullname" . }}-auth-overrides"
+            name: "{{ template "fullname" . }}-config-overrides"
