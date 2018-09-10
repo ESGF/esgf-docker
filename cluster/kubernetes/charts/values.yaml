@@ -1,6 +1,8 @@
 # These will be overridden by the helm-values command of esgf-setup based on the contents
 # of directories under $ESGF_CONFIG
-configuration: {}
+configuration:
+  environment: {}
+  overrides: {}
 
 solr:
   image:
@@ -70,6 +72,8 @@ orp:
     tag: latest
     # pullPolicy:  "IfNotPresent"
   replicas: 1
+  # Environment variable overrides for the ORP
+  environment: {}
   # The resources available to each ORP container
   resources: {}
 
@@ -97,6 +101,8 @@ tds:
     tag: latest
     # pullPolicy:  "IfNotPresent"
   replicas: 1
+  # Environment variable overrides for the TDS
+  environment: {}
   # The resources available to each TDS container
   resources: {}
   # Information for the data PVC
@@ -116,6 +122,8 @@ cog:
     tag: latest
     # pullPolicy:  "IfNotPresent"
   replicas: 1
+  # Environment variables for cog
+  environment: {}
   # The resources available to each cog container
   resources: {}
   # The postgres used by CoG
@@ -160,6 +168,8 @@ slcs:
     tag: latest
     # pullPolicy:  "IfNotPresent"
   replicas: 1
+  # Environment overrides for the SLCS
+  environment: {}
   # The resources available to each SLCS container
   resources: {}
   # The postgres for use by the SLCS
@@ -195,4 +205,7 @@ publisher:
     repository: esgfhub/publisher
     tag: latest
     # pullPolicy:  "IfNotPresent"
+  # Environment overrides for the publisher
+  environment: {}
+  # Resources available to the publisher
   resources: {}

@@ -6,4 +6,4 @@ metadata:
 {{ include "default-labels" . | indent 4 }}
     component: configuration
 data:
-{{ toYaml .Values.configuration | indent 2 }}
+{{ toYaml .Values.configuration.overrides | indent 2 }}

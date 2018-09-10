@@ -7,19 +7,19 @@ metadata:
     component: configuration
 data:
   ESGF_HOSTNAME: "{{ .Values.hostname }}"
-  ESGF_PEER_GROUP: esgf-test
-  ESGF_ATTRIBUTE_SERVICE_ENDPOINT: "https://{{ .Values.hostname }}/esgf-idp/saml/soap/secure/attributeService.htm"
-  ESGF_REGISTRATION_SERVICE_ENDPOINT: "https://{{ .Values.hostname }}/esgf-idp/secure/registrationService.htm"
-  ESGF_OPENID_ENDPOINT: "https://{{ .Values.hostname }}/esgf-idp/idp/openidServer.htm"
+  ESGF_PEER_GROUP: {{ default "esgf-test" .Values.configuration.environment.ESGF_PEER_GROUP | quote }}
+  ESGF_ATTRIBUTE_SERVICE_ENDPOINT: {{ default (printf "https://%s/esgf-idp/saml/soap/secure/attributeService.htm" .Values.hostname) .Values.configuration.environment.ESGF_ATTRIBUTE_SERVICE_ENDPOINT | quote }}
+  ESGF_REGISTRATION_SERVICE_ENDPOINT: {{ default (printf "https://%s/esgf-idp/secure/registrationService.htm" .Values.hostname) .Values.configuration.environment.ESGF_REGISTRATION_SERVICE_ENDPOINT | quote }}
+  ESGF_OPENID_ENDPOINT: {{ default (printf "https://%s/esgf-idp/idp/openidServer.htm" .Values.hostname) .Values.configuration.environment.ESGF_OPENID_ENDPOINT | quote }}
   ESGF_DATABASE_HOST: "{{ template "fullname" . }}-postgres-security"
   ESGF_DATABASE_PORT: "5432"
   ESGF_DATABASE_USER: dbsuper
   ESGF_DATABASE_NAME: esgcet
-  ESGF_SEARCH_SERVICE_ENDPOINT: "https://{{ .Values.hostname }}/esg-search/search"
-  ESGF_IDP_PEER: "{{ .Values.hostname }}"
-  ESGF_INDEX_PEER: "{{ .Values.hostname }}"
-  ESGF_PUBLISH_SERVICE_ENDPOINT: "https://{{ .Values.hostname }}/esg-search/remote/secure/client-cert/hessian/publishingService"
+  ESGF_SEARCH_SERVICE_ENDPOINT: {{ default (printf "https://%s/esg-search/search" .Values.hostname) .Values.configuration.environment.ESGF_SEARCH_SERVICE_ENDPOINT | quote }}
+  ESGF_IDP_PEER: {{ default .Values.hostname .Values.configuration.environment.ESGF_IDP_PEER | quote }}
+  ESGF_INDEX_PEER: {{ default .Values.hostname .Values.configuration.environment.ESGF_INDEX_PEER | quote }}
+  ESGF_PUBLISH_SERVICE_ENDPOINT: {{ default (printf "https://%s/esg-search/remote/secure/client-cert/hessian/publishingService" .Values.hostname) .Values.configuration.environment.ESGF_PUBLISH_SERVICE_ENDPOINT | quote }}
   ESGF_SOLR_QUERY_URL: "http://{{ template "fullname" . }}-solr-slave:8983/solr"
   ESGF_SOLR_PUBLISH_URL: "http://{{ template "fullname" . }}-solr-master:8983/solr"
-  ESGF_AUTHORIZATION_SERVICE_ENDPOINT: "https://{{ .Values.hostname }}/esg-orp/saml/soap/secure/authorizationService.htm"
-  ESGF_SLCS_ENDPOINT: "https://{{ .Values.hostname }}/esgf-slcs"
+  ESGF_AUTHORIZATION_SERVICE_ENDPOINT: {{ default (printf "https://%s/esg-orp/saml/soap/secure/authorizationService.htm" .Values.hostname) .Values.configuration.environment.ESGF_AUTHORIZATION_SERVICE_ENDPOINT | quote }}
+  ESGF_SLCS_ENDPOINT: {{ default (printf "https://%s/esgf-slcs" .Values.hostname) .Values.configuration.environment.ESGF_SLCS_ENDPOINT | quote }}

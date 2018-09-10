@@ -148,11 +148,11 @@ spec:
                 name: "{{ template "fullname" . }}-environment-common"
           env:
             - name: ESGF_COG_SITE_NAME
-              value: "Local CoG"
+              value: {{ default "Local CoG" .Values.cog.environment.ESGF_COG_SITE_NAME | quote }}
             - name: ESGF_COG_HOME_PROJECT
-              value: TestProject
+              value: {{ default "TestProject" .Values.cog.environment.ESGF_COG_HOME_PROJECT | quote }}
             - name: ESGF_COG_TIME_ZONE
-              value: "Europe/London"
+              value: {{ default "Europe/London" .Values.cog.environment.ESGF_COG_TIME_ZONE | quote }}
             - name: ESGF_COG_SECRET_KEY
               valueFrom:
                 secretKeyRef:

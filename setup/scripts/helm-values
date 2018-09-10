@@ -104,21 +104,22 @@ function config2base64 {
 }
 overrides_yaml_file="$(mktemp)"
 echo "configuration:" > "$overrides_yaml_file"
+echo "  overrides:" >> "$overrides_yaml_file"
 if [ -d "/esg/auth" ]; then
-    echo "  auth-overrides.tar.gz.b64: |-" >> "$overrides_yaml_file"
-    config2base64 /esg/auth | indent 4 >> "$overrides_yaml_file"
+    echo "    auth-overrides.tar.gz.b64: |-" >> "$overrides_yaml_file"
+    config2base64 /esg/auth | indent 6 >> "$overrides_yaml_file"
 fi
 if [ -d "/esg/config" ]; then
-    echo "  esg-config-overrides.tar.gz.b64: |-" >> "$overrides_yaml_file"
-    config2base64 /esg/config | indent 4 >> "$overrides_yaml_file"
+    echo "    esg-config-overrides.tar.gz.b64: |-" >> "$overrides_yaml_file"
+    config2base64 /esg/config | indent 6 >> "$overrides_yaml_file"
 fi
 if [ -d "/esg/publisher" ]; then
-    echo "  publisher-overrides.tar.gz.b64: |-" >> "$overrides_yaml_file"
-    config2base64 /esg/publisher | indent 4 >> "$overrides_yaml_file"
+    echo "    publisher-overrides.tar.gz.b64: |-" >> "$overrides_yaml_file"
+    config2base64 /esg/publisher | indent 6 >> "$overrides_yaml_file"
 fi
 if [ -d "/esg/thredds" ]; then
-    echo "  thredds-overrides.tar.gz.b64: |-" >> "$overrides_yaml_file"
-    config2base64 /esg/thredds | indent 4 >> "$overrides_yaml_file"
+    echo "    thredds-overrides.tar.gz.b64: |-" >> "$overrides_yaml_file"
+    config2base64 /esg/thredds | indent 6 >> "$overrides_yaml_file"
 fi
 overrides_yaml="$(cat "$overrides_yaml_file")"
 

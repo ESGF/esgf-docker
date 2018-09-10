@@ -72,11 +72,11 @@ spec:
                 name: "{{ template "fullname" . }}-environment-common"
           env:
             - name: ESGF_ORP_HOME_ENDPOINT
-              value: "https://{{ .Values.hostname }}/esg-orp/home.htm"
+              value: {{ default (printf "https://%s/esg-orp/home.htm" .Values.hostname) .Values.orp.environment.ESGF_ORP_HOME_ENDPOINT | quote }}
             - name: ESGF_AUTH_HOME_ENDPOINT
-              value: "https://{{ .Values.hostname }}/esgf-auth/home/"
+              value: {{ default (printf "https://%s/esgf-auth/home/" .Values.hostname) .Values.orp.environment.ESGF_AUTH_HOME_ENDPOINT | quote }}
             - name: ESGF_REGISTRATION_RELAY_ENDPOINT
-              value: "https://{{ .Values.hostname }}/esg-orp/registration-request.htm"
+              value: {{ default (printf "https://%s/esg-orp/registration-request.htm" .Values.hostname) .Values.orp.environment.ESGF_REGISTRATION_RELAY_ENDPOINT | quote }}
             - name: ESGF_COOKIE_SECRET_KEY
               valueFrom:
                 secretKeyRef:

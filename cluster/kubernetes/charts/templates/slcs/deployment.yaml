@@ -193,7 +193,7 @@ spec:
             - name: ESGF_SLCS_BASIC_AUTH_REALM
               value: "{{ .Values.hostname }}"
             - name: ONLINECA_SUBJECT_NAME_TEMPLATE
-              value: "/DC=esgf/CN={user}"
+              value: {{ default "/DC=esgf/CN={user}" .Values.slcs.environment.ONLINECA_SUBJECT_NAME_TEMPLATE | quote }}
             - name: ONLINECA_CERT_PATH
               value: /esg/certificates/slcsca/ca.crt
             - name: ONLINECA_KEY_PATH

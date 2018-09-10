@@ -115,15 +115,15 @@ spec:
             - name: ESGF_DATABASE_NAME
               value: esgcet
             - name: ESGF_HESSIAN_METADATA_URL
-              value: "https://{{ .Values.hostname }}/esgcet/remote/hessian/guest/remoteMetadataService"
+              value: {{ default (printf "https://%s/esgcet/remote/hessian/guest/remoteMetadataService" .Values.hostname) .Values.publisher.environment.ESGF_HESSIAN_METADATA_URL | quote }}
             - name: ESGF_HESSIAN_URL
-              value: "https://{{ .Values.hostname }}/esg-search/remote/secure/client-cert/hessian/publishingService"
+              value: {{ default (printf "https://%s/esg-search/remote/secure/client-cert/hessian/publishingService" .Values.hostname) .Values.publisher.environment.ESGF_HESSIAN_URL | quote }}
             - name: ESGF_TDS_CATALOG_URL
-              value: "https://{{ .Values.hostname }}/thredds/catalog/esgcet"
+              value: {{ default (printf "https://%s/thredds/catalog/esgcet" .Values.hostname) .Values.publisher.environment.ESGF_TDS_CATALOG_URL | quote }}
             - name: ESGF_TDS_REINIT_URL
-              value: "https://{{ .Values.hostname }}/thredds/admin/debug?Catalogs/recheck"
+              value: {{ default (printf "https://%s/thredds/admin/debug?Catalogs/recheck" .Values.hostname) .Values.publisher.environment.ESGF_TDS_REINIT_URL | quote }}
             - name: ESGF_TDS_REINIT_ERROR_URL
-              value: "https://{{ .Values.hostname }}/thredds/admin/content/logs/catalogInit.log"
+              value: {{ default (printf "https://%s/thredds/admin/content/logs/catalogInit.log" .Values.hostname) .Values.publisher.environment.ESGF_TDS_REINIT_ERROR_URL | quote }}
             - name: ESGF_TDS_USERNAME
               value: rootAdmin
             - name: ESGF_TDS_PASSWORD
@@ -132,7 +132,7 @@ spec:
                   name: "{{ template "fullname" . }}-secrets"
                   key: "rootadmin-password"
             - name: ESGF_SLCS_CERTIFICATE_URL
-              value: "https://{{ .Values.hostname }}/esgf-slcs/onlineca/certificate/"
+              value: {{ default (printf "https://%s/esgf-slcs/onlineca/certificate/" .Values.hostname) .Values.publisher.environment.ESGF_SLCS_CERTIFICATE_URL | quote }}
           volumeMounts:
             - mountPath: /esg/content/thredds/esgcet
               name: tds-content
