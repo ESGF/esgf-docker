@@ -39,6 +39,10 @@ gcloud container clusters create --cluster-version 1.10 esgf-node
 
 This command will create a GKE Kubernetes cluster and configure `kubectl` to point to it.
 
+There are many configuration options for Kubernetes clusters in Google Cloud, such as
+having node-pools in multiple regions for high resilience. They are orthogonal to, and out
+of the scope of, this documentation.
+
 Next, install Tiller:
 
 ```bash
@@ -91,12 +95,22 @@ following command:
 kubectl -n kube-system get service ingress-nginx-ingress-controller | tail -n 1 | awk '{ print $4; }'
 ```
 
-### Install GCP Filestore CSI driver and storage class
+### Enabling shared storage
 
-[Google Cloud Filestore](https://cloud.google.com/filestore/) is Google Cloud's Filesystem-as-a-Service
-offering. We will use this to provide the `ReadWriteMany` volumes required for the TDS/publisher.
+In order to provision the `ReadWriteMany` volumes required for the TDS and publisher to share
+data and THREDDS catalogs, we need to install a suitable storage class.
 
-In order to provision `ReadWriteMany` volumes using a storage class, we install the
+Depending on the required performance and POSIX compatibility, there are two options for this:
+
+  * [Google Cloud Filestore](https://cloud.google.com/filestore/) - Google Cloud's
+    Filesystem-as-a-Service offering
+  * [Google Cloud Storage](https://cloud.google.com/storage/) buckets via s3fs
+
+Both options are described below.
+
+#### Install GCP Filestore CSI driver and storage class
+
+In order to provision Filestore volumes using a storage class, we install the
 [Google Cloud Filestore CSI driver](https://github.com/kubernetes-sigs/gcp-filestore-csi-driver):
 
 ```bash
@@ -138,7 +152,7 @@ kubectl create secret generic "$SA_NAME" \
 kubectl apply -f https://raw.githubusercontent.com/kubernetes-sigs/gcp-filestore-csi-driver/master/deploy/kubernetes/manifests/node.yaml
 kubectl apply -f https://raw.githubusercontent.com/kubernetes-sigs/gcp-filestore-csi-driver/master/deploy/kubernetes/manifests/controller.yaml
 
-# Wait for the comonents to start
+# Wait for the components to start
 kubectl -n gcp-filestore-csi-driver wait --for condition=ready \
   pods -l app=gcp-filestore-csi-driver \
   --timeout 300s
@@ -147,6 +161,56 @@ kubectl -n gcp-filestore-csi-driver wait --for condition=ready \
 #   The name is important (it is used in the Helm overrides file for GKE), but the parameters
 #   should be tweaked, in particular the location
 kubectl apply -f ./cluster/kubernetes/gke/filestore-storageclass.yaml
+```
+
+#### Install s3-csi driver and storage class
+
+In order to provision and mount Google Cloud Storage buckets using a storage class,
+we use [s3-csi](https://github.com/CTrox/csi-s3).
+
+First, enable storage interoperability in the Google Cloud Console under
+"Storage > Settings > Interoberability", then create a new storage access key
+on the same page. This will show an Access Key and a Secret.
+
+Then execute the following commands:
+
+```bash
+# Create a namespace for the provisioner components
+kubectl create namespace s3-csi-driver
+# Create a secret containing the s3-csi settings
+kubectl -n s3-csi-driver create secret generic csi-s3-secret \
+  --from-literal="endpoint=https://storage.googleapis.com" \
+  --from-literal="accessKeyID=<Access Key>" \
+  --from-literal="secretAccessKey=<Secret>" \
+  --from-literal="region=" \
+  --from-literal="encryptionKey="
+
+# In order to create new cluster roles, we must first grant ourselves the cluster-admin role in Kubernetes
+GCLOUD_USER="$(gcloud config get-value account)"
+kubectl create clusterrolebinding \
+  "$(echo -n "$GCLOUD_USER" | cut -d"@" -f1 | sed 's/\./-/g')-cluster-admin-binding" \
+  --clusterrole=cluster-admin \
+  --user="$GCLOUD_USER"
+
+# Install the s3-csi driver components
+#   Correct any namespace references on the way through
+curl -fsSL https://raw.githubusercontent.com/CTrox/csi-s3/master/deploy/kubernetes/provisioner.yaml | \
+  sed 's/namespace: default/namespace: s3-csi-driver/' | \
+  kubectl -n s3-csi-driver apply -f -
+curl -fsSL https://raw.githubusercontent.com/CTrox/csi-s3/master/deploy/kubernetes/attacher.yaml | \
+  sed 's/namespace: default/namespace: s3-csi-driver/' | \
+  kubectl -n s3-csi-driver apply -f -
+curl -fsSL https://raw.githubusercontent.com/CTrox/csi-s3/master/deploy/kubernetes/csi-s3.yaml | \
+  sed 's/namespace: default/namespace: s3-csi-driver/' | \
+  kubectl -n s3-csi-driver apply -f -
+
+# Wait for the components to become available
+kubectl -n s3-csi-driver wait --for condition=ready po -l "app=csi-provisioner-s3"
+kubectl -n s3-csi-driver wait --for condition=ready po -l "app=csi-attacher-s3"
+kubectl -n s3-csi-driver wait --for condition=ready po -l "app=csi-s3"
+
+# Install the storage class
+kubectl apply -f ./cluster/kubernetes/gke/s3-csi-storageclass.yaml
 ```
 
 
@@ -203,24 +267,28 @@ helm delete --purge my-node
 This should delete all the Kubernetes resources for the ESGF deployment. It will also delete any GCE persistent
 disks associated with the RWO `PersistentVolumeClaim`s used by the various Postgres databases and Solr indexes.
 
-Currently, the GCP Filestore CSI driver does **not** delete the Filestore instances it creates, so they need to
-be deleted manually.
+Currently, the S3 and GCP Filestore CSI drivers do **not** delete the buckets or Filestore instances they create,
+so they need to be deleted manually.
 
 <div class="note note-warning" markdown="1">
-To delete **all** Filestore instances for the current project, you can use this command:
+To delete **all** orphaned `PersistentVolume`s and GCS buckets for the current project, use these commands:
+
+```bash
+# Delete the persistent volumes
+kubectl delete pv --all
+# Delete the storage buckets
+gsutil ls gs:// | xargs -n 1 gsutil rm -r
+```
+</div>
+
+<div class="note note-warning" markdown="1">
+To delete **all** Filestore instances for the current project, use this command:
 
 ```bash
 gcloud beta filestore instances list --format="value(name)" | \
   xargs -n 1 gcloud beta filestore instances delete
 ```
-</div>
-
-To delete the cluster:
-
-```bash
-gcloud container clusters delete esgf-node
-```
-
+<p></p>
 To remove the service account and IAM policy bindings for the GCP Filestore CSI provisioner service account:
 
 ```bash
@@ -233,4 +301,11 @@ gcloud projects remove-iam-policy-binding "$PROJECT" \
   --role roles/file.editor
 # Remove the service account
 gcloud iam service-accounts delete "$IAM_NAME"
+```
+</div>
+
+To delete the cluster:
+
+```bash
+gcloud container clusters delete esgf-node
 ```
