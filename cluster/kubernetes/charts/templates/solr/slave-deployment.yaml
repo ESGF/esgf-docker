@@ -1,0 +1,81 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: "{{ template "fullname" . }}-solr-slave"
+  labels:
+{{ include "default-labels" . | indent 4 }}
+    component: solr
+    solr-role: slave
+spec:
+  # Select pods on release and component only, rather than all labels
+  # This means that the selector will match all pods from all versions of the chart when upgrading
+  selector:
+    matchLabels:
+      release: {{ .Release.Name }}
+      component: solr
+      solr-role: slave
+  replicas: 1
+  template:
+    metadata:
+      labels:
+{{ include "default-labels" . | indent 8 }}
+        component: solr
+        solr-role: slave
+    spec:
+      # Setting fsGroup for the pod allows some provisioners to chown mounted volumes to the given group
+      #   The solr group is 8983 inside the container
+      securityContext:
+        fsGroup: 8983
+      initContainers:
+        # Wait for the solr-master to become available before starting
+        - name: ensure-solr-master
+          image: radial/busyboxplus:curl
+          command:
+            # Try every 5 seconds for no longer than 10 mins
+            - sh
+            - -c
+            - |
+              for i in $(seq 120); do
+                sleep 5
+                echo "Attempt $i of 120"
+                if curl -k -m 1 -fsSL http://{{ template "fullname" . }}-solr-master:8983/solr/admin/info/system?wt=json; then exit 0; fi
+              done
+              exit 1
+      containers:
+        - name: solr-slave
+          image: "{{ .Values.solr.image.repository }}:{{ .Values.solr.image.tag }}"
+          imagePullPolicy: {{ default "" .Values.solr.image.pullPolicy | quote }}
+          ports:
+            - name: solr
+              containerPort: 8983
+          # The readiness and liveness probes run the same thing, but the liveness
+          # probe just waits a while before kicking in whereas the readiness probe
+          # starts straight away
+          readinessProbe: &probe
+            httpGet:
+              path: /solr/admin/info/system?wt=json
+              port: 8983
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            <<: *probe
+            initialDelaySeconds: 600
+          env:
+            - name: ESGF_SOLR_MASTER_URL
+              value: "http://{{ template "fullname" . }}-solr-master:8983/solr"
+            # Use a shorter replication interval for the local slave than the default
+            - name: ESGF_SOLR_REPLICATION_INTERVAL
+              value: "00:00:60"
+          resources:
+{{ toYaml .Values.solr.slave.resources | indent 12 }}
+          volumeMounts:
+            - name: solr-home
+              mountPath: /esg/solr-home
+      volumes:
+        - name: solr-home
+{{- if .Values.solr.slave.persistence.enabled }}
+          persistentVolumeClaim:
+            claimName: "{{ template "fullname" . }}-solr-slave"
+{{- else }}
+          emptyDir: {}
+{{- end }}

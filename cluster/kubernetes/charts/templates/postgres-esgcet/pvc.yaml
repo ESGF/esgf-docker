@@ -1,0 +1,22 @@
+{{- if .Values.postgresEsgcet.persistence.enabled }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: "{{ template "fullname" . }}-postgres-esgcet"
+  labels:
+{{ include "default-labels" . | indent 4 }}
+    component: postgres-esgcet
+spec:
+  accessModes:
+    - ReadWriteOnce
+{{- if .Values.postgresEsgcet.persistence.storageClass }}
+  storageClassName: "{{ .Values.postgresEsgcet.persistence.storageClass }}"
+{{- end }}
+  resources:
+    requests:
+      storage: {{ .Values.postgresEsgcet.persistence.size }}
+{{- if .Values.postgresEsgcet.persistence.selector }}
+  selector:
+{{ toYaml .Values.postgresEsgcet.persistence.selector | indent 4 }}
+{{- end }}
+{{- end }}

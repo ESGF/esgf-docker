@@ -11,22 +11,24 @@ set -euo pipefail
 ## values from the environment and running "esginitialize -c"
 #####
 
-# Make sure the trusted certificates have been updated
+# Make sure the trusted certificates have been updated
 info "Updating trusted certificates"
-# Combine the trusted certificates into a single bundle and make sure Python and curl use it
+# Combine the trusted certificates into a single bundle and make sure Python and curl use it
 cat /etc/ssl/certs/ca-certificates.crt > /esg/config/esgcet/trust-bundle.pem
 cat /esg/certificates/esg-trust-bundle.pem >> /esg/config/esgcet/trust-bundle.pem
 export SSL_CERT_FILE=/esg/config/esgcet/trust-bundle.pem
 
-# Compose the database URL
-export DATABASE_URL="postgresql://${ESGF_DATABASE_USER}:$(< "$ESGF_DATABASE_PASSWORD_FILE")@${ESGF_DATABASE_HOST}:${ESGF_DATABASE_PORT}/${ESGF_DATABASE_NAME}"
+# Compose the database URL
+# Using gomplate here allows us to benefit from _FILE fallback
+DB_PASS="$(/esg/bin/gomplate -i '{{ getenv "ESGF_DATABASE_PASSWORD" }}')"
+export DATABASE_URL="postgresql://${ESGF_DATABASE_USER}:${DB_PASS}@${ESGF_DATABASE_HOST}:${ESGF_DATABASE_PORT}/${ESGF_DATABASE_NAME}"
 
 ###
-# Build the configuration directory
+# Build the configuration directory
 ###
 /esg/bin/build-config.sh /esg/config/esgcet
 
-# Initialise the schema migration
+# Initialise the schema migration
 info "Enabling schema versioning"
 if python -m esgcet.schema_migration.manage db_version "${DATABASE_URL}" 1>/dev/null 2>&1; then
     info "  Schema versioning already enabled - skipping"
@@ -40,5 +42,5 @@ esginitialize -c
 
 info "Intialisation complete"
 
-# Execute the specified command
+# Execute the specified command
 exec "$@"

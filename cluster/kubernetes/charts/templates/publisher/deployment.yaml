@@ -1,0 +1,164 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: "{{ template "fullname" . }}-publisher"
+  labels:
+{{ include "default-labels" . | indent 4 }}
+    component: publisher
+spec:
+  # Every time the publisher deployment is rolled out, the number of replicas is set to zero
+  # To perform a publish, scale up the deployment to 1 replica, perform the publish and scale back down to 0
+  replicas: 0
+  # Select pods on release and component only, rather than all labels
+  # This means that the selector will match all pods from all versions of the chart when upgrading
+  selector:
+    matchLabels:
+      release: {{ .Release.Name }}
+      component: publisher
+  template:
+    metadata:
+      labels:
+{{ include "default-labels" . | indent 8 }}
+        component: publisher
+      annotations:
+        checksum/secrets: {{ include (print $.Template.BasePath "/configuration/secrets.yaml") . | sha256sum }}
+        checksum/trust-bundle: {{ include (print $.Template.BasePath "/configuration/trust-bundle.yaml") . | sha256sum }}
+        checksum/config-overrides: {{ include (print $.Template.BasePath "/configuration/config-overrides.yaml") . | sha256sum }}
+    spec:
+      # Setting fsGroup for the pod allows some provisioners to chown mounted volumes to the given group
+      #   The publish group is 1001 inside the container
+      securityContext:
+        fsGroup: 1001
+      initContainers:
+        # Unpack the required config overrides from the base64-encoded tarballs in the configmap
+        # This process is required because configmaps cannot contain nested directory structures
+        - name: unpack-config-overrides
+          image: busybox
+          command:
+            - "sh"
+            - "-c"
+            - |
+              set -eo pipefail
+              if [ -f /esg/tarballs/publisher-overrides.tar.gz.b64 ]; then
+                  base64 -d /esg/tarballs/publisher-overrides.tar.gz.b64 | tar -xz -C /esg/publisher
+              fi
+          volumeMounts:
+            - mountPath: /esg/publisher
+              name: esgcet-overrides
+            - mountPath: /esg/tarballs
+              name: override-tarballs
+              readOnly: true
+        # Wait for postgres-esgcet to become available before starting
+        - name: ensure-postgres-esgcet
+          image: "{{ .Values.postgresEsgcet.image.repository }}:{{ .Values.postgresEsgcet.image.tag }}"
+          imagePullPolicy: {{ default "" .Values.postgresEsgcet.image.pullPolicy | quote }}
+          env:
+            - name: PGHOST
+              value: "{{ template "fullname" . }}-postgres-esgcet"
+            - name: PGPORT
+              value: "5432"
+            - name: PGUSER
+              value: esgcet
+            - name: PGPASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ template "fullname" . }}-secrets"
+                  key: "esgcet-database-password"
+            - name: PGDATABASE
+              value: esgcet
+          command:
+            # Try every 5 seconds for no longer than 10 mins
+            - bash
+            - -c
+            - |
+              for i in $(seq 120); do
+                sleep 5
+                echo "Attempt $i of 120"
+                if pg_isready; then exit 0; fi
+              done
+              exit 1
+        # Ensure the index node is up before starting
+        - name: ensure-index-node
+          image: radial/busyboxplus:curl
+          command:
+            # Try every 5 seconds for no longer than 10 mins
+            - sh
+            - -c
+            - |
+              for i in $(seq 120); do
+                sleep 5
+                echo "Attempt $i of 120"
+                if curl -k -m 1 -fsSL https://{{ .Values.hostname }}/esg-search/search; then exit 0; fi
+              done
+              exit 1
+      containers:
+        - name: publisher
+          image: "{{ .Values.publisher.image.repository }}:{{ .Values.publisher.image.tag }}"
+          imagePullPolicy: {{ default "" .Values.publisher.image.pullPolicy | quote }}
+          # Just sit and wait for somebody to connect via exec
+          command:
+            - "bash"
+            - "-c"
+            - "sleep infinity"
+          env:
+            - name: ESGF_DATABASE_HOST
+              value: "{{ template "fullname" . }}-postgres-esgcet"
+            - name: ESGF_DATABASE_PORT
+              value: "5432"
+            - name: ESGF_DATABASE_USER
+              value: esgcet
+            - name: ESGF_DATABASE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ template "fullname" . }}-secrets"
+                  key: "esgcet-database-password"
+            - name: ESGF_DATABASE_NAME
+              value: esgcet
+            - name: ESGF_HESSIAN_METADATA_URL
+              value: {{ default (printf "https://%s/esgcet/remote/hessian/guest/remoteMetadataService" .Values.hostname) .Values.publisher.environment.ESGF_HESSIAN_METADATA_URL | quote }}
+            - name: ESGF_HESSIAN_URL
+              value: {{ default (printf "https://%s/esg-search/remote/secure/client-cert/hessian/publishingService" .Values.hostname) .Values.publisher.environment.ESGF_HESSIAN_URL | quote }}
+            - name: ESGF_TDS_CATALOG_URL
+              value: {{ default (printf "https://%s/thredds/catalog/esgcet" .Values.hostname) .Values.publisher.environment.ESGF_TDS_CATALOG_URL | quote }}
+            - name: ESGF_TDS_REINIT_URL
+              value: {{ default (printf "https://%s/thredds/admin/debug?Catalogs/recheck" .Values.hostname) .Values.publisher.environment.ESGF_TDS_REINIT_URL | quote }}
+            - name: ESGF_TDS_REINIT_ERROR_URL
+              value: {{ default (printf "https://%s/thredds/admin/content/logs/catalogInit.log" .Values.hostname) .Values.publisher.environment.ESGF_TDS_REINIT_ERROR_URL | quote }}
+            - name: ESGF_TDS_USERNAME
+              value: rootAdmin
+            - name: ESGF_TDS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ template "fullname" . }}-secrets"
+                  key: "rootadmin-password"
+            - name: ESGF_SLCS_CERTIFICATE_URL
+              value: {{ default (printf "https://%s/esgf-slcs/onlineca/certificate/" .Values.hostname) .Values.publisher.environment.ESGF_SLCS_CERTIFICATE_URL | quote }}
+          volumeMounts:
+            - mountPath: /esg/content/thredds/esgcet
+              name: tds-content
+            - mountPath: /esg/data
+              name: tds-data
+            - mountPath: /esg/certificates/esg-trust-bundle.pem
+              name: trust-bundle
+              subPath: esg-trust-bundle.pem
+              readOnly: true
+            - mountPath: /esg/config/esgcet/.overrides
+              name: esgcet-overrides
+              readOnly: true
+          resources:
+{{ toYaml .Values.publisher.resources | indent 12 }}
+      volumes:
+        - name: tds-content
+          persistentVolumeClaim:
+            claimName: "{{ template "fullname" . }}-tds-content"
+        - name: tds-data
+          persistentVolumeClaim:
+            claimName: "{{ template "fullname" . }}-tds-data"
+        - name: trust-bundle
+          configMap:
+            name: "{{ template "fullname" . }}-trust-bundle"
+        - name: esgcet-overrides
+          emptyDir: {}
+        - name: override-tarballs
+          configMap:
+            name: "{{ template "fullname" . }}-config-overrides"

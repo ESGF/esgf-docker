@@ -13,6 +13,8 @@ fi
 : ${ESGF_PREFIX:=}
 : ${ESGF_VERSION:=latest}
 
+export ESGF_CONFIG ESGF_HUB ESGF_PREFIX ESGF_VERSION
+
 # Run the given command in the docker container with the required environment variables and volumes
 # It requires:
 #   * The actual value of the ESGF_CONFIG variable for interpolation

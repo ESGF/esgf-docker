@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: "{{ template "fullname" . }}-idp-node"
+  labels:
+{{ include "default-labels" . | indent 4 }}
+    component: idp-node
+spec:
+  ports:
+    - name: http
+      port: 8080
+  selector:
+    release: {{ .Release.Name }}
+    component: idp-node

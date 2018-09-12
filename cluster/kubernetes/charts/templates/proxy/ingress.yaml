@@ -1,0 +1,28 @@
+{{- if (and .Values.proxy.ingress.enabled (eq .Values.proxy.ingress.mode "kubernetes")) }}
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: "{{ template "fullname" . }}-proxy"
+  labels:
+{{ include "default-labels" . | indent 4 }}
+    component: proxy
+  annotations:
+    # This ingress is specifically for the Nginx ingress controller
+    # It will be ignored by all other ingress controllers, and so can co-exist
+    # with similar ingresses for other controllers
+    kubernetes.io/ingress.class: "nginx"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/ssl-passthrough: "true"
+    nginx.ingress.kubernetes.io/service-upstream: "true"
+spec:
+  rules:
+    - host: "{{ .Values.hostname }}"
+      http:
+        paths:
+          - backend:
+              serviceName: "{{ template "fullname" . }}-proxy"
+              servicePort: 443
+  tls:
+    - hosts:
+      - "{{ .Values.hostname }}"
+{{- end }}

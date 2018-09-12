@@ -1,6 +1,6 @@
 ---
 title: Testing
-category: Usage
+category: Docker Compose
 order: 1.3
 ---
 

@@ -1,0 +1,16 @@
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: standard-rwx
+provisioner: com.google.csi.filestore
+parameters:
+  # The tier to use for filestore volumes: standard or premium
+  tier: standard
+  # The location to provision filestore volumes in
+  #   If not given, the location that the CSI driver is running in is used
+  #   See https://cloud.google.com/filestore/docs/regions for available locations
+  location: europe-west3-a
+  # CIDR range to allocate filestore IPs from
+  # reserved-ipv4-cidr: 192.168.92.22/26
+  # Name of the VPC to use (may require custom firewall rules)
+  # network: default

@@ -1,6 +1,6 @@
 ---
 title: Configuration
-category: Usage
+category: Docker Compose
 order: 1.2
 ---
 
