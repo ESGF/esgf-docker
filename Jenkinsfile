@@ -95,7 +95,7 @@ pipeline
     TEST_DIR_PATH="${ESGF_TEST_SUITE_REPO_PATH}/esgf-test-suite"
     SINGULARITY_FILENAME='esgf-test-suite_env.singularity.img'
     SINGULARITY_IMG_URL="http://distrib-coffee.ipsl.jussieu.fr/pub/esgf/dist/esgf-test-suite/${SINGULARITY_FILENAME}"
-    SINGULARITY_FILE_PATH="${TEST_DIR_PATH}/${SINGULARITY_FILENAME}"
+    SINGULARITY_FILE_PATH="${env.WORKSPACE}/../../../esgf/${SINGULARITY_FILENAME}"
     TESTS='-a !compute,basic -a cog_root_login -a slcs_django_admin_login'
     CONFIG_FILE_PATH="${env.WORKSPACE}/../../../esgf/my_config_docker.ini"
 
