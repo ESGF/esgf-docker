@@ -12,11 +12,6 @@ ENV TOMCAT_GID 1001
 RUN groupadd -g $TOMCAT_GID $TOMCAT_GROUP &&  \
     useradd -d $CATALINA_HOME -g $TOMCAT_GROUP -s /usr/sbin/nologin -u $TOMCAT_UID $TOMCAT_USER
 
-# Install gettext-base (for envsubst)
-RUN apt-get update && \
-    apt-get install -y gettext-base && \
-    rm -rf /var/lib/apt/lists/*
-
 # Allow the tomcat user and any user in the root group to add trusted CAs
 RUN chown $TOMCAT_UID:0 $JAVA_HOME/lib/security/cacerts && \
     chmod u+rw,g+rw $JAVA_HOME/lib/security/cacerts

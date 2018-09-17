@@ -22,18 +22,13 @@ ENV DJANGO_GID 1001
 RUN groupadd -g $DJANGO_GID $DJANGO_GROUP && \
     useradd -M -g $DJANGO_GID -s /sbin/nologin -u $DJANGO_UID $DJANGO_USER
 
-# Install curl and gettext-base (for envsubst)
-RUN apt-get update && \
-    apt-get install -y curl gettext-base && \
-    rm -rf /var/lib/apt/lists/*
-
 # Create a directory for files created at runtime that is owned by the django
 # user but also read-writable by the root group
-ENV DJANGO_STATIC_ROOT /opt/django/static
-RUN mkdir -p /opt/django/conf && \
+ENV DJANGO_STATIC_ROOT /var/run/django/static
+RUN mkdir -p /var/run/django/conf && \
     mkdir -p $DJANGO_STATIC_ROOT && \
-    chown -R $DJANGO_UID:0 /opt/django && \
-    chmod -R 775 /opt/django
+    chown -R $DJANGO_UID:0 /var/run/django && \
+    chmod -R 775 /var/run/django
 
 # Install gunicorn and paste
 RUN pip install gunicorn Paste PasteDeploy
@@ -44,5 +39,5 @@ COPY python/*.py /usr/local/lib/python2.7/site-packages/
 EXPOSE 8000
 
 # Install startup script
-COPY scripts/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
-ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
+COPY scripts/django-serve.sh /usr/local/bin/django-serve.sh
+CMD ["/usr/local/bin/django-serve.sh"]

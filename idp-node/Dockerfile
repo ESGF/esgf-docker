@@ -19,6 +19,11 @@ ARG ESGF_VERSION=latest
 # https://github.com/moby/moby/issues/34482
 FROM ${ESGF_HUB}/${ESGF_PREFIX}configure:${ESGF_VERSION} as configuration
 
+
+#############
+## Stage 1 ##
+#############
+
 FROM openjdk:8-jdk AS esgf-idp-unpack
 
 # Download and unpack esg-orp war
@@ -47,15 +52,13 @@ ENV ESGF_HOME /esg
 COPY --from=esgf-idp-unpack --chown=1001:0 /opt/esgf-idp $CATALINA_HOME/webapps/esgf-idp
 
 # Copy configuration and utils from esgf-configure
-# Ensure the config directory is owned by the tomcat user and root group
-RUN mkdir -p /esg/config && chown 1001:0 /esg/config && chmod 775 /esg/config
-COPY --chown=1001:0 --from=configuration /esg/config /esg/config
-COPY --from=configuration /opt/esgf-docker/scripts/interpolate-configs.sh /tomcat-init.d/
-
-# Install environment customisations, config files and templates
-COPY scripts/setenv.sh $CATALINA_HOME/bin/
+COPY --chown=1001:0 --from=configuration /esg /esg
+# Install initialisation script
+COPY ./scripts/configure.sh /tomcat-init.d/
+# Install environment customisations
+COPY ./scripts/setenv.sh $CATALINA_HOME/bin/
 # Override Yadis configuration file to use full SLCS URL
-COPY conf/yadis-config.xml $CATALINA_HOME/webapps/esgf-idp/WEB-INF/classes/esg/idp/config/yadis-config.xml
+COPY ./conf/yadis-config.xml $CATALINA_HOME/webapps/esgf-idp/WEB-INF/classes/esg/idp/config/yadis-config.xml
 
 # Run as the tomcat user by default
 USER 1001

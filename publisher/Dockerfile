@@ -2,6 +2,15 @@
 # Docker image for the ESGF publisher client
 #####
 
+ARG ESGF_HUB=esgfhub
+ARG ESGF_PREFIX=
+ARG ESGF_VERSION=latest
+
+# This build stage is required because COPY --from=$ARG is not supported
+# https://github.com/moby/moby/issues/34482
+FROM ${ESGF_HUB}/${ESGF_PREFIX}configure:${ESGF_VERSION} as configuration
+
+
 FROM continuumio/miniconda:4.3.27
 
 # Create an unprivileged user to use
@@ -17,11 +26,6 @@ RUN groupadd -g $PUBLISH_GID $PUBLISH_GROUP && \
 ENV ESGINI /esg/config/esgcet/esg.ini
 ENV UVCDAT_ANONYMOUS_LOG no
 
-# Install gettext-base for envsubst
-RUN apt-get update && \
-    apt-get install -y gettext-base && \
-    rm -rf /var/lib/apt/lists/*
-
 # Install packages using conda and pip
 RUN conda install -y -c conda-forge -c uvcdat \
       gcc_linux-64 \
@@ -36,7 +40,7 @@ RUN conda install -y -c conda-forge -c uvcdat \
       'SQLAlchemy==0.7.10' \
       sqlalchemy_migrate \
       ESGConfigParser==0.1.10 \
-      esgprep
+      esgprep==2.7.40
 
 # Install the publisher client from GitHub
 ARG ESG_PUBLISHER_VERSION=v3.2.7
@@ -50,12 +54,12 @@ RUN git clone https://github.com/ESGF/esg-publisher.git /application && \
 # Install entrypoint script
 COPY scripts/* /usr/local/bin/
 # Install configuration files and templates
+# Start with the /esg/bin directory from esgf-configure
+COPY --chown=1001:0 --from=configuration /esg/bin /esg/bin
 # Make the configuration files owned by the publish user and root group
 # This means the container can be run by any user in the root group (e.g. on OpenShift)
-RUN mkdir -p /esg/config/esgcet && \
-    chown 1001:0 /esg/config/esgcet && \
-    chmod 775 /esg/config/esgcet
-COPY --chown=1001:0 conf /esg/config/esgcet
+COPY --chown=1001:0 ./conf /esg/config/esgcet/.defaults
+RUN chown 1001:0 /esg/config/esgcet && chmod 775 /esg/config/esgcet
 # Create the thredds content root owned by publish user and root group
 RUN mkdir -p /esg/content/thredds/esgcet && \
     chown -R 1001:0 /esg/content/thredds && \

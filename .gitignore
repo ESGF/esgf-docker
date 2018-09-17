@@ -6,3 +6,5 @@
 **/*.jar
 **/*.gz
 _site/
+.project
+.vscode

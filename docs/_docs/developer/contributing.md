@@ -1,7 +1,7 @@
 ---
 title: Contributing
 category: Developers
-order: 2.3
+order: 3.3
 toc: false
 ---
 
@@ -21,11 +21,11 @@ The `esgf-docker` repository has two protected branches:
     to `devel` works, but is not as well tested as `master`.
 
 These branches are only committed to using pull requests.
-[Travis](https://travis-ci.org/ESGF/esgf-docker) is configured to automatically
-build pull requests when they are submitted, and a pull request should not be
-merged without a successful build.
+[Jenkins](https://jenkins.io/) is configured to automatically build pull requests
+when they are submitted, and a pull request should not be merged without a
+successful build.
 
-Travis is also configured to automatically build, tag and push each commit to the
+Jenkins is also configured to automatically build, tag and push each commit to the
 `master` and `devel` branches, using the `latest` and `devel` Docker tags
 respectively. Each commit is also given a unique Docker tag that combines the
 closest tag and the commit hash, allowing deployments to target a specific commit.

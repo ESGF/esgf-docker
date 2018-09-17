@@ -20,7 +20,7 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 
 # Clone the github repo and checkout the specified version
-ARG ESGF_SLCS_GIT_VERSION=master
+ARG ESGF_SLCS_GIT_VERSION=issue/3/remove-django-wsgi
 RUN git clone https://github.com/ESGF/esgf-slcs-server.git /application && \
     cd /application && \
     git checkout $ESGF_SLCS_GIT_VERSION && \
@@ -45,23 +45,16 @@ COPY --from=esgf-slcs-build /application /application
 COPY --from=esgf-slcs-build /pip-wheels  /pip-wheels
 
 # Install the application + wheels (remove the wheels when we are done)
-RUN pip install --no-index --find-links=/pip-wheels -r /application/requirements.txt && \
+RUN cd /pip-wheels && \
+    pip install --no-deps $(find /pip-wheels -type f -name '*.whl') && \
     pip install --no-deps -e /application && \
     rm -rf /pip-wheels
 
-# Install configuration files
-ENV ONLINECA_PASTEDEPLOY_FILE /opt/onlineca/onlineca.ini
+# Install Django settings
 COPY conf/settings.py /application/esgf_slcs_server/
-# The Paste config file is a template that is interpolated at runtime with values
-# from environment variables
-# Make sure the file is owned by the Django user but the root group, allowing
-# any user in the root group to write it
-COPY --chown=1001:0 conf/onlineca.ini $ONLINECA_PASTEDEPLOY_FILE
-# This is the script that does the interpolating
-COPY scripts/configure-onlineca.py /django-init.d/
+
+# Set the settings module to use
+ENV DJANGO_SETTINGS_MODULE "esgf_slcs_server.settings"
 
 # Run as the Django user unless otherwise specified
 USER 1001
-
-# The "command" is just the settings file to use
-CMD ["esgf_slcs_server.settings"]

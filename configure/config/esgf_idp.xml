@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<idp_whitelist xmlns="http://www.esgf.org/whitelist">
+    {{ $openid_endpoint := getenv "ESGF_OPENID_ENDPOINT" -}}
+    {{ if $openid_endpoint -}}
+    <value>{{ $openid_endpoint }}</value>
+    {{- end }}
+</idp_whitelist>

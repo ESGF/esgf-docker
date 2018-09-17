@@ -1,0 +1,23 @@
+{{- if .Values.solr.slave.persistence.enabled }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: "{{ template "fullname" . }}-solr-slave"
+  labels:
+{{ include "default-labels" . | indent 4 }}
+    component: solr
+    solr-role: slave
+spec:
+  accessModes:
+    - ReadWriteOnce
+{{- if .Values.solr.slave.persistence.storageClass }}
+  storageClassName: "{{ .Values.solr.slave.persistence.storageClass }}"
+{{- end }}
+  resources:
+    requests:
+      storage: {{ .Values.solr.slave.persistence.size }}
+{{- if .Values.solr.slave.persistence.selector }}
+  selector:
+{{ toYaml .Values.solr.slave.persistence.selector | indent 4 }}
+{{- end }}
+{{- end }}
