@@ -1,0 +1,5 @@
+{
+    "ESGF_HOSTNAME": "{{ .Env.ESGF_HOSTNAME }}",
+    "ESGF_SECRET_KEY": "{{ getenv "ESGF_COOKIE_SECRET_KEY" }}",
+    "WEBAPP_SECRET_KEY": "{{ getenv "ESGF_AUTH_SECRET_KEY" }}"
+}

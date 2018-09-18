@@ -1,0 +1,22 @@
+{{- if .Values.postgresSecurity.persistence.enabled }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: "{{ template "fullname" . }}-postgres-security"
+  labels:
+{{ include "default-labels" . | indent 4 }}
+    component: postgres-security
+spec:
+  accessModes:
+    - ReadWriteOnce
+{{- if .Values.postgresSecurity.persistence.storageClass }}
+  storageClassName: "{{ .Values.postgresSecurity.persistence.storageClass }}"
+{{- end }}
+  resources:
+    requests:
+      storage: {{ .Values.postgresSecurity.persistence.size }}
+{{- if .Values.postgresSecurity.persistence.selector }}
+  selector:
+{{ toYaml .Values.postgresSecurity.persistence.selector | indent 4 }}
+{{- end }}
+{{- end }}

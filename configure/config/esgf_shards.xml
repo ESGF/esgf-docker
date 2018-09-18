@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<shards xmlns="http://www.esgf.org/whitelist">
+    {{- range (getenv "ESGF_SOLR_SHARDS" | strings.Split ",") }}
+    <value>{{ . }}</value>
+    {{- end }}
+</shards>

@@ -6,7 +6,7 @@
     perform source tagging or push docker images).
 
   * Every commit to devel is built and tested. If successful, the
-    docker images are tagged and pushed (to the dockerhub) with "devel" and 
+    docker images are tagged and pushed (to the dockerhub) with "devel" and
     the result of "$(git describe --always --tags)".
 
   * Every commit to master is built and tested. If successful, the docker images
@@ -67,7 +67,7 @@ pipeline
       // env.WORKSPACE is unknown at this step, so we cannot do better than
       // provide an absolute path.
       customWorkspace "/home/jenkins/slave_home/workspace/${env.JOB_NAME}"
-    } 
+    }
   }
 
   options
@@ -76,27 +76,26 @@ pipeline
     timeout(time: 45, unit: 'MINUTES')
     timestamps() // Add timestamp. Needs TimeStamp plugin.
   }
-  
+
   environment
   {
     /*** ESGF-DOCKER **/
     ESGF_HUB='esgfhub'
     ESGF_PREFIX=''
     ESGF_DOCKER_REPO_PATH="${env.WORKSPACE}"
-    ESGF_HOSTNAME=sh(returnStdout: true, script: 'hostname')
     ESGF_CONFIG="${env.WORKSPACE}/config"
     ESGF_DATA="${env.WORKSPACE}/data"
 
     /*** DOCKERHUB ***/
     DOCKERHUB_CREDENTIAL_ID='esgfci-dockerhub'
-    
+
     /*** ESGF TEST SUITE ***/
     ESGF_TEST_SUITE_REPO_URL='https://github.com/ESGF/esgf-test-suite.git'
     ESGF_TEST_SUITE_REPO_PATH="${env.WORKSPACE}/esgf-test-suite"
     TEST_DIR_PATH="${ESGF_TEST_SUITE_REPO_PATH}/esgf-test-suite"
     SINGULARITY_FILENAME='esgf-test-suite_env.singularity.img'
     SINGULARITY_IMG_URL="http://distrib-coffee.ipsl.jussieu.fr/pub/esgf/dist/esgf-test-suite/${SINGULARITY_FILENAME}"
-    SINGULARITY_FILE_PATH="${TEST_DIR_PATH}/${SINGULARITY_FILENAME}"
+    SINGULARITY_FILE_PATH="${env.WORKSPACE}/../../../esgf/${SINGULARITY_FILENAME}"
     TESTS='-a !compute,basic -a cog_root_login -a slcs_django_admin_login'
     CONFIG_FILE_PATH="${env.WORKSPACE}/../../../esgf/my_config_docker.ini"
 
@@ -120,7 +119,7 @@ pipeline
       {
         // Escape pull request that targets branches other than master or devel.
         anyOf
-        { 
+        {
           changeRequest(target: 'devel')
           changeRequest(target: 'master')
           branch 'master'
@@ -128,9 +127,9 @@ pipeline
           buildingTag()
         }
       }
-      
+
       stages
-      {  
+      {
         stage('conf tag')
         {
           when {buildingTag()} // Run this stage when processing a source tag.
@@ -144,7 +143,7 @@ pipeline
               // modified later (e.g. into latest or devel).
               env.ESGF_VERSION=env.BRANCH_NAME
               env.GIT_TAG=env.ESGF_VERSION // This must not be modified.
-              
+
               env.SLACK_MSG_PREFIX ="ESGF-DOCKER <${env.BUILD_URL}|tag ${env.BRANCH_NAME}#${env.BUILD_ID}>:"
               env.CONSOLE_MSG_PREFIX="tag ${env.BRANCH_NAME}"
               begin("testing tag ${env.BRANCH_NAME}")
@@ -208,7 +207,7 @@ pipeline
               info('checkout esgf-test-suite')
               git(url: ESGF_TEST_SUITE_REPO_URL)
             }
-        
+
             dir(ESGF_TEST_SUITE_REPO_PATH)
             {
               info('looking for the singularity env file')
@@ -230,7 +229,7 @@ pipeline
             end_block('checkout')
           }
         }
-        
+
         stage('build')
         {
           steps
@@ -240,30 +239,33 @@ pipeline
             dir(ESGF_DOCKER_REPO_PATH)
             {
               info("building esgf-docker images with the tag '${env.ESGF_VERSION}' and hub '${ESGF_HUB}'")
-              sh('docker-compose build')
+              sh('docker-compose -f docker-compose.build.yml build --no-cache')
             }
 
             end_block('build')
           }
         }
-        
+
         stage('config containers')
-        { 
+        {
           steps
           {
             start_block('config containers')
 
             info('delete the previous configuration files of ESGF docker')
-            sh 'rm -fr "${ESGF_CONFIG}" ; mkdir "${ESGF_CONFIG}"; mkdir -p "${ESGF_DATA}"'
+            sh 'rm -fr "${ESGF_CONFIG}" ; mkdir -p "${ESGF_CONFIG}"; mkdir -p "${ESGF_DATA}"'
+            // Write $ESGF_CONFIG/environment config file
+            sh 'echo -e "ESGF_HOSTNAME=$(hostname)\nESGF_DATA=${ESGF_DATA}" > "${ESGF_CONFIG}/environment"'
+            sh 'cat "${ESGF_CONFIG}/environment"'
             dir(ESGF_DOCKER_REPO_PATH)
             {
               info('generating esgf secrets')
-              sh 'docker-compose run -u $UID esgf-setup generate-secrets'
+              sh './bin/esgf-setup generate-secrets'
               info('generating certificates')
-              sh 'docker-compose run -u $UID esgf-setup generate-test-certificates'
+              sh './bin/esgf-setup generate-test-certificates'
               info('creating trust bundle')
-              sh 'docker-compose run -u $UID esgf-setup create-trust-bundle'
-              
+              sh './bin/esgf-setup create-trust-bundle'
+
               // Enable containers to read the private keys.
               sh 'chmod +r "${ESGF_CONFIG}/certificates/hostcert/hostcert.key"'
               sh 'chmod +r "${ESGF_CONFIG}/certificates/slcsca/ca.key"'
@@ -276,12 +278,12 @@ pipeline
             cleanup {end_block('config containers')}
           }
         }
-        
-        // Nested stages don't stop overall pipeline on error... 
+
+        // Nested stages don't stop overall pipeline on error...
         // In fact an error just exits the current stages statement.
         // I can't factorize the post actions.
         stage('start containers')
-        { 
+        {
           steps
           {
             start_block('start containers')
@@ -294,15 +296,13 @@ pipeline
               sh(script: """
                    set +x
                    export ESGF_CONFIG=${ESGF_CONFIG}
-                   export ESGF_DATA=${ESGF_DATA}
-                   export ESGF_HOSTNAME=${ESGF_HOSTNAME}
-                   docker-compose up -d
+                   ./bin/esgf-compose up -d
                    """)
 
               info("waiting ${WAITING_TIME} seconds for the containers")
               sleep(time:WAITING_TIME, unit: 'SECONDS')
               info('container status:')
-              sh 'docker ps'
+              sh './bin/esgf-compose ps'
             }
           }
           post
@@ -314,7 +314,7 @@ pipeline
         }
 
         stage('run test-suite')
-        { 
+        {
           steps
           {
             info('running the tests')
@@ -329,7 +329,7 @@ pipeline
                 cog_secret_conf="cog.admin_password:${admin_passwd}"
               }
 
-              // Don't set retry statement in the options of a stage as 
+              // Don't set retry statement in the options of a stage as
               // on every retry, post condition failure will be triggered and
               // the result of the job will be a failure even if the
               // instructions retried are successful.
@@ -355,7 +355,7 @@ pipeline
             failure
             {
               info('log of the containers:')
-              dir(ESGF_DOCKER_REPO_PATH) {sh 'docker-compose logs'}          
+              dir(ESGF_DOCKER_REPO_PATH) {sh './bin/esgf-compose logs'}
             }
 
             // Cleanup is run after all post condition statements.
@@ -367,12 +367,12 @@ pipeline
           }
         }
 
-        
+
         // Nested stage don't stop overall pipeline on error...
         // In fact an error just exits the current stages statement.
         // But for pushing docker images, this is ok as the build and tests passed
         // at this point of the script.
-        // So the stages after this stage can be executed even if this stage 
+        // So the stages after this stage can be executed even if this stage
         // has failed !
         stage('push & tag images')
         {
@@ -399,8 +399,8 @@ pipeline
                   credentialsId: "${DOCKERHUB_CREDENTIAL_ID}")])
                 {
                   info('trying to log into dockerhub')
-                  
-                  // Don't set retry statement in the options of a stage as 
+
+                  // Don't set retry statement in the options of a stage as
                   // on every retry, post condition failure will be triggered and
                   // the result of the job will be a failure even if the
                   // instructions retried are successful.
@@ -415,7 +415,7 @@ pipeline
                 }
               }
             }
-   
+
             stage("push images #1")
             {
               steps
@@ -423,12 +423,12 @@ pipeline
                 info("pushing the images tagged ${env.ESGF_VERSION} to ${ESGF_HUB}")
                 dir(ESGF_DOCKER_REPO_PATH)
                 {
-                  // Don't set retry statement in the options of a stage as 
+                  // Don't set retry statement in the options of a stage as
                   // on every retry, post condition failure will be triggered and
                   // the result of the job will be a failure even if the
                   // instructions retried are successful.
                   retry(3)
-                  {sh(script: 'docker-compose push')}
+                  {sh(script: 'docker-compose -f docker-compose.build.yml push')}
                 }
               }
             }
@@ -462,7 +462,7 @@ pipeline
                 info("retagging images with ${env.ESGF_VERSION}")
                 dir(ESGF_DOCKER_REPO_PATH)
                 {
-                 sh('docker-compose build') // Quickly retag the images
+                 sh('docker-compose -f docker-compose.build.yml build') // Quickly retag the images
                 }
               }
             }
@@ -480,12 +480,12 @@ pipeline
                 info("pushing the images tagged ${env.ESGF_VERSION} to ${ESGF_HUB}")
                 dir(ESGF_DOCKER_REPO_PATH)
                 {
-                  // Don't set retry statement in the options of a stage as 
+                  // Don't set retry statement in the options of a stage as
                   // on every retry, post condition failure will be triggered and
                   // the result of the job will be a failure even if the
                   // instructions retried are successful.
                   retry(3)
-                  {sh(script: 'docker-compose push')}
+                  {sh(script: 'docker-compose -f docker-compose.build.yml push')}
                 }
               }
             }
@@ -497,7 +497,7 @@ pipeline
                 beforeAgent true
                 branch 'master'
               }
-              
+
               steps
               {
                 dir(ESGF_DOCKER_REPO_PATH)
@@ -524,7 +524,7 @@ pipeline
 
                   withCredentials([usernamePassword(usernameVariable: 'github_username', passwordVariable: 'github_passwd', credentialsId: "${GITHUB_CREDENTIAL_ID}")])
                   {
-                    // Don't set retry statement in the options of a stage as 
+                    // Don't set retry statement in the options of a stage as
                     // on every retry, post condition failure will be triggered and
                     // the result of the job will be a failure even if the
                     // instructions retried are successful.
@@ -550,7 +550,7 @@ pipeline
     // job. Preserving the old images makes building esgf-docker faster.
     // always {delete_images() ; delete_container()}
     always {delete_container()} // XXX TEST
-    
+
     failure
     {
       info('delete the workspace on failure')
@@ -573,14 +573,14 @@ pipeline
         }
       }
     }
-    
+
     aborted
     {
       info('delete the workspace on abortion')
       deleteDir() // safe precaution
       abort("${env.CONSOLE_MSG_PREFIX}")
     }
-  } 
+  }
 }
 
 
@@ -603,7 +603,7 @@ def shutdown()
   dir(ESGF_DOCKER_REPO_PATH)
   {
     info('shutting down the containers')
-    sh 'docker-compose down -v'
+    sh './bin/esgf-compose down -v'
   }
 }
 

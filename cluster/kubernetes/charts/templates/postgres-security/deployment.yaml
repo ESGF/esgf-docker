@@ -1,0 +1,79 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: "{{ template "fullname" . }}-postgres-security"
+  labels:
+{{ include "default-labels" . | indent 4 }}
+    component: postgres-security
+spec:
+  replicas: 1
+  # Select pods on release and component only, rather than all labels
+  # This means that the selector will match all pods from all versions of the chart when upgrading
+  selector:
+    matchLabels:
+      release: {{ .Release.Name }}
+      component: postgres-security
+  template:
+    metadata:
+      labels:
+{{ include "default-labels" . | indent 8 }}
+        component: postgres-security
+      annotations:
+        checksum/secrets: {{ include (print $.Template.BasePath "/configuration/secrets.yaml") . | sha256sum }}
+    spec:
+      # Setting fsGroup for the pod allows some provisioners to chown mounted volumes to the given group
+      #   The postgres group is 26 inside our container
+      securityContext:
+        fsGroup: 26
+      containers:
+        - name: postgres-security
+          image: "{{ .Values.postgresSecurity.image.repository }}:{{ .Values.postgresSecurity.image.tag }}"
+          imagePullPolicy: {{ default "" .Values.postgresSecurity.image.pullPolicy | quote }}
+          ports:
+            - name: postgres
+              containerPort: 5432
+          # The readiness and liveness probes run the same thing, but the liveness
+          # probe just waits a while before kicking in whereas the readiness probe
+          # starts straight away
+          readinessProbe: &probe
+            tcpSocket:
+              port: 5432
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            <<: *probe
+            initialDelaySeconds: 600
+          env:
+            - name: POSTGRESQL_DATABASE
+              value: esgcet
+            - name: POSTGRESQL_USER
+              value: dbsuper
+            - name: POSTGRESQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ template "fullname" . }}-secrets"
+                  key: "security-database-password"
+            - name: ESGF_ROOTADMIN_EMAIL
+              value: "CoG@{{ .Values.hostname }}"
+            - name: ESGF_ROOTADMIN_USERNAME
+              value: rootAdmin
+            - name: ESGF_ROOTADMIN_OPENID
+              value: https://{{ .Values.hostname }}/esgf-idp/openid/rootAdmin
+            - name: ESGF_ROOTADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ template "fullname" . }}-secrets"
+                  key: "rootadmin-password"
+          volumeMounts:
+            - name: postgres-data
+              mountPath: /var/lib/pgsql/data
+          resources:
+{{ toYaml .Values.postgresSecurity.resources | indent 12 }}
+      volumes:
+        - name: postgres-data
+{{- if .Values.postgresSecurity.persistence.enabled }}
+          persistentVolumeClaim:
+            claimName: "{{ template "fullname" . }}-postgres-security"
+{{- else }}
+          emptyDir: {}
+{{- end }}

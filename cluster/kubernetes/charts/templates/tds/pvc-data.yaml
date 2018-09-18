@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: "{{ template "fullname" . }}-tds-data"
+  labels:
+{{ include "default-labels" . | indent 4 }}
+    component: tds
+spec:
+  accessModes:
+    - ReadWriteMany
+{{- if .Values.tds.data.storageClass }}
+  storageClassName: "{{ .Values.tds.data.storageClass }}"
+{{- end }}
+  resources:
+    requests:
+      storage: {{ .Values.tds.data.size }}
+{{- if .Values.tds.data.selector }}
+  selector:
+{{ toYaml .Values.tds.data.selector | indent 4 }}
+{{- end }}

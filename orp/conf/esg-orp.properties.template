@@ -1,8 +1,0 @@
-# Location of keystore used to sign the authentication cookie
-keystoreFile=$ESGF_KEYSTORE_FILE
-# Password used to read the keystore
-keystorePassword=$ESGF_KEYSTORE_PASSWORD
-# Alias of keystore entry used to sign the authentication cookie
-keystoreAlias=$ESGF_KEYSTORE_ALIAS
-
-orp.provider.list=/esg/config/esgf_known_providers.xml

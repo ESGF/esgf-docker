@@ -2,6 +2,15 @@
 ## Docker image for proxying the ESGF services with Nginx
 #####
 
+ARG ESGF_HUB=esgfhub
+ARG ESGF_PREFIX=
+ARG ESGF_VERSION=latest
+
+# This build stage is required because COPY --from=$ARG is not supported
+# https://github.com/moby/moby/issues/34482
+FROM ${ESGF_HUB}/${ESGF_PREFIX}configure:${ESGF_VERSION} as configuration
+
+
 FROM nginx
 
 MAINTAINER Earth System Grid Federation <esgf-devel@lists.llnl.gov>
@@ -27,10 +36,10 @@ RUN apt-get update && \
     touch /etc/authbind/byport/80  && chmod u+x,g+x,o= /etc/authbind/byport/80 && \
     touch /etc/authbind/byport/443 && chmod u+x,g+x,o= /etc/authbind/byport/443
 
-# Insert custom configuration
-# The Nginx config file contains references to environment variables that are
-# processed by the custom entrypoint before Nginx is started
-COPY conf/esgf.conf /etc/nginx/conf.d/
+# Insert configuration and scripts
+COPY ./conf /etc/nginx/conf.d/.defaults
+# We only need the bin directory from esgf-configure
+COPY --from=configuration /esg/bin /esg/bin
 COPY scripts/docker-entrypoint.sh /usr/local/bin/
 
 ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]

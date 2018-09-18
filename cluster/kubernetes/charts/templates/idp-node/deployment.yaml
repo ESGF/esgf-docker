@@ -1,0 +1,147 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: "{{ template "fullname" . }}-idp-node"
+  labels:
+{{ include "default-labels" . | indent 4 }}
+    component: idp-node
+spec:
+  replicas: {{ .Values.idpNode.replicas }}
+  # Select pods on release and component only, rather than all labels
+  # This means that the selector will match all pods from all versions of the chart when upgrading
+  selector:
+    matchLabels:
+      release: {{ .Release.Name }}
+      component: idp-node
+  template:
+    metadata:
+      labels:
+{{ include "default-labels" . | indent 8 }}
+        component: idp-node
+      annotations:
+        checksum/secrets: {{ include (print $.Template.BasePath "/configuration/secrets.yaml") . | sha256sum }}
+        checksum/trust-bundle: {{ include (print $.Template.BasePath "/configuration/trust-bundle.yaml") . | sha256sum }}
+        checksum/environment-common: {{ include (print $.Template.BasePath "/configuration/environment-common.yaml") . | sha256sum }}
+        checksum/config-overrides: {{ include (print $.Template.BasePath "/configuration/config-overrides.yaml") . | sha256sum }}
+    spec:
+      initContainers:
+        # Unpack the required config overrides from the base64-encoded tarballs in the configmap
+        # This process is required because configmaps cannot contain nested directory structures
+        - name: unpack-config-overrides
+          image: busybox
+          command:
+            - "sh"
+            - "-c"
+            - |
+              set -eo pipefail
+              if [ -f /esg/tarballs/esg-config-overrides.tar.gz.b64 ]; then
+                  base64 -d /esg/tarballs/esg-config-overrides.tar.gz.b64 | tar -xz -C /esg/config
+              fi
+          volumeMounts:
+            - mountPath: /esg/config
+              name: esg-config-overrides
+            - mountPath: /esg/tarballs
+              name: override-tarballs
+              readOnly: true
+        # Wait for security database to become available before starting
+        - name: ensure-postgres-security
+          image: "{{ .Values.postgresSecurity.image.repository }}:{{ .Values.postgresSecurity.image.tag }}"
+          imagePullPolicy: {{ default "" .Values.postgresSecurity.image.pullPolicy | quote }}
+          env:
+            - name: PGHOST
+              valueFrom:
+                configMapKeyRef:
+                  name: "{{ template "fullname" . }}-environment-common"
+                  key: ESGF_DATABASE_HOST
+            - name: PGPORT
+              valueFrom:
+                configMapKeyRef:
+                  name: "{{ template "fullname" . }}-environment-common"
+                  key: ESGF_DATABASE_PORT
+            - name: PGUSER
+              valueFrom:
+                configMapKeyRef:
+                  name: "{{ template "fullname" . }}-environment-common"
+                  key: ESGF_DATABASE_USER
+            - name: PGPASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ template "fullname" . }}-secrets"
+                  key: "security-database-password"
+            - name: PGDATABASE
+              valueFrom:
+                configMapKeyRef:
+                  name: "{{ template "fullname" . }}-environment-common"
+                  key: ESGF_DATABASE_NAME
+          command:
+            # Try every 5 seconds for no longer than 10 mins
+            - bash
+            - -c
+            - |
+              for i in $(seq 120); do
+                sleep 5
+                echo "Attempt $i of 120"
+                if pg_isready; then exit 0; fi
+              done
+              exit 1
+      containers:
+        - name: idp-node
+          image: "{{ .Values.idpNode.image.repository }}:{{ .Values.idpNode.image.tag }}"
+          imagePullPolicy: {{ default "" .Values.idpNode.image.pullPolicy | quote }}
+          ports:
+            - name: http
+              containerPort: 8080
+          # The readiness and liveness probes run the same thing, but the liveness
+          # probe just waits a while before kicking in whereas the readiness probe
+          # starts straight away
+          readinessProbe: &probe
+            httpGet:
+              path: /esgf-idp/
+              port: 8080
+              # This endpoint requires HTTPS, so simulate it
+              httpHeaders:
+                - name: Host
+                  value: "{{ .Values.hostname }}"
+                - name: X-Forwarded-Proto
+                  value: https
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            <<: *probe
+            initialDelaySeconds: 600
+          envFrom:
+            - configMapRef:
+                name: "{{ template "fullname" . }}-environment-common"
+          env:
+            - name: ESGF_DATABASE_PASSWORD_FILE
+              value: /esg/config/.esg_pg_pass
+          volumeMounts:
+            - mountPath: /esg/certificates/esg-trust-bundle.pem
+              name: trust-bundle
+              subPath: esg-trust-bundle.pem
+              readOnly: true
+            - mountPath: /esg/config/.esg_pg_pass
+              name: esg-secrets
+              subPath: security-database-password
+              readOnly: true
+            - mountPath: /esg/config/.esgf_pass
+              name: esg-secrets
+              subPath: rootadmin-password
+              readOnly: true
+            - mountPath: /esg/config/.overrides
+              name: esg-config-overrides
+              readOnly: true
+          resources:
+{{ toYaml .Values.idpNode.resources | indent 12 }}
+      volumes:
+        - name: trust-bundle
+          configMap:
+            name: "{{ template "fullname" . }}-trust-bundle"
+        - name: esg-secrets
+          secret:
+            secretName: "{{ template "fullname" . }}-secrets"
+        - name: esg-config-overrides
+          emptyDir: {}
+        - name: override-tarballs
+          configMap:
+            name: "{{ template "fullname" . }}-config-overrides"

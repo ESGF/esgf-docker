@@ -19,6 +19,11 @@ ARG ESGF_VERSION=latest
 # https://github.com/moby/moby/issues/34482
 FROM ${ESGF_HUB}/${ESGF_PREFIX}configure:${ESGF_VERSION} as configuration
 
+
+#############
+## Stage 1 ##
+#############
+
 FROM openjdk:8-jdk AS esg-orp-unpack
 
 # Download and unpack esg-orp war
@@ -45,16 +50,13 @@ MAINTAINER Earth System Grid Federation <esgf-devel@lists.llnl.gov>
 COPY --from=esg-orp-unpack --chown=1001:0 /opt/esg-orp $CATALINA_HOME/webapps/esg-orp
 
 # Copy configuration and utils from esgf-configure
-# Ensure the config directory is owned by the tomcat user and root group
-RUN mkdir -p /esg/config && chown 1001:0 /esg/config && chmod 775 /esg/config
-COPY --chown=1001:0 --from=configuration /esg/config /esg/config
-# Make sure this script runs first by giving it a low ordinal
-COPY --from=configuration /opt/esgf-docker/scripts/interpolate-configs.sh /tomcat-init.d/01-interpolate.sh
-# Install esg-orp.properties template
-COPY conf/esg-orp.properties.template $CATALINA_HOME/webapps/esg-orp/WEB-INF/classes/
-# This script interpolates environment variables into esg-orp.properties at runtime before Tomcat runs
-COPY scripts/configure-orp.sh /tomcat-init.d/02-configure-orp.sh
-COPY scripts/setenv.sh $CATALINA_HOME/bin/setenv.sh
+COPY --chown=1001:0 --from=configuration /esg /esg
+# Install customised esg-orp.properties template
+COPY ./conf $CATALINA_HOME/webapps/esg-orp/WEB-INF/classes/.defaults
+# Install initialisation script
+COPY ./scripts/configure.sh /tomcat-init.d/
+# Install environment customisations
+COPY ./scripts/setenv.sh $CATALINA_HOME/bin/
 
 # Run as the tomcat user by default
 USER 1001

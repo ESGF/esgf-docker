@@ -2,23 +2,29 @@
 
 set -eo pipefail
 
-source "$(dirname "$(realpath "$0")")/functions.sh"
+. "$(dirname $BASH_SOURCE)/functions.sh"
+
 
 #####
-## This script generates test certificates for a local test installation. These
-## certificates should obviously not be used in production.
+## This script generates test certificates for a local test installation. These
+## certificates should obviously not be used in production.
 ##
 ## The following certificates are generated, unless they already exist:
 ##
-##   1. A self-signed CA for the SLCS
+##   1. A self-signed CA for the SLCS
 ##   2. A self-signed host certificate for SSL
 #####
 
 [ -z "$ESGF_HOSTNAME" ] && error "ESGF_HOSTNAME must be set"
 
 CERTS="/esg/certificates"
+mkdir -p "$CERTS"
 
 info "Generating self-signed test certificates"
+
+# Create a temporary directory to use as HOME
+# This is required to allow openssl to produce its random state
+export HOME="$(mktemp -d)"
 
 if [ ! -f "$CERTS/slcsca/ca.crt" ]; then
     : ${ESGF_SLCS_CA_SUBJECT:="/O=esgf/CN=$ESGF_HOSTNAME SLCS CA"}

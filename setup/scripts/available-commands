@@ -1,22 +1,29 @@
 #!/bin/bash
 
-set -eo pipefail
+set -e
 
-echo "****************************"
-echo "** esgf-docker setup tool **"
-echo "****************************"
-echo ""
-echo "The following commands are available:"
-echo ""
-echo "    generate-test-certificates"
-echo "        Generates self-signed certificates for a test installation"
-echo ""
-echo "    generate-secrets"
-echo "        Generates random secret keys and password required for deployment"
-echo ""
-echo "    create-trust-bundle"
-echo "        Creates a PEM-encoded trust bundle from the available certificates"
-echo ""
-echo "    helm-values"
-echo "        Outputs YAML configuration for use with esgf-helm Helm chart"
-echo ""
+cat <<EOF
+****************************
+** esgf-docker setup tool **
+****************************
+
+The following commands are available:
+
+    generate-secrets
+        Generates random secret keys and password required for deployment
+
+    generate-test-certificates
+        Generates self-signed certificates for a test installation
+
+    fetch-static-configs
+        Fetchs static configuration files from a distribution site
+
+    create-trust-bundle
+        Creates a PEM-encoded trust bundle from the available certificates
+
+    compose-file
+        Outputs a Docker Compose file based on the specified configuration
+
+    helm-values
+        Outputs YAML configuration for use with esgf-helm Helm chart
+EOF

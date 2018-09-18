@@ -1,0 +1,48 @@
+#!/bin/bash
+
+set -eo pipefail
+
+. "$(dirname $BASH_SOURCE)/functions.sh"
+
+
+#####
+## This script downloads static configurations from the esgf-config Github repo
+#####
+
+profile="${1:-"esgf-prod"}"
+
+mkdir -p /esg/config
+
+# Download the static config files
+info "Downloading static configs"
+config_files=(
+    "esgf_ats_static.xml"
+    "esgf_cogs.xml"
+    "esgf_endpoints.xml"
+    "esgf_idp_static.xml"
+    "esgf_known_providers.xml"
+    "esgf_search_aliases.xml"
+)
+for i in "${!config_files[@]}"; do
+    config_file="${config_files[$i]}"
+    prefix="  [$((i + 1))/${#config_files[@]}] $config_file"
+    dest="/esg/config/$config_file"
+    if [ -f "$dest" ]; then
+        warn "$prefix - already exists, skipping"
+    else
+        info "$prefix - downloading"
+        curl -o "$dest" -fsSL "https://raw.githubusercontent.com/ESGF/esgf-config/master/${profile}/xml/${config_file}"
+    fi
+done
+
+# Download the trusted certs
+mkdir -p /esg/certificates
+certs="/esg/certificates/esg_trusted_certificates.tar"
+if [ -f "$certs" ]; then
+    warn "Trusted certificates tarball already present - skipping"
+else
+    info "Downloading trusted certificates tarball"
+    curl -o "$certs" -fsSL "${ESGF_DIST:-"http://dist.ceda.ac.uk/esgf/dist"}/certs/esg_trusted_certificates.tar"
+fi
+
+info "Done"

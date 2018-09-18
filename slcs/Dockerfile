@@ -50,19 +50,11 @@ RUN cd /pip-wheels && \
     pip install --no-deps -e /application && \
     rm -rf /pip-wheels
 
-# Install configuration files
-ENV ONLINECA_PASTEDEPLOY_FILE /opt/onlineca/onlineca.ini
+# Install Django settings
 COPY conf/settings.py /application/esgf_slcs_server/
-# The Paste config file is a template that is interpolated at runtime with values
-# from environment variables
-# Make sure the file is owned by the Django user but the root group, allowing
-# any user in the root group to write it
-COPY --chown=1001:0 conf/onlineca.ini $ONLINECA_PASTEDEPLOY_FILE
-# This is the script that does the interpolating
-COPY scripts/configure-onlineca.py /django-init.d/
+
+# Set the settings module to use
+ENV DJANGO_SETTINGS_MODULE "esgf_slcs_server.settings"
 
 # Run as the Django user unless otherwise specified
 USER 1001
-
-# The "command" is just the settings file to use
-CMD ["esgf_slcs_server.settings"]

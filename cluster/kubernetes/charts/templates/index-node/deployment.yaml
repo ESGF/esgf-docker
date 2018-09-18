@@ -1,0 +1,102 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: "{{ template "fullname" . }}-index-node"
+  labels:
+{{ include "default-labels" . | indent 4 }}
+    component: index-node
+spec:
+  replicas: {{ .Values.indexNode.replicas }}
+  # Select pods on release and component only, rather than all labels
+  # This means that the selector will match all pods from all versions of the chart when upgrading
+  selector:
+    matchLabels:
+      release: {{ .Release.Name }}
+      component: index-node
+  template:
+    metadata:
+      labels:
+{{ include "default-labels" . | indent 8 }}
+        component: index-node
+      annotations:
+        checksum/trust-bundle: {{ include (print $.Template.BasePath "/configuration/trust-bundle.yaml") . | sha256sum }}
+        checksum/environment-common: {{ include (print $.Template.BasePath "/configuration/environment-common.yaml") . | sha256sum }}
+        checksum/config-overrides: {{ include (print $.Template.BasePath "/configuration/config-overrides.yaml") . | sha256sum }}
+    spec:
+      initContainers:
+        # Unpack the required config overrides from the base64-encoded tarballs in the configmap
+        # This process is required because configmaps cannot contain nested directory structures
+        - name: unpack-config-overrides
+          image: busybox
+          command:
+            - "sh"
+            - "-c"
+            - |
+              set -eo pipefail
+              if [ -f /esg/tarballs/esg-config-overrides.tar.gz.b64 ]; then
+                  base64 -d /esg/tarballs/esg-config-overrides.tar.gz.b64 | tar -xz -C /esg/config
+              fi
+          volumeMounts:
+            - mountPath: /esg/config
+              name: esg-config-overrides
+            - mountPath: /esg/tarballs
+              name: override-tarballs
+              readOnly: true
+        # Make sure Solr is up before starting
+        - name: ensure-solr-slave
+          image: radial/busyboxplus:curl
+          command:
+            # Try every 5 seconds for no longer than 10 mins
+            - sh
+            - -c
+            - |
+              for i in $(seq 120); do
+                sleep 5
+                echo "Attempt $i of 120"
+                if curl -k -m 1 -fsSL http://{{ template "fullname" . }}-solr-slave:8983/solr/admin/info/system?wt=json; then exit 0; fi
+              done
+              exit 1
+      containers:
+        - name: index-node
+          image: "{{ .Values.indexNode.image.repository }}:{{ .Values.indexNode.image.tag }}"
+          imagePullPolicy: {{ default "" .Values.indexNode.image.pullPolicy | quote }}
+          ports:
+            - name: http
+              containerPort: 8080
+          # The readiness and liveness probes run the same thing, but the liveness
+          # probe just waits a while before kicking in whereas the readiness probe
+          # starts straight away
+          readinessProbe: &probe
+            httpGet:
+              path: /esg-search/search
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            <<: *probe
+            initialDelaySeconds: 600
+          envFrom:
+            - configMapRef:
+                name: "{{ template "fullname" . }}-environment-common"
+          env:
+            - name: ESGF_SOLR_SHARDS
+              value: "{{ template "fullname" . }}-solr-slave:8983/solr{{ range .Values.solr.shards.shardList }},{{ template "fullname" $ }}-solr-{{ .name }}:8983/solr{{ end }}"
+          volumeMounts:
+            - mountPath: /esg/certificates/esg-trust-bundle.pem
+              name: trust-bundle
+              subPath: esg-trust-bundle.pem
+              readOnly: true
+            - mountPath: /esg/config/.overrides
+              name: esg-config-overrides
+              readOnly: true
+          resources:
+{{ toYaml .Values.indexNode.resources | indent 12 }}
+      volumes:
+        - name: trust-bundle
+          configMap:
+            name: "{{ template "fullname" . }}-trust-bundle"
+        - name: esg-config-overrides
+          emptyDir: {}
+        - name: override-tarballs
+          configMap:
+            name: "{{ template "fullname" . }}-config-overrides"
