@@ -18,8 +18,13 @@ set -eo pipefail
 [ -z "$ESGF_HOSTNAME" ] && error "ESGF_HOSTNAME must be set"
 
 CERTS="/esg/certificates"
+mkdir -p "$CERTS"
 
 info "Generating self-signed test certificates"
+
+# Create a temporary directory to use as HOME
+# This is required to allow openssl to produce its random state
+export HOME="$(mktemp -d)"
 
 if [ ! -f "$CERTS/slcsca/ca.crt" ]; then
     : ${ESGF_SLCS_CA_SUBJECT:="/O=esgf/CN=$ESGF_HOSTNAME SLCS CA"}
