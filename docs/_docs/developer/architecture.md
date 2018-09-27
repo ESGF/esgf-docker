@@ -20,8 +20,8 @@ python:2.7-slim -> esgfhub/django -> esgfhub/auth
                                   -> esgfhub/cog
                                   -> esgfhub/slcs
 
-openjdk:8-jre -> tomcat:8 -> esgfhub/tomcat -> esgfhub/idp-node
-                                            -> esgfhub/index-node
+openjdk:8-jre -> tomcat:8 -> esgfhub/tomcat -> esgfhub/idp
+                                            -> esgfhub/search
                                             -> esgfhub/orp
                                             -> esgfhub/tds
 

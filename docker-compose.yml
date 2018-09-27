@@ -65,8 +65,8 @@ services:
     command: ["true"]
     depends_on:
       - esgf-postgres-esgcet
-      - esgf-index-node
-      - esgf-idp-node
+      - esgf-search
+      - esgf-idp
       - esgf-orp
       - esgf-tds
 
@@ -83,19 +83,19 @@ services:
     environment:
       ESGF_HOSTNAME:
       ESGF_SOLR_UPSTREAM: http://esgf-solr-slave:8983
-      ESGF_INDEX_NODE_UPSTREAM: http://esgf-index-node:8080
+      ESGF_INDEX_NODE_UPSTREAM: http://esgf-search:8080
       ESGF_TDS_UPSTREAM: http://esgf-tds:8080
       ESGF_COG_UPSTREAM: http://esgf-cog:8000
       ESGF_ORP_UPSTREAM: http://esgf-orp:8080
-      ESGF_IDP_UPSTREAM: http://esgf-idp-node:8080
+      ESGF_IDP_UPSTREAM: http://esgf-idp:8080
       ESGF_SLCS_UPSTREAM: http://esgf-slcs:8000
       ESGF_AUTH_UPSTREAM: http://esgf-auth:8000
     depends_on:
       - esgf-solr-slave
-      - esgf-index-node
+      - esgf-search
       - esgf-tds
       - esgf-orp
-      - esgf-idp-node
+      - esgf-idp
       - esgf-slcs
       - esgf-auth
       - esgf-cog
@@ -164,8 +164,8 @@ services:
       # Allow the main ESGF configuration to be overridden
       - "$ESGF_CONFIG/config:/esg/config/.overrides:ro"
 
-  esgf-index-node:
-    image: "${ESGF_HUB}/${ESGF_PREFIX}index-node:${ESGF_VERSION}"
+  esgf-search:
+    image: "${ESGF_HUB}/${ESGF_PREFIX}search:${ESGF_VERSION}"
     restart: always
     environment:
       <<: *esgf_properties
@@ -180,8 +180,8 @@ services:
       - esgf-solr-slave
       - esgf-orp
 
-  esgf-idp-node:
-    image: "${ESGF_HUB}/${ESGF_PREFIX}idp-node:${ESGF_VERSION}"
+  esgf-idp:
+    image: "${ESGF_HUB}/${ESGF_PREFIX}idp:${ESGF_VERSION}"
     restart: always
     environment:
       <<: *esgf_properties

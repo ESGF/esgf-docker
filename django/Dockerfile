@@ -8,7 +8,7 @@
 #####
 
 # Use the smallest base image we can
-FROM python:2.7-slim
+FROM python:2.7-slim-jessie
 
 # Ensure that Python outputs everything that's printed inside
 # the application rather than buffering it.

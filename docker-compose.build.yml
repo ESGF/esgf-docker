@@ -92,10 +92,10 @@ services:
       - esgf-configure
       - esgf-tomcat
 
-  esgf-index-node:
-    image: "${ESGF_HUB}/${ESGF_PREFIX}index-node:${ESGF_VERSION}"
+  esgf-search:
+    image: "${ESGF_HUB}/${ESGF_PREFIX}search:${ESGF_VERSION}"
     build:
-      context: ./index-node
+      context: ./search
       args:
         ESGF_HUB: $ESGF_HUB
         ESGF_PREFIX: $ESGF_PREFIX
@@ -105,10 +105,10 @@ services:
       - esgf-configure
       - esgf-tomcat
 
-  esgf-idp-node:
-    image: "${ESGF_HUB}/${ESGF_PREFIX}idp-node:${ESGF_VERSION}"
+  esgf-idp:
+    image: "${ESGF_HUB}/${ESGF_PREFIX}idp:${ESGF_VERSION}"
     build:
-      context: ./idp-node
+      context: ./idp
       args:
         ESGF_HUB: $ESGF_HUB
         ESGF_PREFIX: $ESGF_PREFIX

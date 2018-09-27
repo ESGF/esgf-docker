@@ -31,13 +31,13 @@ orp:
   image:
     repository: {{ .Env.ESGF_HUB }}/{{ .Env.ESGF_PREFIX }}orp
     tag: {{ .Env.ESGF_VERSION }}
-indexNode:
+search:
   image:
-    repository: {{ .Env.ESGF_HUB }}/{{ .Env.ESGF_PREFIX }}index-node
+    repository: {{ .Env.ESGF_HUB }}/{{ .Env.ESGF_PREFIX }}search
     tag: {{ .Env.ESGF_VERSION }}
-idpNode:
+idp:
   image:
-    repository: {{ .Env.ESGF_HUB }}/{{ .Env.ESGF_PREFIX }}idp-node
+    repository: {{ .Env.ESGF_HUB }}/{{ .Env.ESGF_PREFIX }}idp
     tag: {{ .Env.ESGF_VERSION }}
 tds:
   image:
@@ -88,10 +88,11 @@ certificates:
   slcsca.key: |
 {{ file.Read "/esg/certificates/slcsca/ca.key" | indent 4 }}
 
-secrets:
+globals:
+  secrets:
 {{- range (file.ReadDir "/esg/secrets") }}
-  {{ . }}: >-
-{{ file.Read (printf "/esg/secrets/%s" .) | indent 4 }}
+    {{ . }}: >-
+{{ file.Read (printf "/esg/secrets/%s" .) | indent 6 }}
 {{- end }}
 EOF
 )"

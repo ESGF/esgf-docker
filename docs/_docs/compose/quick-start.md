@@ -106,7 +106,7 @@ in a browser and you should see the CoG interface. You can view the container
 logs using commands of the form:
 
 ```sh
-./bin/esgf-compose logs [-f] esgf-{cog,index-node,idp-node,orp,slcs,...}
+./bin/esgf-compose logs [-f] esgf-{cog,search,idp,orp,slcs,...}
 ```
 
 where the optional `-f` means "follow", as in `tail -f`.

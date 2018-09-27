@@ -35,7 +35,7 @@ services:
     volumes:
       - "{{ template "volume-name" . }}:/esg/solr-home"
 {{ end }}
-  esgf-index-node:
+  esgf-search:
     environment:
       ESGF_SOLR_SHARDS: "esgf-solr-slave:8983/solr{{ range $shards }},{{ template "service-name" . }}:8983/solr{{ end }}"
 
