@@ -1,0 +1,89 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: "{{ template "fullname" . }}-visus"
+  labels:
+{{ include "default-labels" . | indent 4 }}
+    component: visus
+spec:
+  replicas: 1
+  # Select pods on release and component only, rather than all labels
+  # This means that the selector will match all pods from all versions of the chart when upgrading
+  selector:
+    matchLabels:
+      release: {{ .Release.Name }}
+      component: visus
+  template:
+    metadata:
+      labels:
+{{ include "default-labels" . | indent 8 }}
+        component: visus
+
+
+      # annotations:
+      #   checksum/secrets: {{ include (print $.Template.BasePath "/configuration/secrets.yaml") . | sha256sum }}
+      #   checksum/trust-bundle: {{ include (print $.Template.BasePath "/configuration/trust-bundle.yaml") . | sha256sum }}
+      #   checksum/config-overrides: {{ include (print $.Template.BasePath "/configuration/config-overrides.yaml") . | sha256sum }}
+
+
+    spec:
+      # Setting fsGroup for the pod allows some provisioners to chown mounted volumes to the given group
+      #   The publish group is 1001 inside the container
+      securityContext:
+        fsGroup: 1001
+      containers:
+        - name: visus
+          image: "{{ .Values.visus.image.repository }}:{{ .Values.visus.image.tag }}"
+          imagePullPolicy: {{ default "" .Values.visus.image.pullPolicy | quote }}
+          ports:
+            - name: http
+              containerPort: 80
+          # The readiness and liveness probes run the same thing, but the liveness
+          # probe just waits a while before kicking in whereas the readiness probe
+          # starts straight away
+          readinessProbe: &probe
+            httpGet:
+              path: /
+              port: 80
+              # The ALLOWED_HOSTS setting means that the app will only accept
+              # requests from the correct host
+              httpHeaders:
+                - name: Host
+                  value: "{{ .Values.hostname }}"
+                - name: X-Forwarded-Host
+                  value: "{{ .Values.hostname }}"
+                - name: X-Forwarded-Proto
+                  value: https
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            <<: *probe
+            initialDelaySeconds: 600
+          env:
+            - name: ESGF_DATABASE_HOST
+              value: "{{ template "fullname" . }}-postgres-esgcet"
+
+          volumeMounts:
+            - mountPath: /data/xml
+              name: tds-data
+            - mountPath: /esg/certificates/esg-trust-bundle.pem
+              name: trust-bundle
+              subPath: esg-trust-bundle.pem
+              readOnly: true
+            - mountPath: /esg/config/esgcet/.overrides
+              name: esgcet-overrides
+              readOnly: true
+          resources:
+{{ toYaml .Values.visus.resources | indent 12 }}
+      volumes:
+        - name: tds-data
+          persistentVolumeClaim:
+            claimName: "{{ template "fullname" . }}-tds-data"
+        - name: trust-bundle
+          configMap:
+            name: "{{ template "fullname" . }}-trust-bundle"
+        - name: esgcet-overrides
+          emptyDir: {}
+        - name: override-tarballs
+          configMap:
+            name: "{{ template "fullname" . }}-config-overrides"
