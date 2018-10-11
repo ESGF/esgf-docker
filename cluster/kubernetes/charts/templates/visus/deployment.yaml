@@ -18,14 +18,6 @@ spec:
       labels:
 {{ include "default-labels" . | indent 8 }}
         component: visus
-
-
-      # annotations:
-      #   checksum/secrets: {{ include (print $.Template.BasePath "/configuration/secrets.yaml") . | sha256sum }}
-      #   checksum/trust-bundle: {{ include (print $.Template.BasePath "/configuration/trust-bundle.yaml") . | sha256sum }}
-      #   checksum/config-overrides: {{ include (print $.Template.BasePath "/configuration/config-overrides.yaml") . | sha256sum }}
-
-
     spec:
       # Setting fsGroup for the pod allows some provisioners to chown mounted volumes to the given group
       #   The publish group is 1001 inside the container
@@ -59,31 +51,18 @@ spec:
           livenessProbe:
             <<: *probe
             initialDelaySeconds: 600
-          env:
-            - name: ESGF_DATABASE_HOST
-              value: "{{ template "fullname" . }}-postgres-esgcet"
-
           volumeMounts:
             - mountPath: /data/xml
               name: tds-data
-            - mountPath: /esg/certificates/esg-trust-bundle.pem
-              name: trust-bundle
-              subPath: esg-trust-bundle.pem
-              readOnly: true
-            - mountPath: /esg/config/esgcet/.overrides
-              name: esgcet-overrides
-              readOnly: true
+            - mountPath: /home/visus/webviewer/config.js
+              subPath: config.js
+              name: config-js
           resources:
 {{ toYaml .Values.visus.resources | indent 12 }}
       volumes:
         - name: tds-data
           persistentVolumeClaim:
             claimName: "{{ template "fullname" . }}-tds-data"
-        - name: trust-bundle
+        - name: config-js
           configMap:
-            name: "{{ template "fullname" . }}-trust-bundle"
-        - name: esgcet-overrides
-          emptyDir: {}
-        - name: override-tarballs
-          configMap:
-            name: "{{ template "fullname" . }}-config-overrides"
+            name: "{{ template "fullname" . }}-visus-config-js"
