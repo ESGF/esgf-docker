@@ -1,0 +1,7 @@
+visus:
+  image:
+    repository: visus/ondemand
+    tag: latest
+    # pullPolicy:  "IfNotPresent"
+    resources: {}
+    environment: {}
