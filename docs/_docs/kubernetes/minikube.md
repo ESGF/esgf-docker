@@ -127,7 +127,7 @@ $ kubectl exec -it "$PUBLISHER_POD" /usr/local/bin/docker-entrypoint.sh bash
 # Fetch a certificate
 [publisher] $ fetch-certificate
 # Publish the data
-[publisher] $ esgprep mapfile --project test /esg/data/test
+[publisher] $ esgmapfile --project test /esg/data/test
 [publisher] $ esgpublish --project test --map mapfiles/test.test.map --service fileservice
 [publisher] $ esgpublish --project test --map mapfiles/test.test.map --service fileservice --noscan --thredds
 [publisher] $ esgpublish --project test --map mapfiles/test.test.map --service fileservice --noscan --publish
