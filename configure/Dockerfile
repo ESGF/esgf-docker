@@ -7,10 +7,10 @@
 FROM alpine
 
 # Install gomplate (for templating) into the bin directory
-ARG GOMPLATE_VERSION=2.8.0
+ARG GOMPLATE_VERSION=3.1.0
 RUN apk --no-cache add curl && \
     mkdir -p /esg/bin && \
-    curl -o /esg/bin/gomplate -fsSL https://github.com/hairyhenderson/gomplate/releases/download/${GOMPLATE_VERSION}/gomplate_linux-amd64-slim && \
+    curl -o /esg/bin/gomplate -fsSL https://github.com/hairyhenderson/gomplate/releases/download/v${GOMPLATE_VERSION}/gomplate_linux-amd64-slim && \
     chmod 755 /esg/bin/gomplate
 # Copy the scripts into the bin directory
 COPY ./scripts  /esg/bin

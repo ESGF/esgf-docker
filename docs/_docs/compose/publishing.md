@@ -52,15 +52,13 @@ fetch-certificate
 ### Generate map files
 
 ```sh
-esgprep mapfile --project test /esg/data/test
-ls -l mapfiles
+esgmapfile --project test /esg/data/test
 ```
 
 ### Publish to the PostgreSQL database
 
 ```sh
 esgpublish --project test --map mapfiles/test.test.map --service fileservice
-esglist_datasets test
 ```
 
 ### Publish to the TDS

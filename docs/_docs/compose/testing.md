@@ -51,7 +51,7 @@ The following procedure can be used to manually test an ESGF node installation u
 		* username=rootAdmin
 		* password=<value from cat $ESGF_CONFIG/secrets/rootadmin-password>
 
-* Test publishing a test dataset following the instructions at [Data Publishing](/usage/publishing/)
+* Test publishing a test dataset following the instructions at [Data Publishing](../publishing/)
 
 ### Automatic Testing
 

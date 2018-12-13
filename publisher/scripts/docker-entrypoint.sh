@@ -11,6 +11,10 @@ set -euo pipefail
 ## values from the environment and running "esginitialize -c"
 #####
 
+# Create a directory for the egg cache that is writable only by the current user
+export PYTHON_EGG_CACHE="$(mktemp -d)"
+chmod 744 $PYTHON_EGG_CACHE
+
 # Make sure the trusted certificates have been updated
 info "Updating trusted certificates"
 # Combine the trusted certificates into a single bundle and make sure Python and curl use it
