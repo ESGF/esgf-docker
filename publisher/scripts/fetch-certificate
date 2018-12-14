@@ -17,7 +17,7 @@ password="$2"
 echo
 
 CERTFILE="/esg/config/esgcet/.globus/certificate-file"
-mkdir -p /esg/config/esgcet/.globus
+mkdir -p /esg/config/esgcet/.globus/certificates
 
 info "  Generating private key and CSR"
 KEYFILE="$(mktemp)"
