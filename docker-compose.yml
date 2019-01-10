@@ -90,6 +90,7 @@ services:
       ESGF_IDP_UPSTREAM: http://esgf-idp-node:8080
       ESGF_SLCS_UPSTREAM: http://esgf-slcs:8000
       ESGF_AUTH_UPSTREAM: http://esgf-auth:8000
+      ESGF_VISUS_UPSTREAM: http://esgf-visus:8080
     depends_on:
       - esgf-solr-slave
       - esgf-index-node
@@ -99,6 +100,7 @@ services:
       - esgf-slcs
       - esgf-auth
       - esgf-cog
+      - esgf-visus
 
   esgf-solr-master:
     image: "${ESGF_HUB}/${ESGF_PREFIX}solr:${ESGF_VERSION}"
@@ -107,6 +109,15 @@ services:
       ESGF_SOLR_ROLE: master
     volumes:
       - "solr-master-home:/esg/solr-home"
+
+  esgf-visus:
+    image: "visus/ondemand"
+    restart: always  
+    ports:
+      - "8080:80"
+    #  - "42299:42299"
+    volumes:
+      - "visus:/esg/visus-home"
 
   esgf-solr-slave:
     image: "${ESGF_HUB}/${ESGF_PREFIX}solr:${ESGF_VERSION}"
@@ -368,3 +379,4 @@ volumes:
   postgres-slcs-data:
   tds-content:
   slcs-trustroots:
+  visus:
