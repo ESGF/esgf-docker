@@ -4,7 +4,7 @@ category: Docker Compose
 order: 1.5
 ---
 
-The following page gives some useful tips on docker and swarm managment.
+The following page gives some useful tips on docker and swarm management.
 Docker version 17.09.0-ce, build afdb6d4
 
 ## Docker container managment
@@ -43,7 +43,7 @@ docker volume ls
 
 * Remove dangling volumes of container
 ```sh
-docker volume ls -f "dangling=true" | xargs docker volume rm 
+docker volume ls -f "dangling=true" | xargs docker volume rm
 ```
 
 * Remove all volumes
@@ -60,7 +60,7 @@ docker image ls # or docker images
 
 * Remove dangling images
 ```sh
-docker image ls -f "dangling=true" | xargs docker image rm 
+docker image ls -f "dangling=true" | xargs docker image rm
 ```
 
 * Remove all images
