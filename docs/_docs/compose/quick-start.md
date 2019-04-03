@@ -29,7 +29,7 @@ Next, create an empty directory to store the configuration for the deployment an
 the `ESGF_CONFIG` environment variable to point to it:
 
 ```sh
-export ESGF_CONFIG=/path/to/config/directory
+export ESGF_CONFIG=</path/to/config/directory>
 mkdir -p $ESGF_CONFIG
 ```
 
@@ -39,8 +39,8 @@ required:
 
 ```sh
 cat > "$ESGF_CONFIG/environment" <<EOF
-ESGF_HOSTNAME=local.esgf.org
-ESGF_DATA=/path/to/data/directory
+ESGF_HOSTNAME=<local.esgf.org>
+ESGF_DATA=</path/to/data/directory>
 EOF
 ```
 
@@ -101,7 +101,7 @@ Docker Compose:
 This will pull all the images from Docker Hub (unless they are already available
 locally) and launch the containers in order.
 
-Once all the containers are running normally, navigate to `https://$ESGF_HOSTNAME`
+Once all the containers are running normally, navigate to `https://[$ESGF_HOSTNAME]`
 in a browser and you should see the CoG interface. You can view the container
 logs using commands of the form:
 
@@ -111,7 +111,7 @@ logs using commands of the form:
 
 where the optional `-f` means "follow", as in `tail -f`.
 
-Try to log in with the OpenID `https://$ESGF_HOSTNAME/esgf-idp/openid/rootAdmin`.
+Try to log in with the OpenID `https://[$ESGF_HOSTNAME]/esgf-idp/openid/rootAdmin`.
 To find the `rootAdmin` password that was randomly generated for you, run the
 following command:
 
