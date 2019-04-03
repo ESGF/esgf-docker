@@ -4,4 +4,4 @@ ESGF software stack as Docker images.
 
 ## Documentation
 
-For documentation, please visit [cedadev.github.io/esgf-docker](https://cedadev.github.io/esgf-docker).
+For documentation, please visit [esgf.github.io/esgf-docker/](https://https://esgf.github.io/esgf-docker/).
