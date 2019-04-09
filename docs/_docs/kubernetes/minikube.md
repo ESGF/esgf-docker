@@ -29,7 +29,7 @@ mode:
 minikube ssh -- sudo ip link set docker0 promisc on
 ```
 
-Install Tiller:
+Install [Tiller](https://helm.sh/docs/install/#installing-tiller):
 
 ```bash
 # Create service account for Tiller
@@ -43,6 +43,8 @@ helm init --service-account tiller --upgrade
 # Wait for Tiller to start
 kubectl -n kube-system wait --for condition=ready pods -l "app=helm,name=tiller" --timeout 300s
 ```
+
+Be sure to check firewall settings if the Tiller pods is timing out or is unable to be fetched.
 
 Install the Nginx ingress controller using Helm. Unfortunately, we can't use
 `minikube addons enable ingress` because we need an additional flag to enable
