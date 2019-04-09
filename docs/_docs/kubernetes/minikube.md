@@ -18,7 +18,7 @@ the Kubernetes version due to [this bug](https://github.com/kubernetes/kubernete
 See `minikube get-k8s-versions` for the available versions:
 
 ```sh
-minikube start --kubernetes-version v1.10.0 --memory 8096 --disk-size 100GB
+minikube start --kubernetes-version v1.14.0 --memory 8096 --disk-size 100GB
 ```
 
 Pods must be able to loop back to themselves via their own service - this is known
@@ -78,6 +78,7 @@ Configuration is very similar to [Docker Compose](../../compose/quick-start/#con
 ```sh
 # This should be an empty directory
 export ESGF_CONFIG=/path/to/esgf/config
+mkdir -p $ESGF_CONFIG
 # Create an environment file containing the hostname
 cat > "$ESGF_CONFIG/environment" <<EOF
 ESGF_HOSTNAME=$(minikube ip).xip.io
