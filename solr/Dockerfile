@@ -15,9 +15,11 @@ ENV SOLR_HOME /esg/solr-home
 
 # Install the Solr home template from the distribution site
 # Make customisations to the solrconfig.xml to enable extra Java properties
-ARG ESGF_REPO=http://dist.ceda.ac.uk/esgf
+ARG ESG_SEARCH_VERSION=v4.17.9
+ARG ESG_SEARCH_REPO=https://github.com/ESGF/esg-search/releases/download/$ESG_SEARCH_VERSION
+
 RUN mkdir -p /esg/solr-core-config && \
-    curl -fsSL $ESGF_REPO/dist/esg-search/solr-home.tar | \
+    curl -fsSL $ESG_SEARCH_REPO/solr-home.tar | \
       tar -x -C /esg/solr-core-config --strip-components=2 solr-home/mycore && \
     rm -rf /esg/solr-core-config/core.properties && \
     sed -i \

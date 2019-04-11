@@ -24,39 +24,45 @@ FROM ${ESGF_HUB}/${ESGF_PREFIX}configure:${ESGF_VERSION} as configuration
 #############
 
 FROM openjdk:8-jdk AS esgf-tds-unpack
+ARG ESGF_VERSION=4.0.0-alpha1
+ARG ESGF_REPO=https://github.com/ESGF/esgf-ansible/releases/download/$ESGF_VERSION
 
-ARG ESGF_REPO=http://dist.ceda.ac.uk/esgf
+ARG NODE_MANAGER_VERSION=v1.0.5
+ARG NODE_MANAGER_REPO=https://github.com/ESGF/esgf-node-manager/releases/download/$NODE_MANAGER_VERSION
+
+ARG ESGF_SECURITY_VERSION=v2.8.9
+ARG ESGF_SECURITY_REPO=https://github.com/ESGF/esgf-security/releases/download/$ESGF_SECURITY_VERSION
 
 # First, download and unpack THREDDS
 RUN mkdir /opt/thredds && \
     cd /opt/thredds && \
     TMPFILE=$(mktemp) && \
-    curl -o $TMPFILE -fsSL $ESGF_REPO/dist/thredds/5.0/5.0.2/thredds.war && \
+    curl -o $TMPFILE -fsSL $ESGF_REPO/thredds.war && \
     jar xvf $TMPFILE && \
     cd -
 
 # Get jars required for TDS filters from the ESGF repo and install them
 RUN cd /opt/thredds/WEB-INF/lib && \
-    curl -O -fsSL $ESGF_REPO/artifacts/repositories/esgf-repo-share/xml-security/xmlsec/1.4.2/xmlsec-1.4.2.jar && \
-    curl -O -fsSL $ESGF_REPO/artifacts/repositories/esgf-repo-share/velocity/velocity/1.5/velocity-1.5.jar && \
-    curl -Of -sSL $ESGF_REPO/artifacts/repositories/esgf-repo-share/xalan/serializer/2.9.1/serializer-2.9.1.jar && \
-    curl -O -fsSL $ESGF_REPO/artifacts/repositories/esgf-repo-share/postgresql/postgresql/8.4-703.jdbc3/postgresql-8.4-703.jdbc3.jar && \
-    curl -O -fsSL $ESGF_REPO/dist/filters/XSGroupRole-1.0.0.jar && \
-    curl -O -fsSL $ESGF_REPO/dist/filters/commons-httpclient-3.1.jar && \
-    curl -O -fsSL $ESGF_REPO/dist/filters/commons-lang-2.6.jar && \
-    curl -O -fsSL $ESGF_REPO/dist/filters/jdom-legacy-1.1.3.jar && \
-    curl -O -fsSL $ESGF_REPO/dist/filters/opensaml-2.3.2.jar && \
-    curl -O -fsSL $ESGF_REPO/dist/filters/openws-1.3.1.jar && \
-    curl -O -fsSL $ESGF_REPO/dist/filters/xmltooling-1.2.2.jar && \
-    curl -O -fsSL $ESGF_REPO/dist/esg-orp/esg-orp-2.9.6.jar && \
-    curl -O -fsSL $ESGF_REPO/dist/esgf-node-manager/esgf-node-manager-common-1.0.0.jar && \
-    curl -O -fsSL $ESGF_REPO/dist/esgf-node-manager/esgf-node-manager-filters-1.0.0.jar && \
-    curl -O -fsSL $ESGF_REPO/dist/esgf-security/esgf-security-2.7.10.jar && \
+    curl -O -fsSL $ESGF_REPO/xmlsec-1.4.7.jar && \
+    curl -O -fsSL $ESGF_REPO/velocity-1.5.jar && \
+    curl -Of -sSL $ESGF_REPO/serializer-2.9.1.jar && \
+    curl -O -fsSL $ESGF_REPO/postgresql-8.4-703.jdbc3.jar && \
+    curl -O -fsSL $ESGF_REPO/XSGroupRole-1.0.0.jar && \
+    curl -O -fsSL $ESGF_REPO/commons-httpclient-3.1.jar && \
+    curl -O -fsSL $ESGF_REPO/commons-lang-2.6.jar && \
+    curl -O -fsSL $ESGF_REPO/jdom-legacy-1.1.3.jar && \
+    curl -O -fsSL $ESGF_REPO/opensaml-2.6.6.jar && \
+    curl -O -fsSL $ESGF_REPO/openws-1.5.6.jar && \
+    curl -O -fsSL $ESGF_REPO/xmltooling-1.4.6.jar && \
+    curl -O -fsSL $ESGF_REPO/esg-orp-2.10.11.jar && \
+    curl -O -fsSL $NODE_MANAGER_REPO/esgf-node-manager-common-$NODE_MANAGER_VERSION.jar && \
+    curl -O -fsSL $NODE_MANAGER_REPO/esgf-node-manager-filters-$NODE_MANAGER_VERSION.jar && \
+    curl -O -fsSL $ESGF_SECURITY_REPO/esgf-security-$ESGF_SECURITY_VERSION.jar && \
     cd -
 
 # FIXME: Obtain missing jars from ORP and old node-manager distributions
 RUN TMPFILE=$(mktemp) && \
-    curl -o $TMPFILE -fsSL $ESGF_REPO/dist/esg-orp/esg-orp.war && \
+    curl -o $TMPFILE -fsSL $ESGF_REPO/esg-orp.war && \
     TMPDIR=$(mktemp -d) && \
     cd $TMPDIR && \
     jar xvf $TMPFILE && \
@@ -68,7 +74,7 @@ RUN TMPFILE=$(mktemp) && \
     cd - && \
     rm -rf $TMPDIR
 RUN TMPFILE=$(mktemp) && \
-    curl -o $TMPFILE -fsSL $ESGF_REPO/dist/esgf-node-manager/esgf-node-manager.war && \
+    curl -o $TMPFILE -fsSL $NODE_MANAGER_REPO/esgf-node-manager.war && \
     TMPDIR=$(mktemp -d) && \
     cd $TMPDIR && \
     jar xvf $TMPFILE && \
