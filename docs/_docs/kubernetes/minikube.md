@@ -70,7 +70,6 @@ helm upgrade ingress stable/nginx-ingress \
 kubectl -n kube-system wait --for condition=ready pods -l "release=ingress" --timeout 300s
 ```
 
-
 ## Configure and deploy ESGF components
 
 Configuration is very similar to [Docker Compose](../../compose/quick-start/#configure-environment):
@@ -99,13 +98,12 @@ using `minikube dashboard`.
 Once all the containers are running, visit `https://$ESGF_HOSTNAME` to see the CoG interface.
 Try the following as a basic test of functionality:
 
-  *  Log in with the `rootAdmin` account from CoG (OpenID `https://$ESGF_HOSTNAME/esgf-idp/openid/rootAdmin`)
-     using the password from the `my-node-esgf-node-secrets` secret in Kubernetes, or the file
-     `$ESGF_CONFIG/secrets/rootadmin-password`
-  * Log in with the `rootAdmin` account from the ORP (`https://$ESGF_HOSTNAME/esg-orp`)
-  * Check THREDDS is running at `https://$ESGF_HOSTNAME/thredds`
-  * Check Solr is running at `https://$ESGF_HOSTNAME/solr`
-
+- Log in with the `rootAdmin` account from CoG (OpenID `https://$ESGF_HOSTNAME/esgf-idp/openid/rootAdmin`)
+  using the password from the `my-node-esgf-node-secrets` secret in Kubernetes, or the file
+  `$ESGF_CONFIG/secrets/rootadmin-password`
+- Log in with the `rootAdmin` account from the ORP (`https://$ESGF_HOSTNAME/esg-orp`)
+- Check THREDDS is running at `https://$ESGF_HOSTNAME/thredds`
+- Check Solr is running at `https://$ESGF_HOSTNAME/solr`
 
 ## Test publication
 
@@ -123,7 +121,7 @@ $ kubectl wait --for condition=ready pods "$PUBLISHER_POD" --timeout 300s
 $ kubectl exec -it "$PUBLISHER_POD" /usr/local/bin/docker-entrypoint.sh bash
 # Download the data
 [publisher] $ mkdir -p /esg/data/test
-[publisher] $ wget -O /esg/data/test/sftlf.nc http://distrib-coffee.ipsl.jussieu.fr/pub/esgf/dist/externals/sftlf.nc
+[publisher] $ wget -O /esg/data/test/sftlf.nc https://github.com/ESGF/esgf-ansible/releases/download/4.0.0-alpha1/sftlf.nc
 # Fetch a certificate
 [publisher] $ fetch-certificate
 # Publish the data
@@ -139,7 +137,6 @@ $ kubectl scale --replicas=0 deployment my-node-esgf-node-publisher
 
 After allowing time for the data to replicate from the master to the slave, check that search is working at
 `https://$ESGF_HOSTNAME/search/testproject/` and that the data is accessible from THREDDS.
-
 
 ## Cleanup
 

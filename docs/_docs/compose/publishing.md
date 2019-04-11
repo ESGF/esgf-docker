@@ -16,8 +16,10 @@ Before running the publication, ensure that the test dataset exists in `ESGF_DAT
 
 ```sh
 mkdir -p "$ESGF_DATA/test"
-wget -O "$ESGF_DATA/test/sftlf.nc" http://distrib-coffee.ipsl.jussieu.fr/pub/esgf/dist/externals/sftlf.nc
+wget -O "$ESGF_DATA/test/sftlf.nc" https://github.com/ESGF/esgf-ansible/releases/download/4.0.0-alpha1/sftlf.nc
 ```
+
+https://github.com/ESGF/esgf-ansible/releases/download/4.0.0-alpha1/sftlf.nc
 
 ### Start a publisher container instance
 
@@ -87,8 +89,8 @@ esgpublish --project test --map mapfiles/test.test.map --service fileservice --n
 
 After about a minute, the dataset and file should be returned when querying Solr:
 
-  * `https://${ESGF_HOSTNAME}/solr/index.html#/datasets/query`
-  * `https://${ESGF_HOSTNAME}/solr/index.html#/files/query`
+- `https://${ESGF_HOSTNAME}/solr/index.html#/datasets/query`
+- `https://${ESGF_HOSTNAME}/solr/index.html#/files/query`
 
 Additionally, they should be returned when initiating a search from the CoG user
 interface, if the project has searching enabled: `https://${ESGF_HOSTNAME}/search/testproject/`.
