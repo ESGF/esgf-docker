@@ -27,11 +27,13 @@ FROM ${ESGF_HUB}/${ESGF_PREFIX}configure:${ESGF_VERSION} as configuration
 FROM openjdk:8-jdk AS esg-orp-unpack
 
 # Download and unpack esg-orp war
-ARG ESGF_REPO=http://dist.ceda.ac.uk/esgf/dist
+ARG ORP_VERSION=v2.10.10
+ARG ORP_REPO=https://github.com/ESGF/esg-orp/releases/download/$ORP_VERSION/esg-orp.war
+
 RUN mkdir /opt/esg-orp && \
     cd /opt/esg-orp && \
     TMPFILE=$(mktemp) && \
-    curl -o $TMPFILE -fsSL $ESGF_REPO/esg-orp/esg-orp.war && \
+    curl -o $TMPFILE -fsSL $ORP_REPO/esg-orp.war && \
     jar xvf $TMPFILE && \
     chmod -R g+w /opt/esg-orp
 
