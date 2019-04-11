@@ -27,11 +27,13 @@ FROM ${ESGF_HUB}/${ESGF_PREFIX}configure:${ESGF_VERSION} as configuration
 FROM openjdk:8-jdk AS esg-search-unpack
 
 # Download and unpack war
-ARG ESGF_REPO=http://dist.ceda.ac.uk/esgf/dist
+ARG ESG_SEARCH_VERSION=v4.17.9
+ARG ESG_SEARCH_REPO=https://github.com/ESGF/esg-search/releases/download/$ESG_SEARCH_VERSION
+
 RUN mkdir /opt/esg-search && \
     cd /opt/esg-search && \
     TMPFILE=$(mktemp) && \
-    curl -o $TMPFILE -fsSL $ESGF_REPO/esg-search/esg-search.war && \
+    curl -o $TMPFILE -fsSL $ESG_SEARCH_REPO/esg-search.war && \
     jar xvf $TMPFILE && \
     chmod -R g+w /opt/esg-search
 
