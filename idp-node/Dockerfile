@@ -27,11 +27,13 @@ FROM ${ESGF_HUB}/${ESGF_PREFIX}configure:${ESGF_VERSION} as configuration
 FROM openjdk:8-jdk AS esgf-idp-unpack
 
 # Download and unpack esg-orp war
-ARG ESGF_REPO=http://dist.ceda.ac.uk/esgf/dist
+ARG IDP_VERSION=v2.8.8
+ARG IDP_REPO=https://github.com/ESGF/esgf-idp/releases/download/$IDP_VERSION
+
 RUN mkdir /opt/esgf-idp && \
     cd /opt/esgf-idp && \
     TMPFILE=$(mktemp) && \
-    curl -o $TMPFILE -fsSL $ESGF_REPO/esgf-idp/esgf-idp.war && \
+    curl -o $TMPFILE -fsSL $IDP_REPO/esgf-idp.war && \
     jar xvf $TMPFILE && \
     chmod -R g+w /opt/esgf-idp
 
