@@ -28,7 +28,7 @@ FROM openjdk:8-jdk AS esg-orp-unpack
 
 # Download and unpack esg-orp war
 ARG ORP_VERSION=v2.10.10
-ARG ORP_REPO=https://github.com/ESGF/esg-orp/releases/download/$ORP_VERSION/esg-orp.war
+ARG ORP_REPO=https://github.com/ESGF/esg-orp/releases/download/$ORP_VERSION
 
 RUN mkdir /opt/esg-orp && \
     cd /opt/esg-orp && \
