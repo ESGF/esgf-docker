@@ -43,7 +43,7 @@ RUN mkdir /opt/thredds && \
 
 # Get jars required for TDS filters from the ESGF repo and install them
 RUN cd /opt/thredds/WEB-INF/lib && \
-    curl -O -fsSL $ESGF_REPO/xmlsec-1.4.7.jar && \
+    curl -O -fsSL $ESGF_REPO/xmlsec-1.5.7.jar && \
     curl -O -fsSL $ESGF_REPO/velocity-1.5.jar && \
     curl -Of -sSL $ESGF_REPO/serializer-2.9.1.jar && \
     curl -O -fsSL $ESGF_REPO/postgresql-8.4-703.jdbc3.jar && \
@@ -55,9 +55,9 @@ RUN cd /opt/thredds/WEB-INF/lib && \
     curl -O -fsSL $ESGF_REPO/openws-1.5.6.jar && \
     curl -O -fsSL $ESGF_REPO/xmltooling-1.4.6.jar && \
     curl -O -fsSL $ESGF_REPO/esg-orp-2.10.11.jar && \
-    curl -O -fsSL $NODE_MANAGER_REPO/esgf-node-manager-common-$NODE_MANAGER_VERSION.jar && \
-    curl -O -fsSL $NODE_MANAGER_REPO/esgf-node-manager-filters-$NODE_MANAGER_VERSION.jar && \
-    curl -O -fsSL $ESGF_SECURITY_REPO/esgf-security-$ESGF_SECURITY_VERSION.jar && \
+    curl -O -fsSL $NODE_MANAGER_REPO/esgf-node-manager-common-1.0.5.jar && \
+    curl -O -fsSL $NODE_MANAGER_REPO/esgf-node-manager-filters-1.0.5.jar && \
+    curl -O -fsSL $ESGF_SECURITY_REPO/esgf-security-2.8.9.jar && \
     cd -
 
 # FIXME: Obtain missing jars from ORP and old node-manager distributions
