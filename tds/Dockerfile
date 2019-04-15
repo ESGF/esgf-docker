@@ -24,8 +24,8 @@ FROM ${ESGF_HUB}/${ESGF_PREFIX}configure:${ESGF_VERSION} as configuration
 #############
 
 FROM openjdk:8-jdk AS esgf-tds-unpack
-ARG ESGF_VERSION=4.0.0-alpha1
-ARG ESGF_REPO=https://github.com/ESGF/esgf-ansible/releases/download/$ESGF_VERSION
+ARG ESGF_ANSIBLE_VERSION=4.0.0-alpha1
+ARG ESGF_REPO=https://github.com/ESGF/esgf-ansible/releases/download/$ESGF_ANSIBLE_VERSION
 
 ARG NODE_MANAGER_VERSION=v1.0.5
 ARG NODE_MANAGER_REPO=https://github.com/ESGF/esgf-node-manager/releases/download/$NODE_MANAGER_VERSION
