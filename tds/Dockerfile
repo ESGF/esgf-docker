@@ -68,7 +68,7 @@ RUN TMPFILE=$(mktemp) && \
     jar xvf $TMPFILE && \
     rm -f $TMPFILE && \
     cp WEB-INF/lib/xalan-2.7.2.jar /opt/thredds/WEB-INF/lib/ && \
-    cp WEB-INF/lib/xercesImpl-2.10.0.jar /opt/thredds/WEB-INF/lib/ && \
+    cp WEB-INF/lib/xercesImpl-2.11.0.jar /opt/thredds/WEB-INF/lib/ && \
     cp WEB-INF/lib/xml-apis-1.4.01.jar /opt/thredds/WEB-INF/lib/ && \
     cp WEB-INF/lib/commons-io-2.4.jar /opt/thredds/WEB-INF/lib/ && \
     cd - && \
