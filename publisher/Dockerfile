@@ -30,7 +30,7 @@ ENV UVCDAT_ANONYMOUS_LOG no
 # NOTE: esgprep has very specific version requirements
 ARG CDAT_LABEL_CHANNEL=cdat/label/80
 RUN conda install -y -c $CDAT_LABEL_CHANNEL -c conda-forge -c cdat \
-      psycopg2-binary \
+      psycopg2 \
       lxml \
       cdutil \
       gcc_linux-64 \
