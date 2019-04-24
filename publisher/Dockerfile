@@ -26,32 +26,30 @@ RUN groupadd -g $PUBLISH_GID $PUBLISH_GROUP && \
 ENV ESGINI /esg/config/esgcet/esg.ini
 ENV UVCDAT_ANONYMOUS_LOG no
 
-# Install dependencies using conda
+# Install dependencies
 # NOTE: esgprep has very specific version requirements
-ARG CDAT_LABEL_CHANNEL=cdat/label/80
-RUN conda install -y -c $CDAT_LABEL_CHANNEL -c conda-forge -c cdat \
-      psycopg2 \
-      lxml \
-      cdutil \
-      gcc_linux-64 \
-      'requests==2.20.0' \
-      'netCDF4==1.4.0'
-
-# Make the conda-installed gcc available as gcc
+#   netCDF4 1.4.0 must be installed using pip as it conflicts with the
+#   dependency specification for later versions of libcdms
+# Also make the conda-installed gcc available as gcc
 #   See https://conda.io/docs/user-guide/tasks/build-packages/compiler-tools.html
-RUN ln -s /opt/conda/bin/x86_64-conda_cos6-linux-gnu-gcc /usr/local/bin/gcc
+ARG CDAT_LABEL_CHANNEL=cdat/label/v81
+RUN conda install -y -c conda-forge -c $CDAT_LABEL_CHANNEL \
+      gcc_linux-64 \
+      lxml \
+      cdtime \
+      cdms2 \
+      'psycopg2<2.7' \
+      'requests==2.20.0' && \
+    pip install \
+      'netCDF4==1.4.0' && \
+    ln -s /opt/conda/bin/x86_64-conda_cos6-linux-gnu-gcc /usr/local/bin/gcc
 
 # Install the publisher client from GitHub
-# TODO: REMOVE PATCH
-# Before installing, patch the publisher to fix this issue - https://github.com/ESGF/esg-publisher/issues/133
-ARG ESG_PUBLISHER_VERSION=v3.5.5
+ARG ESG_PUBLISHER_VERSION=v3.6.3
 RUN git clone https://github.com/ESGF/esg-publisher.git /application && \
     cd /application && \
     git checkout $ESG_PUBLISHER_VERSION && \
     cd src/python/esgcet && \
-    sed -i \
-      "s/config.get('DEFAULT', 'hessian_service_certs_location')/getConfig().get('DEFAULT', 'hessian_service_certs_location')/g" \
-      ./esgcet/publish/utility.py && \
     python setup.py install && \
     cd
 
