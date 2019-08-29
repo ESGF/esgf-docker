@@ -1,0 +1,33 @@
+{{ if .Values.tds.hpa.enabled }}
+apiVersion: autoscaling/v2beta2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: "{{ template "fullname" . }}-tds"
+  labels:
+{{ include "default-labels" . | indent 4 }}
+    component: tds
+spec:
+  minReplicas: {{ .Values.tds.hpa.minReplicas }}
+  {{ if lt .Values.tds.hpa.maxReplicas .Values.tds.replicas }}
+  maxReplicas: {{ .Values.tds.replicas }}
+  {{ else }}
+  maxReplicas: {{ .Values.tds.hpa.maxReplicas }}
+  {{ end }}
+  scaleTargetRef:
+    apiVersion: extensions/v1beta1
+    kind: Deployment
+    name: "{{ template "fullname" . }}-tds"
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.tds.hpa.cpuUtilization }}
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.tds.hpa.memUtilization }}
+{{ end }}
