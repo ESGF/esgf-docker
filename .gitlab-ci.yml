@@ -1,5 +1,6 @@
 stages:
   - build-centos7
+  - build-conda
 
 .dind:
   services:
@@ -27,19 +28,33 @@ stages:
     # Use the basename of the context directory as the image name
     - IMAGE_NAME="${IMAGE_NAME:-"$(basename $CONTEXT_DIR)"}"
     # Use a repository within the GitLab container registry for the project
-    - REPOSITORY="${REPOSITORY:-"$CI_REGISTRY_IMAGE/$IMAGE_NAME"}"
-    # Build and push with the short commit SHA as a tag
-    - TAG="$REPOSITORY:$CI_COMMIT_SHORT_SHA"
+    - REPOSITORY_BASE="${REPOSITORY_BASE:-$CI_REGISTRY_IMAGE}"
+    - REPOSITORY="${REPOSITORY:-"$REPOSITORY_BASE/$IMAGE_NAME"}"
     # Use the latest build for the branch and the latest build as cache sources
     - LATEST="$REPOSITORY:latest"
     - LATEST_BRANCH="$REPOSITORY:$CI_COMMIT_REF_SLUG"
     - docker pull $LATEST || true
     - docker pull $LATEST_BRANCH || true
-    - docker build --cache-from $LATEST --cache-from $LATEST_BRANCH --tag $TAG $CONTEXT_DIR
-    - docker push "$TAG"
+    - DOCKER_ARGS="--cache-from $LATEST --cache-from $LATEST_BRANCH"
+    # Build and push with the short commit SHA as a tag
+    - DOCKER_ARGS="$DOCKER_ARGS --tag $REPOSITORY:$CI_COMMIT_SHORT_SHA"
+    # Add the repository base and image version as build args for references
+    - DOCKER_ARGS="$DOCKER_ARGS --build-arg ESGF_REPOSITORY_BASE=$REPOSITORY_BASE --build-arg ESGF_IMAGES_VERSION=$CI_COMMIT_SHORT_SHA"
+    # Use any environment variable starting with BUILD_ARG_ as a build arg
+    - BUILD_ARGS=$(env | grep -e "^BUILD_ARG_" | awk -F '=' '{ print $1 }' || true)
+    - for arg in $BUILD_ARGS; do DOCKER_ARGS="$DOCKER_ARGS --build-arg ${arg:10}=$(eval "echo \$$arg")"; done
+    # Build and push
+    - docker build $DOCKER_ARGS $DOCKER_EXTRA_ARGS $CONTEXT_DIR
+    - docker push $REPOSITORY:$CI_COMMIT_SHORT_SHA
 
 build_centos7:
   extends: .docker-build
   stage: build-centos7
   variables:
     CONTEXT_DIR: $CI_PROJECT_DIR/images/centos7
+
+build_conda:
+  extends: .docker-build
+  stage: build-conda
+  variables:
+    CONTEXT_DIR: $CI_PROJECT_DIR/images/conda
