@@ -1,0 +1,45 @@
+stages:
+  - build-centos7
+
+.dind:
+  services:
+    - docker:19.03-dind
+  image: docker:19.03
+  variables:
+    DOCKER_HOST: tcp://docker:2376
+    DOCKER_TLS_CERTDIR: "/certs"
+  before_script:
+    - docker info
+    # Use the GitLab container registry by default
+    - REGISTRY="${REGISTRY:-$CI_REGISTRY}"
+    - REGISTRY_USER="${REGISTRY_USER:-$CI_REGISTRY_USER}"
+    # Allow the password to come from a file
+    - test -z "$REGISTRY_PASSWORD" && test -f "$REGISTRY_PASSWORD_FILE" && REGISTRY_PASSWORD="$(cat "$REGISTRY_PASSWORD_FILE")"
+    # Also allow the password to be base64 encoded (GitLab masked variables must be base64-encoded)
+    - test -z "$REGISTRY_PASSWORD" && test -n "$REGISTRY_PASSWORD_B64" && REGISTRY_PASSWORD="$(echo -n "$REGISTRY_PASSWORD_B64" | base64 -d)"
+    # If not given, use the GitLab container registry password
+    - REGISTRY_PASSWORD="${REGISTRY_PASSWORD:-$CI_REGISTRY_PASSWORD}"
+    - docker login -u $REGISTRY_USER -p $REGISTRY_PASSWORD $REGISTRY
+
+.docker-build:
+  extends: .dind
+  script:
+    # Use the basename of the context directory as the image name
+    - IMAGE_NAME="${IMAGE_NAME:-"$(basename $CONTEXT_DIR)"}"
+    # Use a repository within the GitLab container registry for the project
+    - REPOSITORY="${REPOSITORY:-"$CI_REGISTRY_IMAGE/$IMAGE_NAME"}"
+    # Build and push with the short commit SHA as a tag
+    - TAG="$REPOSITORY:$CI_COMMIT_SHORT_SHA"
+    # Use the latest build for the branch and the latest build as cache sources
+    - LATEST="$REPOSITORY:latest"
+    - LATEST_BRANCH="$REPOSITORY:$CI_COMMIT_REF_SLUG"
+    - docker pull $LATEST || true
+    - docker pull $LATEST_BRANCH || true
+    - docker build --cache-from $LATEST --cache-from $LATEST_BRANCH --tag $TAG $CONTEXT_DIR
+    - docker push "$TAG"
+
+build_centos7:
+  extends: .docker-build
+  stage: build-centos7
+  variables:
+    CONTEXT_DIR: $CI_PROJECT_DIR/images/centos7
