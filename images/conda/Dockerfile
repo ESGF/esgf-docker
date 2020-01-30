@@ -1,14 +1,14 @@
 #####
-## Base image for all images that require a basic Conda installation
+## Base image for all images that require Conda
 #####
 
 ARG ESGF_REPOSITORY_BASE=docker.io/esgfhub
 ARG ESGF_IMAGES_VERSION=latest
-FROM ${ESGF_REPOSITORY_BASE}/centos7:${ESGF_IMAGES_VERSION}
+FROM ${ESGF_REPOSITORY_BASE}/base:${ESGF_IMAGES_VERSION}
 
 # Configure environment
-ENV CONDA_DIR=/opt/conda
-ENV PATH=$CONDA_DIR/bin:$PATH
+ENV CONDA_DIR /opt/conda
+ENV PATH $CONDA_DIR/bin:$PATH
 
 # Install and configure Conda
 ENV CONDA_VERSION=4.7.12.1
