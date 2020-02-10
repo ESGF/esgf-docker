@@ -4,8 +4,8 @@ stages:
 
 .dind:
   services:
-    - docker:19.03-dind
-  image: docker:19.03
+    - docker:18-dind
+  image: docker:18
   variables:
     DOCKER_HOST: tcp://localhost:2375
     DOCKER_TLS_CERTDIR: ""
@@ -47,13 +47,13 @@ stages:
     - docker build $DOCKER_ARGS $DOCKER_EXTRA_ARGS $CONTEXT_DIR
     - docker push $REPOSITORY:$CI_COMMIT_SHORT_SHA
 
-build_base:
+build-base:
   extends: .docker-build
   stage: build-base
   variables:
     CONTEXT_DIR: $CI_PROJECT_DIR/images/base
 
-build_conda:
+build-conda:
   extends: .docker-build
   stage: build-conda
   variables:
