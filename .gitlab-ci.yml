@@ -2,15 +2,13 @@ stages:
   - build-base
   - build-conda
 
-services:
-  - docker:18-dind
-
-variables:
-  DOCKER_HOST: tcp://localhost:2375
-  DOCKER_TLS_CERTDIR: ""
-
 .dind:
-  image: docker:18
+  services:
+    - docker:19-dind
+  image: docker:19
+  variables:
+    DOCKER_HOST: tcp://localhost:2375
+    DOCKER_TLS_CERTDIR: ""
   before_script:
     - docker info
     # Use the GitLab container registry by default
@@ -50,10 +48,18 @@ variables:
     - docker push $REPOSITORY:$CI_COMMIT_SHORT_SHA
 
 build-base:
-  extends: .docker-build
+  # extends: .docker-build
   stage: build-base
+  # variables:
+  #   CONTEXT_DIR: $CI_PROJECT_DIR/images/base
+  services:
+    - docker:19-dind
+  image: docker:19
   variables:
-    CONTEXT_DIR: $CI_PROJECT_DIR/images/base
+    DOCKER_HOST: tcp://localhost:2375
+    DOCKER_TLS_CERTDIR: ""
+  script:
+    - sleep 1200
 
 build-conda:
   extends: .docker-build
