@@ -9,12 +9,12 @@ FROM ${ESGF_REPOSITORY_BASE}/base:${ESGF_IMAGES_VERSION}
 # Configure environment
 ENV CONDA_HOME /opt/conda
 ENV PATH $CONDA_HOME/bin:$PATH
-WORKDIR $CONDA_HOME
+# Don't buffer stdout and stderr as it breaks realtime logging
+ENV PYTHONUNBUFFERED 1
 
 # Install and configure Conda
 ENV CONDA_VERSION=4.7.12.1
-RUN set -euxo pipefail; && \
-    curl -fsSL -o miniconda.sh https://repo.anaconda.com/miniconda/${MINICONDA_FILENAME} && \
+RUN curl -fsSL -o miniconda.sh https://repo.anaconda.com/miniconda/Miniconda3-$CONDA_VERSION-Linux-x86_64.sh && \
     echo "bfe34e1fa28d6d75a7ad05fd02fa5472275673d5f5621b77380898dee1be15d2 *miniconda.sh" | sha256sum --check - && \
     /bin/bash miniconda.sh -f -b -p $CONDA_HOME && \
     rm miniconda.sh && \

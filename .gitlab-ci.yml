@@ -7,7 +7,7 @@ stages:
     - docker:19.03-dind
   image: docker:19.03
   variables:
-    DOCKER_HOST: tcp://docker:2376
+    DOCKER_HOST: tcp://localhost:2376
     DOCKER_TLS_CERTDIR: "/certs"
   before_script:
     - docker info
@@ -27,10 +27,10 @@ stages:
   script:
     # Use the basename of the context directory as the image name
     - IMAGE_NAME="${IMAGE_NAME:-"$(basename $CONTEXT_DIR)"}"
-    # Use a repository within the GitLab container registry for the project
+    # By default, use the GitLab container registry for the project
     - REPOSITORY_BASE="${REPOSITORY_BASE:-$CI_REGISTRY_IMAGE}"
     - REPOSITORY="${REPOSITORY:-"$REPOSITORY_BASE/$IMAGE_NAME"}"
-    # Use the latest build for the branch and the latest build as cache sources
+    # Use the latest build for the branch and the latest build for master as cache sources
     - LATEST="$REPOSITORY:latest"
     - LATEST_BRANCH="$REPOSITORY:$CI_COMMIT_REF_SLUG"
     - docker pull $LATEST || true
