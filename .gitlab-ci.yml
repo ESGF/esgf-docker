@@ -2,13 +2,15 @@ stages:
   - build-base
   - build-conda
 
+services:
+  - docker:18-dind
+
+variables:
+  DOCKER_HOST: tcp://localhost:2375
+  DOCKER_TLS_CERTDIR: ""
+
 .dind:
-  services:
-    - docker:18-dind
   image: docker:18
-  variables:
-    DOCKER_HOST: tcp://localhost:2375
-    DOCKER_TLS_CERTDIR: ""
   before_script:
     - docker info
     # Use the GitLab container registry by default
