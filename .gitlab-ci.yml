@@ -4,8 +4,8 @@ stages:
 
 .dind:
   services:
-    - docker:19-dind
-  image: docker:19
+    - docker:19.03-dind
+  image: docker:19.03
   variables:
     DOCKER_HOST: tcp://localhost:2375
     DOCKER_TLS_CERTDIR: ""
@@ -48,18 +48,10 @@ stages:
     - docker push $REPOSITORY:$CI_COMMIT_SHORT_SHA
 
 build-base:
-  # extends: .docker-build
+  extends: .docker-build
   stage: build-base
-  # variables:
-  #   CONTEXT_DIR: $CI_PROJECT_DIR/images/base
-  services:
-    - docker:19-dind
-  image: docker:19
   variables:
-    DOCKER_HOST: tcp://localhost:2375
-    DOCKER_TLS_CERTDIR: ""
-  script:
-    - sleep 1200
+    CONTEXT_DIR: $CI_PROJECT_DIR/images/base
 
 build-conda:
   extends: .docker-build
