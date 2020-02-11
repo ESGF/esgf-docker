@@ -7,7 +7,7 @@ set -eo pipefail;
 echo "[info] Running pre-init customisations from $ESG_INIT_DIR"
 if [ -d "$ESG_INIT_DIR" ]; then
     for file in $(find $ESG_INIT_DIR -mindepth 1 -type f -executable | sort -n); do
-        echo "[info]   Running customisations from $file"
+        echo "[info] Running customisations from $file"
         case "$file" in
             *.sh) source $file ;;
             *) eval $file ;;
