@@ -45,7 +45,8 @@ RUN curl -fsSL -o /usr/local/bin/tini https://github.com/krallin/tini/releases/d
 # Include a custom entrypoint that will execute startup scripts
 COPY docker-entrypoint.sh /usr/local/bin/
 # This init script adds the certificates from $ESG_CERT_DIR to the system trust roots
-COPY esg-update-trust.sh $ESG_INIT_DIR/01-esg-update-trust.sh
+# It is numbered 00 so that it runs first
+COPY 00-esg-update-trust.sh $ESG_INIT_DIR/
 # Allow users in the esg group to update the trust roots
 RUN chown $ESG_USER:$ESG_GROUP /etc/pki/ca-trust/source/anchors && \
     chown -R $ESG_USER:$ESG_GROUP /etc/pki/ca-trust/extracted && \

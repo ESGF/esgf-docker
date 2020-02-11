@@ -38,5 +38,5 @@ COPY setenv.sh bin/
 COPY tomcat-users.xml $ESG_HOME/tomcat/
 
 # By default, execute the Tomcat server as the tomcat user
-USER $TOMCAT_UID
+USER $ESG_UID
 CMD ["catalina.sh", "run"]
