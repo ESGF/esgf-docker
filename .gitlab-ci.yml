@@ -1,6 +1,6 @@
 stages:
-  - build-base
-  - build-conda
+  - build-1
+  - build-2
 
 .dind:
   services:
@@ -49,12 +49,18 @@ stages:
 
 build-base:
   extends: .docker-build
-  stage: build-base
+  stage: build-1
   variables:
     CONTEXT_DIR: $CI_PROJECT_DIR/images/base
 
 build-conda:
   extends: .docker-build
-  stage: build-conda
+  stage: build-2
   variables:
     CONTEXT_DIR: $CI_PROJECT_DIR/images/conda
+
+build-tomcat:
+  extends: .docker-build
+  stage: build-2
+  variables:
+    CONTEXT_DIR: $CI_PROJECT_DIR/images/tomcat
