@@ -2,9 +2,11 @@
 ## Base image for all images that require Conda
 #####
 
-ARG ESGF_REPOSITORY_BASE=docker.io/esgfhub
+ARG ESGF_REPOSITORY_BASE=esgfhub
 ARG ESGF_IMAGES_VERSION=latest
 FROM ${ESGF_REPOSITORY_BASE}/base:${ESGF_IMAGES_VERSION}
+
+USER root
 
 # Configure environment
 ENV CONDA_HOME /opt/conda
@@ -26,3 +28,5 @@ RUN curl -fsSL -o miniconda.sh https://repo.anaconda.com/miniconda/Miniconda3-$C
     conda update --all --quiet --yes && \
     conda list python | grep '^python ' | tr -s ' ' | cut -d '.' -f 1,2 | sed 's/$/.*/' >> $CONDA_HOME/conda-meta/pinned && \
     conda clean --all -f -y
+
+USER $ESG_UID
