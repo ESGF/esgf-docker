@@ -1,5 +1,9 @@
 #####
-## Base image for all images that require Tomcat
+## Base image for all tomcat runtime images
+##
+## We build tomcat images as a two-stage process to avoid having build
+## artifacts in the runtime image, and so the runtime image can have
+## just the JRE instead of the full JDK
 #####
 
 ARG ESGF_REPOSITORY_BASE=esgfhub
@@ -15,7 +19,7 @@ ENV PATH $CATALINA_HOME/bin:$PATH
 RUN mkdir -p $CATALINA_HOME
 WORKDIR $CATALINA_HOME
 
-# Install java
+# Install JRE
 RUN yum makecache && \
     yum install -y java-1.8.0-openjdk-1.8.0.242* && \
     yum clean all
@@ -36,6 +40,11 @@ RUN curl -fsSL -o tomcat.tar.gz https://archive.apache.org/dist/tomcat/tomcat-$T
 COPY context.xml server.xml conf/
 COPY setenv.sh bin/
 COPY tomcat-users.xml $ESG_HOME/tomcat/
+
+# Install the unpacked webapp from the builder image
+# Using ONBUILD instructions allows this to be used with different builders
+ONBUILD ARG WEBAPP_NAME
+ONBUILD COPY --from=builder /application $CATALINA_HOME/webapps/$WEBAPP_NAME
 
 # By default, execute the Tomcat server as the tomcat user
 USER $ESG_UID

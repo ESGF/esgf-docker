@@ -1,6 +1,7 @@
 stages:
   - build-1
   - build-2
+  - build-3
 
 .dind:
   services:
@@ -59,14 +60,26 @@ build-conda:
   variables:
     CONTEXT_DIR: $CI_PROJECT_DIR/images/conda
 
-build-tomcat:
+build-tomcat-builder:
   extends: .docker-build
   stage: build-2
   variables:
-    CONTEXT_DIR: $CI_PROJECT_DIR/images/tomcat
+    CONTEXT_DIR: $CI_PROJECT_DIR/images/tomcat-builder
+
+build-tomcat-runtime:
+  extends: .docker-build
+  stage: build-2
+  variables:
+    CONTEXT_DIR: $CI_PROJECT_DIR/images/tomcat-runtime
 
 build-postgres:
   extends: .docker-build
   stage: build-2
   variables:
     CONTEXT_DIR: $CI_PROJECT_DIR/images/postgres
+
+build-idp:
+  extends: .docker-build
+  stage: build-3
+  variables:
+    CONTEXT_DIR: $CI_PROJECT_DIR/images/idp
