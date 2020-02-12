@@ -64,3 +64,9 @@ build-tomcat:
   stage: build-2
   variables:
     CONTEXT_DIR: $CI_PROJECT_DIR/images/tomcat
+
+build-postgres:
+  extends: .docker-build
+  stage: build-2
+  variables:
+    CONTEXT_DIR: $CI_PROJECT_DIR/images/postgres
