@@ -1,5 +1,11 @@
 #####
 ## Base image for all runtime Conda images
+##
+## It is designed to have a pre-built Conda environment based on conda-builder
+## copied into it using "COPY --from=<build image> /opt/conda /opt/conda"
+##
+## This avoids having build dependencies, such as compilers, git, etc. in
+## the final image
 #####
 
 ARG ESGF_REPOSITORY_BASE=esgfhub
@@ -18,8 +24,5 @@ ENV PYTHONUNBUFFERED 1
 ENV PYTHON_EGG_CACHE /var/cache/python-eggs
 RUN mkdir -p $PYTHON_EGG_CACHE && \
     chown -R $ESG_USER:$ESG_GROUP $PYTHON_EGG_CACHE
-
-# Copy the conda environment from the builder image
-ONBUILD COPY --from=builder /opt/conda /opt/conda
 
 USER $ESG_UID

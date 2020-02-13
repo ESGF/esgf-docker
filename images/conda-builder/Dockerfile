@@ -1,23 +1,18 @@
 #####
 ## Base image for building Conda environments
+##
+## It is designed to provide a Conda environment to a runtime image
+## based on conda-runtime
+##
+## This avoids having build dependencies, such as compilers, git, etc. in
+## the final image
 #####
 
 ARG ESGF_REPOSITORY_BASE=esgfhub
 ARG ESGF_IMAGES_VERSION=latest
-FROM ${ESGF_REPOSITORY_BASE}/base:${ESGF_IMAGES_VERSION}
+FROM ${ESGF_REPOSITORY_BASE}/conda-runtime:${ESGF_IMAGES_VERSION}
 
 USER root
-
-# Configure environment
-ENV CONDA_HOME /opt/conda
-ENV PATH $CONDA_HOME/bin:$PATH
-# Don't buffer stdout and stderr as it breaks realtime logging
-ENV PYTHONUNBUFFERED 1
-
-# Make an egg cache directory that is writable by the esg user
-ENV PYTHON_EGG_CACHE /var/cache/python-eggs
-RUN mkdir -p $PYTHON_EGG_CACHE && \
-    chown -R $ESG_USER:$ESG_GROUP $PYTHON_EGG_CACHE
 
 # Install and configure Conda
 ENV CONDA_VERSION=4.7.12.1

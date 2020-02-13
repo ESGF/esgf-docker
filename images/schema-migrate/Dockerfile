@@ -25,3 +25,5 @@ RUN conda install "python<3" && \
 
 
 FROM ${ESGF_REPOSITORY_BASE}/conda-runtime:${ESGF_IMAGES_VERSION}
+
+COPY --from=builder /opt/conda /opt/conda
