@@ -101,7 +101,7 @@ build:idp:
   stage: build-3
   variables:
     CONTEXT_DIR: $CI_PROJECT_DIR/images/idp
-  needs: ["build:tomcat-builder", "build:tomcat-runner"]
+  needs: ["build:tomcat-builder", "build:tomcat-runtime"]
 
 # Depends on: conda-runtime (stage 2), conda-builder (stage 3)
 build:schema-migrate:
