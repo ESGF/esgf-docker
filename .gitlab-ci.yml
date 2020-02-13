@@ -49,57 +49,64 @@ stages:
     - docker build $DOCKER_ARGS $DOCKER_EXTRA_ARGS $CONTEXT_DIR
     - docker push $REPOSITORY:$CI_COMMIT_SHORT_SHA
 
-build-base:
+build:base:
   extends: .docker-build
   stage: build-1
   variables:
     CONTEXT_DIR: $CI_PROJECT_DIR/images/base
 
-# Depends on: conda-base (stage 1)
-build-conda-runtime:
+# Depends on: base (stage 1)
+build:conda-runtime:
   extends: .docker-build
   stage: build-2
   variables:
     CONTEXT_DIR: $CI_PROJECT_DIR/images/conda-runtime
+  needs: ["build:base"]
 
-# Depends on: conda-base (stage 1)
-build-tomcat-builder:
+# Depends on: base (stage 1)
+build:tomcat-builder:
   extends: .docker-build
   stage: build-2
   variables:
     CONTEXT_DIR: $CI_PROJECT_DIR/images/tomcat-builder
+  needs: ["build:base"]
 
-# Depends on: conda-base (stage 1)
-build-tomcat-runtime:
+# Depends on: base (stage 1)
+build:tomcat-runtime:
   extends: .docker-build
   stage: build-2
   variables:
     CONTEXT_DIR: $CI_PROJECT_DIR/images/tomcat-runtime
+  needs: ["build:base"]
 
-# Depends on: conda-base (stage 1)
-build-postgres:
+# Depends on: base (stage 1)
+build:postgres:
   extends: .docker-build
   stage: build-2
   variables:
     CONTEXT_DIR: $CI_PROJECT_DIR/images/postgres
+  needs: ["build:base"]
 
 # Depends on: conda-runtime (stage 2)
-build-conda-builder:
+build:conda-builder:
   extends: .docker-build
   stage: build-3
   variables:
     CONTEXT_DIR: $CI_PROJECT_DIR/images/conda-builder
+  needs: ["build:conda-runtime"]
 
 # Depends on: tomcat-builder, tomcat-runtime (stage 2)
-build-idp:
+build:idp:
   extends: .docker-build
   stage: build-3
   variables:
     CONTEXT_DIR: $CI_PROJECT_DIR/images/idp
+  needs: ["build:tomcat-builder", "build:tomcat-runner"]
 
 # Depends on: conda-runtime (stage 2), conda-builder (stage 3)
-build-schema-migrate:
+build:schema-migrate:
   extends: .docker-build
   stage: build-4
   variables:
     CONTEXT_DIR: $CI_PROJECT_DIR/images/schema-migrate
+  needs: ["build:conda-builder", "build:conda-runtime"]
