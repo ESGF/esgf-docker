@@ -2,6 +2,7 @@ stages:
   - build-1
   - build-2
   - build-3
+  - build-4
 
 .dind:
   services:
@@ -54,44 +55,51 @@ build-base:
   variables:
     CONTEXT_DIR: $CI_PROJECT_DIR/images/base
 
-build-conda-builder:
-  extends: .docker-build
-  stage: build-2
-  variables:
-    CONTEXT_DIR: $CI_PROJECT_DIR/images/conda-builder
-
+# Depends on: conda-base (stage 1)
 build-conda-runtime:
   extends: .docker-build
   stage: build-2
   variables:
     CONTEXT_DIR: $CI_PROJECT_DIR/images/conda-runtime
 
+# Depends on: conda-base (stage 1)
 build-tomcat-builder:
   extends: .docker-build
   stage: build-2
   variables:
     CONTEXT_DIR: $CI_PROJECT_DIR/images/tomcat-builder
 
+# Depends on: conda-base (stage 1)
 build-tomcat-runtime:
   extends: .docker-build
   stage: build-2
   variables:
     CONTEXT_DIR: $CI_PROJECT_DIR/images/tomcat-runtime
 
+# Depends on: conda-base (stage 1)
 build-postgres:
   extends: .docker-build
   stage: build-2
   variables:
     CONTEXT_DIR: $CI_PROJECT_DIR/images/postgres
 
+# Depends on: conda-runtime (stage 2)
+build-conda-builder:
+  extends: .docker-build
+  stage: build-3
+  variables:
+    CONTEXT_DIR: $CI_PROJECT_DIR/images/conda-builder
+
+# Depends on: tomcat-builder, tomcat-runtime (stage 2)
 build-idp:
   extends: .docker-build
   stage: build-3
   variables:
     CONTEXT_DIR: $CI_PROJECT_DIR/images/idp
 
+# Depends on: conda-runtime (stage 2), conda-builder (stage 3)
 build-schema-migrate:
   extends: .docker-build
-  stage: build-3
+  stage: build-4
   variables:
     CONTEXT_DIR: $CI_PROJECT_DIR/images/schema-migrate
