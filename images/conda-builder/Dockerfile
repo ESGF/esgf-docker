@@ -1,5 +1,5 @@
 #####
-## Base image for all images that require Conda
+## Base image for building Conda environments
 #####
 
 ARG ESGF_REPOSITORY_BASE=esgfhub
@@ -13,6 +13,11 @@ ENV CONDA_HOME /opt/conda
 ENV PATH $CONDA_HOME/bin:$PATH
 # Don't buffer stdout and stderr as it breaks realtime logging
 ENV PYTHONUNBUFFERED 1
+
+# Make an egg cache directory that is writable by the esg user
+ENV PYTHON_EGG_CACHE /var/cache/python-eggs
+RUN mkdir -p $PYTHON_EGG_CACHE && \
+    chown -R $ESG_USER:$ESG_GROUP $PYTHON_EGG_CACHE
 
 # Install and configure Conda
 ENV CONDA_VERSION=4.7.12.1

@@ -54,11 +54,17 @@ build-base:
   variables:
     CONTEXT_DIR: $CI_PROJECT_DIR/images/base
 
-build-conda:
+build-conda-builder:
   extends: .docker-build
   stage: build-2
   variables:
-    CONTEXT_DIR: $CI_PROJECT_DIR/images/conda
+    CONTEXT_DIR: $CI_PROJECT_DIR/images/conda-builder
+
+build-conda-runtime:
+  extends: .docker-build
+  stage: build-2
+  variables:
+    CONTEXT_DIR: $CI_PROJECT_DIR/images/conda-runtime
 
 build-tomcat-builder:
   extends: .docker-build
@@ -83,3 +89,9 @@ build-idp:
   stage: build-3
   variables:
     CONTEXT_DIR: $CI_PROJECT_DIR/images/idp
+
+build-schema-migrate:
+  extends: .docker-build
+  stage: build-3
+  variables:
+    CONTEXT_DIR: $CI_PROJECT_DIR/images/schema-migrate
