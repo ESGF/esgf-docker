@@ -55,31 +55,13 @@ build:base:
   variables:
     CONTEXT_DIR: $CI_PROJECT_DIR/images/base
 
-# Depends on: base (stage 1)
-build:conda-runtime:
+build:conda:
   extends: .docker-build
   stage: build-2
   variables:
-    CONTEXT_DIR: $CI_PROJECT_DIR/images/conda-runtime
+    CONTEXT_DIR: $CI_PROJECT_DIR/images/conda
   needs: ["build:base"]
 
-# Depends on: base (stage 1)
-build:tomcat-builder:
-  extends: .docker-build
-  stage: build-2
-  variables:
-    CONTEXT_DIR: $CI_PROJECT_DIR/images/tomcat-builder
-  needs: ["build:base"]
-
-# Depends on: base (stage 1)
-build:tomcat-runtime:
-  extends: .docker-build
-  stage: build-2
-  variables:
-    CONTEXT_DIR: $CI_PROJECT_DIR/images/tomcat-runtime
-  needs: ["build:base"]
-
-# Depends on: base (stage 1)
 build:postgres:
   extends: .docker-build
   stage: build-2
@@ -87,15 +69,27 @@ build:postgres:
     CONTEXT_DIR: $CI_PROJECT_DIR/images/postgres
   needs: ["build:base"]
 
-# Depends on: conda-runtime (stage 2)
+build:tomcat-builder:
+  extends: .docker-build
+  stage: build-2
+  variables:
+    CONTEXT_DIR: $CI_PROJECT_DIR/images/tomcat-builder
+  needs: ["build:base"]
+
+build:tomcat-runtime:
+  extends: .docker-build
+  stage: build-2
+  variables:
+    CONTEXT_DIR: $CI_PROJECT_DIR/images/tomcat-runtime
+  needs: ["build:base"]
+
 build:conda-builder:
   extends: .docker-build
   stage: build-3
   variables:
     CONTEXT_DIR: $CI_PROJECT_DIR/images/conda-builder
-  needs: ["build:conda-runtime"]
+  needs: ["build:conda"]
 
-# Depends on: tomcat-builder, tomcat-runtime (stage 2)
 build:idp:
   extends: .docker-build
   stage: build-3
@@ -103,10 +97,9 @@ build:idp:
     CONTEXT_DIR: $CI_PROJECT_DIR/images/idp
   needs: ["build:tomcat-builder", "build:tomcat-runtime"]
 
-# Depends on: conda-runtime (stage 2), conda-builder (stage 3)
 build:schema-migrate:
   extends: .docker-build
-  stage: build-4
+  stage: build-3
   variables:
     CONTEXT_DIR: $CI_PROJECT_DIR/images/schema-migrate
-  needs: ["build:conda-builder", "build:conda-runtime"]
+  needs: ["build:conda"]
