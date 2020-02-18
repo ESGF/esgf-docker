@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/bash
 # Environment variables for ESGF tomcat instances
 
 # Allow the heap size to be set using an environment variable, using 2GB by default

@@ -1,6 +1,6 @@
-#!/bin/bash
+#!/usr/bin/bash
 
-set -eo pipefail;
+set -eo pipefail
 
 # Look for scripts in the init directory and execute them in lexicograhpical order
 # Bash scripts are sourced, any other executable script is just executed

@@ -24,7 +24,7 @@ RUN yum makecache && \
 
 # Build wheels for the esgf-security dependencies
 RUN mkdir -p /build/wheelhouse && \
-    pip wheel --no-cache --wheel-dir /build/wheelhouse \
+    pip wheel --no-cache-dir --wheel-dir /build/wheelhouse \
       "psycopg2>=2.0,<2.7" \
       "SQLAlchemy>=0.5.3,<1.3" \
       "sqlalchemy_migrate>=0.6,<=0.12"
