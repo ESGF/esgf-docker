@@ -90,6 +90,13 @@ build:conda-builder:
     CONTEXT_DIR: $CI_PROJECT_DIR/images/conda-builder
   needs: ["build:conda"]
 
+build:django:
+  extends: .docker-build
+  stage: build-3
+  variables:
+    CONTEXT_DIR: $CI_PROJECT_DIR/images/django
+  needs: ["build:conda"]
+
 build:idp:
   extends: .docker-build
   stage: build-3
@@ -103,3 +110,10 @@ build:schema-migrate:
   variables:
     CONTEXT_DIR: $CI_PROJECT_DIR/images/schema-migrate
   needs: ["build:conda"]
+
+build:slcs:
+  extends: .docker-build
+  stage: build-4
+  variables:
+    CONTEXT_DIR: $CI_PROJECT_DIR/images/slcs
+  needs: ["build:conda-builder", "build:django"]
