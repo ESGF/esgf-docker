@@ -24,7 +24,7 @@ stages:
     - REGISTRY_PASSWORD="${REGISTRY_PASSWORD:-$CI_REGISTRY_PASSWORD}"
     - docker login -u $REGISTRY_USER -p $REGISTRY_PASSWORD $REGISTRY
 
-.build_docker:
+.docker-build:
   image:
     name: gcr.io/kaniko-project/executor:debug-v0.16.0
     entrypoint: [""]

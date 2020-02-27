@@ -47,6 +47,7 @@ echo "[info] Fixing permissions for $PGDATA"
 ls -l /var/lib
 ls -l /var/lib/pgsql
 chown $ESG_USER:$ESG_GROUP "$PGDATA"
+ls -l /var/lib/pgsql
 chmod 700 "$PGDATA"
 
 echo "[info] Initialising database in $PGDATA"
