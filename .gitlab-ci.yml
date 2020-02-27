@@ -48,8 +48,8 @@ stages:
     - REPOSITORY_BASE="${REPOSITORY_BASE:-$CI_REGISTRY_IMAGE}"
     - REPOSITORY="${REPOSITORY:-"$REPOSITORY_BASE/$IMAGE_NAME"}"
     # Set build args so that child images find the right parents
-    - BUILD_ARG_ESGF_REPOSITORY_BASE="$REPOSITORY_BASE"
-    - BUILD_ARG_ESGF_IMAGES_VERSION="$CI_COMMIT_SHORT_SHA"
+    - export BUILD_ARG_ESGF_REPOSITORY_BASE="$REPOSITORY_BASE"
+    - export BUILD_ARG_ESGF_IMAGES_VERSION="$CI_COMMIT_SHORT_SHA"
     # Build the Kaniko arguments
     - KANIKO_ARGS="--context $CONTEXT_DIR --dockerfile $DOCKERFILE"
     # Use the cache unless specifically asked not to
