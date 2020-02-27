@@ -1,0 +1,40 @@
+image:
+  prefix: breezy.badc.rl.ac.uk:4567/github-mirrors/esgf__esgf-docker
+  tag: 2757fa79
+  pullPolicy: IfNotPresent
+  pullSecrets:
+    - name: breezy
+
+persistence:
+  enabled: false
+  # Only used when database.type=internal and persistence.enabled=true
+  database:
+    # Set this to the name of a pre-existing persistentVolumeClaim
+    existingClaim:
+    # Set these to dynamically create a new persistentVolumeClaim
+    # If no storage class is given, then the default is used
+    storageClassName:
+    size: 1Gi
+
+database:
+  type: internal
+  external:
+    # host:
+    # port: 5432
+    # user:
+    # password:
+    # securityDatabase:
+    # slcsDatabase:
+  internal:
+    # Specify a secure password in production
+    password: changeme
+    image:
+      repository: postgres
+    resources: {}
+
+slcs:
+  enabled: true
+  image:
+    repository: slcs
+  replicaCount: 1
+  resources: {}

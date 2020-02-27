@@ -1,0 +1,22 @@
+{{- if and (eq .Values.database.type "internal") .Values.persistence.enabled -}}
+{{- $persistence := .Values.persistence.database -}}
+{{- if not $persistence.existingClaim -}}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "esgf.component.fullname" (list . "database") }}
+  labels: {{ include "esgf.component.labels" (list . "database") | nindent 4 }}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: {{ $persistence.size }}
+  {{- with $persistence.storageClassName }}
+  storageClassName: {{ $persistence.storageClassName }}
+  {{- end }}
+  {{- with $persistence.selector }}
+  selector: {{ toYaml $persistence.selector | nindent 4 }}
+  {{- end }}
+{{- end -}}
+{{- end -}}
