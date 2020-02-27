@@ -27,6 +27,10 @@ RUN groupadd --gid $ESG_GID $ESG_GROUP && \
       --uid $ESG_UID \
       $ESG_USER
 
+# Set the locale to UTF-8 for all containers
+ENV LANG en_US.UTF-8
+ENV LC_ALL en_US.UTF-8
+
 # Upgrade all existing packages
 # Updating CACHE_BUST to the current time will bust the cache and force a rebuild
 RUN CACHE_BUST="202002101000" && \
