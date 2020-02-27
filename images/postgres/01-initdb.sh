@@ -43,6 +43,12 @@ fi
 
 export DB_INITIALISED=true
 
+echo "[info] Fixing permissions for $PGDATA"
+ls -l /var/lib
+ls -l /var/lib/pgsql
+chown $ESG_USER:$ESG_GROUP "$PGDATA"
+chmod 700 "$PGDATA"
+
 echo "[info] Initialising database in $PGDATA"
 eval 'initdb --username="$POSTGRES_USER" --pwfile=<(echo "$POSTGRES_PASSWORD") '"$POSTGRES_INITDB_ARGS"
 
