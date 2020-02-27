@@ -25,9 +25,13 @@ if [ -z "$POSTGRES_PASSWORD" ]; then
 fi
 export POSTGRES_PASSWORD
 
+# If PGDATA does not exist, create it with the correct permissions
 if [ ! -d "$PGDATA" ]; then
-    echo "[fatal] $PGDATA is not a directory" 1>&2
-    exit 1
+    # Ensure PGDATA exists and correct it's permissions
+    echo "[info] Creating $PGDATA"
+    mkdir -p "$PGDATA"
+    echo "[info] Fixing permissions for $PGDATA"
+    chmod 0700 "$PGDATA"
 fi
 
 if [ ! -w "$PGDATA" ]; then
@@ -42,13 +46,6 @@ if [ -s "$PGDATA/PG_VERSION" ]; then
 fi
 
 export DB_INITIALISED=true
-
-echo "[info] Fixing permissions for $PGDATA"
-ls -l /var/lib
-ls -l /var/lib/pgsql
-chown $ESG_USER:$ESG_GROUP "$PGDATA"
-ls -l /var/lib/pgsql
-chmod 700 "$PGDATA"
 
 echo "[info] Initialising database in $PGDATA"
 eval 'initdb --username="$POSTGRES_USER" --pwfile=<(echo "$POSTGRES_PASSWORD") '"$POSTGRES_INITDB_ARGS"

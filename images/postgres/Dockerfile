@@ -25,7 +25,6 @@ RUN yum makecache && \
     chown -R $ESG_USER:$ESG_GROUP /var/lib/pgsql /run/postgresql && \
     sed -ri "s!^#?(listen_addresses)\s*=\s*\S+.*!\1 = '*'!" /usr/share/pgsql/postgresql.conf.sample && \
     echo "host all all all md5" >> /usr/share/pgsql/pg_hba.conf.sample
-VOLUME /var/lib/pgsql/data
 
 # Install database initialisation script
 COPY 01-initdb.sh $ESG_INIT_DIR/
