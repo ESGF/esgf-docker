@@ -25,54 +25,38 @@ stages:
     - docker login -u $REGISTRY_USER -p $REGISTRY_PASSWORD $REGISTRY
 
 .docker-build:
-  image:
-    name: gcr.io/kaniko-project/executor:debug-v0.16.0
-    entrypoint: [""]
-  # Default values for environment variables
-  variables:
-    REGISTRY: $CI_REGISTRY
-    REGISTRY_USER: $CI_REGISTRY_USER
-    CONTEXT_DIR: $CI_PROJECT_DIR
-    DOCKERFILE: Dockerfile
-    USE_CACHE: "1"
+  extends: .dind
   script:
-    # Allow the password to come from a file
-    - test -z "$REGISTRY_PASSWORD" && test -f "$REGISTRY_PASSWORD_FILE" && REGISTRY_PASSWORD="$(cat "$REGISTRY_PASSWORD_FILE")"
-    # Also allow the password to be base64 encoded (GitLab masked variables must be base64-encoded)
-    - test -z "$REGISTRY_PASSWORD" && test -n "$REGISTRY_PASSWORD_B64" && REGISTRY_PASSWORD="$(echo -n "$REGISTRY_PASSWORD_B64" | base64 -d)"
-    # If not given, use the GitLab container registry password
-    - REGISTRY_PASSWORD="${REGISTRY_PASSWORD:-$CI_REGISTRY_PASSWORD}"
-    # The default IMAGE_NAME is the directory name of the context directory
+    # Use the basename of the context directory as the image name
     - IMAGE_NAME="${IMAGE_NAME:-"$(basename $CONTEXT_DIR)"}"
     # By default, use the GitLab container registry for the project
     - REPOSITORY_BASE="${REPOSITORY_BASE:-$CI_REGISTRY_IMAGE}"
     - REPOSITORY="${REPOSITORY:-"$REPOSITORY_BASE/$IMAGE_NAME"}"
-    # Set build args so that child images find the right parents
+    # Set build args so that child images pick up the correct parents
     - export BUILD_ARG_ESGF_REPOSITORY_BASE="$REPOSITORY_BASE"
     - export BUILD_ARG_ESGF_IMAGES_VERSION="$CI_COMMIT_SHORT_SHA"
-    # Build the Kaniko arguments
-    - KANIKO_ARGS="--context $CONTEXT_DIR --dockerfile $DOCKERFILE"
-    # Use the cache unless specifically asked not to
-    - test "$USE_CACHE" == "1" && KANIKO_ARGS="$KANIKO_ARGS --cache"
-    # Add flags to skip TLS checks on the registry if required
-    - test "$REGISTRY_SKIP_TLS" == "1" && KANIKO_ARGS="$KANIKO_ARGS --skip-tls-verify --skip-tls-verify-pull"
-    # Add tags to the image
-    #   Always tag with the short SHA
-    - KANIKO_ARGS="$KANIKO_ARGS --destination $REPOSITORY:$CI_COMMIT_SHORT_SHA"
-    #   Always tag with the slugified branch/tag name
-    - KANIKO_ARGS="$KANIKO_ARGS --destination $REPOSITORY:$CI_COMMIT_REF_SLUG"
-    #   If building for a tag, add the Git tag to the Docker tags verbatim
-    - test -n "$CI_COMMIT_TAG" && KANIKO_ARGS="$KANIKO_ARGS --destination $REPOSITORY:$CI_COMMIT_TAG"
-    #   If building master, also tag latest
-    - test "$CI_COMMIT_REF_NAME" == "master" && KANIKO_ARGS="$KANIKO_ARGS --destination $REPOSITORY:latest"
-    # Translate environment variables of the form BUILD_ARG_* into build arguments
+    # Use the latest build for the branch and the latest build for master as cache sources
+    - LATEST="$REPOSITORY:latest"
+    - LATEST_BRANCH="$REPOSITORY:$CI_COMMIT_REF_SLUG"
+    - docker pull $LATEST || true
+    - docker pull $LATEST_BRANCH || true
+    - DOCKER_ARGS="--cache-from $LATEST --cache-from $LATEST_BRANCH"
+    # Build and push with the short commit SHA as a tag
+    - DOCKER_ARGS="$DOCKER_ARGS --tag $REPOSITORY:$CI_COMMIT_SHORT_SHA"
+    # Use any environment variable starting with BUILD_ARG_ as a build arg
     - BUILD_ARGS=$(env | grep -e "^BUILD_ARG_" | awk -F '=' '{ print $1 }' || true)
-    - for arg in $BUILD_ARGS; do KANIKO_ARGS="$KANIKO_ARGS --build-arg ${arg:10}=$(eval "echo \$$arg")"; done
-    # Write the repository auth file
-    - echo "{\"auths\":{\"$REGISTRY\":{\"username\":\"$REGISTRY_USER\",\"password\":\"$REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
-    - echo "KANIKO_ARGS = $KANIKO_ARGS"
-    # Do the build
-    - /kaniko/executor $KANIKO_ARGS $KANIKO_EXTRA_ARGS
+    - for arg in $BUILD_ARGS; do DOCKER_ARGS="$DOCKER_ARGS --build-arg ${arg:10}=$(eval "echo \$$arg")"; done
+    # Build the image
+    - docker build $DOCKER_ARGS $DOCKER_EXTRA_ARGS $CONTEXT_DIR
+    # Retag the image
+    #   Always tag with the slugified branch/tag name
+    - docker tag "$REPOSITORY:$CI_COMMIT_SHORT_SHA" "$REPOSITORY:$CI_COMMIT_REF_SLUG"
+    #   If building for a tag, add the Git tag to the Docker tags verbatim
+    - test -n "$CI_COMMIT_TAG" && docker tag "$REPOSITORY:$CI_COMMIT_SHORT_SHA" "$REPOSITORY:$CI_COMMIT_TAG"
+    #   If building master, also tag latest
+    - test "$CI_COMMIT_REF_NAME" == "master" && docker tag "$REPOSITORY:$CI_COMMIT_SHORT_SHA" "$REPOSITORY:latest"
+    # Push all tags
+    - docker push $REPOSITORY
 
 build:base:
   extends: .docker-build
