@@ -32,6 +32,9 @@ RUN mkdir -p /build/wheelhouse && \
 
 FROM python27
 
+# Install runtime dependencies
+RUN yum makecache && yum install -y postgresql && yum clean all
+
 # Copy the wheels from the builder and install them along with the egg
 ARG ESGF_SECURITY_ASSETS=https://github.com/ESGF/esgf-security/releases/download/
 ARG ESGF_SECURITY_VERSION=v2.8.11
