@@ -35,11 +35,11 @@ RUN curl -fsSL -o tomcat.tar.gz https://archive.apache.org/dist/tomcat/tomcat-$T
     rm -rf tomcat.tar.gz bin/*.bat webapps/* && \
     # Fix permissions for running as tomcat
     chmod -R +rX . && \
-    chown -R $ESG_USER:$ESG_GROUP logs temp work
+    chown -R $ESGF_USER:$ESGF_GROUP logs temp work
 # Install custom configs
 COPY context.xml server.xml conf/
 COPY setenv.sh bin/
-COPY tomcat-users.xml $ESG_HOME/tomcat/
+COPY tomcat-users.xml $ESGF_HOME/tomcat/
 
 # Install the unpacked webapp from the builder image
 # Using ONBUILD instructions allows this to be used with different builders
@@ -47,5 +47,5 @@ ONBUILD ARG WEBAPP_NAME
 ONBUILD COPY --from=builder /application $CATALINA_HOME/webapps/$WEBAPP_NAME
 
 # By default, execute the Tomcat server as the tomcat user
-USER $ESG_UID
+USER $ESGF_UID
 CMD ["catalina.sh", "run"]

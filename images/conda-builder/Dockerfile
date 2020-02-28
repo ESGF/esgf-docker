@@ -14,4 +14,4 @@ USER root
 # Install common dependencies, e.g. git
 RUN yum makecache && yum install -y git && yum clean all
 
-USER $ESG_UID
+USER $ESGF_UID

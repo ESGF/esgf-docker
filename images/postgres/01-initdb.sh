@@ -60,10 +60,10 @@ if [ "$POSTGRES_DATABASE" != 'postgres' ]; then
     psql -v ON_ERROR_STOP=1 --dbname postgres --set db="$POSTGRES_DATABASE" <<< 'CREATE DATABASE :"db" ;'
 fi
 
-echo "[info] Running database setup scripts from $ESG_INIT_DB_DIR"
+echo "[info] Running database setup scripts from $ESGF_INIT_DB_DIR"
 psql=( psql -v ON_ERROR_STOP=1 --dbname "$POSTGRES_DATABASE" )
-if [ -d "$ESG_INIT_DB_DIR" ]; then
-    for file in $(find $ESG_INIT_DB_DIR -mindepth 1 -type f | sort -n); do
+if [ -d "$ESGF_INIT_DB_DIR" ]; then
+    for file in $(find $ESGF_INIT_DB_DIR -mindepth 1 -type f | sort -n); do
         echo "[info] Running database setup from $file"
         case "$file" in
             *.sh) source $file ;;

@@ -45,4 +45,4 @@ RUN pushd /build && \
     easy_install --no-deps $ESGF_SECURITY_DB_EGG_FILENAME && \
     popd
 
-USER $ESG_UID
+USER $ESGF_UID

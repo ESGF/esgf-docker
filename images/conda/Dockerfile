@@ -14,10 +14,10 @@ ENV PATH $CONDA_HOME/bin:$PATH
 # Don't buffer stdout and stderr as it breaks realtime logging
 ENV PYTHONUNBUFFERED 1
 
-# Make an egg cache directory that is writable by the esg user
+# Make an egg cache directory that is writable by the esgf user
 ENV PYTHON_EGG_CACHE /var/cache/python-eggs
 RUN mkdir -p $PYTHON_EGG_CACHE && \
-    chown -R $ESG_USER:$ESG_GROUP $PYTHON_EGG_CACHE
+    chown -R $ESGF_USER:$ESGF_GROUP $PYTHON_EGG_CACHE
 
 # Install and configure Conda
 ENV CONDA_VERSION=4.7.12.1
@@ -34,4 +34,4 @@ RUN curl -fsSL -o miniconda.sh https://repo.anaconda.com/miniconda/Miniconda3-$C
     conda list python | grep '^python ' | tr -s ' ' | cut -d '.' -f 1,2 | sed 's/$/.*/' >> $CONDA_HOME/conda-meta/pinned && \
     conda clean --all -f -y
 
-USER $ESG_UID
+USER $ESGF_UID

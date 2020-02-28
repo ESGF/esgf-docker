@@ -62,9 +62,9 @@ BASIC_AUTH_REALM = urlparse(BASE_URL).hostname
 # OnlineCA settings
 from pathlib import Path
 ONLINECA = {
-    'TRUSTROOTS_DIR': os.environ['ESG_CERT_DIR'],
+    'TRUSTROOTS_DIR': os.environ['ESGF_CERT_DIR'],
     'USER_TO_STRING_MAPPER': 'esgf_auth.openid.django_user_to_openid',
     'SUBJECT_NAME_TEMPLATE': '/DC=esgf/CN={user}',
-    'CA_CERT_PATH': '{}/slcs/ca/cert.pem'.format(os.environ['ESG_HOME']),
-    'CA_KEY_PATH': '{}/slcs/ca/key.pem'.format(os.environ['ESG_HOME']),
+    'CA_CERT_PATH': '{}/slcs/ca/cert.pem'.format(os.environ['ESGF_HOME']),
+    'CA_KEY_PATH': '{}/slcs/ca/key.pem'.format(os.environ['ESGF_HOME']),
 }

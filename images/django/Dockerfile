@@ -27,7 +27,7 @@ ENV DJANGO_FLEXI_SETTINGS_ROOT /esg/django/settings.py
 ENV DJANGO_SETTINGS_DIR /esg/django/settings.d
 COPY gunicorn.conf.py /etc/gunicorn/conf.py
 COPY django-serve.sh /usr/local/bin/
-COPY init.d/* $ESG_INIT_DIR/
+COPY init.d/* $ESGF_INIT_DIR/
 COPY settings.py $DJANGO_FLEXI_SETTINGS_ROOT
 COPY settings.d/* $DJANGO_SETTINGS_DIR/
 
@@ -36,7 +36,7 @@ ONBUILD COPY --from=builder /build/wheelhouse /build/wheelhouse
 ONBUILD COPY --from=builder /application /application
 # Install the application, but only look for dependencies in the wheelhouse
 ONBUILD RUN pip install --no-cache-dir --no-index --find-links /build/wheelhouse --editable /application
-ONBUILD USER $ESG_UID
+ONBUILD USER $ESGF_UID
 
 # By default, run gunicorn
 EXPOSE 8080
