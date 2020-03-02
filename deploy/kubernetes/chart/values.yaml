@@ -1,6 +1,8 @@
+hostname: 192.168.99.101.nip.io
+
 image:
   prefix: breezy.badc.rl.ac.uk:4567/github-mirrors/esgf__esgf-docker
-  tag: 2757fa79
+  tag: 0322b008
   pullPolicy: IfNotPresent
   pullSecrets:
     - name: breezy
@@ -16,15 +18,19 @@ persistence:
     storageClassName:
     size: 1Gi
 
+ingress:
+  enabled: true
+  annotations:
+  tlsSecretName:
+
 database:
   type: internal
   external:
-    # host:
-    # port: 5432
-    # user:
-    # password:
-    # securityDatabase:
-    # slcsDatabase:
+    host:
+    port: 5432
+    user:
+    password:
+    dbname:
   internal:
     # Specify a secure password in production
     password: changeme
@@ -32,9 +38,24 @@ database:
       repository: postgres
     resources: {}
 
+schemaMigrate:
+  image:
+    repository: schema-migrate
+  resources: {}
+
+idp:
+  enabled: true
+  image:
+    repository: idp
+  replicaCount: 1
+  resources: {}
+
 slcs:
   enabled: true
   image:
     repository: slcs
   replicaCount: 1
   resources: {}
+
+myproxy:
+  endpoint:

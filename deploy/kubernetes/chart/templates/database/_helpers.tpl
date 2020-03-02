@@ -1,7 +1,3 @@
-{{/*
-Templates for connecting to databases.
-*/}}
-
 {{- define "esgf.database.host" -}}
   {{- if eq .Values.database.type "internal" -}}
     {{- template "esgf.component.fullname" (list . "database") -}}
@@ -34,18 +30,10 @@ Templates for connecting to databases.
   {{- end -}}
 {{- end -}}
 
-{{- define "esgf.database.securityDatabase" -}}
+{{- define "esgf.database.dbname" -}}
   {{- if eq .Values.database.type "internal" -}}
     {{- printf "%s" "esgcet" -}}
   {{- else -}}
-    {{- .Values.database.external.securityDatabase | required "Specify an external security database name" -}}
-  {{- end -}}
-{{- end -}}
-
-{{- define "esgf.database.slcsDatabase" -}}
-  {{- if eq .Values.database.type "internal" -}}
-    {{- printf "%s" "esgcet" -}}
-  {{- else -}}
-    {{- .Values.database.external.slcsDatabase | required "Specify an external SLCS database name" -}}
+    {{- .Values.database.external.dbname | required "Specify an external database name" -}}
   {{- end -}}
 {{- end -}}

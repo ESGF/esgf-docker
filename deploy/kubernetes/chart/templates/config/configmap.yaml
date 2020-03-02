@@ -1,0 +1,28 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "esgf.component.fullname" (list . "config") }}
+  labels: {{ include "esgf.component.labels" (list . "config") | nindent 4 }}
+data:
+  esgf.properties: |-
+    [installer.properties]
+    esgf.host={{ .Values.hostname }}
+    {{- if .Values.idp.enabled }}
+    esgf.idp.peer={{ .Values.hostname }}
+    {{- end }}
+    {{/* esgf.index.peer={{ include "esgf" . }} */}}
+
+    db.protocol=jdbc:postgresql:
+    db.driver=org.postgresql.Driver
+    db.host={{ include "esgf.database.host" . }}
+    db.port={{ include "esgf.database.port" . }}
+    db.user={{ include "esgf.database.user" . }}
+    db.database={{ include "esgf.database.dbname" . }}
+
+    {{- if .Values.idp.enabled }}
+    idp.service.endpoint={{ include "esgf.idp.endpoint.openid" . }}
+    idp.security.attribute.service.endpoint={{ include "esgf.idp.endpoint.attributeService" . }}
+    idp.security.registration.service.endpoint={{ include "esgf.idp.endpoint.registrationService" . }}
+    {{- end }}
+
+    {{/* gridftp.server.port={{ gridftp.port }} */}}

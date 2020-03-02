@@ -1,0 +1,31 @@
+{{- if .Values.ingress.enabled -}}
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: {{ include "esgf.component.fullname" (list . "ingress") }}
+  labels: {{ include "esgf.component.labels" (list . "ingress") | nindent 4 }}
+  {{- with .Values.ingress.annotations }}
+  annotations: {{ toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  tls:
+    - hosts:
+        - {{ .Values.hostname | quote }}
+      secretName: {{ .Values.ingress.tlsSecretName | default (include "esgf.component.fullname" (list . "ingress")) }}
+  rules:
+    - host: {{ .Values.hostname | quote }}
+      http:
+        paths:
+          {{- if .Values.idp.enabled }}
+          - path: /esgf-idp
+            backend:
+              serviceName: {{ include "esgf.component.fullname" (list . "idp") }}
+              servicePort: 8080
+          {{- end }}
+          {{- if .Values.slcs.enabled }}
+          - path: /esgf-slcs
+            backend:
+              serviceName: {{ include "esgf.component.fullname" (list . "slcs") }}
+              servicePort: 8080
+          {{- end }}
+{{- end }}

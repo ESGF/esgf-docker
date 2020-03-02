@@ -1,0 +1,51 @@
+{{- if .Values.idp.enabled -}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "esgf.component.fullname" (list . "idp") }}
+  labels: {{ include "esgf.component.labels" (list . "idp") | nindent 4 }}
+data:
+  # Only include things that are enabled in the Yadis configuration
+  yadis-config.xml: |
+    <beans xmlns="http://www.springframework.org/schema/beans"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xmlns:context="http://www.springframework.org/schema/context"
+           xmlns:util="http://www.springframework.org/schema/util"
+           xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.2.xsd
+                               http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-4.2.xsd
+                               http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.2.xsd">
+        <!-- Configurable properties -->
+        <bean id="propertyConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+            <!-- <property name="location" value="classpath:esg/idp/config/application.properties" /> -->
+            <property name="location" value="file:///esg/config/esgf.properties" />
+        </bean>
+
+        <!-- Yadis -->
+        <context:component-scan base-package="esg.idp.yadis" />
+
+        <!-- URL-controller mappings -->
+        <bean id="openidYadisMapping" class="org.springframework.web.servlet.handler.SimpleUrlHandlerMapping">
+            <property name="order" value="1" />
+            <property name="mappings">
+                <props>
+                    <prop key="*">yadisController</prop>
+                </props>
+            </property>
+        </bean>
+
+        <!-- additional endpoints discovered by Yadis service -->
+        <util:map id="yadisEndpoints">
+            <!-- Just include entries for the services that are enabled -->
+            <entry key="http://specs.openid.net/auth/2.0/server" value="{{ include "esgf.idp.endpoint.openid" . }}"/>
+            {{- if .Values.slcs.enabled }}
+            <entry key="urn:esg:security:oauth:endpoint:authorize" value="{{ include "esgf.slcs.endpoint.authorize" . }}" />
+            <entry key="urn:esg:security:oauth:endpoint:access" value="{{ include "esgf.slcs.endpoint.accessToken" . }}" />
+            <entry key="urn:esg:security:oauth:endpoint:resource" value="{{ include "esgf.slcs.endpoint.certificate" . }}" />
+            {{- end }}
+            {{- if .Values.myproxy.endpoint }}
+            <entry key="urn:esg:security:myproxy-service" value="{{ .Values.myproxy.endpoint }}" />
+            {{- end }}
+            <entry key="urn:esg:security:attribute-service" value="{{ include "esgf.idp.endpoint.attributeService" . }}" />
+        </util:map>
+    </beans>
+{{- end -}}

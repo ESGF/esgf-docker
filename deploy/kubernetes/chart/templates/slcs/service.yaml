@@ -1,0 +1,15 @@
+{{- if .Values.slcs.enabled -}}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "esgf.component.fullname" (list . "slcs") }}
+  labels: {{ include "esgf.component.labels" (list . "slcs") | nindent 4 }}
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 8080
+      targetPort: http
+      protocol: TCP
+  selector: {{ include "esgf.component.selectorLabels" (list . "slcs") | nindent 4 }}
+{{- end -}}

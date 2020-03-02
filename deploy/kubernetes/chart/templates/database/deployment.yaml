@@ -6,7 +6,10 @@ metadata:
   name: {{ include "esgf.component.fullname" (list . "database") }}
   labels: {{ include "esgf.component.labels" (list . "database") | nindent 4 }}
 spec:
+  # Use one replica only, and make sure that old containers are destroyed first
   replicas: 1
+  strategy:
+    type: Recreate
   selector:
     matchLabels: {{ include "esgf.component.selectorLabels" (list . "database") | nindent 6 }}
   template:
@@ -15,21 +18,18 @@ spec:
       # Force deployments to roll if the secret changes
       # https://helm.sh/docs/howto/charts_tips_and_tricks/#automatically-roll-deployments
       annotations:
-        checksum/secret: {{ include (print $.Template.BasePath "/database/secret.yaml") . | sha256sum }}
+        checksum/secret: {{ include (print $.Template.BasePath "/config/secret.yaml") . | sha256sum }}
     spec:
       {{- with (default .Values.image.pullSecrets $database.image.pullSecrets) }}
       imagePullSecrets: {{ toYaml . | nindent 8 }}
       {{- end }}
       securityContext:
-        # This is the gid of the esg group in the container
+        # This is the gid of the esgf group in the container
         # Setting this allows many providers to chown dynamic volumes
         fsGroup: 1000
       containers:
         - name: database
-          {{- with $database.securityContext }}
-          securityContext: {{ toYaml . | nindent 12 }}
-          {{- end }}
-          {{ include "esgf.component.image" (mergeOverwrite .Values.image $database.image) | indent 10 | trim }}
+          {{ include "esgf.deployment.image" (list . $database) }}
           resources: {{ toYaml $database.resources | nindent 12 }}
           ports:
             - name: postgres
@@ -48,14 +48,14 @@ spec:
             initialDelaySeconds: 120
           env:
             - name: POSTGRES_DATABASE
-              value: esgcet
+              value: {{ include "esgf.database.dbname" . }}
             - name: POSTGRES_USER
-              value: dbsuper
+              value: {{ include "esgf.database.user" . }}
             - name: POSTGRES_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ include "esgf.component.fullname" (list . "database") }}
-                  key: "database-password"
+                  name: {{ include "esgf.component.fullname" (list . "config") }}
+                  key: .esg_pg_pass
           volumeMounts:
             - name: postgres-data
               mountPath: /var/lib/pgsql

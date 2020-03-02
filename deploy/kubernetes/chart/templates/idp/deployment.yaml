@@ -1,0 +1,95 @@
+{{- if .Values.idp.enabled -}}
+{{- $idp := .Values.idp -}}
+{{- $migrate := .Values.schemaMigrate -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "esgf.component.fullname" (list . "idp") }}
+  labels: {{ include "esgf.component.labels" (list . "idp") | nindent 4 }}
+spec:
+  replicas: {{ $idp.replicaCount }}
+  selector:
+    matchLabels: {{ include "esgf.component.selectorLabels" (list . "idp") | nindent 6 }}
+  template:
+    metadata:
+      labels: {{ include "esgf.component.selectorLabels" (list . "idp") | nindent 8 }}
+      # Force deployments to roll if the config changes
+      # https://helm.sh/docs/howto/charts_tips_and_tricks/#automatically-roll-deployments
+      annotations:
+        checksum/config.secret: {{ include (print $.Template.BasePath "/config/secret.yaml") . | sha256sum }}
+        checksum/config.configmap: {{ include (print $.Template.BasePath "/config/configmap.yaml") . | sha256sum }}
+        checksum/idp.configmap: {{ include (print $.Template.BasePath "/idp/configmap.yaml") . | sha256sum }}
+    spec:
+      {{- with (default .Values.image.pullSecrets $idp.image.pullSecrets) }}
+      imagePullSecrets: {{ toYaml . | nindent 8 }}
+      {{- end }}
+      # Before starting the IDP container, run the esgf-security migration
+      initContainers:
+        - name: esgf-security-migrate
+          {{ include "esgf.deployment.image" (list . $migrate) }}
+          resources: {{ toYaml $migrate.resources | nindent 12 }}
+          env:
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "esgf.component.fullname" (list . "config") }}
+                  key: .esg_pg_pass
+          args:
+            - esgf_security_initialize
+            - -c
+            - --dburl
+            - "{{ include "esgf.database.user" . }}:$(DB_PASSWORD)@{{ include "esgf.database.host" . }}:{{ include "esgf.database.port" . }}/{{ include "esgf.database.dbname" . }}"
+      containers:
+        - name: idp
+          {{ include "esgf.deployment.image" (list . $idp) }}
+          resources: {{ toYaml $idp.resources | nindent 12 }}
+          ports:
+            - name: http
+              containerPort: 8080
+          # The readiness and liveness probes run the same thing, but the liveness
+          # probe just waits a while before kicking in whereas the readiness probe
+          # starts straight away
+          readinessProbe: &probe
+            httpGet:
+              path: /esgf-idp/
+              port: 8080
+              # This endpoint requires HTTPS, so simulate it
+              httpHeaders:
+                - name: Host
+                  value: "{{ .Values.hostname }}"
+                - name: X-Forwarded-Proto
+                  value: https
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            <<: *probe
+            initialDelaySeconds: 300
+          volumeMounts:
+            - name: esg-config
+              mountPath: /esg/config
+              readOnly: true
+            - name: yadis-config
+              mountPath: /opt/tomcat/webapps/esgf-idp/WEB-INF/classes/esg/idp/config/yadis-config.xml
+              subPath: yadis-config.xml
+              readOnly: true
+      {{- with $idp.nodeSelector }}
+      nodeSelector: {{ toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $idp.affinity }}
+      affinity: {{ toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $idp.tolerations }}
+      tolerations: {{ toYaml . | nindent 8 }}
+      {{- end }}
+      volumes:
+        - name: esg-config
+          projected:
+            sources:
+              - configMap:
+                  name: {{ include "esgf.component.fullname" (list . "config") }}
+              - secret:
+                  name: {{ include "esgf.component.fullname" (list . "config") }}
+        - name: yadis-config
+          configMap:
+            name: {{ include "esgf.component.fullname" (list . "idp") }}
+{{- end -}}

@@ -48,6 +48,16 @@ app.kubernetes.io/component: {{ index . 1 }}
 Produces an image specification.
 */}}
 {{- define "esgf.component.image" -}}
-image: {{ printf "%s/%s:%s" .prefix .repository .tag }}
-imagePullPolicy: {{ .pullPolicy }}
+{{- $context := index . 0 -}}
+{{- $component := index . 1 -}}
+{{- $image := mergeOverwrite $context.Values.image $component.image -}}
+image: {{ printf "%s/%s:%s" $image.prefix $image.repository $image.tag }}
+imagePullPolicy: {{ $image.pullPolicy }}
+{{- end -}}
+
+{{/*
+Produces an image specification with the correct nesting for use in deployments.
+*/}}
+{{- define "esgf.deployment.image" -}}
+{{- include "esgf.component.image" . | indent 10 | trim -}}
 {{- end -}}

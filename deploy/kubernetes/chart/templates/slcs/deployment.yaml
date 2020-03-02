@@ -1,0 +1,71 @@
+{{- if .Values.slcs.enabled -}}
+{{- $slcs := .Values.slcs -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "esgf.component.fullname" (list . "slcs") }}
+  labels: {{ include "esgf.component.labels" (list . "slcs") | nindent 4 }}
+spec:
+  replicas: {{ $slcs.replicaCount }}
+  selector:
+    matchLabels: {{ include "esgf.component.selectorLabels" (list . "slcs") | nindent 6 }}
+  template:
+    metadata:
+      labels: {{ include "esgf.component.selectorLabels" (list . "slcs") | nindent 8 }}
+      # Force deployments to roll if the config changes
+      # https://helm.sh/docs/howto/charts_tips_and_tricks/#automatically-roll-deployments
+      annotations:
+        checksum/secret: {{ include (print $.Template.BasePath "/slcs/secret.yaml") . | sha256sum }}
+    spec:
+      {{- with (default .Values.image.pullSecrets $slcs.image.pullSecrets) }}
+      imagePullSecrets: {{ toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: slcs
+          {{ include "esgf.deployment.image" (list . $slcs) }}
+          resources: {{ toYaml $slcs.resources | nindent 12 }}
+          ports:
+            - name: http
+              containerPort: 8080
+          env:
+            - name: SCRIPT_NAME
+              value: /esgf-slcs
+          # The readiness and liveness probes run the same thing, but the liveness
+          # probe just waits a while before kicking in whereas the readiness probe
+          # starts straight away
+          readinessProbe: &probe
+            httpGet:
+              path: /esgf-slcs/
+              port: 8080
+              # This endpoint requires HTTPS, so simulate it
+              httpHeaders:
+                - name: Host
+                  value: "{{ .Values.hostname }}"
+                - name: X-Forwarded-Host
+                  value: "{{ .Values.hostname }}"
+                - name: X-Forwarded-Proto
+                  value: https
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            <<: *probe
+            initialDelaySeconds: 300
+          volumeMounts:
+            - name: runtime-settings
+              mountPath: /esg/django/settings.d/05-runtime-settings.yaml
+              subPath: 05-runtime-settings.yaml
+              readOnly: true
+      {{- with $slcs.nodeSelector }}
+      nodeSelector: {{ toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $slcs.affinity }}
+      affinity: {{ toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $slcs.tolerations }}
+      tolerations: {{ toYaml . | nindent 8 }}
+      {{- end }}
+      volumes:
+        - name: runtime-settings
+          secret:
+            secretName: {{ include "esgf.component.fullname" (list . "slcs") }}
+{{- end -}}
