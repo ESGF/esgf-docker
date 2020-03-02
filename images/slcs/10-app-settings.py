@@ -1,5 +1,9 @@
 import os
 
+from django.utils.module_loading import module_dir
+import esgf_slcs_server
+BASE_DIR = module_dir(esgf_slcs_server)
+
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
