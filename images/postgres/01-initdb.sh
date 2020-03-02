@@ -48,20 +48,20 @@ fi
 export DB_INITIALISED=true
 
 echo "[info] Initialising database in $PGDATA"
-eval 'initdb --username="$POSTGRES_USER" --pwfile=<(echo "$POSTGRES_PASSWORD") '"$POSTGRES_INITDB_ARGS"
+eval '/usr/pgsql-10/bin/initdb --username="$POSTGRES_USER" --pwfile=<(echo "$POSTGRES_PASSWORD") '"$POSTGRES_INITDB_ARGS"
 
 echo "[info] Starting local server"
 export PGUSER="$POSTGRES_USER"
 export PGPASSWORD="$POSTGRES_PASSWORD"
-pg_ctl -D "$PGDATA" -o "-c listen_addresses='' -p $PGPORT" -w start
+/usr/pgsql-10/bin/pg_ctl -D "$PGDATA" -o "-c listen_addresses='' -p $PGPORT" -w start
 
 if [ "$POSTGRES_DATABASE" != 'postgres' ]; then
     echo "[info] Creating database - $POSTGRES_DATABASE"
-    psql -v ON_ERROR_STOP=1 --dbname postgres --set db="$POSTGRES_DATABASE" <<< 'CREATE DATABASE :"db" ;'
+    /usr/pgsql-10/bin/psql -v ON_ERROR_STOP=1 --dbname postgres --set db="$POSTGRES_DATABASE" <<< 'CREATE DATABASE :"db" ;'
 fi
 
 echo "[info] Running database setup scripts from $ESGF_INIT_DB_DIR"
-psql=( psql -v ON_ERROR_STOP=1 --dbname "$POSTGRES_DATABASE" )
+psql=( /usr/pgsql-10/bin/psql -v ON_ERROR_STOP=1 --dbname "$POSTGRES_DATABASE" )
 if [ -d "$ESGF_INIT_DB_DIR" ]; then
     for file in $(find $ESGF_INIT_DB_DIR -mindepth 1 -type f | sort -n); do
         echo "[info] Running database setup from $file"
@@ -75,7 +75,7 @@ if [ -d "$ESGF_INIT_DB_DIR" ]; then
 fi
 
 echo "[info] Stopping local server"
-pg_ctl -D "$PGDATA" -m fast -w stop
+/usr/pgsql-10/bin/pg_ctl -D "$PGDATA" -m fast -w stop
 
 unset PGUSER PGPASSWORD
 echo "[info] Database initialisation complete!"

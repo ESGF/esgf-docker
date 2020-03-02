@@ -19,12 +19,13 @@ ENV PGPORT 5432
 # We also munge the sample config files to be correct for our use case by default, i.e.
 #   listen on all addresses and allow password-based auth
 RUN yum makecache && \
-    yum install -y postgresql-server && \
+    yum install -y https://download.postgresql.org/pub/repos/yum/reporpms/EL-7-x86_64/pgdg-redhat-repo-latest.noarch.rpm && \
+    yum install -y postgresql10-server-10.12* && \
     yum clean all && \
     mkdir -p /var/lib/pgsql/data && \
     chown -R $ESGF_USER:$ESGF_GROUP /var/lib/pgsql /run/postgresql && \
-    sed -ri "s!^#?(listen_addresses)\s*=\s*\S+.*!\1 = '*'!" /usr/share/pgsql/postgresql.conf.sample && \
-    echo "host all all all md5" >> /usr/share/pgsql/pg_hba.conf.sample
+    sed -ri "s!^#?(listen_addresses)\s*=\s*\S+.*!\1 = '*'!" /usr/pgsql-10/share/postgresql.conf.sample && \
+    echo "host all all all md5" >> /usr/pgsql-10/share/pg_hba.conf.sample
 
 # Install database initialisation script
 COPY 01-initdb.sh $ESGF_INIT_DIR/
@@ -32,4 +33,4 @@ COPY 01-initdb.sh $ESGF_INIT_DIR/
 # Run as the esgf user by default
 USER $ESGF_UID
 EXPOSE 5432
-CMD ["postgres"]
+CMD ["/usr/pgsql-10/bin/postgres"]
