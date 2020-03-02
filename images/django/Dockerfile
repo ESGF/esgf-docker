@@ -25,11 +25,14 @@ RUN pip install --no-cache-dir \
 ENV DJANGO_SETTINGS_MODULE flexi_settings.settings
 ENV DJANGO_FLEXI_SETTINGS_ROOT /esg/django/settings.py
 ENV DJANGO_SETTINGS_DIR /esg/django/settings.d
+ENV DJANGO_STATIC_DIR /esg/django/staticfiles
 COPY gunicorn.conf.py /etc/gunicorn/conf.py
 COPY django-serve.sh /usr/local/bin/
 COPY init.d/* $ESGF_INIT_DIR/
 COPY settings.py $DJANGO_FLEXI_SETTINGS_ROOT
 COPY settings.d/* $DJANGO_SETTINGS_DIR/
+RUN mkdir -p $DJANGO_STATIC_DIR && \
+    chown $ESGF_USER:$ESGF_GROUP $DJANGO_STATIC_DIR
 
 # Install wheels and application from the builder
 ONBUILD COPY --from=builder /build/wheelhouse /build/wheelhouse
