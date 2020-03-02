@@ -17,7 +17,7 @@ USER root
 # Install gunicorn as WSGI server, whitenoise for serving static files and
 # django-flexi-settings for smart handling of settings
 RUN pip install --no-cache-dir \
-      'django-flexi-settings==0.1.0' \
+      'django-flexi-settings==0.1.1' \
       'gunicorn==20.0.4' \
       'whitenoise==5.0.1'
 
