@@ -11,7 +11,7 @@ USER root
 
 # Clone the SLCS code into /application and build wheels of the dependencies in /build/wheelhouse
 ARG ESGF_SLCS_REPO=https://github.com/ESGF/esgf-slcs-server.git
-ARG ESGF_SLCS_VERSION=794bed5316731d3df22328869f2fd0753542cfb5
+ARG ESGF_SLCS_VERSION=7397e0fc3dd51cc161148db4c3bf7f29fd708ac7
 RUN git clone $ESGF_SLCS_REPO /application && \
     pushd /application && \
     git checkout $ESGF_SLCS_VERSION && \
