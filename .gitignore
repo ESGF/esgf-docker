@@ -8,3 +8,5 @@
 _site/
 .project
 .vscode
+.python-version
+telepresence.log

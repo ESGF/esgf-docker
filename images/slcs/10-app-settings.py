@@ -2,7 +2,7 @@ import os
 
 from django.utils.module_loading import module_dir
 import esgf_slcs_server
-BASE_DIR = module_dir(esgf_slcs_server)
+SLCS_SERVER_BASE_DIR = module_dir(esgf_slcs_server)
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -27,7 +27,7 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'esgf_slcs_server.urls'
 
-TEMPLATES[0]['DIRS'].append(os.path.join(BASE_DIR, 'esgf_slcs_server', 'templates'))
+TEMPLATES[0]['DIRS'].append(os.path.join(SLCS_SERVER_BASE_DIR, 'templates'))
 
 WSGI_APPLICATION = 'esgf_slcs_server.wsgi.application'
 
@@ -39,7 +39,7 @@ AUTHENTICATION_BACKENDS = [
     'esgf_auth.backend.EsgfUserBackend'
 ]
 
-STATICFILES_DIRS = [os.path.join(BASE_DIR, 'esgf_slcs_server', 'static')]
+STATICFILES_DIRS = [os.path.join(SLCS_SERVER_BASE_DIR, 'static')]
 
 LOGIN_URL = 'accounts_login'
 LOGOUT_URL = 'accounts_logout'
