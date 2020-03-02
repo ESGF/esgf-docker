@@ -119,5 +119,6 @@ USE_L10N = True
 USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
-STATIC_URL = '/static/'
+# Make sure to include the WSGI script name in the static URL
+STATIC_URL = '{}/static/'.format(os.environ.get('SCRIPT_NAME', ''))
 STATIC_ROOT = os.environ['DJANGO_STATIC_DIR']
