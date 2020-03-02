@@ -49,6 +49,12 @@ BOOTSTRAP3 = {
     'success_css_class': '',
 }
 
+# If not defined, set the BASE_URL from the host + WSGI script name
+try:
+    BASE_URL
+except NameError:
+    BASE_URL = 'https://{}{}'.format(HOSTNAME, os.environ.get('SCRIPT_NAME', ''))
+
 # OAuth provider configuration
 # This expects the BASE_URL variable to be set before this file is included
 CERTIFICATE_SCOPE = '{}/oauth/certificate/'.format(BASE_URL)
