@@ -10,6 +10,10 @@ DEBUG = False
 # In a Docker container, ALLOWED_HOSTS is always '*' - let the proxy worry about hosts
 ALLOWED_HOSTS = ['*']
 
+# Make sure Django interprets the script name correctly if set
+if 'SCRIPT_NAME' in os.environ:
+    FORCE_SCRIPT_NAME = os.environ['SCRIPT_NAME']
+
 # Security settings
 SECURE_CONTENT_TYPE_NOSNIFF = True
 SECURE_BROWSER_XSS_FILTER = True
