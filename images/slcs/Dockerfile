@@ -11,7 +11,7 @@ USER root
 
 # Clone the SLCS code into /application and build wheels of the dependencies in /build/wheelhouse
 ARG ESGF_SLCS_REPO=https://github.com/ESGF/esgf-slcs-server.git
-ARG ESGF_SLCS_VERSION=issue/6/python3
+ARG ESGF_SLCS_VERSION=794bed5316731d3df22328869f2fd0753542cfb5
 RUN git clone $ESGF_SLCS_REPO /application && \
     pushd /application && \
     git checkout $ESGF_SLCS_VERSION && \
