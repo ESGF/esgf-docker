@@ -120,6 +120,20 @@ build:schema-migrate:
     CONTEXT_DIR: $CI_PROJECT_DIR/images/schema-migrate
   needs: ["build:conda"]
 
+build:orp:
+  extends: .docker-build
+  stage: build-3
+  variables:
+    CONTEXT_DIR: $CI_PROJECT_DIR/images/orp
+  needs: ["build:tomcat-builder", "build:tomcat-runtime"]
+
+build:search:
+  extends: .docker-build
+  stage: build-3
+  variables:
+    CONTEXT_DIR: $CI_PROJECT_DIR/images/search
+  needs: ["build:tomcat-builder", "build:tomcat-runtime"]
+
 build:slcs:
   extends: .docker-build
   stage: build-4
