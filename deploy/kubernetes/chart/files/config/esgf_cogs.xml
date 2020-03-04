@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<sites>
+    {{- range .Values.config.cogs }}
+    <site name="{{ .name }}" domain="{{ .domain }}" />
+    {{- end }}
+</sites>

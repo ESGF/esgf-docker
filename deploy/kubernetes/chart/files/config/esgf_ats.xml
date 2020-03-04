@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<ats_whitelist xmlns="http://www.esgf.org/whitelist">
+    {{- if .Values.idp.enabled }}
+    <attribute
+        type="wheel"
+        attributeService="{{ include "esgf.idp.endpoint.attributeService" . }}"
+        description="Administrator Group"
+        registrationService="{{ include "esgf.idp.endpoint.registrationService" . }}" />
+    {{- end }}
+</ats_whitelist>

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<las_servers xmlns="http://www.esgf.org/registry">
+    {{- range .Values.config.lasServers }}
+    <las_server name="{{ .name }}" url="{{ .url }}" ip="{{ .ip }}" />
+    {{- end }}
+</las_servers>

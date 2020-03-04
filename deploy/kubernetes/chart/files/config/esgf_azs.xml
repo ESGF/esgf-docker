@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<azs_whitelist>
+    {{- if .Values.orp.enabled }}
+    <value>{{ include "esgf.orp.endpoint.authorizationService" . }}</value>
+    {{- end }}
+</azs_whitelist>

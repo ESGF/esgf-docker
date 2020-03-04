@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<endpoints xmlns="http://www.esgf.org/whitelist">
+    {{- range .Values.config.endpoints }}
+    <endpoint name="{{ .name }}" gridftp="{{ .gridftp }}" path_out="{{ .pathOut }}" />
+    {{- end }}
+</endpoints>

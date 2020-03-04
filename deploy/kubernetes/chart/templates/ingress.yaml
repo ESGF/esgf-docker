@@ -11,7 +11,7 @@ spec:
   tls:
     - hosts:
         - {{ .Values.hostname | quote }}
-      secretName: {{ .Values.ingress.tlsSecretName | default (include "esgf.component.fullname" (list . "ingress")) }}
+      secretName: {{ .Values.ingress.tlsSecretName | required "Specify a TLS secret name" }}
   rules:
     - host: {{ .Values.hostname | quote }}
       http:
