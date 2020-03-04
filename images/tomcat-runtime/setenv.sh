@@ -5,4 +5,6 @@
 JAVA_MAX_HEAP_MB="${JAVA_MAX_HEAP_MB:-2048}"
 # By default, set the initial allocation to 50% of the max
 JAVA_INITIAL_HEAP_MB="${JAVA_INITIAL_HEAP_MB:-$(($JAVA_MAX_HEAP_MB / 2))}"
-export CATALINA_OPTS="-Xmx${JAVA_MAX_HEAP_MB}m -server -Xms${JAVA_INITIAL_HEAP_MB}m -XX:MaxPermSize=512m -Desg.home=$ESGF_HOME"
+CATALINA_OPTS="-Xmx${JAVA_MAX_HEAP_MB}m -server -Xms${JAVA_INITIAL_HEAP_MB}m -XX:MaxPermSize=512m"
+CATALINA_OPTS="$CATALINA_OPTS -Desg.home=$ESGF_HOME $CATALINA_EXTRA_OPTS"
+export CATALINA_OPTS

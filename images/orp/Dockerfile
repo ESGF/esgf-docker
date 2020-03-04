@@ -15,6 +15,7 @@ FROM ${ESGF_REPOSITORY_BASE}/tomcat-builder:${ESGF_IMAGES_VERSION} as builder
 ARG WEBAPP_NAME=esg-orp
 FROM ${ESGF_REPOSITORY_BASE}/tomcat-runtime:${ESGF_IMAGES_VERSION}
 
-# Install custom startup scripts
+# Install custom config and startup scripts
 ENV ESGF_HOSTCERT_DIR $ESGF_HOME/hostcert
 COPY 01-keystore.sh $ESGF_INIT_DIR/
+COPY esg-orp.properties $CATALINA_HOME/webapps/esg-orp/WEB-INF/classes/
