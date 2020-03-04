@@ -8,7 +8,7 @@ ARG ESGF_IMAGES_VERSION=latest
 # Unpack the esg-orp war
 ARG ESGF_ORP_ASSETS=https://github.com/ESGF/esg-orp/releases/download/
 ARG ESGF_ORP_VERSION=v2.11.0
-ARG WAR_LOCATION=$ESGF_ORP_ASSETS/$ESGF_ORP_VERSION/esgf-orp.war
+ARG WAR_LOCATION=$ESGF_ORP_ASSETS/$ESGF_ORP_VERSION/esg-orp.war
 FROM ${ESGF_REPOSITORY_BASE}/tomcat-builder:${ESGF_IMAGES_VERSION} as builder
 
 # Copy the unpacked contents into the runtime container
