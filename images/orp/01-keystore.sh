@@ -7,6 +7,9 @@ set -eo pipefail
 ## and configures the ORP to use it
 #####
 
+# Create a temporary file for openssl to put random state
+export RANDFILE="$(mktemp)"
+
 ESGF_KEYSTORE_ALIAS="${ESGF_KEYSTORE_ALIAS:-esgf-self}"
 ESGF_KEYSTORE_FILE="$ESGF_HOME/tomcat/hostcert.p12"
 # Generate a random keystore password for this container run
@@ -31,3 +34,6 @@ keystoreAlias=$ESGF_KEYSTORE_ALIAS
 
 orp.provider.list=$ESGF_CONFIG_DIR/esgf_known_providers.xml
 EOF
+
+rm -rf "$RANDFILE"
+unset RANDFILE
