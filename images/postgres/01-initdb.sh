@@ -42,7 +42,7 @@ fi
 if [ -s "$PGDATA/PG_VERSION" ]; then
     echo "[warn] $PGDATA already contains a database - skipping initialisation"
     export DB_INITIALISED=false
-    return 0
+    return
 fi
 
 export DB_INITIALISED=true

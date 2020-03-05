@@ -10,9 +10,10 @@ function fatal { echo "[fatal] $1" 1>&2; exit 1; }
 #####
 
 # If not asked to create a superuser, there is nothing to do
-test "${DJANGO_CREATE_SUPERUSER:-0}" -eq 0 && \
-  info "Skipping Django superuser creation"
-  return
+if [ "${DJANGO_CREATE_SUPERUSER:-0}" -eq 0 ]; then
+    info "Skipping Django superuser creation"
+    return
+fi
 
 # We require that username and email are set
 test -z "$DJANGO_SUPERUSER_USERNAME" && \
