@@ -20,7 +20,8 @@ RUN mkdir -p $CATALINA_HOME
 WORKDIR $CATALINA_HOME
 
 # Make a config directory that is writable by the esgf user
-RUN mkdir -p $ESGF_HOME/tomcat && chown $ESGF_USER:$ESGF_GROUP $ESGF_HOME/tomcat
+RUN mkdir -p $ESGF_HOME/tomcat && \
+    chown $ESGF_USER:$ESGF_GROUP $ESGF_HOME/tomcat
 
 # Install JRE
 RUN yum makecache && \

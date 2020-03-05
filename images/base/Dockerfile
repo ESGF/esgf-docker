@@ -11,7 +11,6 @@ ENV ESGF_HOME /esg
 ENV ESGF_CONFIG_DIR $ESGF_HOME/config
 ENV ESGF_CERT_DIR $ESGF_HOME/certificates
 ENV ESGF_INIT_DIR $ESGF_HOME/init.d
-RUN mkdir -p $ESGF_CONFIG_DIR && mkdir -p $ESGF_CERT_DIR && mkdir -p $ESGF_INIT_DIR
 
 # Create the esgf user that will be used to run apps
 ENV ESGF_UID 1000
