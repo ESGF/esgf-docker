@@ -1,4 +1,3 @@
-{{- if .Values.ingress.enabled -}}
 apiVersion: networking.k8s.io/v1beta1
 kind: Ingress
 metadata:
@@ -11,7 +10,11 @@ spec:
   tls:
     - hosts:
         - {{ .Values.hostname | quote }}
-      secretName: {{ .Values.ingress.tlsSecretName | required "Specify a TLS secret name" }}
+      {{- if .Values.ingress.tls.secretName }}
+      secretName: {{ .Values.ingress.tls.secretName }}
+      {{- else }}
+      secretName: {{ include "esgf.component.fullname" (list . "hostcert") }}
+      {{- end }}
   rules:
     - host: {{ .Values.hostname | quote }}
       http:
@@ -28,4 +31,9 @@ spec:
               serviceName: {{ include "esgf.component.fullname" (list . "slcs") }}
               servicePort: 8080
           {{- end }}
-{{- end }}
+          {{- if .Values.orp.enabled }}
+          - path: /esg-orp
+            backend:
+              serviceName: {{ include "esgf.component.fullname" (list . "orp") }}
+              servicePort: 8080
+          {{- end }}

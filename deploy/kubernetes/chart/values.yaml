@@ -2,7 +2,7 @@ hostname: esgf.130.246.129.72.nip.io
 
 image:
   prefix: breezy.badc.rl.ac.uk:4567/github-mirrors/esgf__esgf-docker
-  tag: 5d96ec18
+  tag: "60421751"
   pullPolicy: IfNotPresent
   pullSecrets:
     - name: breezy
@@ -19,9 +19,14 @@ persistence:
     size: 1Gi
 
 ingress:
-  enabled: true
   annotations:
-  tlsSecretName: esgf-tls
+  tls:
+    # Either give an existing secret name
+    secretName:
+    # Or provide PEM-encoded certificate (including chain) and key files
+    pem:
+      cert:
+      key:
 
 database:
   type: internal
@@ -95,6 +100,16 @@ orp:
     repository: orp
   replicaCount: 1
   resources: {}
+  policies:
+    # Default policies are for open test data
+    - resource: ".*test.*"
+      attributeType: ANY
+      attributeValue: ""
+      action: Read
+    - resource: ".*test.*"
+      attributeType: wheel
+      attributeValue: super
+      action: Write
 
 myproxy:
   endpoint:

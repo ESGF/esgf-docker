@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<policies xmlns="http://www.esgf.org/security">
+    {{- range .Values.orp.policies }}
+    <policy resource="{{ .resource }}" attribute_type="{{ .attributeType }}" attribute_value="{{ .attributeValue }}" action="{{ .action }}" />
+    {{- end }}
+</policies>

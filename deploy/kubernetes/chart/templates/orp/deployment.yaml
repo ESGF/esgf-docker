@@ -1,0 +1,82 @@
+{{- if .Values.orp.enabled -}}
+{{- $orp := .Values.orp -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "esgf.component.fullname" (list . "orp") }}
+  labels: {{ include "esgf.component.labels" (list . "orp") | nindent 4 }}
+spec:
+  replicas: {{ $orp.replicaCount }}
+  selector:
+    matchLabels: {{ include "esgf.component.selectorLabels" (list . "orp") | nindent 6 }}
+  template:
+    metadata:
+      labels: {{ include "esgf.component.selectorLabels" (list . "orp") | nindent 8 }}
+      # Force deployments to roll if the config changes
+      # https://helm.sh/docs/howto/charts_tips_and_tricks/#automatically-roll-deployments
+      annotations:
+        {{- if not .Values.ingress.tls.secretName }}
+        checksum/hostcert: {{ include (print $.Template.BasePath "/config/hostcert.yaml") . | sha256sum }}
+        {{- end }}
+        checksum/config.configmap: {{ include (print $.Template.BasePath "/config/configmap.yaml") . | sha256sum }}
+        checksum/orp.configmap: {{ include (print $.Template.BasePath "/orp/configmap.yaml") . | sha256sum }}
+    spec:
+      {{- with (default .Values.image.pullSecrets $orp.image.pullSecrets) }}
+      imagePullSecrets: {{ toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: orp
+          {{ include "esgf.deployment.image" (list . $orp) }}
+          resources: {{ toYaml $orp.resources | nindent 12 }}
+          ports:
+            - name: http
+              containerPort: 8080
+          # The readiness and liveness probes run the same thing, but the liveness
+          # probe just waits a while before kicking in whereas the readiness probe
+          # starts straight away
+          readinessProbe: &probe
+            httpGet:
+              path: /esg-orp/home.htm
+              port: 8080
+              httpHeaders:
+                - name: Host
+                  value: "{{ .Values.hostname }}"
+                - name: X-Forwarded-Proto
+                  value: https
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            <<: *probe
+            initialDelaySeconds: 300
+          volumeMounts:
+            - name: esg-config
+              mountPath: /esg/config
+              readOnly: true
+            - name: hostcert
+              mountPath: /esg/hostcert
+              readOnly: true
+      {{- with $orp.nodeSelector }}
+      nodeSelector: {{ toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $orp.affinity }}
+      affinity: {{ toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $orp.tolerations }}
+      tolerations: {{ toYaml . | nindent 8 }}
+      {{- end }}
+      volumes:
+        - name: esg-config
+          projected:
+            sources:
+              - configMap:
+                  name: {{ include "esgf.component.fullname" (list . "config") }}
+              - configMap:
+                  name: {{ include "esgf.component.fullname" (list . "orp") }}
+        - name: hostcert
+          secret:
+            {{- if .Values.ingress.tls.secretName }}
+            secretName: {{ .Values.ingress.tls.secretName }}
+            {{- else }}
+            secretName: {{ include "esgf.component.fullname" (list . "hostcert") }}
+            {{- end }}
+{{- end -}}

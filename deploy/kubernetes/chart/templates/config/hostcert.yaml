@@ -1,0 +1,18 @@
+{{- $tls := .Values.ingress.tls -}}
+{{- if not $tls.secretName -}}
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ include "esgf.component.fullname" (list . "hostcert") }}
+  labels: {{ include "esgf.component.labels" (list . "hostcert") | nindent 4 }}
+type: kubernetes.io/tls
+data:
+  {{- if $tls.pem.cert }}
+  tls.crt: {{ $tls.pem.cert | b64enc | quote }}
+  tls.key: {{ $tls.pem.key | b64enc | quote }}
+  {{- else }}
+  {{- $cert := genSelfSignedCert .Values.hostname nil nil 365 }}
+  tls.crt: {{ $cert.Cert | b64enc | quote }}
+  tls.key: {{ $cert.Key | b64enc | quote }}
+  {{- end }}
+{{- end -}}
