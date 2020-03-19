@@ -64,11 +64,22 @@ build:base:
   variables:
     CONTEXT_DIR: $CI_PROJECT_DIR/images/base
 
-build:conda:
+build:python2:
   extends: .docker-build
   stage: build-2
   variables:
-    CONTEXT_DIR: $CI_PROJECT_DIR/images/conda
+    CONTEXT_DIR: $CI_PROJECT_DIR/images/python
+    IMAGE_NAME: python2
+    BUILD_ARG_PYTHON_MAJOR_VERSION: "2"
+  needs: ["build:base"]
+
+build:python3:
+  extends: .docker-build
+  stage: build-2
+  variables:
+    CONTEXT_DIR: $CI_PROJECT_DIR/images/python
+    IMAGE_NAME: python3
+    BUILD_ARG_PYTHON_MAJOR_VERSION: "3"
   needs: ["build:base"]
 
 build:postgres:
@@ -92,19 +103,23 @@ build:tomcat-runtime:
     CONTEXT_DIR: $CI_PROJECT_DIR/images/tomcat-runtime
   needs: ["build:base"]
 
-build:conda-builder:
-  extends: .docker-build
-  stage: build-3
-  variables:
-    CONTEXT_DIR: $CI_PROJECT_DIR/images/conda-builder
-  needs: ["build:conda"]
-
-build:django:
+build:django2:
   extends: .docker-build
   stage: build-3
   variables:
     CONTEXT_DIR: $CI_PROJECT_DIR/images/django
-  needs: ["build:conda"]
+    IMAGE_NAME: django2
+    BUILD_ARG_PYTHON_MAJOR_VERSION: "2"
+  needs: ["build:python2"]
+
+build:django3:
+  extends: .docker-build
+  stage: build-3
+  variables:
+    CONTEXT_DIR: $CI_PROJECT_DIR/images/django
+    IMAGE_NAME: django3
+    BUILD_ARG_PYTHON_MAJOR_VERSION: "3"
+  needs: ["build:python3"]
 
 build:idp:
   extends: .docker-build
@@ -118,7 +133,7 @@ build:schema-migrate:
   stage: build-3
   variables:
     CONTEXT_DIR: $CI_PROJECT_DIR/images/schema-migrate
-  needs: ["build:conda"]
+  needs: ["build:python2"]
 
 build:orp:
   extends: .docker-build
@@ -139,4 +154,4 @@ build:slcs:
   stage: build-4
   variables:
     CONTEXT_DIR: $CI_PROJECT_DIR/images/slcs
-  needs: ["build:conda-builder", "build:django"]
+  needs: ["build:django3"]

@@ -5,9 +5,11 @@
 ARG ESGF_REPOSITORY_BASE=esgfhub
 ARG ESGF_IMAGES_VERSION=latest
 
-FROM ${ESGF_REPOSITORY_BASE}/conda-builder:${ESGF_IMAGES_VERSION} as builder
+FROM ${ESGF_REPOSITORY_BASE}/python3:${ESGF_IMAGES_VERSION} as builder
 
 USER root
+
+RUN yum makecache && yum install -y git && yum clean all
 
 # Clone the SLCS code into /application and build wheels of the dependencies in /build/wheelhouse
 ARG ESGF_SLCS_REPO=https://github.com/ESGF/esgf-slcs-server.git
@@ -20,7 +22,7 @@ RUN git clone $ESGF_SLCS_REPO /application && \
     pip wheel --no-deps --requirement /application/requirements.txt --wheel-dir /build/wheelhouse
 
 
-FROM ${ESGF_REPOSITORY_BASE}/django:${ESGF_IMAGES_VERSION}
+FROM ${ESGF_REPOSITORY_BASE}/django3:${ESGF_IMAGES_VERSION}
 
 # Install the app settings file
 # These are settings that define the application rather than runtime settings

@@ -1,5 +1,7 @@
 #####
 ## Base image for all Python images using conda
+##
+## This Dockerfile is used to build the python2 and python3 images
 #####
 
 ARG ESGF_REPOSITORY_BASE=esgfhub
@@ -20,9 +22,9 @@ RUN mkdir -p $PYTHON_EGG_CACHE && \
     chown -R $ESGF_USER:$ESGF_GROUP $PYTHON_EGG_CACHE
 
 # Install and configure Conda
-ENV CONDA_VERSION=4.7.12.1
-RUN curl -fsSL -o miniconda.sh https://repo.anaconda.com/miniconda/Miniconda3-$CONDA_VERSION-Linux-x86_64.sh && \
-    echo "bfe34e1fa28d6d75a7ad05fd02fa5472275673d5f5621b77380898dee1be15d2 *miniconda.sh" | sha256sum --check - && \
+ARG PYTHON_MAJOR_VERSION=3
+ARG CONDA_VERSION=4.7.12.1
+RUN curl -fsSL -o miniconda.sh https://repo.anaconda.com/miniconda/Miniconda${PYTHON_MAJOR_VERSION}-${CONDA_VERSION}-Linux-x86_64.sh && \
     /bin/bash miniconda.sh -f -b -p $CONDA_HOME && \
     rm miniconda.sh && \
     echo "conda ${CONDA_VERSION}" >> $CONDA_HOME/conda-meta/pinned && \

@@ -6,16 +6,7 @@
 
 ARG ESGF_REPOSITORY_BASE=esgfhub
 ARG ESGF_IMAGES_VERSION=latest
-FROM ${ESGF_REPOSITORY_BASE}/conda:${ESGF_IMAGES_VERSION} as python27
-
-USER root
-
-# Downgrade the conda installation to Python 2.7
-RUN conda install "python<3" && \
-    conda clean --all -f -y
-
-
-FROM python27 as builder
+FROM ${ESGF_REPOSITORY_BASE}/python2:${ESGF_IMAGES_VERSION} as builder
 
 # Install dependencies required to build wheels
 RUN yum makecache && \
@@ -30,7 +21,7 @@ RUN mkdir -p /build/wheelhouse && \
       "sqlalchemy_migrate>=0.6,<=0.12"
 
 
-FROM python27
+FROM ${ESGF_REPOSITORY_BASE}/python2:${ESGF_IMAGES_VERSION}
 
 # Install runtime dependencies
 RUN yum makecache && yum install -y postgresql && yum clean all
