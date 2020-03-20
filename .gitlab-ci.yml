@@ -1,0 +1,72 @@
+stages:
+  - build-1
+  - build-2
+  - build-3
+  - build-4
+
+.dind:
+  services:
+    - docker:19.03-dind
+  image: docker:19.03
+  variables:
+    DOCKER_HOST: tcp://localhost:2375
+    DOCKER_TLS_CERTDIR: ""
+  before_script:
+    - docker info
+    # Use the GitLab container registry by default
+    - REGISTRY="${REGISTRY:-$CI_REGISTRY}"
+    - REGISTRY_USER="${REGISTRY_USER:-$CI_REGISTRY_USER}"
+    # Allow the password to come from a file
+    - test -z "$REGISTRY_PASSWORD" && test -f "$REGISTRY_PASSWORD_FILE" && REGISTRY_PASSWORD="$(cat "$REGISTRY_PASSWORD_FILE")"
+    # Also allow the password to be base64 encoded (GitLab masked variables must be base64-encoded)
+    - test -z "$REGISTRY_PASSWORD" && test -n "$REGISTRY_PASSWORD_B64" && REGISTRY_PASSWORD="$(echo -n "$REGISTRY_PASSWORD_B64" | base64 -d)"
+    # If not given, use the GitLab container registry password
+    - REGISTRY_PASSWORD="${REGISTRY_PASSWORD:-$CI_REGISTRY_PASSWORD}"
+    - docker login -u $REGISTRY_USER -p $REGISTRY_PASSWORD $REGISTRY
+
+.docker-build:
+  extends: .dind
+  script:
+    # Use the basename of the context directory as the image name
+    - IMAGE_NAME="${IMAGE_NAME:-"$(basename $CONTEXT_DIR)"}"
+    # By default, use the GitLab container registry for the project
+    - REPOSITORY_BASE="${REPOSITORY_BASE:-$CI_REGISTRY_IMAGE}"
+    - REPOSITORY="${REPOSITORY:-"$REPOSITORY_BASE/$IMAGE_NAME"}"
+    # Set build args so that child images pick up the correct parents
+    - export BUILD_ARG_ESGF_REPOSITORY_BASE="$REPOSITORY_BASE"
+    - export BUILD_ARG_ESGF_IMAGES_VERSION="$CI_COMMIT_SHORT_SHA"
+    # Use the latest build for the branch and the latest build for master as cache sources
+    - LATEST="$REPOSITORY:latest"
+    - LATEST_BRANCH="$REPOSITORY:$CI_COMMIT_REF_SLUG"
+    - docker pull $LATEST || true
+    - docker pull $LATEST_BRANCH || true
+    - DOCKER_ARGS="--cache-from $LATEST --cache-from $LATEST_BRANCH"
+    # Build and push with the short commit SHA as a tag
+    - DOCKER_ARGS="$DOCKER_ARGS --tag $REPOSITORY:$CI_COMMIT_SHORT_SHA"
+    # Use any environment variable starting with BUILD_ARG_ as a build arg
+    - BUILD_ARGS=$(env | grep -e "^BUILD_ARG_" | awk -F '=' '{ print $1 }' || true)
+    - for arg in $BUILD_ARGS; do DOCKER_ARGS="$DOCKER_ARGS --build-arg ${arg:10}=$(eval "echo \$$arg")"; done
+    # Build the image
+    - docker build $DOCKER_ARGS $DOCKER_EXTRA_ARGS $CONTEXT_DIR
+    # Retag the image
+    #   Always tag with the slugified branch/tag name
+    - docker tag "$REPOSITORY:$CI_COMMIT_SHORT_SHA" "$REPOSITORY:$CI_COMMIT_REF_SLUG"
+    #   If building for a tag, add the Git tag to the Docker tags verbatim
+    - test -n "$CI_COMMIT_TAG" && docker tag "$REPOSITORY:$CI_COMMIT_SHORT_SHA" "$REPOSITORY:$CI_COMMIT_TAG"
+    #   If building master, also tag latest
+    - test "$CI_COMMIT_REF_NAME" == "master" && docker tag "$REPOSITORY:$CI_COMMIT_SHORT_SHA" "$REPOSITORY:latest"
+    # Push all tags
+    - docker push $REPOSITORY
+
+build:base:
+  extends: .docker-build
+  stage: build-1
+  variables:
+    CONTEXT_DIR: $CI_PROJECT_DIR/images/base
+
+build:nginx:
+  extends: .docker-build
+  stage: build-2
+  variables:
+    CONTEXT_DIR: $CI_PROJECT_DIR/images/nginx
+  needs: ["build:base"]
