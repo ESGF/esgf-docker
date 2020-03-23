@@ -70,3 +70,31 @@ build:nginx:
   variables:
     CONTEXT_DIR: $CI_PROJECT_DIR/images/nginx
   needs: ["build:base"]
+
+build:jdk:
+  extends: .docker-build
+  stage: build-2
+  variables:
+    CONTEXT_DIR: $CI_PROJECT_DIR/images/jdk
+  needs: ["build:base"]
+
+build:jre:
+  extends: .docker-build
+  stage: build-2
+  variables:
+    CONTEXT_DIR: $CI_PROJECT_DIR/images/jre
+  needs: ["build:base"]
+
+build:tomcat:
+  extends: .docker-build
+  stage: build-3
+  variables:
+    CONTEXT_DIR: $CI_PROJECT_DIR/images/tomcat
+  needs: ["build:jre"]
+
+build:thredds:
+  extends: .docker-build
+  stage: build-4
+  variables:
+    CONTEXT_DIR: $CI_PROJECT_DIR/images/thredds
+  needs: ["build:tomcat"]
