@@ -1,0 +1,51 @@
+{{- if .Values.thredds.enabled -}}
+{{- $thredds := .Values.thredds -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "esgf.component.fullname" (list . "thredds") }}
+  labels: {{ include "esgf.component.labels" (list . "thredds") | nindent 4 }}
+spec:
+  replicas: {{ $thredds.replicaCount }}
+  selector:
+    matchLabels: {{ include "esgf.component.selectorLabels" (list . "thredds") | nindent 6 }}
+  template:
+    metadata:
+      labels: {{ include "esgf.component.selectorLabels" (list . "thredds") | nindent 8 }}
+    spec:
+      {{- with (default .Values.image.pullSecrets $thredds.image.pullSecrets) }}
+      imagePullSecrets: {{ toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: thredds
+          {{ include "esgf.deployment.image" (list . $thredds) }}
+          resources: {{ toYaml $thredds.resources | nindent 12 }}
+          ports:
+            - name: http
+              containerPort: 8080
+          readinessProbe: &probe
+            httpGet:
+              path: /thredds/
+              port: 8080
+              httpHeaders:
+                - name: Host
+                  value: "{{ .Values.hostname }}"
+                - name: X-Forwarded-Host
+                  value: "{{ .Values.hostname }}"
+                - name: X-Forwarded-Proto
+                  value: https
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            <<: *probe
+            initialDelaySeconds: 300
+      {{- with $thredds.nodeSelector }}
+      nodeSelector: {{ toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $thredds.affinity }}
+      affinity: {{ toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $thredds.tolerations }}
+      tolerations: {{ toYaml . | nindent 8 }}
+      {{- end }}
+{{- end -}}
