@@ -23,11 +23,14 @@ FROM ${ESGF_REPOSITORY_BASE}/tomcat:${ESGF_IMAGES_VERSION}
 
 USER root
 
+# Make the content root directory and point tomcat at it
+RUN mkdir content/thredds && chown $ESGF_USER:$ESGF_GROUP content/thredds
+ENV CATALINA_EXTRA_OPTS "-Dtds.content.root.path=$CATALINA_HOME/content"
+
 # Copy the unpacked webapp from the builder
 COPY --from=builder /application ./webapps/thredds
-
-# Make the content root directory and point tomcat at it
-RUN mkdir content && chown $ESGF_USER:$ESGF_GROUP content
-ENV CATALINA_EXTRA_OPTS "-Dtds.content.root.path=$CATALINA_HOME/content"
+# Install configuration files
+COPY log4j2.xml ./webapps/thredds/WEB-INF/classes/
+COPY threddsConfig.xml catalog.xml ./content/thredds/
 
 USER $ESGF_UID
