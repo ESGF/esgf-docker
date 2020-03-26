@@ -32,5 +32,6 @@ COPY --from=builder /application ./webapps/thredds
 # Install configuration files
 COPY log4j2.xml ./webapps/thredds/WEB-INF/classes/
 COPY threddsConfig.xml catalog.xml ./content/thredds/
+COPY catalog-esgcet.xml ./content/thredds/esgcet/catalog.xml
 
 USER $ESGF_UID

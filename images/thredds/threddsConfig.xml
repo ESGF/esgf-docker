@@ -5,7 +5,7 @@
   <!-- see http://www.unidata.ucar.edu/projects/THREDDS/tech/reference/ThreddsConfigXMLFile.html -->
   <serverInformation>
     <name>ESGF THREDDS Data Server</name>
-    <logoUrl>threddsIcon.png</logoUrl>
+    <logoUrl>/thredds/threddsIcon.png</logoUrl>
     <logoAltText>ESGF THREDDS Data Server</logoAltText>
 
     <abstract>Scientific Data</abstract>

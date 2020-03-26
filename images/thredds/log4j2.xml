@@ -9,8 +9,8 @@
         </Async>
     </Appenders>
     <Loggers>
-        <Root level="debug">
-            <AppenderRef ref="async"/>
+        <Root level="info">
+            <AppenderRef ref="async" />
         </Root>
     </Loggers>
 </Configuration>
