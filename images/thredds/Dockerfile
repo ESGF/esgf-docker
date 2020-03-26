@@ -24,7 +24,7 @@ FROM ${ESGF_REPOSITORY_BASE}/tomcat:${ESGF_IMAGES_VERSION}
 USER root
 
 # Make the content root directory and point tomcat at it
-RUN mkdir content/thredds && chown $ESGF_USER:$ESGF_GROUP content/thredds
+RUN mkdir -p ./content/thredds && chown $ESGF_USER ./content/thredds
 ENV CATALINA_EXTRA_OPTS "-Dtds.content.root.path=$CATALINA_HOME/content"
 
 # Copy the unpacked webapp from the builder
