@@ -25,9 +25,10 @@ RUN curl -fsSL -o tomcat.tar.gz $TOMCAT_URL && \
     tar -xzf tomcat.tar.gz --strip-components=1 && \
     # Cleanup tar file, remove Windows scripts and default webapps
     rm -rf tomcat.tar.gz bin/*.bat webapps/* && \
-    # Fix permissions for running as tomcat
+    # Fix permissions - we want any user in the tomcat group to be able to run the container
     chmod -R +rX . && \
-    chown -R $ESGF_USER:$ESGF_GROUP logs temp work
+    chown -R $ESGF_USER:$ESGF_GROUP logs temp work && \
+    chmod -R u+w,g+w logs temp work
 # Install custom configs
 COPY context.xml server.xml tomcat-users.xml conf/
 COPY setenv.sh bin/
