@@ -1,5 +1,5 @@
-{{- if .Values.thredds.enabled -}}
-{{- $thredds := .Values.thredds -}}
+{{- if .Values.data.thredds.enabled -}}
+{{- $thredds := .Values.data.thredds -}}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -15,6 +15,9 @@ spec:
     spec:
       {{- with (default .Values.image.pullSecrets $thredds.image.pullSecrets) }}
       imagePullSecrets: {{ toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $thredds.podSecurityContext }}
+      securityContext: {{ toYaml $thredds.podSecurityContext | nindent 8 }}
       {{- end }}
       containers:
         - name: thredds
@@ -39,6 +42,14 @@ spec:
           livenessProbe:
             <<: *probe
             initialDelaySeconds: 300
+          {{- with $thredds.securityContext }}
+          securityContext: {{ toYaml $thredds.securityContext | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+            - name: catalog-esgcet
+              mountPath: /opt/tomcat/content/thredds/esgcet
+              readOnly: true
+            {{- include "esgf.data.volumeMounts" . | nindent 12 }}
       {{- with $thredds.nodeSelector }}
       nodeSelector: {{ toYaml . | nindent 8 }}
       {{- end }}
@@ -48,4 +59,9 @@ spec:
       {{- with $thredds.tolerations }}
       tolerations: {{ toYaml . | nindent 8 }}
       {{- end }}
+      volumes:
+        - name: catalog-esgcet
+          configMap:
+            name: {{ include "esgf.component.fullname" (list . "thredds") }}
+        {{- include "esgf.data.volumes" . | nindent 8 }}
 {{- end -}}

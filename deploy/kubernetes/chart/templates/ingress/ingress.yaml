@@ -19,9 +19,15 @@ spec:
     - host: {{ .Values.hostname | quote }}
       http:
         paths:
-          {{- if .Values.thredds.enabled }}
+          {{- if .Values.data.thredds.enabled }}
           - path: /thredds
             backend:
               serviceName: {{ include "esgf.component.fullname" (list . "thredds") }}
+              servicePort: 8080
+          {{- end }}
+          {{- if .Values.data.fileServer.enabled }}
+          - path: /thredds/fileServer
+            backend:
+              serviceName: {{ include "esgf.component.fullname" (list . "fileServer") }}
               servicePort: 8080
           {{- end }}

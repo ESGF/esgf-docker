@@ -3,7 +3,7 @@ Expand the name of a component.
 */}}
 {{- define "esgf.component.name" -}}
   {{- $context := index . 0 -}}
-  {{- printf "%s-%s" $context.Chart.Name (index . 1) | trunc 63 | trimSuffix "-" -}}
+  {{- printf "%s-%s" $context.Chart.Name (index . 1 | kebabcase) | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
 {{/*
@@ -60,4 +60,25 @@ Produces an image specification with the correct nesting for use in deployments.
 */}}
 {{- define "esgf.deployment.image" -}}
 {{- include "esgf.component.image" . | indent 10 | trim -}}
+{{- end -}}
+
+{{/*
+Produces volume definitions for the specified data volumes.
+*/}}
+{{- define "esgf.data.volumes" -}}
+{{- range .Values.data.volumes }}
+- name: {{ regexReplaceAll "[^a-zA-Z0-9]+" .mountPath "-" | trimAll "-" | quote }}
+  {{- toYaml .volume | nindent 2 }}
+{{- end }}
+{{- end -}}
+
+{{/*
+Produces volume mount definitions for the specified data volumes.
+*/}}
+{{- define "esgf.data.volumeMounts" -}}
+{{- range .Values.data.volumes }}
+- name: {{ regexReplaceAll "[^a-zA-Z0-9]+" .mountPath "-" | trimAll "-" | quote }}
+  readOnly: true
+  {{- omit . "volume" | toYaml | nindent 2 }}
+{{- end }}
 {{- end -}}

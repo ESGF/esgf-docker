@@ -1,15 +1,10 @@
 {{- if .Values.data.thredds.enabled -}}
 apiVersion: v1
-kind: Service
+kind: ConfigMap
 metadata:
   name: {{ include "esgf.component.fullname" (list . "thredds") }}
   labels: {{ include "esgf.component.labels" (list . "thredds") | nindent 4 }}
-spec:
-  type: ClusterIP
-  ports:
-    - name: http
-      port: 8080
-      targetPort: http
-      protocol: TCP
-  selector: {{ include "esgf.component.selectorLabels" (list . "thredds") | nindent 4 }}
+# Template the files from files/thredds as the data
+data:
+  catalog.xml: {{ tpl (.Files.Get "files/thredds/catalog.xml") . | quote }}
 {{- end -}}
