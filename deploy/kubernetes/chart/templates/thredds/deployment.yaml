@@ -12,6 +12,10 @@ spec:
   template:
     metadata:
       labels: {{ include "esgf.component.selectorLabels" (list . "thredds") | nindent 8 }}
+      # Force deployment to roll if the config changes
+      # https://helm.sh/docs/howto/charts_tips_and_tricks/#automatically-roll-deployments
+      annotations:
+        checksum/configmap: {{ include (print $.Template.BasePath "/thredds/configmap.yaml") . | sha256sum }}
     spec:
       {{- with (default .Values.image.pullSecrets $thredds.image.pullSecrets) }}
       imagePullSecrets: {{ toYaml . | nindent 8 }}

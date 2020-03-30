@@ -17,8 +17,17 @@
 
     <!-- Produce a scan element for each of the given datasets -->
     {{- range .Values.data.datasets }}
-    <datasetScan name="{{ .name }}" path="{{ .path }}" location="{{ .location }}" >
-        <serviceName>all</serviceName>
+    <datasetScan name="{{ .name }}" ID="{{ .path }}" path="{{ .path }}" location="{{ .location }}">
+        <metadata inherited="true">
+            <serviceName>all</serviceName>
+        </metadata>
+        <filter>
+            <!-- Exclude files or directories beginning with a dot -->
+            <exclude wildcard=".*" collection="true" />
+            {{- range .filters }}
+            <{{ .type }} {{ range $k, $v := (omit . "type") }}{{ $k }}={{ $v | quote }} {{ end }}/>
+            {{- end }}
+        </filter>
     </datasetScan>
     {{- end }}
 </catalog>
