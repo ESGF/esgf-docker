@@ -12,11 +12,13 @@ USER root
 
 RUN yum makecache && yum install -y nginx && yum clean all
 
-# Create the run directory and fix permissions so that any user in the
-# esgf group can run the container
+# Make the default log locations go to stdout and stderr
+# Also fix some permissions so that any user in the esgf group can run the container
 RUN mkdir /run/nginx && \
-    chown $ESGF_USER:$ESGF_GROUP /run/nginx && \
-    chmod g+w /run/nginx
+    chown -R $ESGF_USER:$ESGF_GROUP /var/log/nginx /var/lib/nginx /run/nginx && \
+    chmod -R g+w /var/log/nginx /var/lib/nginx /run/nginx && \
+    ln -sf /dev/stdout /var/log/nginx/access.log && \
+    ln -sf /dev/stderr /var/log/nginx/error.log
 
 # Make dhparam and dummy SSL certificates
 RUN mkdir -p /etc/nginx/tls/default && \
