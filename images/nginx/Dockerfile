@@ -30,6 +30,7 @@ RUN mkdir -p /etc/nginx/tls/default && \
 
 # Install a default configuration file that uses unprivileged ports
 COPY nginx.conf /etc/nginx/
+COPY conf.d/* /etc/nginx/conf.d/
 COPY includes/* /etc/nginx/includes/
 
 USER $ESGF_UID
