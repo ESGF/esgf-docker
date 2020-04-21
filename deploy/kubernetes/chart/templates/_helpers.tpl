@@ -63,11 +63,18 @@ Produces an image specification with the correct nesting for use in deployments.
 {{- end -}}
 
 {{/*
+Produces a volume name from a mount path
+*/}}
+{{- define "esgf.data.volumeName" -}}
+{{- regexReplaceAll "[^a-zA-Z0-9]+" . "-" | trimAll "-" -}}
+{{- end -}}
+
+{{/*
 Produces volume definitions for the specified data volumes.
 */}}
 {{- define "esgf.data.volumes" -}}
-{{- range .Values.data.volumes }}
-- name: {{ regexReplaceAll "[^a-zA-Z0-9]+" .mountPath "-" | trimAll "-" | quote }}
+{{- range .Values.data.mounts }}
+- name: {{ include "esgf.data.volumeName" .mountPath | quote }}
   {{- toYaml .volume | nindent 2 }}
 {{- end }}
 {{- end -}}
@@ -76,8 +83,8 @@ Produces volume definitions for the specified data volumes.
 Produces volume mount definitions for the specified data volumes.
 */}}
 {{- define "esgf.data.volumeMounts" -}}
-{{- range .Values.data.volumes }}
-- name: {{ regexReplaceAll "[^a-zA-Z0-9]+" .mountPath "-" | trimAll "-" | quote }}
+{{- range .Values.data.mounts }}
+- name: {{ include "esgf.data.volumeName" .mountPath | quote }}
   readOnly: true
   {{- omit . "volume" | toYaml | nindent 2 }}
 {{- end }}

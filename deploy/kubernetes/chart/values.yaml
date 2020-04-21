@@ -1,25 +1,18 @@
-hostname: esgf.130.246.129.72.nip.io
+# The hostname for the deployment
+hostname:
 
+# All image properties can be overridden on a per-service basis
 image:
-  prefix: breezy.badc.rl.ac.uk:4567/github-mirrors/esgf__esgf-docker
-  tag: "4f0af764"
-  pullPolicy: IfNotPresent
-  pullSecrets:
-    - name: breezy
-
-persistence:
-  enabled: false
-  # Only used when database.type=internal and persistence.enabled=true
-  database:
-    # Set this to the name of a pre-existing persistentVolumeClaim
-    existingClaim:
-    # Set these to dynamically create a new persistentVolumeClaim
-    # If no storage class is given, then the default is used
-    storageClassName:
-    size: 1Gi
+  # The image repository prefix
+  prefix: esgfhub
+  # The tag to use
+  tag: latest
+  # The image pull policy
+  pullPolicy: Always
 
 ingress:
   annotations:
+  # TLS configuration
   tls:
     # Either give an existing secret name
     secretName:
@@ -27,10 +20,68 @@ ingress:
     pem:
       cert:
       key:
+    # If neither are given, then a self-signed certificate is generated
 
-thredds:
-  enabled: true
-  image:
-    repository: thredds
-  replicaCount: 1
-  resources: {}
+data:
+  # The mounts that are required to serve data, as defined by the given datasets
+  #
+  # Each specified mount should include at least the following keys:
+  #
+  #   mountPath: The path to mount the volume inside the container
+  #   volume: A Kubernetes volume specification
+  #
+  # Any additional keys are set as options on the volume mount, e.g. mountPropagation for hostPath volumes
+  mounts: []
+    # - mountPath: /datacentre
+    #   mountPropagation: HostToContainer
+    #   volume:
+    #     hostPath:
+    #       path: /datacentre
+
+  # The datasets to expose - for each dataset, a THREDDS datasetScan element and an Nginx location are generated
+  #
+  # Each specified dataset should have the following keys:
+  #
+  #   name: The name of the dataset
+  #   path: The URL path for the dataset
+  #   location: The location of the dataset *inside the container* (see mounts above)
+  #   filters (optional): A list of filter specifications for the datasetScan element
+  datasets: []
+    # e.g.
+    # - name: CMIP5
+    #   path: esg_dataroot
+    #   location: /datacentre/archiveroots/archive/badc/cmip5/data
+
+  # Configuration for the THREDDS pod
+  thredds:
+    # Indicates if THREDDS should be deployed or not
+    enabled: true
+    # Image overrides for the THREDDS image
+    image:
+      repository: thredds
+    # The pod and container security contexts for the THREDDS pod
+    # These may especially be required if using hostPath volumes for data, depending
+    # on the permissions of that data
+    podSecurityContext:
+    securityContext:
+    # The number of replicas for the THREDDS pod
+    replicaCount: 1
+    # The resource allocations for the THREDDS container
+    resources: {}
+
+  # Configuration for the Nginx file server pod
+  fileServer:
+    # Indicates if the Nginx file server should be deployed or not
+    enabled: true
+    # Image overrides for the Nginx image
+    image:
+      repository: nginx
+    # The pod and container security contexts for the Nginx file server pod
+    # These may especially be required if using hostPath volumes for data, depending
+    # on the permissions of that data
+    podSecurityContext:
+    securityContext:
+    # The number of replicas for the Nginx file server pod
+    replicaCount: 1
+    # The resource allocations for the Nginx file server container
+    resources: {}
