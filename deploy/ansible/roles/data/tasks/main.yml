@@ -1,0 +1,70 @@
+---
+
+#####
+## Tasks to configure and deploy containers for a data node
+#####
+
+- name: Make config directories
+  file:
+    path: /esg/config/{{ item }}
+    state: directory
+  loop: [fileserver, thredds]
+
+- name: Create Docker network
+  docker_network:
+    name: esgf
+
+- name: Configure THREDDS
+  block:
+    - name: Write THREDDS configuration
+      template:
+        src: catalog.xml.j2
+        dest: /esg/config/thredds/catalog.xml
+
+    - name: Start THREDDS container
+      docker_container:
+        name: thredds
+        image: "{{ data.thredds.image.prefix }}/{{ data.thredds.image.repository }}:{{ data.thredds.image.tag }}"
+        detach: yes
+        restart_policy: on-failure
+        exposed_ports:
+          - "8080"
+        networks:
+          - name: esgf
+        networks_cli_compatible: yes
+        user: "{{ data.thredds.securityContext.user }}"
+        groups: "{{ data.thredds.securityContext.groups }}"
+        volumes:
+          # Start with the catalog volume
+          - "/esg/config/thredds:/opt/tomcat/content/thredds/esgcet:ro"
+        state: started
+        restart: yes
+  when: "data.thredds.enabled | bool"
+
+- name: Configure Nginx fileserver
+  block:
+    - name: Write fileserver configuration
+      template:
+        src: fileserver.conf.j2
+        dest: /esg/config/fileserver/fileserver.conf
+      register: thredds_config
+
+    - name: Start fileserver container
+      docker_container:
+        name: fileserver
+        image: "{{ data.fileserver.image.prefix }}/{{ data.fileserver.image.repository }}:{{ data.fileserver.image.tag }}"
+        detach: yes
+        restart_policy: on-failure
+        exposed_ports:
+          - "8080"
+        networks:
+          - name: esgf
+        networks_cli_compatible: yes
+        user: "{{ data.fileserver.securityContext.user }}"
+        groups: "{{ data.fileserver.securityContext.groups }}"
+        volumes:
+          # Start with the Nginx config
+          - "/esg/config/fileserver:/etc/nginx/conf.d:ro"
+        state: started
+        restart: yes
+  when: "data.fileserver.enabled | bool"

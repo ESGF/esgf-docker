@@ -1,0 +1,25 @@
+# Server that serves datasets directly from disk
+
+server {
+    listen       8080 default_server;
+    listen       [::]:8080 default_server;
+    server_name  _;
+
+    # By default, return 404
+    location / {
+        return 404;
+    }
+
+    # Disallow access to all dot-files
+    location ~ /\. {
+        return 404;
+    }
+
+    # Create a location block for each dataset
+    {% for dataset in data.datasets %}
+    location /thredds/fileServer/{{ dataset.path }}/ {
+        alias {{ dataset.location }}/;
+        try_files $uri =404;
+    }
+    {% endfor %}
+}

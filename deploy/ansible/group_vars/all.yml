@@ -1,0 +1,69 @@
+---
+
+# The hostname to use - by default, use the FQDN of the host
+hostname: "{{ ansible_fqdn }}"
+
+# Configuration for custom registries that require authentication
+registries: []
+  # - registry: my.registry.org
+  #   username: registryuser
+  #   password: registrypassword
+
+# Defaults for Docker images
+image: &imageDefaults
+  prefix: esgfhub
+  tag: latest
+
+data:
+  # The mounts that are required to serve data, as defined by the given datasets
+  #
+  # Each specified mount should include the following keys:
+  #
+  #   hostPath: The path on the host that should be mounted into the container
+  #   mountPath (optional): The mount path to use inside the container - if not given, hostPath is used
+  mounts: []
+    # - hostPath: /datacentre/archiveroots/archive/badc
+    #   mountPath: /badc
+
+  # The datasets to expose - for each dataset, a THREDDS datasetScan element and an Nginx location are generated
+  #
+  # Each specified dataset should have the following keys:
+  #
+  #   name: The name of the dataset
+  #   path: The URL path for the dataset
+  #   location: The location of the dataset *inside the container* (see mounts above)
+  #   filters (optional): A list of filter specifications for the datasetScan element
+  datasets:
+    # - name: CMIP5
+    #   path: esg_dataroot
+    #   location: /badc/cmip5/data
+
+  # Configuration for the THREDDS container
+  thredds:
+    # Indicates if THREDDS should be deployed or not
+    enabled: true
+    # Image overrides for the THREDDS image
+    image:
+      <<: *imageDefaults
+      repository: thredds
+    # Start the THREDDS container with the given user and groups
+    securityContext: &securityContext
+      # By default, use the Nginx user and group
+      user: "1000"
+      groups: ["1000"]
+
+  # Configuration for the Nginx file server container
+  fileserver:
+    # Indicates if the Nginx file server should be deployed or not
+    enabled: true
+    # Image overrides for the Nginx image
+    image:
+      <<: *imageDefaults
+      repository: nginx
+    # Start the Nginx container with the given user and groups
+    securityContext: *securityContext
+
+proxy:
+  image:
+    <<: *imageDefaults
+    repository: nginx
