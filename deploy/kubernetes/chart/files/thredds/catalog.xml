@@ -5,11 +5,7 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://www.unidata.ucar.edu/namespaces/thredds/InvCatalog/v1.0
                              http://www.unidata.ucar.edu/schemas/thredds/InvCatalog.1.0.6.xsd">
-    <!--
-        This is the default catalog that is used if no other catalogs are mounted.
-        It includes a single scan element that scans the entire /data directory.
-        The OPeNDAP and HTTPServer services are enabled for all files.
-    -->
+    <!-- Configure the available services -->
     <service name="all" serviceType="Compound" base="">
         <service name="fileserver" serviceType="HTTPServer" base="/thredds/fileServer/" />
         <service name="opendap" serviceType="OPeNDAP" base="/thredds/dodsC/" />
