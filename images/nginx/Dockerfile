@@ -20,18 +20,8 @@ RUN mkdir /run/nginx && \
     ln -sf /dev/stdout /var/log/nginx/access.log && \
     ln -sf /dev/stderr /var/log/nginx/error.log
 
-# Make dhparam and dummy SSL certificates
-RUN mkdir -p /etc/nginx/tls/default && \
-    openssl req \
-      -new -nodes -x509 -days 3650 -extensions v3_ca \
-      -subj "/CN=default-server" \
-      -keyout /etc/nginx/tls/default/tls.key \
-      -out /etc/nginx/tls/default/tls.crt && \
-    openssl dhparam -dsaparam -out /etc/nginx/tls/dhparam.pem 4096
-
 # Install a default configuration file that uses unprivileged ports
 COPY nginx.conf /etc/nginx/
-COPY conf.d/* /etc/nginx/conf.d/
 COPY includes/* /etc/nginx/includes/
 
 USER $ESGF_UID
