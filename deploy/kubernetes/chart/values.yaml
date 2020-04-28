@@ -4,7 +4,7 @@ hostname:
 # All image properties can be overridden on a per-service basis
 image:
   # The image repository prefix
-  prefix: esgfhub
+  prefix: esgfdeploy
   # The tag to use
   tag: latest
   # The image pull policy

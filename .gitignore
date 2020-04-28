@@ -9,3 +9,5 @@ _site/
 .project
 .vscode
 .python-version
+.vagrant
+kubeconfig
