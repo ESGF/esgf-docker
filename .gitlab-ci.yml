@@ -63,6 +63,10 @@ variables:
     - test "$CI_COMMIT_REF_NAME" == "master" && docker tag "$REPOSITORY:$CI_COMMIT_SHORT_SHA" "$REPOSITORY:latest"
     # Push all tags
     - docker push $REPOSITORY
+  only:
+    # Only run build jobs if there is a change to the images
+    changes:
+      - images/**/*
 
 build:base:
   extends: .docker-build
