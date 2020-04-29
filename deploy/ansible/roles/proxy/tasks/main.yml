@@ -18,10 +18,15 @@
     src: proxy.conf.j2
     dest: /esg/config/proxy/proxy.conf
 
+- name: Set proxy image fact
+  set_fact:
+    proxy_image: "{{ image_defaults | combine(proxy.image) }}"
+
 - name: Start proxy container
   docker_container:
     name: proxy
-    image: "{{ proxy.image.prefix }}/{{ proxy.image.repository }}:{{ proxy.image.tag }}"
+    image: "{{ proxy_image.prefix }}/{{ proxy_image.repository }}:{{ proxy_image.tag }}"
+    pull: "{{ proxy_image.pull }}"
     detach: yes
     restart_policy: on-failure
     exposed_ports:

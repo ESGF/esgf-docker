@@ -52,6 +52,12 @@ data:
     #   path: esg_dataroot
     #   location: /datacentre/archiveroots/archive/badc/cmip5/data
 
+  # The pod and container security contexts for the THREDDS and Nginx pods
+  # These may especially be required if using hostPath volumes for data, depending
+  # on the permissions of that data
+  podSecurityContext: {}
+  securityContext: {}
+
   # Configuration for the THREDDS pod
   thredds:
     # Indicates if THREDDS should be deployed or not
@@ -59,11 +65,6 @@ data:
     # Image overrides for the THREDDS image
     image:
       repository: thredds
-    # The pod and container security contexts for the THREDDS pod
-    # These may especially be required if using hostPath volumes for data, depending
-    # on the permissions of that data
-    podSecurityContext:
-    securityContext:
     # The number of replicas for the THREDDS pod
     replicaCount: 1
     # The resource allocations for the THREDDS container
@@ -76,11 +77,6 @@ data:
     # Image overrides for the Nginx image
     image:
       repository: nginx
-    # The pod and container security contexts for the Nginx file server pod
-    # These may especially be required if using hostPath volumes for data, depending
-    # on the permissions of that data
-    podSecurityContext:
-    securityContext:
     # The number of replicas for the Nginx file server pod
     replicaCount: 1
     # The resource allocations for the Nginx file server container

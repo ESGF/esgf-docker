@@ -22,9 +22,34 @@ Vagrant.configure(2) do |config|
     virtualbox.customize [ "guestproperty", "set", :id, "/VirtualBox/GuestAdd/VBoxService/--timesync-set-threshold", 1000 ]
   end
 
+  config.vm.provision :shell, inline: <<-SHELL
+    set -euo pipefail
+    echo "Installing roocs/mini-esgf-data into /test_data..."
+    curl -fsSL https://github.com/roocs/mini-esgf-data/tarball/master | tar -xz --strip-components=1 -C / */test_data
+  SHELL
+
   # Provision the VM with our Ansible playbook
   config.vm.provision :ansible do |ansible|
     ansible.playbook = "deploy/ansible/playbook.yml"
-    ansible.groups = { "data" => ["default"] }
+    ansible.config_file = "deploy/ansible/ansible.cfg"
+    ansible.groups = { data: ["default"] }
+    # Configure the datasets from mini-esgf-data
+    ansible.extra_vars = {
+      data: {
+        mounts: [{ hostPath: "/test_data", mountPath: "/test_data" }],
+        datasets: [
+          {
+            name: "CMIP5",
+            path: "esg_cmip5",
+            location: "/test_data/badc/cmip5/data"
+          },
+          {
+            name: "CORDEX",
+            path: "esg_cordex",
+            location: "/test_data/group_workspaces/jasmin2/cp4cds1/data/c3s-cordex"
+          }
+        ]
+      }
+    }
   end
 end

@@ -20,8 +20,8 @@ spec:
       {{- with (default .Values.image.pullSecrets $fileServer.image.pullSecrets) }}
       imagePullSecrets: {{ toYaml . | nindent 8 }}
       {{- end }}
-      {{- with $fileServer.podSecurityContext }}
-      securityContext: {{ toYaml $fileServer.podSecurityContext | nindent 8 }}
+      {{- with .Values.data.podSecurityContext }}
+      securityContext: {{ toYaml . | nindent 8 }}
       {{- end }}
       containers:
         - name: file-server
@@ -42,8 +42,8 @@ spec:
           livenessProbe:
             <<: *probe
             initialDelaySeconds: 300
-          {{- with $fileServer.securityContext }}
-          securityContext: {{ toYaml $fileServer.securityContext | nindent 12 }}
+          {{- with .Values.data.securityContext }}
+          securityContext: {{ toYaml . | nindent 12 }}
           {{- end }}
           volumeMounts:
             - name: nginx-conf

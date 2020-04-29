@@ -9,10 +9,10 @@ registries: []
   #   username: registryuser
   #   password: registrypassword
 
-# Defaults for Docker images
-image: &imageDefaults
-  prefix: esgfhub
+image_defaults:
+  prefix: esgfdeploy
   tag: latest
+  pull: true
 
 data:
   # The mounts that are required to serve data, as defined by the given datasets
@@ -33,10 +33,17 @@ data:
   #   path: The URL path for the dataset
   #   location: The location of the dataset *inside the container* (see mounts above)
   #   filters (optional): A list of filter specifications for the datasetScan element
-  datasets:
+  datasets: []
     # - name: CMIP5
     #   path: esg_dataroot
     #   location: /badc/cmip5/data
+
+  # Security parameters required to run Nginx and serve data
+  # By default, use the ESGF user and group
+  security_context:
+    user: "1000"
+    # In order to run THREDDS/Nginx inside the container, the user must have group 1000
+    groups: ["1000"]
 
   # Configuration for the THREDDS container
   thredds:
@@ -44,13 +51,7 @@ data:
     enabled: true
     # Image overrides for the THREDDS image
     image:
-      <<: *imageDefaults
       repository: thredds
-    # Start the THREDDS container with the given user and groups
-    securityContext: &securityContext
-      # By default, use the Nginx user and group
-      user: "1000"
-      groups: ["1000"]
 
   # Configuration for the Nginx file server container
   fileserver:
@@ -58,12 +59,8 @@ data:
     enabled: true
     # Image overrides for the Nginx image
     image:
-      <<: *imageDefaults
       repository: nginx
-    # Start the Nginx container with the given user and groups
-    securityContext: *securityContext
 
 proxy:
   image:
-    <<: *imageDefaults
     repository: nginx

@@ -14,6 +14,15 @@
   docker_network:
     name: esgf
 
+- name: Configure data volumes
+  set_fact:
+    data_docker_mounts: >-
+      [
+        {% for mount in data.mounts %}
+        "{{ mount.hostPath }}:{{ mount.mountPath }}:ro",
+        {% endfor %}
+      ]
+
 - name: Configure THREDDS
   block:
     - name: Write THREDDS configuration
@@ -21,10 +30,15 @@
         src: catalog.xml.j2
         dest: /esg/config/thredds/catalog.xml
 
+    - name: Set THREDDS image fact
+      set_fact:
+        thredds_image: "{{ image_defaults | combine(data.thredds.image) }}"
+
     - name: Start THREDDS container
       docker_container:
         name: thredds
-        image: "{{ data.thredds.image.prefix }}/{{ data.thredds.image.repository }}:{{ data.thredds.image.tag }}"
+        image: "{{ thredds_image.prefix }}/{{ thredds_image.repository }}:{{ thredds_image.tag }}"
+        pull: "{{ thredds_image.pull }}"
         detach: yes
         restart_policy: on-failure
         exposed_ports:
@@ -32,11 +46,10 @@
         networks:
           - name: esgf
         networks_cli_compatible: yes
-        user: "{{ data.thredds.securityContext.user }}"
-        groups: "{{ data.thredds.securityContext.groups }}"
-        volumes:
-          # Start with the catalog volume
-          - "/esg/config/thredds:/opt/tomcat/content/thredds/esgcet:ro"
+        user: "{{ data.security_context.user }}"
+        groups: "{{ data.security_context.groups }}"
+        # Append the catalog volume to the data mounts
+        volumes: "{{ ['/esg/config/thredds:/opt/tomcat/content/thredds/esgcet:ro'] + data_docker_mounts }}"
         state: started
         restart: yes
   when: "data.thredds.enabled | bool"
@@ -47,12 +60,16 @@
       template:
         src: fileserver.conf.j2
         dest: /esg/config/fileserver/fileserver.conf
-      register: thredds_config
+
+    - name: Set fileserver image fact
+      set_fact:
+        fileserver_image: "{{ image_defaults | combine(data.fileserver.image) }}"
 
     - name: Start fileserver container
       docker_container:
         name: fileserver
-        image: "{{ data.fileserver.image.prefix }}/{{ data.fileserver.image.repository }}:{{ data.fileserver.image.tag }}"
+        image: "{{ fileserver_image.prefix }}/{{ fileserver_image.repository }}:{{ fileserver_image.tag }}"
+        pull: "{{ fileserver_image.pull }}"
         detach: yes
         restart_policy: on-failure
         exposed_ports:
@@ -60,11 +77,10 @@
         networks:
           - name: esgf
         networks_cli_compatible: yes
-        user: "{{ data.fileserver.securityContext.user }}"
-        groups: "{{ data.fileserver.securityContext.groups }}"
-        volumes:
-          # Start with the Nginx config
-          - "/esg/config/fileserver:/etc/nginx/conf.d:ro"
+        user: "{{ data.security_context.user }}"
+        groups: "{{ data.security_context.groups }}"
+        # Append the Nginx config volume to the data mounts
+        volumes: "{{ ['/esg/config/fileserver:/etc/nginx/conf.d:ro'] + data_docker_mounts }}"
         state: started
         restart: yes
   when: "data.fileserver.enabled | bool"
