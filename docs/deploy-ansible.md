@@ -60,18 +60,17 @@ To set the tag to something other than `latest`, create a file at `/my/esgf/conf
 ```yaml
 # /my/esgf/config/group_vars/all.yml
 
-image_defaults:
-  # Use the images that were built for a particular commit
-  tag: a031a2ca
-  # If using an immutable tag, don't do unnecessary pulls
-  pull: false
+# Use the images that were built for a particular commit
+image_tag: a031a2ca
+# If using an immutable tag, don't do unnecessary pulls
+image_pull: false
 ```
 
 ### Setting the web address
 
 By default, the web address is the FQDN of the host (i.e. the output of `hostname --fqdn`). This can
-be changed on a host-by-host basis using the variable `hostname`. For convenience, this can be set directly
-in the inventory file:
+be changed on a host-by-host basis using the variable `hostname`. For convenience, this can be set
+directly in the inventory file:
 
 ```ini
 # /my/esgf/config/inventory.ini
@@ -94,47 +93,48 @@ esgf-data01.example.org  hostname=esgf-data.example.org
 esgf-data02.example.org  hostname=esgf-data.example.org
 ```
 
-The Ansible playbook does **not** configure the DNS load-balancing automatically - you will need to separately
-configure [Round-robin DNS](https://en.wikipedia.org/wiki/Round-robin_DNS) or a more sophisticated service like
-[AWS Route 53](https://aws.amazon.com/route53/) to do this.
+The Ansible playbook does **not** configure the DNS load-balancing automatically - you will need to
+separately configure [Round-robin DNS](https://en.wikipedia.org/wiki/Round-robin_DNS) or a more sophisticated
+service like [AWS Route 53](https://aws.amazon.com/route53/) to do this.
 
 ### Configuring the available datasets
 
-The Docker-based data node uses a catalog-free configuration to serve data - the available data is defined simply
-by a series of datasets, under which all files will be served using both OPeNDAP (for NetCDF files) and plain
-HTTP. The browsable interface and OPeNDAP are provided by THREDDS and, direct file serving is provided by Nginx.
+The data node uses a catalog-free configuration where the available data is defined simply by a
+series of datasets. For each dataset, all files under the specified path will be served using both
+OPeNDAP (for NetCDF files) and plain HTTP. The browsable interface and OPeNDAP are provided by
+THREDDS and direct file serving is provided by Nginx.
 
 The configuration of the datasets is done using two variables:
 
-  * `data.mounts`: List of directories to mount from the host into the container. Each item should contain
+  * `data_mounts`: List of directories to mount from the host into the container. Each item should contain
     the keys:
-    * `hostPath`: The path on the host
-    * `mountPath`: The path in the container
-  * `data.datasets`: List of datasets to expose via THREDDS/Nginx. Each item should contain the keys:
+    * `host_path`: The path on the host
+    * `mount_path`: The path in the container
+  * `data_datasets`: List of datasets to expose. Each item should contain the keys:
     * `name`: The human-readable name of the dataset, displayed in the THREDDS UI
     * `path`: The URL path part for the dataset
     * `location`: The directory path to the root of the dataset
 
-These variables should be defined in your configuration directory using `/my/esgf/config/group_vars/data.yml`, e.g.:
+These variables should be defined in your configuration directory using
+`/my/esgf/config/group_vars/data.yml`, e.g.:
 
 ```yaml
 # /my/esgf/config/group_vars/data.yml
 
-data:
-  mounts:
-    # This will mount /datacentre/archive on the host as /data in the containers
-    - hostPath: /datacentre/archive
-      mountPath: /data
+data_mounts:
+  # This will mount /datacentre/archive on the host as /data in the containers
+  - host_path: /datacentre/archive
+    mount_path: /data
 
-  datasets:
-    # This will expose files at /data/cmip6/[path]
-    # as http://esgf-data.example.org/thredds/{dodsC,fileServer}/esg_cmip6/[path]
-    - name: CMIP6
-      path: esg_cmip6
-      location: /data/cmip6
-    # Similarly, this exposes files at /data/cordex/[path]
-    # as http://esgf-data.example.org/thredds/{dodsC,fileServer}/esg_cordex/[path]
-    - name: CORDEX
-      path: esg_cordex
-      location: /data/cordex
+data_datasets:
+  # This will expose files at /data/cmip6/[path]
+  # as http://esgf-data.example.org/thredds/{dodsC,fileServer}/esg_cmip6/[path]
+  - name: CMIP6
+    path: esg_cmip6
+    location: /data/cmip6
+  # Similarly, this exposes files at /data/cordex/[path]
+  # as http://esgf-data.example.org/thredds/{dodsC,fileServer}/esg_cordex/[path]
+  - name: CORDEX
+    path: esg_cordex
+    location: /data/cordex
 ```
