@@ -77,18 +77,3 @@ Then follow the deployment guide for your chosen deployment method:
 
   * [Deploy ESGF using Ansible](./docs/deploy-ansible.md)
   * [Deploy ESGF to Kubernetes using Helm](./docs/deploy-kubernetes.md)
-
-## Test server using Vagrant
-
-This repository includes a [Vagrantfile](./Vagrantfile) that deploys a simple test server using the
-Ansible method. This test server is configured to serve data from
-[roocs/mini-esgf-data](https://github.com/roocs/mini-esgf-data).
-
-To deploy a test server, first install [VirtualBox](https://www.virtualbox.org/) and
-[Vagrant](https://www.vagrantup.com/), then run:
-
-```sh
-vagrant up
-```
-
-After waiting for the containers to start, the THREDDS interface will be available at http://192.168.100.100.nip.io/thredds.

@@ -45,6 +45,21 @@ Once you have configured your inventory and host/group variables, you can run th
 ansible-playbook -i /my/esgf/config/inventory.ini ./deploy/ansible/playbook.yml
 ```
 
+## Local test installation with Vagrant
+
+This repository includes a [Vagrantfile](./Vagrantfile) that deploys a simple test server using the
+Ansible method. This test server is configured to serve data from
+[roocs/mini-esgf-data](https://github.com/roocs/mini-esgf-data).
+
+To deploy a test server, first install [VirtualBox](https://www.virtualbox.org/) and
+[Vagrant](https://www.vagrantup.com/), then run:
+
+```sh
+vagrant up
+```
+
+After waiting for the containers to start, the THREDDS interface will be available at http://192.168.100.100.nip.io/thredds.
+
 ## Configuring the installation
 
 This section describes the most commonly modified configuration options. For a full list of available
@@ -113,7 +128,7 @@ The configuration of the datasets is done using two variables:
   * `data_datasets`: List of datasets to expose. Each item should contain the keys:
     * `name`: The human-readable name of the dataset, displayed in the THREDDS UI
     * `path`: The URL path part for the dataset
-    * `location`: The directory path to the root of the dataset
+    * `location`: The directory path to the root of the dataset in the container
 
 These variables should be defined in your configuration directory using
 `/my/esgf/config/group_vars/data.yml`, e.g.:
@@ -127,12 +142,12 @@ data_mounts:
     mount_path: /data
 
 data_datasets:
-  # This will expose files at /data/cmip6/[path]
+  # This will expose files at /data/cmip6/[path] in the container
   # as http://esgf-data.example.org/thredds/{dodsC,fileServer}/esg_cmip6/[path]
   - name: CMIP6
     path: esg_cmip6
     location: /data/cmip6
-  # Similarly, this exposes files at /data/cordex/[path]
+  # Similarly, this exposes files at /data/cordex/[path] in the container
   # as http://esgf-data.example.org/thredds/{dodsC,fileServer}/esg_cordex/[path]
   - name: CORDEX
     path: esg_cordex

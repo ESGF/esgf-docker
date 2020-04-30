@@ -1,34 +1,53 @@
 # The hostname for the deployment
 hostname:
 
+###
+# Image defaults
+###
 # All image properties can be overridden on a per-service basis
 image:
-  # The image repository prefix
+  # The image prefix to use
+  # If using a private registry, change this, e.g. registry.ceda.ac.uk/esgfdeploy
   prefix: esgfdeploy
   # The tag to use
   tag: latest
-  # The image pull policy
+  # Indicates whether images should be pulled every time a pod starts
+  # When using mutable tags, like latest or branch names, this should be Always
+  # When using immutable tags, like commit shas or release tags, this should be IfNotPresent
   pullPolicy: Always
+  # A list of names of existing secrets providing Docker registry credentials
+  # Required if using a private registry that requires authentication
+  # See https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+  pullSecrets:
 
+###
+# Ingress configuration
+###
 ingress:
+  # The annotations for the ingress
+  # Depending on your Kubernetes cluster, this can be used to configure things like Let's Encrypt certificates
   annotations:
   # TLS configuration
   tls:
-    # Either give an existing secret name
+    # Either give the name of an existing TLS secret
+    # See https://kubernetes.io/docs/concepts/services-networking/ingress/#tls
     secretName:
-    # Or provide PEM-encoded certificate (including chain) and key files
+    # Or provide a PEM-encoded certificate (including chain) and key as variables
     pem:
       cert:
       key:
     # If neither are given, then a self-signed certificate is generated
 
+###
+# Data node configuration
+###
 data:
   # The mounts that are required to serve data, as defined by the given datasets
   #
   # Each specified mount should include at least the following keys:
   #
   #   mountPath: The path to mount the volume inside the container
-  #   volume: A Kubernetes volume specification
+  #   volume: A Kubernetes volume specification - see https://kubernetes.io/docs/concepts/storage/volumes/
   #
   # Any additional keys are set as options on the volume mount, e.g. mountPropagation for hostPath volumes
   mounts: []
@@ -52,9 +71,12 @@ data:
     #   path: esg_dataroot
     #   location: /datacentre/archiveroots/archive/badc/cmip5/data
 
-  # The pod and container security contexts for the THREDDS and Nginx pods
-  # These may especially be required if using hostPath volumes for data, depending
+  # The pod and container security contexts for data serving pods
+  # In particular, these may be required if using hostPath volumes for data, depending
   # on the permissions of that data
+  # See https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
+  # WARNING: Due to permissions set inside the container, the user *must* belong to group 1000
+  #          in addition to the groups required to access data
   podSecurityContext: {}
   securityContext: {}
 
@@ -68,16 +90,36 @@ data:
     # The number of replicas for the THREDDS pod
     replicaCount: 1
     # The resource allocations for the THREDDS container
+    # See https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
     resources: {}
+    # The node selector for the THREDDS pod
+    # See https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector
+    nodeSelector:
+    # The affinity rules for the THREDDS pod
+    # See https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
+    affinity:
+    # The tolerations for the THREDDS pod
+    # See https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
+    tolerations:
 
-  # Configuration for the Nginx file server pod
+  # Configuration for the file server pod
   fileServer:
-    # Indicates if the Nginx file server should be deployed or not
+    # Indicates if the file server should be deployed or not
     enabled: true
-    # Image overrides for the Nginx image
+    # Image overrides for the file server image
     image:
       repository: nginx
-    # The number of replicas for the Nginx file server pod
+    # The number of replicas for the file server pod
     replicaCount: 1
-    # The resource allocations for the Nginx file server container
+    # The resource allocations for the file server container
+    # See https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
     resources: {}
+    # The node selector for the file server pod
+    # See https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector
+    nodeSelector:
+    # The affinity rules for the file server pod
+    # See https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
+    affinity:
+    # The tolerations for the file server pod
+    # See https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
+    tolerations:
