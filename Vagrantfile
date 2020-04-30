@@ -1,6 +1,8 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
+require 'json'
+
 # Vagrant configuration
 Vagrant.configure(2) do |config|
   config.vm.box = "cedadev/centos7"
@@ -31,29 +33,36 @@ Vagrant.configure(2) do |config|
   # Provision the VM with our Ansible playbook
   config.vm.provision :ansible do |ansible|
     ansible.playbook = "deploy/ansible/playbook.yml"
-    ansible.groups = { data: ["default"] }
     # Configure the datasets from mini-esgf-data
-    # Use group_vars to simulate
-    ansible.extra_vars = {
-      hostname: "192.168.100.100.nip.io",
-      data_mounts: [
-        {
-          host_path: "/test_data",
-          mount_path: "/test_data"
-        }
-      ],
-      data_datasets: [
-        {
-          name: "CMIP5",
-          path: "esg_cmip5",
-          location: "/test_data/badc/cmip5/data"
-        },
-        {
-          name: "CORDEX",
-          path: "esg_cordex",
-          location: "/test_data/group_workspaces/jasmin2/cp4cds1/data/c3s-cordex"
-        }
-      ]
+    # Use group_vars to simulate the advice in the documentation
+    # However, because the Ansible provisioner doesn't have a native group_vars
+    # property, like it does for {extra,host}_vars, we need to convert to JSON
+    data_mounts = [
+      {
+        host_path: "/test_data",
+        mount_path: "/test_data"
+      }
+    ]
+    data_datasets = [
+      {
+        name: "CMIP5",
+        path: "esg_cmip5",
+        location: "/test_data/badc/cmip5/data"
+      },
+      {
+        name: "CORDEX",
+        path: "esg_cordex",
+        location: "/test_data/group_workspaces/jasmin2/cp4cds1/data/c3s-cordex"
+      }
+    ]
+    ansible.groups = {
+      "data" => ["default"],
+      "data:vars" => {
+        "hostname" => "192.168.100.100.nip.io",
+        "image_tag" => "issue-112-nginx-data-node",
+        "data_mounts" => "#{data_mounts.to_json}",
+        "data_datasets" => "#{data_datasets.to_json}"
+      }
     }
   end
 end

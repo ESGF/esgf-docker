@@ -1,21 +1,6 @@
 ---
 
 ###
-# The hostname to use - by default, use the FQDN of the host
-###
-hostname: "{{ ansible_fqdn }}"
-
-
-###
-# Configuration for private registries that require authentication
-###
-docker_registries: []
-  # - registry: my.registry.org
-  #   username: registryuser
-  #   password: registrypassword
-
-
-###
 # Default values used for all images
 # Each of these values can be overidden on a per-image basis if required
 ###
@@ -85,14 +70,3 @@ fileserver_image_prefix: "{{ image_prefix }}"
 fileserver_image_tag: "{{ image_tag }}"
 fileserver_image_pull: "{{ image_pull }}"
 fileserver_image_repository: nginx
-
-
-###
-# Proxy configuration
-###
-
-# Settings for the proxy image
-proxy_image_prefix: "{{ image_prefix }}"
-proxy_image_tag: "{{ image_tag }}"
-proxy_image_pull: "{{ image_pull }}"
-proxy_image_repository: nginx

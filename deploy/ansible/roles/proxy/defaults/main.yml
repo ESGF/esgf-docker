@@ -1,0 +1,39 @@
+---
+
+###
+# The hostname to use - by default, use the FQDN of the host
+###
+hostname: "{{ ansible_fqdn }}"
+
+
+###
+# Default values used for all images
+# Each of these values can be overidden on a per-image basis if required
+###
+
+# The image prefix to use
+# If using a private registry, change this, e.g. registry.ceda.ac.uk/esgfdeploy
+image_prefix: esgfdeploy
+# The image tag to use
+image_tag: latest
+# Indicates whether images should be pulled every time the playbook runs
+# When using mutable tags, like latest or branch names, this should be true
+# When using immutable tags, like commit shas or release tags, this can be false
+image_pull: true
+
+
+###
+# Proxy configuration
+###
+
+# Settings for the proxy image
+proxy_image_prefix: "{{ image_prefix }}"
+proxy_image_tag: "{{ image_tag }}"
+proxy_image_pull: "{{ image_pull }}"
+proxy_image_repository: nginx
+
+# Indicates if THREDDS is enabled or not
+thredds_enabled: true
+
+# Indicates if the Nginx file server should be deployed or not
+fileserver_enabled: true
