@@ -12,7 +12,7 @@
     </service>
 
     <!-- Produce a scan element for each of the given datasets -->
-    {% for dataset in data.datasets %}
+    {% for dataset in data_datasets %}
     <datasetScan name="{{ dataset.name }}" ID="{{ dataset.path }}" path="{{ dataset.path }}" location="{{ dataset.location }}">
         <metadata inherited="true">
             <serviceName>all</serviceName>

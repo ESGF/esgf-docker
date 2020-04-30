@@ -57,6 +57,6 @@
     registry: "{{ item.registry }}"
     username: "{{ item.username }}"
     password: "{{ item.password }}"
-  loop: "{{ registries }}"
+  loop: "{{ docker_registries }}"
   loop_control:
     label: "{{ item.registry }}"

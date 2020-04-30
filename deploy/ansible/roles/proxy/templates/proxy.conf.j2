@@ -14,14 +14,14 @@ server {
     }
 
     {% if 'data' in group_names %}
-    {% if data.thredds.enabled %}
+    {% if thredds_enabled %}
     location /thredds {
         include /etc/nginx/includes/proxy_params.conf;
         proxy_pass http://thredds:8080;
     }
     {% endif %}
 
-    {% if data.fileserver.enabled %}
+    {% if fileserver_enabled %}
     location /thredds/fileServer {
         include /etc/nginx/includes/proxy_params.conf;
         proxy_pass http://fileserver:8080;

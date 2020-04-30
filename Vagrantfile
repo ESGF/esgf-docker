@@ -31,25 +31,29 @@ Vagrant.configure(2) do |config|
   # Provision the VM with our Ansible playbook
   config.vm.provision :ansible do |ansible|
     ansible.playbook = "deploy/ansible/playbook.yml"
-    ansible.config_file = "deploy/ansible/ansible.cfg"
     ansible.groups = { data: ["default"] }
     # Configure the datasets from mini-esgf-data
+    # Use group_vars to simulate
     ansible.extra_vars = {
-      data: {
-        mounts: [{ hostPath: "/test_data", mountPath: "/test_data" }],
-        datasets: [
-          {
-            name: "CMIP5",
-            path: "esg_cmip5",
-            location: "/test_data/badc/cmip5/data"
-          },
-          {
-            name: "CORDEX",
-            path: "esg_cordex",
-            location: "/test_data/group_workspaces/jasmin2/cp4cds1/data/c3s-cordex"
-          }
-        ]
-      }
+      hostname: "192.168.100.100.nip.io",
+      data_mounts: [
+        {
+          host_path: "/test_data",
+          mount_path: "/test_data"
+        }
+      ],
+      data_datasets: [
+        {
+          name: "CMIP5",
+          path: "esg_cmip5",
+          location: "/test_data/badc/cmip5/data"
+        },
+        {
+          name: "CORDEX",
+          path: "esg_cordex",
+          location: "/test_data/group_workspaces/jasmin2/cp4cds1/data/c3s-cordex"
+        }
+      ]
     }
   end
 end

@@ -16,7 +16,7 @@ server {
     }
 
     # Create a location block for each dataset
-    {% for dataset in data.datasets %}
+    {% for dataset in data_datasets %}
     location /thredds/fileServer/{{ dataset.path }}/ {
         alias {{ dataset.location }}/;
         try_files $uri =404;
