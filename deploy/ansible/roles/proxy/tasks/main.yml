@@ -1,0 +1,39 @@
+---
+
+#####
+## Tasks to configure and deploy the proxy container for this host
+#####
+
+- name: Make config directory
+  file:
+    path: /esg/config/proxy
+    state: directory
+
+- name: Create Docker network
+  docker_network:
+    name: esgf
+
+- name: Write Nginx configuration
+  template:
+    src: proxy.conf.j2
+    dest: /esg/config/proxy/proxy.conf
+
+- name: Start proxy container
+  docker_container:
+    name: proxy
+    image: "{{ proxy_image_prefix }}/{{ proxy_image_repository }}:{{ proxy_image_tag }}"
+    pull: "{{ proxy_image_pull }}"
+    detach: yes
+    restart_policy: on-failure
+    exposed_ports:
+      - "8080"
+    published_ports:
+      - "80:8080"
+    networks:
+      - name: esgf
+    networks_cli_compatible: yes
+    volumes:
+      # Mount the Nginx configuration for the proxy
+      - "/esg/config/proxy:/etc/nginx/conf.d:ro"
+    state: started
+    restart: yes

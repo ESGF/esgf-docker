@@ -1,0 +1,82 @@
+---
+
+#####
+## Tasks to configure and deploy containers for a data node
+#####
+
+- name: Make config directories
+  file:
+    path: /esg/config/{{ item }}
+    state: directory
+  loop: [fileserver, thredds]
+
+- name: Create Docker network
+  docker_network:
+    name: esgf
+
+- name: Configure THREDDS
+  block:
+    - name: Write THREDDS configuration
+      template:
+        src: catalog.xml.j2
+        dest: /esg/config/thredds/catalog.xml
+
+    - name: Start THREDDS container
+      docker_container:
+        name: thredds
+        image: "{{ thredds_image_prefix }}/{{ thredds_image_repository }}:{{ thredds_image_tag }}"
+        pull: "{{ thredds_image_pull }}"
+        detach: yes
+        restart_policy: on-failure
+        exposed_ports:
+          - "8080"
+        networks:
+          - name: esgf
+        networks_cli_compatible: yes
+        user: "{{ data_security_context_user }}"
+        groups: "{{ data_security_context_groups }}"
+        # Append the catalog volume to the data mounts
+        volumes: >-
+          [
+            "/esg/config/thredds:/opt/tomcat/content/thredds/esgcet:ro",
+            {% for mount in data_mounts %}
+            "{{ mount.host_path }}:{{ mount.mount_path }}:ro",
+            {% endfor %}
+          ]
+        state: started
+        restart: yes
+  when: "thredds_enabled | bool"
+
+- name: Configure Nginx fileserver
+  block:
+    - name: Write fileserver configuration
+      template:
+        src: fileserver.conf.j2
+        dest: /esg/config/fileserver/fileserver.conf
+
+    - name: Start fileserver container
+      docker_container:
+        name: fileserver
+        image: "{{ fileserver_image_prefix }}/{{ fileserver_image_repository }}:{{ fileserver_image_tag }}"
+        pull: "{{ fileserver_image_pull }}"
+        detach: yes
+        restart_policy: on-failure
+        exposed_ports:
+          - "8080"
+        networks:
+          - name: esgf
+        networks_cli_compatible: yes
+        user: "{{ data_security_context_user }}"
+        groups: "{{ data_security_context_groups }}"
+        # Append the Nginx config volume to the data mounts
+        # Append the catalog volume to the data mounts
+        volumes: >-
+          [
+            "/esg/config/fileserver:/etc/nginx/conf.d:ro",
+            {% for mount in data_mounts %}
+            "{{ mount.host_path }}:{{ mount.mount_path }}:ro",
+            {% endfor %}
+          ]
+        state: started
+        restart: yes
+  when: "fileserver_enabled | bool"

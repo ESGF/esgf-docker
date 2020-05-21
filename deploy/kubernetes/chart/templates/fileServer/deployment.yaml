@@ -1,0 +1,67 @@
+{{- if .Values.data.fileServer.enabled -}}
+{{- $fileServer := .Values.data.fileServer -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "esgf.component.fullname" (list . "fileServer") }}
+  labels: {{ include "esgf.component.labels" (list . "fileServer") | nindent 4 }}
+spec:
+  replicas: {{ $fileServer.replicaCount }}
+  selector:
+    matchLabels: {{ include "esgf.component.selectorLabels" (list . "fileServer") | nindent 6 }}
+  template:
+    metadata:
+      labels: {{ include "esgf.component.selectorLabels" (list . "fileServer") | nindent 8 }}
+      # Force deployment to roll if the config changes
+      # https://helm.sh/docs/howto/charts_tips_and_tricks/#automatically-roll-deployments
+      annotations:
+        checksum/configmap: {{ include (print $.Template.BasePath "/fileServer/configmap.yaml") . | sha256sum }}
+    spec:
+      {{- with (default .Values.image.pullSecrets $fileServer.image.pullSecrets) }}
+      imagePullSecrets: {{ toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.data.podSecurityContext }}
+      securityContext: {{ toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: file-server
+          {{ include "esgf.deployment.image" (list . $fileServer) }}
+          resources: {{ toYaml $fileServer.resources | nindent 12 }}
+          ports:
+            - name: http
+              containerPort: 8080
+          readinessProbe: &probe
+            httpGet:
+              path: /
+              port: 8080
+              httpHeaders:
+                - name: Host
+                  value: healthz.local
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            <<: *probe
+            initialDelaySeconds: 300
+          {{- with .Values.data.securityContext }}
+          securityContext: {{ toYaml . | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+            - name: nginx-conf
+              mountPath: /etc/nginx/conf.d
+              readOnly: true
+            {{- include "esgf.data.volumeMounts" . | nindent 12 }}
+      {{- with $fileServer.nodeSelector }}
+      nodeSelector: {{ toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $fileServer.affinity }}
+      affinity: {{ toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $fileServer.tolerations }}
+      tolerations: {{ toYaml . | nindent 8 }}
+      {{- end }}
+      volumes:
+        - name: nginx-conf
+          configMap:
+            name: {{ include "esgf.component.fullname" (list . "fileServer") }}
+        {{- include "esgf.data.volumes" . | nindent 8 }}
+{{- end -}}

@@ -1,0 +1,110 @@
+stages:
+  - build-1
+  - build-2
+  - build-3
+  - build-4
+
+variables:
+  # By default, push to the esgfdeploy organisation on Docker Hub using the esgfci user
+  # The password should be set as a CI/CD variable in the GitLab interface
+  REGISTRY: docker.io
+  REGISTRY_USER: esgfci
+  REPOSITORY_BASE: esgfdeploy
+
+# Base for Docker-in-Docker jobs
+# Sets up authentication with the configured registry, which defaults to Docker Hub
+.dind:
+  services:
+    - docker:19.03-dind
+  image: docker:19.03
+  variables:
+    DOCKER_HOST: tcp://localhost:2375
+    DOCKER_TLS_CERTDIR: ""
+  before_script:
+    - docker info
+    # Allow the password to come from a file
+    - test -z "$REGISTRY_PASSWORD" && test -f "$REGISTRY_PASSWORD_FILE" && REGISTRY_PASSWORD="$(cat "$REGISTRY_PASSWORD_FILE")"
+    # Also allow the password to be base64 encoded (GitLab masked variables must be base64-encoded)
+    - test -z "$REGISTRY_PASSWORD" && test -n "$REGISTRY_PASSWORD_B64" && REGISTRY_PASSWORD="$(echo -n "$REGISTRY_PASSWORD_B64" | base64 -d)"
+    # If there is still no password, bail
+    - test -z "$REGISTRY_PASSWORD" && echo "REGISTRY_PASSWORD is required" 1>&2 && exit 1
+    - docker login -u $REGISTRY_USER -p $REGISTRY_PASSWORD $REGISTRY
+
+# Base for Docker build jobs
+# Build and push a Docker image to the primary registry, which defaults to Docker Hub
+.docker-build:
+  extends: .dind
+  script:
+    # Use the basename of the context directory as the image name
+    - IMAGE_NAME="${IMAGE_NAME:-"$(basename $CONTEXT_DIR)"}"
+    - REPOSITORY="${REPOSITORY:-"$REPOSITORY_BASE/$IMAGE_NAME"}"
+    # Set build args so that child images pick up the correct parents
+    - export BUILD_ARG_ESGF_REPOSITORY_BASE="$REPOSITORY_BASE"
+    - export BUILD_ARG_ESGF_IMAGES_VERSION="$CI_COMMIT_SHORT_SHA"
+    # Use the latest build for the branch and the latest build for master as cache sources
+    - LATEST="$REPOSITORY:latest"
+    - LATEST_BRANCH="$REPOSITORY:$CI_COMMIT_REF_SLUG"
+    - docker pull $LATEST || true
+    - docker pull $LATEST_BRANCH || true
+    - DOCKER_ARGS="--cache-from $LATEST --cache-from $LATEST_BRANCH"
+    # Build and push with the short commit SHA as a tag
+    - DOCKER_ARGS="$DOCKER_ARGS --tag $REPOSITORY:$CI_COMMIT_SHORT_SHA"
+    # Use any environment variable starting with BUILD_ARG_ as a build arg
+    - BUILD_ARGS=$(env | grep -e "^BUILD_ARG_" | awk -F '=' '{ print $1 }' || true)
+    - for arg in $BUILD_ARGS; do DOCKER_ARGS="$DOCKER_ARGS --build-arg ${arg:10}=$(eval "echo \$$arg")"; done
+    # Build the image
+    - docker build $DOCKER_ARGS $DOCKER_EXTRA_ARGS $CONTEXT_DIR
+    # Retag the image
+    #   Always tag with the slugified branch/tag name
+    - docker tag "$REPOSITORY:$CI_COMMIT_SHORT_SHA" "$REPOSITORY:$CI_COMMIT_REF_SLUG"
+    #   If building for a tag, add the Git tag to the Docker tags verbatim
+    - test -n "$CI_COMMIT_TAG" && docker tag "$REPOSITORY:$CI_COMMIT_SHORT_SHA" "$REPOSITORY:$CI_COMMIT_TAG"
+    #   If building master, also tag latest
+    - test "$CI_COMMIT_REF_NAME" == "master" && docker tag "$REPOSITORY:$CI_COMMIT_SHORT_SHA" "$REPOSITORY:latest"
+    # Push all tags
+    - docker push $REPOSITORY
+  only:
+    # Only run build jobs if there is a change to the images
+    changes:
+      - images/**/*
+
+build:base:
+  extends: .docker-build
+  stage: build-1
+  variables:
+    CONTEXT_DIR: $CI_PROJECT_DIR/images/base
+
+build:nginx:
+  extends: .docker-build
+  stage: build-2
+  variables:
+    CONTEXT_DIR: $CI_PROJECT_DIR/images/nginx
+  needs: ["build:base"]
+
+build:jdk:
+  extends: .docker-build
+  stage: build-2
+  variables:
+    CONTEXT_DIR: $CI_PROJECT_DIR/images/jdk
+  needs: ["build:base"]
+
+build:jre:
+  extends: .docker-build
+  stage: build-2
+  variables:
+    CONTEXT_DIR: $CI_PROJECT_DIR/images/jre
+  needs: ["build:base"]
+
+build:tomcat:
+  extends: .docker-build
+  stage: build-3
+  variables:
+    CONTEXT_DIR: $CI_PROJECT_DIR/images/tomcat
+  needs: ["build:jre"]
+
+build:thredds:
+  extends: .docker-build
+  stage: build-4
+  variables:
+    CONTEXT_DIR: $CI_PROJECT_DIR/images/thredds
+  needs: ["build:tomcat"]

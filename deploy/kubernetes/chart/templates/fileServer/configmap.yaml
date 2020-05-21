@@ -1,0 +1,9 @@
+{{- if .Values.data.fileServer.enabled -}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "esgf.component.fullname" (list . "fileServer") }}
+  labels: {{ include "esgf.component.labels" (list . "fileServer") | nindent 4 }}
+data:
+  datasets.conf: {{ tpl (.Files.Get "files/fileServer/datasets.conf") . | quote }}
+{{- end -}}

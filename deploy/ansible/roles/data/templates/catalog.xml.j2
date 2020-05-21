@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<catalog name="Earth System Root Catalog"
+         xmlns="http://www.unidata.ucar.edu/namespaces/thredds/InvCatalog/v1.0"
+         xmlns:xlink="http://www.w3.org/1999/xlink"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://www.unidata.ucar.edu/namespaces/thredds/InvCatalog/v1.0
+                             http://www.unidata.ucar.edu/schemas/thredds/InvCatalog.1.0.6.xsd">
+    <!-- Configure the available services -->
+    <service name="all" serviceType="Compound" base="">
+        <service name="fileserver" serviceType="HTTPServer" base="/thredds/fileServer/" />
+        <service name="opendap" serviceType="OPeNDAP" base="/thredds/dodsC/" />
+    </service>
+
+    <!-- Produce a scan element for each of the given datasets -->
+    {% for dataset in data_datasets %}
+    <datasetScan name="{{ dataset.name }}" ID="{{ dataset.path }}" path="{{ dataset.path }}" location="{{ dataset.location }}">
+        <metadata inherited="true">
+            <serviceName>all</serviceName>
+        </metadata>
+        <filter>
+            <!-- Exclude files or directories beginning with a dot -->
+            <exclude wildcard=".*" collection="true" />
+            {% for filter in dataset.filters | default([]) %}
+            {% set filter_type = filter.pop('type') %}
+            <{{ filter_type }} {% for k, v in filter.items() %}{{ k }}="{{ v }}" {% endfor %}/>
+            {% endfor %}
+        </filter>
+    </datasetScan>
+    {% endfor %}
+</catalog>

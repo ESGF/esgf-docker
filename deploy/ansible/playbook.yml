@@ -1,0 +1,12 @@
+---
+
+#####
+## This playbook deploys the configured hosts as ESGF nodes using Docker containers
+#####
+
+- hosts: all
+  become: true
+  roles:
+    - docker
+    - { name: data, when: "'data' in group_names", tags: [data] }
+    - proxy

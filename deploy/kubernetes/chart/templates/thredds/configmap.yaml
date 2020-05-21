@@ -1,0 +1,9 @@
+{{- if .Values.data.thredds.enabled -}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "esgf.component.fullname" (list . "thredds") }}
+  labels: {{ include "esgf.component.labels" (list . "thredds") | nindent 4 }}
+data:
+  catalog.xml: {{ tpl (.Files.Get "files/thredds/catalog.xml") . | quote }}
+{{- end -}}
