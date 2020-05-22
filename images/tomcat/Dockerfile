@@ -2,7 +2,7 @@
 ## Base image for all Tomcat runtime images
 #####
 
-ARG ESGF_REPOSITORY_BASE=esgfhub
+ARG ESGF_REPOSITORY_BASE=esgfdeploy
 ARG ESGF_IMAGES_VERSION=latest
 FROM ${ESGF_REPOSITORY_BASE}/jre:${ESGF_IMAGES_VERSION}
 
@@ -17,8 +17,8 @@ WORKDIR $CATALINA_HOME
 
 # Download and install Tomcat 8
 ARG TOMCAT_MAJOR_VERSION=8
-ARG TOMCAT_VERSION=8.5.50
-ARG TOMCAT_SHA512=ffca86027d298ba107c7d01c779318c05b61ba48767cc5967ee6ce5a88271bb6ec8eed60708d45453f30eeedddcaedd1a369d6df1b49eea2cd14fa40832cfb90
+ARG TOMCAT_VERSION=8.5.55
+ARG TOMCAT_SHA512=996b653b4f81b40ae3620d6424593d23687e5ceb5cbd7357fc8d0e4b92f76903fe7fb20bf7316505e4e86269153fbfe62394bf45e59b4fb1cbc1bc95fad9eb7a
 ARG TOMCAT_URL=https://archive.apache.org/dist/tomcat/tomcat-$TOMCAT_MAJOR_VERSION/v$TOMCAT_VERSION/bin/apache-tomcat-$TOMCAT_VERSION.tar.gz
 RUN curl -fsSL -o tomcat.tar.gz $TOMCAT_URL && \
     echo "$TOMCAT_SHA512 *tomcat.tar.gz" | sha512sum --strict --check && \

@@ -2,7 +2,7 @@
 ## Image for running THREDDS
 #####
 
-ARG ESGF_REPOSITORY_BASE=esgfhub
+ARG ESGF_REPOSITORY_BASE=esgfdeploy
 ARG ESGF_IMAGES_VERSION=latest
 
 FROM ${ESGF_REPOSITORY_BASE}/jdk:${ESGF_IMAGES_VERSION} as builder
