@@ -25,10 +25,13 @@ USER root
 
 # Make the content root directory, fix permissions so that any user in the
 # esgf group can use it and point tomcat at it
-RUN mkdir -p ./content/thredds && \
-    chown $ESGF_USER:$ESGF_GROUP ./content/thredds && \
-    chmod u+w,g+w ./content/thredds
+# We also make the cache directory with correct permissions and declare it
+# as a volume - this ensures that Docker named volumes will work correctly
+RUN mkdir -p ./content/thredds/cache && \
+    chown -R $ESGF_USER:$ESGF_GROUP ./content/thredds && \
+    chmod -R u+w,g+w,o= ./content/thredds
 ENV CATALINA_EXTRA_OPTS "-Dtds.content.root.path=$CATALINA_HOME/content"
+VOLUME ./content/thredds/cache
 
 # Copy the unpacked webapp from the builder
 COPY --from=builder /application ./webapps/thredds
