@@ -4,7 +4,7 @@
 ## Currently just a fully-updated CentOS 7 with common packages and entrypoint
 #####
 
-FROM centos:7.7.1908
+FROM centos:7.8.2003
 
 # Create the esgf user that will be used to run apps
 ENV ESGF_UID 1000
