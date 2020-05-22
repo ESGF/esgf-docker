@@ -107,4 +107,4 @@ build:thredds:
   stage: build-4
   variables:
     CONTEXT_DIR: $CI_PROJECT_DIR/images/thredds
-  needs: ["build:tomcat"]
+  needs: ["build:jdk", "build:tomcat"]
