@@ -71,6 +71,13 @@ data:
     #   path: esg_dataroot
     #   location: /datacentre/archiveroots/archive/badc/cmip5/data
 
+  # Volume containing pre-existing THREDDS catalogs
+  # If not given, a catalog will be generated containing datasetScan elements for the configured datasets
+  catalogVolume:
+    # Kubernetes volume specification
+    volume: {}
+    # Any additional keys are set as options on the mount, e.g. mountPropagation
+
   # The pod and container security contexts for data serving pods
   # In particular, these may be required if using hostPath volumes for data, depending
   # on the permissions of that data
@@ -89,6 +96,9 @@ data:
       repository: thredds
     # The number of replicas for the THREDDS pod
     replicaCount: 1
+    # The startup time for the THREDDS container
+    # For large pre-existing catalogs, this maybe need to be large (default 5 mins)
+    startTimeout: 300
     # The resource allocations for the THREDDS container
     # See https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
     resources: {}

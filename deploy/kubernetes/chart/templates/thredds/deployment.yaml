@@ -45,7 +45,7 @@ spec:
             periodSeconds: 10
           livenessProbe:
             <<: *probe
-            initialDelaySeconds: 300
+            initialDelaySeconds: {{ .Values.data.thredds.startTimeout }}
           {{- with .Values.data.securityContext }}
           securityContext: {{ toYaml . | nindent 12 }}
           {{- end }}
@@ -53,6 +53,9 @@ spec:
             - name: catalog-esgcet
               mountPath: /opt/tomcat/content/thredds/esgcet
               readOnly: true
+              {{- with (omit .Values.data.catalogVolume "volume") }}
+              {{- toYaml . | nindent 14 }}
+              {{- end }}
             {{- include "esgf.data.volumeMounts" . | nindent 12 }}
       {{- with $thredds.nodeSelector }}
       nodeSelector: {{ toYaml . | nindent 8 }}
@@ -65,7 +68,11 @@ spec:
       {{- end }}
       volumes:
         - name: catalog-esgcet
+          {{- if .Values.data.catalogVolume.volume }}
+          {{- toYaml .Values.data.catalogVolume.volume | nindent 10 }}
+          {{- else }}
           configMap:
             name: {{ include "esgf.component.fullname" (list . "thredds") }}
+          {{- end }}
         {{- include "esgf.data.volumes" . | nindent 8 }}
 {{- end -}}

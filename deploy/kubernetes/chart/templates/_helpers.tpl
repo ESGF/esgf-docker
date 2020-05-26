@@ -86,6 +86,8 @@ Produces volume mount definitions for the specified data volumes.
 {{- range .Values.data.mounts }}
 - name: {{ include "esgf.data.volumeName" .mountPath | quote }}
   readOnly: true
-  {{- omit . "volume" | toYaml | nindent 2 }}
+  {{- with (omit . "volume") }}
+  {{- toYaml . | nindent 2 }}
+  {{- end }}
 {{- end }}
 {{- end -}}
