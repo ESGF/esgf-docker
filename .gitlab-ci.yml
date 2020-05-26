@@ -74,13 +74,6 @@ build:base:
   variables:
     CONTEXT_DIR: $CI_PROJECT_DIR/images/base
 
-build:nginx:
-  extends: .docker-build
-  stage: build-2
-  variables:
-    CONTEXT_DIR: $CI_PROJECT_DIR/images/nginx
-  needs: ["build:base"]
-
 build:jdk:
   extends: .docker-build
   stage: build-2
@@ -93,6 +86,20 @@ build:jre:
   stage: build-2
   variables:
     CONTEXT_DIR: $CI_PROJECT_DIR/images/jre
+  needs: ["build:base"]
+
+build:kubectl:
+  extends: .docker-build
+  stage: build-2
+  variables:
+    CONTEXT_DIR: $CI_PROJECT_DIR/images/kubectl
+  needs: ["build:base"]
+
+build:nginx:
+  extends: .docker-build
+  stage: build-2
+  variables:
+    CONTEXT_DIR: $CI_PROJECT_DIR/images/nginx
   needs: ["build:base"]
 
 build:tomcat:
