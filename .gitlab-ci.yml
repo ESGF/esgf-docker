@@ -95,6 +95,13 @@ build:kubectl:
     CONTEXT_DIR: $CI_PROJECT_DIR/images/kubectl
   needs: ["build:base"]
 
+build:rsync:
+  extends: .docker-build
+  stage: build-2
+  variables:
+    CONTEXT_DIR: $CI_PROJECT_DIR/images/rsync
+  needs: ["build:base"]
+
 build:nginx:
   extends: .docker-build
   stage: build-2
