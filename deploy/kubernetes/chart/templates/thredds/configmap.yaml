@@ -1,4 +1,4 @@
-{{- if (and .Values.data.thredds.enabled (not .Values.data.catalogVolume.volume))  -}}
+{{- if (and .Values.data.thredds.enabled (not .Values.data.thredds.catalogVolume))  -}}
 apiVersion: v1
 kind: ConfigMap
 metadata:

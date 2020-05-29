@@ -47,15 +47,20 @@ data:
   # Each specified mount should include at least the following keys:
   #
   #   mountPath: The path to mount the volume inside the container
-  #   volume: A Kubernetes volume specification - see https://kubernetes.io/docs/concepts/storage/volumes/
+  #   volumeSpec: A Kubernetes volume specification - see https://kubernetes.io/docs/concepts/storage/volumes/
   #
-  # Any additional keys are set as options on the volume mount, e.g. mountPropagation for hostPath volumes
+  # The following keys are optional:
+  #
+  #   mountOptions: Additional options for the mount, e.g. mountPropagation for hostPath volumes
+  #   name: The name for the volume - if not given, this is derived from the mount path
   mounts: []
-    # - mountPath: /datacentre
-    #   mountPropagation: HostToContainer
-    #   volume:
+    # - name: datacentre   # This is actually the derived name that would be used anyway
+    #   mountPath: /datacentre
+    #   volumeSpec:
     #     hostPath:
     #       path: /datacentre
+    #   mountOptions:
+    #     mountPropagation: HostToContainer
 
   # The datasets to expose - for each dataset, a THREDDS datasetScan element and an Nginx location are generated
   #
@@ -70,13 +75,6 @@ data:
     # - name: CMIP5
     #   path: esg_dataroot
     #   location: /datacentre/archiveroots/archive/badc/cmip5/data
-
-  # Volume containing pre-existing THREDDS catalogs
-  # If not given, a catalog will be generated containing datasetScan elements for the configured datasets
-  catalogVolume:
-    # Kubernetes volume specification
-    volume: {}
-    # Any additional keys are set as options on the mount, e.g. mountPropagation
 
   # The pod and container security contexts for data serving pods
   # In particular, these may be required if using hostPath volumes for data, depending
@@ -94,6 +92,20 @@ data:
     # Image overrides for the THREDDS image
     image:
       repository: thredds
+    # Volume containing pre-existing THREDDS catalogs
+    # If not given, a catalog will be generated containing datasetScan elements for the configured datasets
+    # Format is the same as items in mounts except that name and mountPath are ignored
+    catalogVolume: {}
+    # Configuration for the node-local cache
+    # If the local cache is enabled, catalogs will be copied to the local disk of each node
+    # where THREDDS pods will run, and will be loaded from there by the THREDDS pods
+    localCache:
+      enabled: false
+      # The image to use for rsync
+      rsyncImage:
+        repository: rsync
+      # A folder will be created within this directory using the namespace and release name
+      pathPrefix: /var/cache/esgf
     # The number of replicas for the THREDDS pod
     replicaCount: 1
     # The startup time for the THREDDS container
@@ -102,6 +114,9 @@ data:
     # The resource allocations for the THREDDS container
     # See https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
     resources: {}
+    # Extra environment variables for the THREDDS container
+    # See https://kubernetes.io/docs/tasks/inject-data-application/define-environment-variable-container/
+    extraEnv: []
     # The node selector for the THREDDS pod
     # See https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector
     nodeSelector:
@@ -124,6 +139,9 @@ data:
     # The resource allocations for the file server container
     # See https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
     resources: {}
+    # Extra environment variables for the file server container
+    # See https://kubernetes.io/docs/tasks/inject-data-application/define-environment-variable-container/
+    extraEnv: []
     # The node selector for the file server pod
     # See https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector
     nodeSelector:

@@ -49,8 +49,8 @@ Produces an image specification.
 */}}
 {{- define "esgf.component.image" -}}
 {{- $context := index . 0 -}}
-{{- $component := index . 1 -}}
-{{- $image := mergeOverwrite $context.Values.image $component.image -}}
+{{- $overrides := index . 1 -}}
+{{- $image := mergeOverwrite $context.Values.image $overrides -}}
 image: {{ printf "%s/%s:%s" $image.prefix $image.repository $image.tag }}
 imagePullPolicy: {{ $image.pullPolicy }}
 {{- end -}}
@@ -63,31 +63,38 @@ Produces an image specification with the correct nesting for use in deployments.
 {{- end -}}
 
 {{/*
-Produces a volume name from a mount path
+Produces a volume name for the given volume configuration.
 */}}
 {{- define "esgf.data.volumeName" -}}
-{{- regexReplaceAll "[^a-zA-Z0-9]+" . "-" | trimAll "-" -}}
+{{- if .name -}}
+{{- .name -}}
+{{- else -}}
+{{- regexReplaceAll "[^a-zA-Z0-9]+" .mountPath "-" | trimAll "-" -}}
+{{- end -}}
 {{- end -}}
 
 {{/*
-Produces volume definitions for the specified data volumes.
+Produces pod volume definitions for the configured data volumes.
 */}}
 {{- define "esgf.data.volumes" -}}
 {{- range .Values.data.mounts }}
-- name: {{ include "esgf.data.volumeName" .mountPath | quote }}
-  {{- toYaml .volume | nindent 2 }}
+- name: {{ include "esgf.data.volumeName" . | quote }}
+  {{ toYaml .volumeSpec | indent 2 | trim }}
 {{- end }}
 {{- end -}}
 
 {{/*
 Produces volume mount definitions for the specified data volumes.
+
+The produced mounts will always be read-only.
 */}}
 {{- define "esgf.data.volumeMounts" -}}
 {{- range .Values.data.mounts }}
-- name: {{ include "esgf.data.volumeName" .mountPath | quote }}
+- name: {{ include "esgf.data.volumeName" . | quote }}
+  mountPath: {{ .mountPath }}
   readOnly: true
-  {{- with (omit . "volume") }}
-  {{- toYaml . | nindent 2 }}
+  {{- with (omit (default dict .mountOptions) "readOnly") }}
+  {{ toYaml . | indent 2 | trim }}
   {{- end }}
 {{- end }}
 {{- end -}}
