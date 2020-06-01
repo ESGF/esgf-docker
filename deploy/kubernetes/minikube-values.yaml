@@ -6,7 +6,7 @@ data:
   # Mount the /test_data volume on the host as /test_data in the container
   mounts:
     - mountPath: /test_data
-      volume:
+      volumeSpec:
         hostPath:
           path: /test_data
 
