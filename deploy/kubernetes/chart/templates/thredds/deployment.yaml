@@ -27,9 +27,9 @@ spec:
       {{- with .Values.data.podSecurityContext }}
       securityContext: {{ toYaml . | nindent 8 }}
       {{- end }}
-      {{- if (and $thredds.catalogVolume $thredds.localCache.enabled) }}
-      # If the local cache is enabled, wait for the node we have landed on to be initialised before starting
       initContainers:
+        {{- if (and $thredds.catalogVolume $thredds.localCache.enabled) }}
+        # If the local cache is enabled, wait for the node we have landed on to be initialised before starting
         - name: wait-for-cache
           {{ include "esgf.deployment.image" (list . $thredds.image) }}
           env:
@@ -67,7 +67,28 @@ spec:
               readOnly: true
             - name: thredds-cache
               mountPath: /thredds/cache
-      {{- end }}
+        {{- end }}
+        # Create named pipes for the log files
+        - name: make-log-pipes
+          {{ include "esgf.deployment.image" (list . $thredds.image) }}
+          args:
+            - bash
+            - -c
+            - |
+              set -ex
+              mkfifo /thredds/logs/serverStartup.log
+              mkfifo /thredds/logs/catalogInit.log
+              mkfifo /thredds/logs/httpout.log
+              mkfifo /thredds/logs/featureCollectionScan.log
+              mkfifo /thredds/logs/fmrc.log
+              mkfifo /thredds/logs/threddsServlet.log
+              mkfifo /thredds/logs/cache.log
+          {{- with .Values.data.securityContext }}
+          securityContext: {{ toYaml . | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+            - name: thredds-logs
+              mountPath: /thredds/logs
       containers:
         - name: thredds
           {{ include "esgf.deployment.image" (list . $thredds.image) }}
@@ -106,7 +127,25 @@ spec:
               {{- end }}
             - name: thredds-cache
               mountPath: /opt/tomcat/content/thredds/cache
+            - name: thredds-logs
+              mountPath: /opt/tomcat/content/thredds/logs
             {{- include "esgf.data.volumeMounts" . | nindent 12 }}
+        # Tail the log pipes
+        {{- $topContext := . }}
+        {{- range (list "serverStartup.log" "catalogInit.log" "httpout.log" "featureCollectionScan.log" "fmrc.log" "threddsServlet.log" "cache.log") }}
+        - name: thredds-log-{{ trimSuffix ".log" . | lower }}
+          {{ include "esgf.deployment.image" (list $topContext $thredds.image) }}
+          args:
+            # Just cat the log file
+            - cat
+            - /thredds/logs/{{ . }}
+          {{- with $topContext.Values.data.securityContext }}
+          securityContext: {{ toYaml . | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+            - name: thredds-logs
+              mountPath: /thredds/logs
+        {{- end }}
       {{- with $thredds.nodeSelector }}
       nodeSelector: {{ toYaml . | nindent 8 }}
       {{- end }}
@@ -134,6 +173,9 @@ spec:
         {{- end }}
         # Each pod gets its own cache directory on the local disk
         - name: thredds-cache
+          emptyDir: {}
+        # Each pod gets a directory to hold the named pipes for log files
+        - name: thredds-logs
           emptyDir: {}
         {{- include "esgf.data.volumes" . | nindent 8 }}
 {{- end -}}
