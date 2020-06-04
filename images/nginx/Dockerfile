@@ -4,7 +4,7 @@
 ## Configuration can be either injected by child images or by mounting files.
 #####
 
-ARG ESGF_REPOSITORY_BASE=esgfhub
+ARG ESGF_REPOSITORY_BASE=esgfdeploy
 ARG ESGF_IMAGES_VERSION=latest
 FROM ${ESGF_REPOSITORY_BASE}/base:${ESGF_IMAGES_VERSION}
 

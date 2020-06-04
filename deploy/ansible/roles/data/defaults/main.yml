@@ -43,6 +43,9 @@ data_datasets: []
   #   path: esg_dataroot
   #   location: /badc/cmip5/data
 
+# If specified, catalogs from this directory are used instead of the generated catalogs
+# thredds_catalog_host_path:
+
 # Security parameters required to run Nginx and serve data
 #
 # If a special user or groups are required to access data, they can be set here, which

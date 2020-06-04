@@ -25,11 +25,12 @@ spec:
       {{- end }}
       containers:
         - name: file-server
-          {{ include "esgf.deployment.image" (list . $fileServer) }}
+          {{ include "esgf.deployment.image" (list . $fileServer.image) }}
           resources: {{ toYaml $fileServer.resources | nindent 12 }}
           ports:
             - name: http
               containerPort: 8080
+          env: {{ toYaml $fileServer.extraEnv | nindent 12 }}
           readinessProbe: &probe
             httpGet:
               path: /

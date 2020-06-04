@@ -4,7 +4,7 @@
 ## Currently just a fully-updated CentOS 7 with common packages and entrypoint
 #####
 
-FROM centos:7.7.1908
+FROM centos:7.8.2003
 
 # Create the esgf user that will be used to run apps
 ENV ESGF_UID 1000
@@ -26,7 +26,7 @@ ENV LC_ALL en_US.UTF-8
 
 # Upgrade all existing packages
 # Updating CACHE_BUST to the current time will bust the cache and force a rebuild
-RUN CACHE_BUST="202003191437"; \
+RUN CACHE_BUST="202005221033"; \
     yum makecache && yum upgrade -y && yum clean all
 
 # Install ca-certificates and openssl

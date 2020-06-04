@@ -1,0 +1,146 @@
+{{- $thredds := .Values.data.thredds -}}
+{{- if (and $thredds.enabled $thredds.catalogVolume $thredds.localCache.enabled) -}}
+####
+# When the local cache is enabled, this daemonset will initialise the local caches for each host
+####
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: {{ include "esgf.component.fullname" (list . "thredds-prepare-node") }}
+  labels: {{ include "esgf.component.labels" (list . "thredds-prepare-node") | nindent 4 }}
+spec:
+  updateStrategy:
+    type: RollingUpdate
+    # Allow all pods on all nodes to update at once
+    rollingUpdate:
+      maxUnavailable: "100%"
+  selector:
+    matchLabels: {{ include "esgf.component.selectorLabels" (list . "thredds-prepare-node") | nindent 6 }}
+  template:
+    metadata:
+      labels: {{ include "esgf.component.selectorLabels" (list . "thredds-prepare-node") | nindent 8 }}
+      annotations:
+        # Roll the daemonset on each revision to pick up new catalogs
+        release/revision: {{ .Release.Revision | quote }}
+    spec:
+      {{- with (default .Values.image.pullSecrets $thredds.image.pullSecrets) }}
+      imagePullSecrets: {{ toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.data.podSecurityContext }}
+      securityContext: {{ toYaml . | nindent 8 }}
+      {{- end }}
+      initContainers:
+        - name: fix-permissions
+          {{ include "esgf.deployment.image" (list . $thredds.image) }}
+          env:
+            - name: CHOWN_UID
+              value: {{ pluck "runAsUser" .Values.data.securityContext .Values.data.podSecurityContext (dict "runAsUser" 1000) | first | quote }}
+            - name: CHOWN_GID
+              value: {{ pluck "fsGroup" .Values.data.securityContext .Values.data.podSecurityContext (dict "fsGroup" 1000) | first | quote }}
+          args:
+            - chown
+            - "$(CHOWN_UID):$(CHOWN_GID)"
+            - /thredds/cache
+            - /thredds/catalogs
+          securityContext:
+            runAsUser: 0
+            {{- with (omit .Values.data.securityContext "runAsUser") }}
+            {{ toYaml . | indent 12 | trim }}
+            {{- end }}
+          volumeMounts:
+            - name: thredds-cache
+              mountPath: /thredds/cache
+            - name: thredds-local-catalogs
+              mountPath: /thredds/catalogs
+        - name: copy-catalogs
+          {{ include "esgf.deployment.image" (list . $thredds.localCache.rsyncImage) }}
+          # Use rsync so we only copy over catalogs that have changed
+          args:
+            - rsync
+            - -avzh
+            - /thredds/catalogs/
+            - /thredds/local-catalogs
+          {{- with .Values.data.securityContext }}
+          securityContext: {{ toYaml . | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+            - name: thredds-local-catalogs
+              mountPath: /thredds/local-catalogs
+            - name: thredds-catalogs
+              mountPath: /thredds/catalogs
+              readOnly: true
+              {{- with (omit (default dict $thredds.catalogVolume.mountOptions) "readOnly") }}
+              {{ toYaml . | indent 14 | trim }}
+              {{- end }}
+        - name: rebuild-cache
+          {{ include "esgf.deployment.image" (list . $thredds.image) }}
+          args:
+            # Start THREDDS in order to build the cache
+            # Once it has started successfully, stop it
+            - bash
+            - -c
+            - |
+              set -ex
+              # Setting a PID file is critical to allowing us to stop tomcat later
+              export CATALINA_PID="$(mktemp)"
+              # Start tomcat in the background
+              catalina.sh start
+              # Wait for THREDDS to start
+              sleep 10
+              until curl -fsSL http://localhost:8080/thredds > /dev/null; do true; done
+              # Stop tomcat and exit
+              catalina.sh stop
+          {{- with .Values.data.securityContext }}
+          securityContext: {{ toYaml . | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+            - name: thredds-local-catalogs
+              mountPath: /opt/tomcat/content/thredds/esgcet
+              readOnly: true
+            - name: thredds-cache
+              mountPath: /opt/tomcat/content/thredds/cache
+        - name: write-revision-file
+          {{ include "esgf.deployment.image" (list . $thredds.image) }}
+          env:
+            - name: RELEASE_REVISION
+              value: {{ .Release.Revision | quote }}
+          args:
+            # Loop until the sentinel file exists and contains the correct revision
+            # This indicates that the daemonset has initialised the node for this revision
+            - bash
+            - -c
+            - echo "$(RELEASE_REVISION)" > /thredds/cache/revision.txt
+          {{- with .Values.data.securityContext }}
+          securityContext: {{ toYaml . | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+            - name: thredds-cache
+              mountPath: /thredds/cache
+      containers:
+        # All the work is done in the init containers
+        # The main container just sits and does nothing until the daemonset is rolled
+        - name: pause
+          {{ include "esgf.deployment.image" (list . $thredds.image) }}
+          args: [bash, -c, "sleep infinity"]
+          {{- with .Values.data.securityContext }}
+          securityContext: {{ toYaml . | nindent 12 }}
+          {{- end }}
+      {{- with $thredds.nodeSelector }}
+      nodeSelector: {{ toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $thredds.affinity }}
+      affinity: {{ toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $thredds.tolerations }}
+      tolerations: {{ toYaml . | nindent 8 }}
+      {{- end }}
+      volumes:
+        - name: thredds-local-catalogs
+          hostPath:
+            path: {{ printf "%s/%s/%s/catalogs" $thredds.localCache.pathPrefix .Release.Namespace .Release.Name | quote }}
+        - name: thredds-catalogs
+          {{ toYaml $thredds.catalogVolume.volumeSpec | indent 10 | trim }}
+        - name: thredds-cache
+          hostPath:
+            path: {{ printf "%s/%s/%s/cache" $thredds.localCache.pathPrefix .Release.Namespace .Release.Name | quote }}
+{{- end -}}

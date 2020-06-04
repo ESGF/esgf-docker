@@ -59,7 +59,7 @@ Vagrant.configure(2) do |config|
       "data" => ["default"],
       "data:vars" => {
         "hostname" => "192.168.100.100.nip.io",
-        "image_tag" => "issue-112-nginx-data-node",
+        "image_tag" => "issue-123-existing-catalogs",
         "data_mounts" => "#{data_mounts.to_json}",
         "data_datasets" => "#{data_datasets.to_json}"
       }

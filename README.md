@@ -26,10 +26,14 @@ This project is under heavy active development, with the implementation dependin
 Future Architecture discussions.
 
 Currently, only an unauthenticated data node is implemented. The data node uses THREDDS to serve
-catalog and OPeNDAP endpoints and Nginx to serve files, using
-[datasetScan elements](https://www.unidata.ucar.edu/software/tds/current/reference/DatasetScan.html)
-for a catalog-free configuration. As such, it is designed to work with the next-generation publisher
-being developed at LLNL that does not rely on THREDDS catalogs for publishing metadata.
+catalog and OPeNDAP endpoints, but uses Nginx to do direct file serving which should by more
+performant than THREDDS.
+
+The data node is capable of using existing catalogs from the current publisher to specify the
+available data, however it can also use a catalog-free configuration which utilises
+[datasetScan elements](https://www.unidata.ucar.edu/software/tds/current/reference/DatasetScan.html),
+to serve all files under a given dataset root. This is designed to work with the next-generation
+publisher being developed at LLNL that does not rely on THREDDS catalogs for publishing metadata.
 
 ## Image tags
 
@@ -70,7 +74,7 @@ cd esgf-docker
 These changes have not yet been committed to `master`, so you will need to check out the development branch:
 
 ```sh
-git checkout issue/112/nginx-data-node
+git checkout future-architecture
 ```
 
 Then follow the deployment guide for your chosen deployment method:
