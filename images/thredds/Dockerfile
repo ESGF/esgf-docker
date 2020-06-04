@@ -25,9 +25,19 @@ USER root
 
 # Make the content root directory, fix permissions so that any user in the
 # esgf group can use it and point tomcat at it
-# We also make the cache directory with correct permissions and declare it
-# as a volume - this ensures that Docker named volumes will work correctly
-RUN mkdir -p ./content/thredds/cache && \
+#
+# Make the cache directory with correct permissions and declare it as a volume
+# This ensures that Docker named volumes will work correctly
+#
+# Make the log directory and create symlinks for log files to stdout
+RUN mkdir -p ./content/thredds/{cache,logs} && \
+    ln -s /dev/stdout ./content/thredds/logs/serverStartup.log && \
+    ln -s /dev/stdout ./content/thredds/logs/catalogInit.log && \
+    ln -s /dev/stdout ./content/thredds/logs/httpout.log && \
+    ln -s /dev/stdout ./content/thredds/logs/featureCollectionScan.log && \
+    ln -s /dev/stdout ./content/thredds/logs/fmrc.log && \
+    ln -s /dev/stdout ./content/thredds/logs/threddsServlet.log && \
+    ln -s /dev/stdout ./content/thredds/logs/cache.log && \
     chown -R $ESGF_USER:$ESGF_GROUP ./content/thredds && \
     chmod -R u+w,g+w,o= ./content/thredds
 ENV CATALINA_EXTRA_OPTS "-Dtds.content.root.path=$CATALINA_HOME/content"
