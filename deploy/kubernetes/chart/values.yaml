@@ -85,6 +85,12 @@ data:
   podSecurityContext: {}
   securityContext: {}
 
+  # The resources for log-tailing containers
+  logTailResources:
+    requests:
+      cpu: 5m
+      memory: 10Mi
+
   # Configuration for the THREDDS pod
   thredds:
     # Indicates if THREDDS should be deployed or not
@@ -107,7 +113,26 @@ data:
       # A folder will be created within this directory using the namespace and release name
       pathPrefix: /var/cache/esgf
     # The number of replicas for the THREDDS pod
+    # If an hpa is configured, this is ignored - the hpa has full control over the number of replicas
     replicaCount: 1
+    # The horizontal pod autoscaler configuration for THREDDS pods
+    # See https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/
+    hpa: {}
+      # minReplicas: 1
+      # maxReplicas: 20
+      # metrics:
+      #   - type: Resource
+      #     resource:
+      #       name: cpu
+      #       target:
+      #         type: Utilization
+      #         averageUtilization: 80
+      #   - type: Resource
+      #     resource:
+      #       name: memory
+      #       target:
+      #         type: Utilization
+      #         averageUtilization: 70
     # The startup time for the THREDDS container
     # For large pre-existing catalogs, this maybe need to be large (default 5 mins)
     startTimeout: 300
@@ -135,7 +160,12 @@ data:
     image:
       repository: nginx
     # The number of replicas for the file server pod
+    # If an hpa is configured, this is ignored - the hpa has full control over the number of replicas
     replicaCount: 1
+    # The horizontal pod autoscaler configuration for file server pods
+    # See https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/
+    # Configuration is the same as for the thredds pod
+    hpa: {}
     # The resource allocations for the file server container
     # See https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
     resources: {}
