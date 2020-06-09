@@ -212,7 +212,7 @@ operations.
 
 For large catalogs, this can result in THREDDS pods taking an hour or more to start. This is not
 merely an inconvenience - in order to benefit from advanced features in Kubernetes such as
-recovery from failure and demand-based auto-scaling, pods must start quickly in order to begin
+recovery from failure and demand-based autoscaling, pods must start quickly in order to begin
 taking load as soon as possible. There are two things that can be done to address this problem:
 
   * Keep a copy of the catalogs on the local disk of each node that may have THREDDS pods scheduled
@@ -297,10 +297,11 @@ By default, this allows scaling based on the CPU or memory usage of the pods bac
 it is possible to integrate other metrics gathering systems, such as [Prometheus](https://prometheus.io/),
 to allow scaling based on any of the collected metrics (e.g. network I/O, requests per second).
 
-The ESGF Helm chart allows `HorizontalPodAutoscaler` resources to be defined for the THREDDS and Nginx file
-server components using the `data.{thredds,fileServer}.hpa` variables. These variables define the `spec`
-section of the HPA, except for the `scaleTargetRef` section which is automatically populated with the correct
-reference. For more information about HPA configuration, see the
+By default, autoscaling is disabled in the ESGF Helm chart. To enable autoscaling for the THREDDS and
+Nginx file server components, the chart allows `HorizontalPodAutoscaler` resources to be defined using
+the `data.{thredds,fileServer}.hpa` variables. These variables define the `spec` section of the HPA, except
+for the `scaleTargetRef` section which is automatically populated with the correct reference.
+For more information about HPA configuration, see the
 [Kubernetes HPA Walkthrough](https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale-walkthrough/).
 
 > **WARNING**
@@ -338,5 +339,3 @@ data:
               type: Utilization
               averageUtilization: 80
 ```
-
-By default, autoscaling is not enabled.
