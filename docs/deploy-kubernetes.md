@@ -20,6 +20,8 @@ configurations.
     - [Configuring the available datasets](#configuring-the-available-datasets)
     - [Using existing THREDDS catalogs](#using-existing-thredds-catalogs)
     - [Improving pod startup time for large catalogs](#improving-pod-startup-time-for-large-catalogs)
+    - [Configuring container resources](#configuring-container-resources)
+    - [Enabling demand-based autoscaling](#enabling-demand-based-autoscaling)
 
 <!-- /TOC -->
 
@@ -234,4 +236,105 @@ data:
   thredds:
     localCache:
       enabled: true
+```
+
+### Configuring container resources
+
+When specifying a pod in Kubernetes, you can optionally [specify how much of each resource
+a container requires](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/).
+Most commonly, this will be CPU and memory (RAM), but it is also possible to specify other resources.
+
+The resources for a container are specified as `requests` and `limits`. The `requests` section
+should specify the minimum amount of each resource that the container needs to run, and is used
+by the scheduler to decide which node to place the pod on and to reserve resources. The
+`limits` section specifies the maximum amount of each resource that the container is allowed to
+consume, and is enforced by Kubernetes. Each pod is given a
+[Quality of Service (QoS) class](https://kubernetes.io/docs/tasks/configure-pod-container/quality-service-pod/)
+based on whether the `requests` and `limits` are the same or different.
+
+Defining `resources.requests` and `resources.limits` is good practice as it prevents a badly
+behaving container from taking out other containers by constraining it. It also allow the
+Kubernetes scheduler to make more intelligent about where to schedule pods to ensure they have
+the resources they need to run.
+
+The ESGF Helm chart allows the resources section to be specified for the THREDDS and Nginx file
+server components:
+
+```yaml
+data:
+  thredds:
+    resources:
+      requests:
+        cpu: 200m
+        memory: 2Gi
+      limits:
+        cpu: 200m
+        memory: 2Gi
+
+  fileServer:
+    resources:
+      requests:
+        cpu: 200m
+        memory: 512Mi
+      limits:
+        cpu: 200m
+        memory: 512Mi
+```
+
+By default, the ESGF Helm chart does not specify any resources, and the pods will be placed
+in the `BestEffort` QoS class.
+
+### Enabling demand-based autoscaling
+
+Kubernetes allows the number of pods backing a service to be scaled up and down automatically using
+a [Horizontal Pod Autoscaler (HPA)](https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/).
+This allows the service to respond to spikes in demand by creating more pods to respond to requests.
+A Kubernetes `Service` ensures that requests are routed to the new replicas as they become ready.
+
+A HPA can be configured to automatically adjust the number of replicas based on any metrics that are exposed via
+the [Metrics API](https://kubernetes.io/docs/tasks/debug-application-cluster/resource-metrics-pipeline/).
+By default, this allows scaling based on the CPU or memory usage of the pods backing a service. However
+it is possible to integrate other metrics gathering systems, such as [Prometheus](https://prometheus.io/),
+to allow scaling based on any of the collected metrics (e.g. network I/O, requests per second).
+
+The ESGF Helm chart allows `HorizontalPodAutoscaler` resources to be defined for the THREDDS and Nginx file
+server components using the `data.{thredds,fileServer}.hpa` variables. These variables define the `spec`
+section of the HPA, except for the `scaleTargetRef` section which is automatically populated with the correct
+reference - for more information about HPA configuration, see the
+[Kubernetes HPA Walkthrough](https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale-walkthrough/).
+
+> **WARNING**
+>
+> In order to scale based on utilisation (as opposed to absolute value), you must define
+> `resources.requests` for the service
+> (see [Configuring container resources](#configuring-container-resources) above).
+
+For example, the following configuration would attempt to keep the average CPU utilisation
+below 80% of the requested amount by scaling out up to a maximum of 10 replicas:
+
+```yaml
+data:
+  thredds:
+    hpa:
+      minReplicas: 1
+      maxReplicas: 10
+      metrics:
+        - type: Resource
+          resource:
+            name: cpu
+            target:
+              type: Utilization
+              averageUtilization: 80
+
+  fileServer:
+    hpa:
+      minReplicas: 1
+      maxReplicas: 10
+      metrics:
+        - type: Resource
+          resource:
+            name: cpu
+            target:
+              type: Utilization
+              averageUtilization: 80
 ```
