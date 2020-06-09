@@ -127,7 +127,7 @@ The configuration of the datasets is done using two variables:
 
 > **WARNING**
 >
-> When using `hostPath` volumes, the data must exist at the same path on all cluster hosts where the THREDDS
+> When using `hostPath` volumes, the data must exist at the same path on all cluster nodes where the THREDDS
 > or file server pods might be scheduled.
 >
 > If your data is on a shared filesystem, just mount the filesystem on your cluster nodes as you would
@@ -253,9 +253,9 @@ consume, and is enforced by Kubernetes. Each pod is given a
 based on whether the `requests` and `limits` are the same or different.
 
 Defining `resources.requests` and `resources.limits` is good practice as it prevents a badly
-behaving container from taking out other containers by constraining it. It also allow the
-Kubernetes scheduler to make more intelligent about where to schedule pods to ensure they have
-the resources they need to run.
+behaving container from taking out other containers by constraining it. It also allows the
+Kubernetes scheduler to make more intelligent decisions about where to schedule pods to ensure
+they have the resources they need to run.
 
 The ESGF Helm chart allows the resources section to be specified for the THREDDS and Nginx file
 server components:
@@ -300,7 +300,7 @@ to allow scaling based on any of the collected metrics (e.g. network I/O, reques
 The ESGF Helm chart allows `HorizontalPodAutoscaler` resources to be defined for the THREDDS and Nginx file
 server components using the `data.{thredds,fileServer}.hpa` variables. These variables define the `spec`
 section of the HPA, except for the `scaleTargetRef` section which is automatically populated with the correct
-reference - for more information about HPA configuration, see the
+reference. For more information about HPA configuration, see the
 [Kubernetes HPA Walkthrough](https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale-walkthrough/).
 
 > **WARNING**
@@ -338,3 +338,5 @@ data:
               type: Utilization
               averageUtilization: 80
 ```
+
+By default, autoscaling is not enabled.
