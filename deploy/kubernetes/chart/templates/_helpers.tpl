@@ -50,7 +50,7 @@ Produces an image specification.
 {{- define "esgf.component.image" -}}
 {{- $context := index . 0 -}}
 {{- $overrides := index . 1 -}}
-{{- $image := mergeOverwrite $context.Values.image $overrides -}}
+{{- $image := deepCopy $context.Values.image | merge $overrides -}}
 image: {{ printf "%s/%s:%s" $image.prefix $image.repository $image.tag }}
 imagePullPolicy: {{ $image.pullPolicy }}
 {{- end -}}
