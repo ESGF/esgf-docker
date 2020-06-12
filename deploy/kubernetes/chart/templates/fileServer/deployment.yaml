@@ -6,7 +6,9 @@ metadata:
   name: {{ include "esgf.component.fullname" (list . "fileServer") }}
   labels: {{ include "esgf.component.labels" (list . "fileServer") | nindent 4 }}
 spec:
+  {{- if not $fileServer.hpa }}
   replicas: {{ $fileServer.replicaCount }}
+  {{- end }}
   selector:
     matchLabels: {{ include "esgf.component.selectorLabels" (list . "fileServer") | nindent 6 }}
   template:
@@ -80,6 +82,7 @@ spec:
             # Just cat the access log
             - cat
             - /var/log/nginx/access.log
+          resources: {{ toYaml .Values.data.logTailResources | nindent 12 }}
           {{- with .Values.data.securityContext }}
           securityContext: {{ toYaml . | nindent 12 }}
           {{- end }}

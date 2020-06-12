@@ -6,7 +6,9 @@ metadata:
   name: {{ include "esgf.component.fullname" (list . "thredds") }}
   labels: {{ include "esgf.component.labels" (list . "thredds") | nindent 4 }}
 spec:
+  {{- if not $thredds.hpa }}
   replicas: {{ $thredds.replicaCount }}
+  {{- end }}
   selector:
     matchLabels: {{ include "esgf.component.selectorLabels" (list . "thredds") | nindent 6 }}
   template:
@@ -139,6 +141,7 @@ spec:
             # Just cat the log file
             - cat
             - /thredds/logs/{{ . }}
+          resources: {{ toYaml $topContext.Values.data.logTailResources | nindent 12 }}
           {{- with $topContext.Values.data.securityContext }}
           securityContext: {{ toYaml . | nindent 12 }}
           {{- end }}
