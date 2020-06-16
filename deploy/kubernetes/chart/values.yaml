@@ -88,8 +88,8 @@ data:
   # The resources for log-tailing containers
   logTailResources:
     requests:
-      cpu: 5m
-      memory: 10Mi
+      cpu: 1m
+      memory: 1Mi
 
   # Configuration for the THREDDS pod
   thredds:
