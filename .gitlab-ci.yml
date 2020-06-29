@@ -102,6 +102,13 @@ build:nginx:
     CONTEXT_DIR: $CI_PROJECT_DIR/images/nginx
   needs: ["build:base"]
 
+build:solr:
+  extends: .docker-build
+  stage: build-3
+  variables:
+    CONTEXT_DIR: $CI_PROJECT_DIR/images/solr
+  needs: ["build:jre"]
+
 build:tomcat:
   extends: .docker-build
   stage: build-3
