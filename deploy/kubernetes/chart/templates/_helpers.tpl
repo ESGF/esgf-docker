@@ -32,6 +32,9 @@ app.kubernetes.io/version: {{ $context.Chart.AppVersion | quote }}
 {{- end }}
 app.kubernetes.io/managed-by: {{ $context.Release.Service }}
 {{ include "esgf.component.selectorLabels" . }}
+{{- with $context.Values.extraLabels }}
+{{ toYaml . }}
+{{- end }}
 {{- end -}}
 
 {{/*

@@ -20,6 +20,9 @@ image:
   # See https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
   pullSecrets:
 
+# A map of extra labels to be applied to all resources
+extraLabels: {}
+
 ###
 # Ingress configuration
 ###
