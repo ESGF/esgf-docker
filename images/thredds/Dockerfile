@@ -29,17 +29,17 @@ USER root
 # Make the cache directory with correct permissions and declare it as a volume
 # This ensures that Docker named volumes will work correctly
 #
-# Make the log directory and create symlinks for log files to stdout
-RUN mkdir -p ./content/thredds/{cache,logs} && \
-    ln -s /dev/stdout ./content/thredds/logs/serverStartup.log && \
-    ln -s /dev/stdout ./content/thredds/logs/catalogInit.log && \
-    ln -s /dev/stdout ./content/thredds/logs/httpout.log && \
-    ln -s /dev/stdout ./content/thredds/logs/featureCollectionScan.log && \
-    ln -s /dev/stdout ./content/thredds/logs/fmrc.log && \
-    ln -s /dev/stdout ./content/thredds/logs/threddsServlet.log && \
-    ln -s /dev/stdout ./content/thredds/logs/cache.log && \
+# Create symlinks for log files to stdout
+RUN mkdir -p ./content/thredds/cache && \
     chown -R $ESGF_USER:$ESGF_GROUP ./content/thredds && \
-    chmod -R u+w,g+w,o= ./content/thredds
+    chmod -R u+w,g+w,o= ./content/thredds && \
+    ln -s /dev/stdout ./logs/serverStartup.log && \
+    ln -s /dev/stdout ./logs/catalogInit.log && \
+    ln -s /dev/stdout ./logs/httpout.log && \
+    ln -s /dev/stdout ./logs/featureCollectionScan.log && \
+    ln -s /dev/stdout ./logs/fmrc.log && \
+    ln -s /dev/stdout ./logs/threddsServlet.log && \
+    ln -s /dev/stdout ./logs/cache.log
 ENV CATALINA_EXTRA_OPTS "-Dtds.content.root.path=$CATALINA_HOME/content"
 VOLUME ./content/thredds/cache
 

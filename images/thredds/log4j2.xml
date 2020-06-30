@@ -1,8 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration monitorInterval="30">
   <properties>
-    <property name="tds.content.root.path">../content</property>
-    <property name="tds.log.dir">${sys:tds.content.root.path}/thredds/logs</property>
+    <!--
+      Use the tomcat logs directory rather than a THREDDS one as it makes configuring the
+      log redirection pipes easier in the Helm chart
+    -->
+    <property name="tds.log.dir">/opt/tomcat/logs</property>
   </properties>
 
   <Appenders>

@@ -134,7 +134,7 @@ spec:
             - name: thredds-cache
               mountPath: /opt/tomcat/content/thredds/cache
             - name: thredds-logs
-              mountPath: /opt/tomcat/content/thredds/logs
+              mountPath: /opt/tomcat/logs
             {{- include "esgf.data.volumeMounts" . | nindent 12 }}
             {{- with $thredds.extraVolumeMounts }}
             {{- toYaml . | nindent 12 }}

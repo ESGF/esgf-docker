@@ -173,8 +173,7 @@
         <Valve className="org.apache.catalina.valves.AccessLogValve" directory="logs"
                prefix="localhost_access_log" suffix=".txt"
                pattern="combined"
-               renameOnRotate="true"
-               rotateable="false"
+               rotatable="false"
         />
 
       </Host>
