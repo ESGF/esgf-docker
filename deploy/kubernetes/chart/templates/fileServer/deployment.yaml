@@ -45,6 +45,9 @@ spec:
           volumeMounts:
             - name: nginx-logs
               mountPath: /var/log/nginx
+        {{- with $fileServer.extraInitContainers }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
       containers:
         - name: file-server
           {{ include "esgf.deployment.image" (list . $fileServer.image) }}
@@ -75,6 +78,9 @@ spec:
             - name: nginx-logs
               mountPath: /var/log/nginx
             {{- include "esgf.data.volumeMounts" . | nindent 12 }}
+            {{- with $fileServer.extraVolumeMounts }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
         # Tail the access log separately
         - name: file-server-access-log
           {{ include "esgf.deployment.image" (list . $fileServer.image) }}
@@ -106,4 +112,7 @@ spec:
         - name: nginx-logs
           emptyDir: {}
         {{- include "esgf.data.volumes" . | nindent 8 }}
+        {{- with $fileServer.extraVolumes }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
 {{- end -}}

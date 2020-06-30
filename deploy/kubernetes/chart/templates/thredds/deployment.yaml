@@ -91,6 +91,9 @@ spec:
           volumeMounts:
             - name: thredds-logs
               mountPath: /thredds/logs
+        {{- with $thredds.extraInitContainers }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
       containers:
         - name: thredds
           {{ include "esgf.deployment.image" (list . $thredds.image) }}
@@ -132,6 +135,9 @@ spec:
             - name: thredds-logs
               mountPath: /opt/tomcat/content/thredds/logs
             {{- include "esgf.data.volumeMounts" . | nindent 12 }}
+            {{- with $thredds.extraVolumeMounts }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
         # Tail the log pipes
         {{- $topContext := . }}
         {{- range (list "serverStartup.log" "catalogInit.log" "httpout.log" "featureCollectionScan.log" "fmrc.log" "threddsServlet.log" "cache.log") }}
@@ -181,4 +187,7 @@ spec:
         - name: thredds-logs
           emptyDir: {}
         {{- include "esgf.data.volumes" . | nindent 8 }}
+        {{- with $thredds.extraVolumes }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
 {{- end -}}
