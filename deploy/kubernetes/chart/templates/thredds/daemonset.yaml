@@ -7,7 +7,7 @@ apiVersion: apps/v1
 kind: DaemonSet
 metadata:
   name: {{ include "esgf.component.fullname" (list . "thredds-prepare-node") }}
-  labels: {{ include "esgf.component.labels" (list . "thredds-prepare-node") | nindent 4 }}
+  labels: {{ include "esgf.component.labels" (list . "thredds-prepare-node" $thredds.labels) | nindent 4 }}
 spec:
   updateStrategy:
     type: RollingUpdate

@@ -1,9 +1,10 @@
-{{- if .Values.data.fileServer.enabled -}}
+{{- $fileServer := .Values.data.fileServer -}}
+{{- if $fileServer.enabled -}}
 apiVersion: v1
 kind: Service
 metadata:
   name: {{ include "esgf.component.fullname" (list . "fileServer") }}
-  labels: {{ include "esgf.component.labels" (list . "fileServer") | nindent 4 }}
+  labels: {{ include "esgf.component.labels" (list . "fileServer" $fileServer.labels) | nindent 4 }}
 spec:
   type: ClusterIP
   ports:
