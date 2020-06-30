@@ -142,7 +142,7 @@ spec:
         # Tail the log pipes
         {{- $topContext := . }}
         {{- range (list "serverStartup.log" "catalogInit.log" "httpout.log" "featureCollectionScan.log" "fmrc.log" "threddsServlet.log" "cache.log" "localhost_access_log.txt") }}
-        - name: thredds-log-{{ trimSuffix ".log" . | lower }}
+        - name: thredds-log-{{ regexReplaceAll "[^a-zA-Z0-9]+" (. | trimSuffix ".log" | trimSuffix ".txt") "-" | trimAll "-" | lower }}
           {{ include "esgf.deployment.image" (list $topContext $thredds.image) }}
           args:
             # Just cat the log file
