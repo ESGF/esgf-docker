@@ -85,6 +85,7 @@ spec:
               mkfifo /thredds/logs/fmrc.log
               mkfifo /thredds/logs/threddsServlet.log
               mkfifo /thredds/logs/cache.log
+              mkfifo /thredds/logs/localhost_access_log.txt
           {{- with .Values.data.securityContext }}
           securityContext: {{ toYaml . | nindent 12 }}
           {{- end }}
@@ -140,7 +141,7 @@ spec:
             {{- end }}
         # Tail the log pipes
         {{- $topContext := . }}
-        {{- range (list "serverStartup.log" "catalogInit.log" "httpout.log" "featureCollectionScan.log" "fmrc.log" "threddsServlet.log" "cache.log") }}
+        {{- range (list "serverStartup.log" "catalogInit.log" "httpout.log" "featureCollectionScan.log" "fmrc.log" "threddsServlet.log" "cache.log" "localhost_access_log.txt") }}
         - name: thredds-log-{{ trimSuffix ".log" . | lower }}
           {{ include "esgf.deployment.image" (list $topContext $thredds.image) }}
           args:
