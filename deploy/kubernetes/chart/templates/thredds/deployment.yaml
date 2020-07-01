@@ -4,7 +4,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ include "esgf.component.fullname" (list . "thredds") }}
-  labels: {{ include "esgf.component.labels" (list . "thredds") | nindent 4 }}
+  labels: {{ include "esgf.component.labels" (list . "thredds" $thredds.labels) | nindent 4 }}
 spec:
   {{- if not $thredds.hpa }}
   replicas: {{ $thredds.replicaCount }}

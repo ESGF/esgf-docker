@@ -4,7 +4,7 @@ apiVersion: v1
 kind: Secret
 metadata:
   name: {{ include "esgf.component.fullname" (list . "hostcert") }}
-  labels: {{ include "esgf.component.labels" (list . "hostcert") | nindent 4 }}
+  labels: {{ include "esgf.component.labels" (list . "hostcert" .Values.ingress.labels) | nindent 4 }}
 type: kubernetes.io/tls
 data:
   {{- if $tls.pem.cert }}

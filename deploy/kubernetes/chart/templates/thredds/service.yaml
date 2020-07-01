@@ -1,9 +1,10 @@
-{{- if .Values.data.thredds.enabled -}}
+{{- $thredds := .Values.data.thredds -}}
+{{- if $thredds.enabled -}}
 apiVersion: v1
 kind: Service
 metadata:
   name: {{ include "esgf.component.fullname" (list . "thredds") }}
-  labels: {{ include "esgf.component.labels" (list . "thredds") | nindent 4 }}
+  labels: {{ include "esgf.component.labels" (list . "thredds" $thredds.labels) | nindent 4 }}
 spec:
   type: ClusterIP
   ports:

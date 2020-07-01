@@ -22,7 +22,11 @@ If the release name contains the chart or component name, it is not duplicated.
 {{- end -}}
 
 {{/*
-Common labels for a component.
+Common labels for a component. The context should be a list consisting of:
+
+  * Top context
+  * Component name
+  * Component-specific extra labels (optional)
 */}}
 {{- define "esgf.component.labels" -}}
 {{- $context := index . 0 -}}
@@ -32,6 +36,12 @@ app.kubernetes.io/version: {{ $context.Chart.AppVersion | quote }}
 {{- end }}
 app.kubernetes.io/managed-by: {{ $context.Release.Service }}
 {{ include "esgf.component.selectorLabels" . }}
+{{- with $context.Values.globalLabels }}
+{{ toYaml . }}
+{{- end }}
+{{- with (index . 2) }}
+{{ toYaml . }}
+{{- end }}
 {{- end -}}
 
 {{/*
