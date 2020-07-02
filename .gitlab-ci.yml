@@ -64,6 +64,9 @@ variables:
     # Push all tags
     - docker push $REPOSITORY
   only:
+    # Only run build jobs for branches in the repo, not PRs
+    refs:
+      - branches
     # Only run build jobs if there is a change to the images
     changes:
       - images/**/*
