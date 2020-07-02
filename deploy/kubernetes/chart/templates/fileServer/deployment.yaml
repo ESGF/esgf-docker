@@ -77,6 +77,12 @@ spec:
               readOnly: true
             - name: nginx-logs
               mountPath: /var/log/nginx
+            # In order to use a read-only root filesystem, we mount emptyDirs in places
+            # where files are expected to change
+            - name: nginx-cache
+              mountPath: /var/lib/nginx/tmp
+            - name: nginx-run
+              mountPath: /run/nginx
             {{- include "esgf.data.volumeMounts" . | nindent 12 }}
             {{- with $fileServer.extraVolumeMounts }}
             {{- toYaml . | nindent 12 }}
@@ -110,6 +116,12 @@ spec:
             name: {{ include "esgf.component.fullname" (list . "fileServer") }}
         # Each pod gets a directory to hold the named pipes for the logs
         - name: nginx-logs
+          emptyDir: {}
+        # In order to use a read-only root filesystem, we mount emptyDirs in places
+        # where files are expected to change
+        - name: nginx-cache
+          emptyDir: {}
+        - name: nginx-run
           emptyDir: {}
         {{- include "esgf.data.volumes" . | nindent 8 }}
         {{- with $fileServer.extraVolumes }}
