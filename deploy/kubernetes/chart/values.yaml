@@ -87,8 +87,14 @@ data:
   # See https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
   # WARNING: Due to permissions set inside the container, the user *must* belong to group 1000
   #          in addition to the groups required to access data
-  podSecurityContext: {}
-  securityContext: {}
+  # By default, we run as the esgf user/group
+  podSecurityContext:
+    runAsUser: 1000
+    runAsGroup: 1000
+    fsGroup: 1000
+  securityContext:
+    # Run with a read-only root filesystem by default
+    readOnlyRootFilesystem: true
 
   # The resources for log-tailing containers
   logTailResources:

@@ -90,7 +90,7 @@ spec:
           securityContext: {{ toYaml . | nindent 12 }}
           {{- end }}
           volumeMounts:
-            - name: thredds-logs
+            - name: tomcat-logs
               mountPath: /thredds/logs
         {{- with $thredds.extraInitContainers }}
         {{- toYaml . | nindent 8 }}
@@ -133,8 +133,13 @@ spec:
               {{- end }}
             - name: thredds-cache
               mountPath: /opt/tomcat/content/thredds/cache
-            - name: thredds-logs
+            - name: tomcat-logs
               mountPath: /opt/tomcat/logs
+            # In order to use a read-only rootfs, we must put emptyDirs where we expect tomcat to write
+            - name: tomcat-temp
+              mountPath: /opt/tomcat/temp
+            - name: tomcat-work
+              mountPath: /opt/tomcat/work
             {{- include "esgf.data.volumeMounts" . | nindent 12 }}
             {{- with $thredds.extraVolumeMounts }}
             {{- toYaml . | nindent 12 }}
@@ -153,7 +158,7 @@ spec:
           securityContext: {{ toYaml . | nindent 12 }}
           {{- end }}
           volumeMounts:
-            - name: thredds-logs
+            - name: tomcat-logs
               mountPath: /thredds/logs
         {{- end }}
       {{- with $thredds.nodeSelector }}
@@ -181,11 +186,16 @@ spec:
           configMap:
             name: {{ include "esgf.component.fullname" (list . "thredds") }}
         {{- end }}
-        # Each pod gets its own cache directory on the local disk
+        # Each pod gets its own THREDDS cache directory on the local disk
         - name: thredds-cache
           emptyDir: {}
         # Each pod gets a directory to hold the named pipes for log files
-        - name: thredds-logs
+        - name: tomcat-logs
+          emptyDir: {}
+        # In order to use a read-only rootfs, we must put emptyDirs where we expect tomcat to write
+        - name: tomcat-temp
+          emptyDir: {}
+        - name: tomcat-work
           emptyDir: {}
         {{- include "esgf.data.volumes" . | nindent 8 }}
         {{- with $thredds.extraVolumes }}

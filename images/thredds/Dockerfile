@@ -30,7 +30,7 @@ USER root
 # This ensures that Docker named volumes will work correctly
 #
 # Create symlinks for log files to stdout
-RUN mkdir -p ./content/thredds/cache && \
+RUN mkdir -p ./content/thredds/{cache,logs,public} && \
     chown -R $ESGF_USER:$ESGF_GROUP ./content/thredds && \
     chmod -R u+w,g+w,o= ./content/thredds && \
     ln -s /dev/stdout ./logs/serverStartup.log && \
@@ -49,5 +49,7 @@ COPY --from=builder /application ./webapps/thredds
 COPY log4j2.xml ./webapps/thredds/WEB-INF/classes/
 COPY threddsConfig.xml catalog.xml ./content/thredds/
 COPY catalog-esgcet.xml ./content/thredds/esgcet/catalog.xml
+# Copy the default wmsConfig.xml into place
+RUN cp ./webapps/thredds/WEB-INF/altContent/startup/wmsConfig.xml ./content/thredds
 
 USER $ESGF_UID
