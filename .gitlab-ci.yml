@@ -67,8 +67,9 @@ variables:
     # Only run build jobs for branches in the repo, not MRs
     refs:
       - branches
-    # Only run build jobs if there is a change to the images
+    # Only run build jobs if there is a change to the images or the build
     changes:
+      - .gitlab-ci.yml
       - images/**/*
   except:
     # Exclude any branches that correspond to external PRs
