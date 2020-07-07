@@ -1,10 +1,10 @@
-{{- if .Values.data.fileServer.enabled -}}
 {{- $fileServer := .Values.data.fileServer -}}
+{{- if $fileServer.enabled -}}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ include "esgf.component.fullname" (list . "fileServer") }}
-  labels: {{ include "esgf.component.labels" (list . "fileServer") | nindent 4 }}
+  labels: {{ include "esgf.component.labels" (list . "fileServer" $fileServer.labels) | nindent 4 }}
 spec:
   {{- if not $fileServer.hpa }}
   replicas: {{ $fileServer.replicaCount }}
@@ -45,6 +45,9 @@ spec:
           volumeMounts:
             - name: nginx-logs
               mountPath: /var/log/nginx
+        {{- with $fileServer.extraInitContainers }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
       containers:
         - name: file-server
           {{ include "esgf.deployment.image" (list . $fileServer.image) }}
@@ -74,7 +77,16 @@ spec:
               readOnly: true
             - name: nginx-logs
               mountPath: /var/log/nginx
+            # In order to use a read-only root filesystem, we mount emptyDirs in places
+            # where files are expected to change
+            - name: nginx-cache
+              mountPath: /var/lib/nginx/tmp
+            - name: nginx-run
+              mountPath: /run/nginx
             {{- include "esgf.data.volumeMounts" . | nindent 12 }}
+            {{- with $fileServer.extraVolumeMounts }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
         # Tail the access log separately
         - name: file-server-access-log
           {{ include "esgf.deployment.image" (list . $fileServer.image) }}
@@ -105,5 +117,14 @@ spec:
         # Each pod gets a directory to hold the named pipes for the logs
         - name: nginx-logs
           emptyDir: {}
+        # In order to use a read-only root filesystem, we mount emptyDirs in places
+        # where files are expected to change
+        - name: nginx-cache
+          emptyDir: {}
+        - name: nginx-run
+          emptyDir: {}
         {{- include "esgf.data.volumes" . | nindent 8 }}
+        {{- with $fileServer.extraVolumes }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
 {{- end -}}

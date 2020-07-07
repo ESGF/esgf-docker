@@ -20,6 +20,9 @@ image:
   # See https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
   pullSecrets:
 
+# Extra labels to be applied to all resources
+globalLabels: {}
+
 ###
 # Ingress configuration
 ###
@@ -27,6 +30,8 @@ ingress:
   # The annotations for the ingress
   # Depending on your Kubernetes cluster, this can be used to configure things like Let's Encrypt certificates
   annotations:
+  # Extra labels to apply to the ingress resources
+  labels: {}
   # TLS configuration
   tls:
     # Either give the name of an existing TLS secret
@@ -82,8 +87,14 @@ data:
   # See https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
   # WARNING: Due to permissions set inside the container, the user *must* belong to group 1000
   #          in addition to the groups required to access data
-  podSecurityContext: {}
-  securityContext: {}
+  # By default, we run as the esgf user/group
+  podSecurityContext:
+    runAsUser: 1000
+    runAsGroup: 1000
+    fsGroup: 1000
+  securityContext:
+    # Run with a read-only root filesystem by default
+    readOnlyRootFilesystem: true
 
   # The resources for log-tailing containers
   logTailResources:
@@ -142,6 +153,8 @@ data:
     # Extra environment variables for the THREDDS container
     # See https://kubernetes.io/docs/tasks/inject-data-application/define-environment-variable-container/
     extraEnv: []
+    # Additional labels for THREDDS resources
+    labels: {}
     # The node selector for the THREDDS pod
     # See https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector
     nodeSelector:
@@ -172,6 +185,8 @@ data:
     # Extra environment variables for the file server container
     # See https://kubernetes.io/docs/tasks/inject-data-application/define-environment-variable-container/
     extraEnv: []
+    # Additional labels for file server resources
+    labels: {}
     # The node selector for the file server pod
     # See https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector
     nodeSelector:

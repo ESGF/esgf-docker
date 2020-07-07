@@ -18,7 +18,7 @@ variables:
     - docker:19.03-dind
   image: docker:19.03
   variables:
-    DOCKER_HOST: tcp://localhost:2375
+    DOCKER_HOST: tcp://docker:2375
     DOCKER_TLS_CERTDIR: ""
   before_script:
     - docker info
@@ -64,9 +64,16 @@ variables:
     # Push all tags
     - docker push $REPOSITORY
   only:
-    # Only run build jobs if there is a change to the images
+    # Only run build jobs for branches in the repo, not MRs
+    refs:
+      - branches
+    # Only run build jobs if there is a change to the images or the build
     changes:
+      - .gitlab-ci.yml
       - images/**/*
+  except:
+    # Exclude any branches that correspond to external PRs
+    - external_pull_requests
 
 build:base:
   extends: .docker-build
