@@ -15,8 +15,8 @@ ENV SOLR_HOME="/var/solr/data" \
     PATH="/opt/solr/bin:$PATH"
 
 # Install Solr
-ARG SOLR_VERSION=8.5.2
-ARG SOLR_SHA512=02b9b90468f399701dba26695c9af6cd205f47916a06e26838613fe238594e9902de6ef3b42ec8257d195e37589adf8427d9b7962557731e91949fbef06bb544
+ARG SOLR_VERSION=7.7.3
+ARG SOLR_SHA512=ca9200c18cc19ab723fd4d10f257e27eb81dc8bc33401ebc4eb99178faf4033a2684f0f8b12ae7b659cfeb0f4c9d9e24aaac518a4e00fd28b69854a359a666ed
 ARG SOLR_URL=http://archive.apache.org/dist/lucene/solr/${SOLR_VERSION}/solr-${SOLR_VERSION}.tgz
 RUN mkdir -p /opt/solr && \
     curl -fsSL -o /opt/solr/solr.tar.gz $SOLR_URL && \
@@ -29,8 +29,9 @@ RUN mkdir -p /opt/solr && \
     chown $ESGF_UID:$ESGF_GID $SOLR_LOGS_DIR $SOLR_HOME && \
     chmod 0770 $SOLR_LOGS_DIR $SOLR_HOME
 
-# Copy init scripts
+# Copy init scripts and configuration
 COPY solr.in.sh /etc/default/solr.in.sh
+COPY core-template/ /esg/core-template
 COPY init.d/* /docker-init.d/
 
 USER $ESGF_UID
