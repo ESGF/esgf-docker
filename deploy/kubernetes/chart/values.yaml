@@ -211,7 +211,6 @@ index:
     # Image overrides for the Solr image
     image:
       repository: solr
-      pullPolicy: Always
     # The pod security context for all Solr pods
     # This should normally not need to change unless Solr pods are configured to use
     # specific paths on the host for core storage
