@@ -238,9 +238,17 @@ index:
     # See https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
     tolerations:
 
+    # Master-specific resource allocations
+    masterResources: {}
+    # The slave poll interval (default 60 seconds)
+    slavePollInterval: "00:00:60"
+    # Slave-specific resource allocations
+    slaveResources: {}
+
     # The default replica poll interval (default one hour)
     replicaPollInterval: "01:00:00"
-
+    # The default replica resources
+    replicaResources: {}
     # List of replicas of external Solr instances to replicate
     #
     # Each specified replica should contain the following keys:

@@ -1,15 +1,12 @@
 {{- if .Values.index.enabled -}}
 {{- $solr := .Values.index.solr -}}
-{{- range $index, $replica := $solr.replicas -}}
----
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "esgf.component.fullname" (list $ "solr" $replica.name) }}
+  name: {{ include "esgf.component.fullname" (list . "solr" "slave") }}
   labels:
-    {{ include "esgf.component.labels" (list $ "solr" $solr.labels) | indent 4 | trim }}
-    solr.esgf.org/role: "replica"
-    solr.esgf.org/replica-name: {{ $replica.name }}
+    {{ include "esgf.component.labels" (list . "solr" $solr.labels) | indent 4 | trim }}
+    solr.esgf.org/role: "slave"
 spec:
   # Solr shards can currently only have one replica
   replicas: 1
@@ -19,15 +16,13 @@ spec:
     type: Recreate
   selector:
     matchLabels:
-      {{ include "esgf.component.selectorLabels" (list $ "solr") | indent 6 | trim }}
-      solr.esgf.org/role: "replica"
-      solr.esgf.org/replica-name: {{ $replica.name }}
+      {{ include "esgf.component.selectorLabels" (list . "solr") | indent 6 | trim }}
+      solr.esgf.org/role: "slave"
   template:
     metadata:
       labels:
-        {{ include "esgf.component.selectorLabels" (list $ "solr") | indent 8 | trim }}
-        solr.esgf.org/role: "replica"
-        solr.esgf.org/replica-name: {{ $replica.name }}
+        {{ include "esgf.component.selectorLabels" (list . "solr") | indent 8 | trim }}
+        solr.esgf.org/role: "slave"
     spec:
       {{- with (default $.Values.image.pullSecrets $solr.image.pullSecrets) }}
       imagePullSecrets: {{ toYaml . | nindent 8 }}
@@ -37,16 +32,15 @@ spec:
       {{- end }}
       containers:
         - name: solr
-          {{ include "esgf.deployment.image" (list $ $solr.image) }}
+          {{ include "esgf.deployment.image" (list . $solr.image) }}
           args:
             - solr
             - -f
-            - "-Dmaster.enable=true"
             - "-Dslave.enable=true"
-            - "-Dslave.masterUrl={{ $replica.masterUrl | required "Replica masterUrl is required" }}"
-            - "-Dslave.pollInterval={{ $replica.pollInterval | default $solr.replicaPollInterval }}"
-          # Merge the resource-specific resources with the Solr ones
-          resources: {{ $replica.resources | default dict | mergeOverwrite $solr.resources $solr.replicaResources | toYaml | nindent 12 }}
+            - "-Dslave.masterUrl=http://{{ include "esgf.component.fullname" (list . "solr" "master") }}:8983/solr"
+            - "-Dslave.pollInterval={{ $solr.slavePollInterval }}"
+          # Merge the slave-specific resources with the Solr ones
+          resources: {{ mergeOverwrite $solr.resources $solr.slaveResources | toYaml | nindent 12 }}
           ports:
             - name: solr
               containerPort: 8983
@@ -89,5 +83,4 @@ spec:
           emptyDir: {}
         - name: solr-home
           emptyDir: {}
-{{- end -}}
 {{- end -}}

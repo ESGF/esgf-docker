@@ -8,7 +8,8 @@ metadata:
   name: {{ include "esgf.component.fullname" (list $ "solr" $replica.name) }}
   labels:
     {{ include "esgf.component.labels" (list $ "solr" $solr.labels) | indent 4 | trim }}
-    solr.esgf.org/replica: {{ $replica.name }}
+    solr.esgf.org/role: "replica"
+    solr.esgf.org/replica-name: {{ $replica.name }}
 spec:
   type: ClusterIP
   ports:
@@ -18,6 +19,7 @@ spec:
       protocol: TCP
   selector:
     {{ include "esgf.component.selectorLabels" (list $ "solr") | indent 4 | trim }}
-    solr.esgf.org/replica: {{ $replica.name }}
+    solr.esgf.org/role: "replica"
+    solr.esgf.org/replica-name: {{ $replica.name }}
 {{- end -}}
 {{- end -}}
