@@ -38,5 +38,4 @@ USER $ESGF_UID
 
 # Start Solr in the foreground
 WORKDIR /opt/solr
-VOLUME /var/solr/data
 CMD ["solr", "-f"]
