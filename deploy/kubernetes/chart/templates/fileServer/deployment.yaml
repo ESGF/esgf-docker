@@ -1,5 +1,5 @@
 {{- $fileServer := .Values.data.fileServer -}}
-{{- if $fileServer.enabled -}}
+{{- if (and .Values.data.enabled $fileServer.enabled) -}}
 apiVersion: apps/v1
 kind: Deployment
 metadata:

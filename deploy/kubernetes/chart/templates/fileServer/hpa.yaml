@@ -1,5 +1,5 @@
 {{- $fileServer := .Values.data.fileServer -}}
-{{- if (and $fileServer.enabled $fileServer.hpa) -}}
+{{- if (and .Values.data.enabled $fileServer.enabled $fileServer.hpa) -}}
 apiVersion: autoscaling/v2beta2
 kind: HorizontalPodAutoscaler
 metadata:

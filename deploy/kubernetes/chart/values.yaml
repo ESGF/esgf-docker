@@ -47,6 +47,9 @@ ingress:
 # Data node configuration
 ###
 data:
+  # Indicates if the data node is to be enabled
+  enabled: true
+
   # The mounts that are required to serve data, as defined by the given datasets
   #
   # Each specified mount should include at least the following keys:
