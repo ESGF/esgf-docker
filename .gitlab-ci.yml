@@ -123,6 +123,13 @@ build:tomcat:
     CONTEXT_DIR: $CI_PROJECT_DIR/images/tomcat
   needs: ["build:jre"]
 
+build:search:
+  extends: .docker-build
+  stage: build-4
+  variables:
+    CONTEXT_DIR: $CI_PROJECT_DIR/images/search
+  needs: ["build:jdk", "build:tomcat"]
+
 build:thredds:
   extends: .docker-build
   stage: build-4

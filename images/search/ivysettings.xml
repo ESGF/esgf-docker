@@ -1,0 +1,46 @@
+<ivysettings>
+    <property name="ivy.default.root.url" value="https://raw.githubusercontent.com/ESGF/esgf-artifacts/master/ivy" override="false"/>
+
+    <!-- ESGF LOCAL repository -->
+    <include url="${ivy.default.root.url}/ivysettings-esgf-repo-local.xml"/>
+
+    <!-- ESGF Devel repository -->
+    <include url="${ivy.default.root.url}/ivysettings-esgf-repo-devel.xml"/>
+
+    <!-- ESGF repository -->
+    <include url="${ivy.default.root.url}/ivysettings-esgf-repo.xml"/>
+
+    <!-- Third party libraries stored on ESGF system -->
+    <include url="${ivy.default.root.url}/ivysettings-esgf-repo-shared.xml"/>
+
+    <!-- Java.net Public Maven 2 repository -->
+    <include url="${ivy.default.root.url}/ivysettings-javanet.xml"/>
+
+    <!-- Spring repository -->
+    <include url="${ivy.default.root.url}/ivysettings-spring.xml"/>
+
+    <!-- Alfresco -->
+    <include url="${ivy.default.root.url}/ivysettings-alfresco.xml"/>
+
+    <!-- Shibboleth -->
+    <include url="${ivy.default.root.url}/ivysettings-shibboleth.xml"/>
+
+    <!-- Define a resolver for the Maven repo that uses HTTPS and the default chain -->
+    <resolvers>
+        <ibiblio name="maven-https" m2compatible="true" root="https://repo1.maven.org/maven2"/>
+        <chain name="default-chain" returnFirst="true">
+            <resolver ref="esgf_repo_local"/>
+            <resolver ref="esgf_repo_devel"/>
+            <resolver ref="esgf_repo"/>
+            <resolver ref="esgf_repo_share"/>
+            <resolver ref="javanet"/>
+            <resolver ref="maven-https"/>
+            <resolver ref="spring-release"/>
+            <resolver ref="spring-external"/>
+            <resolver ref="alfresco" />
+            <resolver ref="shibboleth" />
+        </chain>
+    </resolvers>
+
+    <settings defaultResolver="default-chain"/>
+</ivysettings>

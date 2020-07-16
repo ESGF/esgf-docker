@@ -28,9 +28,12 @@ RUN curl -fsSL -o tomcat.tar.gz $TOMCAT_URL && \
     # Fix permissions - we want any user in the tomcat group to be able to run the container
     chmod -R +rX . && \
     chown -R $ESGF_USER:$ESGF_GROUP logs temp work && \
-    chmod -R u+w,g+w logs temp work
+    chmod -R u+w,g+w logs temp work && \
+    # Send tomcat logs to stdout by default
+    ln -s /dev/stdout ./logs/localhost.log && \
+    ln -s /dev/stdout ./logs/localhost_access_log.txt
 # Install custom configs
-COPY context.xml server.xml tomcat-users.xml conf/
+COPY context.xml logging.properties server.xml tomcat-users.xml conf/
 COPY setenv.sh bin/
 
 # By default, execute the Tomcat server as the tomcat user
