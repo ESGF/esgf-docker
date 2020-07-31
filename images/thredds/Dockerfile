@@ -30,7 +30,7 @@ USER root
 # This ensures that Docker named volumes will work correctly
 #
 # Create symlinks for log files to stdout
-RUN mkdir -p ./content/thredds/{cache,logs,public} && \
+RUN mkdir -p ./content/thredds/{cache,logs,notebooks,public,templates} && \
     chown -R $ESGF_USER:$ESGF_GROUP ./content/thredds && \
     chmod -R u+w,g+w,o= ./content/thredds && \
     ln -s /dev/stdout ./logs/serverStartup.log && \
