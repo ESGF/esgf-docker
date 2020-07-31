@@ -238,6 +238,8 @@ index:
     # See https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
     tolerations:
 
+    # Indicates if the local Solr master/slave should be enabled
+    localEnabled: true
     # Master-specific resource allocations
     masterResources: {}
     # The slave poll interval (default 60 seconds)
