@@ -140,6 +140,8 @@ spec:
               mountPath: /opt/tomcat/temp
             - name: tomcat-work
               mountPath: /opt/tomcat/work
+            - name: tmp-thredds
+              mountPath: /tmp/thredds
             {{- include "esgf.data.volumeMounts" . | nindent 12 }}
             {{- with $thredds.extraVolumeMounts }}
             {{- toYaml . | nindent 12 }}
@@ -196,6 +198,8 @@ spec:
         - name: tomcat-temp
           emptyDir: {}
         - name: tomcat-work
+          emptyDir: {}
+        - name: tmp-thredds
           emptyDir: {}
         {{- include "esgf.data.volumes" . | nindent 8 }}
         {{- with $thredds.extraVolumes }}
