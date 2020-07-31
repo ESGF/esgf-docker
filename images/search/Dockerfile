@@ -22,7 +22,6 @@ RUN git clone https://github.com/ESGF/esgf-node-manager.git /src/esgf-node-manag
     pushd /src/esgf-node-manager && \
     git checkout $ESGF_NODE_MANAGER_VERSION && \
     popd
-COPY ivysettings.xml /src/esgf-node-manager/
 RUN pushd /src/esgf-node-manager && \
     ant clean_all make_dist publish_local && \
     popd
@@ -33,7 +32,6 @@ RUN git clone https://github.com/ESGF/esgf-security.git /src/esgf-security && \
     pushd /src/esgf-security && \
     git checkout $ESGF_SECURITY_VERSION && \
     popd
-COPY ivysettings.xml /src/esgf-security/
 RUN pushd /src/esgf-security && \
     ant clean_all make_dist publish_local && \
     popd
@@ -44,7 +42,6 @@ RUN git clone https://github.com/ESGF/esg-search.git /src/esg-search && \
     pushd /src/esg-search && \
     git checkout $ESG_SEARCH_VERSION && \
     popd
-COPY ivysettings.xml /src/esg-search/
 RUN pushd /src/esg-search && \
     ant clean_all make_dist publish_local && \
     popd
