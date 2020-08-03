@@ -70,7 +70,8 @@ spec:
             - name: thredds-cache
               mountPath: /thredds/cache
         {{- end }}
-        # Create named pipes for the log files
+        # Create a named pipe for the access log so it can be separated
+        # Continue to send the rest of the logs to stdout
         - name: make-log-pipes
           {{ include "esgf.deployment.image" (list . $thredds.image) }}
           args:
@@ -78,14 +79,15 @@ spec:
             - -c
             - |
               set -ex
-              mkfifo /thredds/logs/serverStartup.log
-              mkfifo /thredds/logs/catalogInit.log
-              mkfifo /thredds/logs/httpout.log
-              mkfifo /thredds/logs/featureCollectionScan.log
-              mkfifo /thredds/logs/fmrc.log
-              mkfifo /thredds/logs/threddsServlet.log
-              mkfifo /thredds/logs/cache.log
-              mkfifo /thredds/logs/localhost_access_log.txt
+              ln -sf /dev/stdout /thredds/logs/serverStartup.log
+              ln -sf /dev/stdout /thredds/logs/catalogInit.log
+              ln -sf /dev/stdout /thredds/logs/httpout.log
+              ln -sf /dev/stdout /thredds/logs/featureCollectionScan.log
+              ln -sf /dev/stdout /thredds/logs/fmrc.log
+              ln -sf /dev/stdout /thredds/logs/threddsServlet.log
+              ln -sf /dev/stdout /thredds/logs/cache.log
+              ln -sf /dev/stdout /thredds/logs/localhost.log
+              rm -f /thredds/logs/localhost_access_log.txt && mkfifo /thredds/logs/localhost_access_log.txt
           {{- with .Values.data.securityContext }}
           securityContext: {{ toYaml . | nindent 12 }}
           {{- end }}
@@ -146,23 +148,20 @@ spec:
             {{- with $thredds.extraVolumeMounts }}
             {{- toYaml . | nindent 12 }}
             {{- end }}
-        # Tail the log pipes
-        {{- $topContext := . }}
-        {{- range (list "serverStartup.log" "catalogInit.log" "httpout.log" "featureCollectionScan.log" "fmrc.log" "threddsServlet.log" "cache.log" "localhost_access_log.txt") }}
-        - name: thredds-log-{{ regexReplaceAll "[^a-zA-Z0-9]+" (. | trimSuffix ".log" | trimSuffix ".txt") "-" | trimAll "-" | lower }}
-          {{ include "esgf.deployment.image" (list $topContext $thredds.image) }}
+        # Tail the access log separately
+        - name: thredds-log-localhost-access-log
+          {{ include "esgf.deployment.image" (list . $thredds.image) }}
           args:
-            # Just cat the log file
+            # Just cat the access log
             - cat
-            - /thredds/logs/{{ . }}
-          resources: {{ toYaml $topContext.Values.data.logTailResources | nindent 12 }}
-          {{- with $topContext.Values.data.securityContext }}
+            - /thredds/logs/localhost_access_log.txt
+          resources: {{ toYaml .Values.data.logTailResources | nindent 12 }}
+          {{- with .Values.data.securityContext }}
           securityContext: {{ toYaml . | nindent 12 }}
           {{- end }}
           volumeMounts:
             - name: tomcat-logs
               mountPath: /thredds/logs
-        {{- end }}
       {{- with $thredds.nodeSelector }}
       nodeSelector: {{ toYaml . | nindent 8 }}
       {{- end }}
