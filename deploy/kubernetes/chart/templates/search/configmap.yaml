@@ -1,0 +1,11 @@
+{{- $search := .Values.index.search -}}
+{{- if (and .Values.index.enabled $search.enabled) -}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "esgf.component.fullname" (list . "search") }}
+  labels: {{ include "esgf.component.labels" (list . "search" $search.labels) | nindent 4 }}
+data:
+  esgf.properties: {{ tpl (.Files.Get "files/search/esgf.properties") . | quote }}
+  esgf_shards_static.xml: {{ tpl (.Files.Get "files/search/esgf_shards_static.xml") . | quote }}
+{{- end -}}

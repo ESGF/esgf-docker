@@ -39,6 +39,9 @@ spec:
             - "-Dslave.enable=true"
             - "-Dslave.masterUrl=http://{{ include "esgf.component.fullname" (list . "solr" "master") }}:8983/solr"
             - "-Dslave.pollInterval={{ $solr.slavePollInterval }}"
+            # This is the Solr instance used for queries, so we need to enable shards
+            # However we want to use a whitelist so that only queries for local shards are allowed
+            - "-Dsolr.shardsWhitelist={{ include "esgf.solr.shardsWhitelist" . }}"
           # Merge the slave-specific resources with the Solr ones
           resources: {{ mergeOverwrite $solr.resources $solr.slaveResources | toYaml | nindent 12 }}
           ports:

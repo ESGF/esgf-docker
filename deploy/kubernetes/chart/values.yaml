@@ -247,6 +247,10 @@ index:
     # Slave-specific resource allocations
     slaveResources: {}
 
+    # If localEnabled = false but search is enabled, set these URLs to use external Solr instances
+    # masterExternalUrl:
+    # slaveExternalUrl:
+
     # The default replica poll interval (default one hour)
     replicaPollInterval: "01:00:00"
     # The default replica resources
@@ -263,3 +267,30 @@ index:
       # - name: remote-site
       #   masterUrl: https://remote.esgf.node/solr
       #   pollInterval: "06:00:00"
+
+  # Configuration for the search app
+  search:
+    # Indicates if the search app should be deployed or not
+    enabled: true
+    # Image overrides for the search app
+    image:
+      repository: search
+    # The number of replicas for the search deployment
+    replicaCount: 1
+    # The resource allocations for the search container
+    # See https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+    resources: {}
+    # Extra environment variables for the search container
+    # See https://kubernetes.io/docs/tasks/inject-data-application/define-environment-variable-container/
+    extraEnv: []
+    # Additional labels for search resources
+    labels: {}
+    # The node selector for the search pods
+    # See https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector
+    nodeSelector:
+    # The affinity rules for the search pods
+    # See https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
+    affinity:
+    # The tolerations for the search pods
+    # See https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
+    tolerations:

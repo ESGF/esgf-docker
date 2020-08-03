@@ -34,6 +34,7 @@ spec:
           {{- end }}
           {{- end }}
           {{- if .Values.index.enabled }}
+          {{- if .Values.index.solr.localEnabled }}
           # We only want to permit access to the replication handler for each core from outside
           # However wildcard paths are not supported on all ingress controllers
           # So we make a path definition for each core
@@ -46,4 +47,11 @@ spec:
             backend: *solr
           - path: /solr/files/replication
             backend: *solr
+          {{- end }}
+          {{- if .Values.index.search.enabled }}
+          - path: /esg-search
+            backend:
+              serviceName: {{ include "esgf.component.fullname" (list . "search") }}
+              servicePort: 8080
+          {{- end }}
           {{- end }}
