@@ -15,12 +15,12 @@ ENV SOLR_HOME="/var/solr/data" \
     PATH="/opt/solr/bin:$PATH"
 
 # Install Solr
-ARG SOLR_VERSION=7.7.3
-ARG SOLR_SHA512=ca9200c18cc19ab723fd4d10f257e27eb81dc8bc33401ebc4eb99178faf4033a2684f0f8b12ae7b659cfeb0f4c9d9e24aaac518a4e00fd28b69854a359a666ed
+ARG SOLR_VERSION=6.6.6
+ARG SOLR_SHA1=1dfd3de06c8e6554c42e69f49573b563125da5a1
 ARG SOLR_URL=http://archive.apache.org/dist/lucene/solr/${SOLR_VERSION}/solr-${SOLR_VERSION}.tgz
 RUN mkdir -p /opt/solr && \
     curl -fsSL -o /opt/solr/solr.tar.gz $SOLR_URL && \
-    echo "$SOLR_SHA512 /opt/solr/solr.tar.gz" | sha512sum --strict --check && \
+    echo "$SOLR_SHA1 /opt/solr/solr.tar.gz" | sha1sum --strict --check && \
     tar -xzf /opt/solr/solr.tar.gz -C /opt/solr --strip-components=1 && \
     rm -rf /opt/solr/solr.tar.gz && \
     rm -Rf /opt/solr/docs/ /opt/solr/dist/{solr-core-$SOLR_VERSION.jar,solr-solrj-$SOLR_VERSION.jar,solrj-lib,solr-test-framework-$SOLR_VERSION.jar,test-framework} && \
