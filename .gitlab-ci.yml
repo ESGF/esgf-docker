@@ -109,6 +109,13 @@ build:nginx:
     CONTEXT_DIR: $CI_PROJECT_DIR/images/nginx
   needs: ["build:base"]
 
+build:search-builder:
+  extends: .docker-build
+  stage: build-3
+  variables:
+    CONTEXT_DIR: $CI_PROJECT_DIR/images/search-builder
+  needs: ["build:jdk"]
+
 build:solr:
   extends: .docker-build
   stage: build-3
@@ -128,7 +135,7 @@ build:search:
   stage: build-4
   variables:
     CONTEXT_DIR: $CI_PROJECT_DIR/images/search
-  needs: ["build:jdk", "build:tomcat"]
+  needs: ["build:search-builder", "build:tomcat"]
 
 build:thredds:
   extends: .docker-build
