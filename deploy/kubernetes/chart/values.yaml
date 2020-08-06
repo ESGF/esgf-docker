@@ -29,7 +29,7 @@ globalLabels: {}
 ingress:
   # The annotations for the ingress
   # Depending on your Kubernetes cluster, this can be used to configure things like Let's Encrypt certificates
-  annotations:
+  annotations: {}
   # Extra labels to apply to the ingress resources
   labels: {}
   # TLS configuration
