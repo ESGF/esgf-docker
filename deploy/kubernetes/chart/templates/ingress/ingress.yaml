@@ -34,7 +34,7 @@ spec:
           {{- end }}
           {{- end }}
           {{- if .Values.index.enabled }}
-          {{- if .Values.index.solr.localEnabled }}
+          {{- if .Values.index.solr.enabled }}
           # We only want to permit access to the replication handler for each core from outside
           # However wildcard paths are not supported on all ingress controllers
           # So we make a path definition for each core

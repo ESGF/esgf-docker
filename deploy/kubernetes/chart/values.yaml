@@ -208,6 +208,8 @@ index:
 
   # Configuration for Solr
   solr:
+    # Indicates if Solr components should be deployed
+    enabled: true
     # Image overrides for the Solr image
     image:
       repository: solr
@@ -238,8 +240,12 @@ index:
     # See https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
     tolerations:
 
-    # Indicates if the local Solr master/slave should be enabled
-    localEnabled: true
+    # External URLs for the Solr master and slave
+    # If search is enabled but Solr is not, set these URLs to use external Solr instances
+    # If Solr is enabled, the local instances will be used in preference
+    # masterExternalUrl:
+    # slaveExternalUrl:
+
     # Master-specific resource allocations
     masterResources: {}
     # The slave poll interval (default 60 seconds)
@@ -247,15 +253,14 @@ index:
     # Slave-specific resource allocations
     slaveResources: {}
 
-    # If localEnabled = false but search is enabled, set these URLs to use external Solr instances
-    # masterExternalUrl:
-    # slaveExternalUrl:
-
     # The default replica poll interval (default one hour)
     replicaPollInterval: "01:00:00"
     # The default replica resources
     replicaResources: {}
-    # List of replicas of external Solr instances to replicate
+    # List of replicas of external Solr instances to use as replica shards
+    #
+    # If Solr is enabled, a local replica will be created for each specified remote index
+    # If Solr is not enabled, the masterUrl will be used directly in the search
     #
     # Each specified replica should contain the following keys:
     #

@@ -1,5 +1,5 @@
 {{- $solr := .Values.index.solr -}}
-{{- if and .Values.index.enabled $solr.localEnabled -}}
+{{- if and .Values.index.enabled $solr.enabled -}}
 apiVersion: apps/v1
 kind: Deployment
 metadata:

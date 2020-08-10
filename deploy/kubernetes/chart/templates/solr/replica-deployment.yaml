@@ -1,5 +1,5 @@
-{{- if .Values.index.enabled -}}
 {{- $solr := .Values.index.solr -}}
+{{- if and .Values.index.enabled $solr.enabled -}}
 {{- range $index, $replica := $solr.replicas -}}
 ---
 apiVersion: apps/v1
