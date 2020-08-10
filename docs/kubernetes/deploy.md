@@ -3,25 +3,19 @@
 This project provides a [Helm chart](https://helm.sh/docs/topics/charts/) to deploy ESGF resources
 on a [Kubernetes](https://kubernetes.io/) cluster.
 
-The chart is in [deploy/kubernetes/chart](../deploy/kubernetes/chart/). Please look at the files to
-understand exactly what resources are being created.
+The chart is in [deploy/kubernetes/chart](../../deploy/kubernetes/chart/). Please look at the
+files to understand exactly what resources are being created.
 
 For a complete list of all the variables that are available, please look at the
-[values.yaml for the chart](../deploy/kubernetes/chart/values.yaml). The defaults there have extensive
-comments that explain how to use these variables. This document describes how to apply some common
-configurations.
+[values.yaml for the chart](../../deploy/kubernetes/chart/values.yaml). The defaults there have
+extensive comments that explain how to use these variables. This documentation describes how to
+apply some common configurations.
 
 <!-- TOC depthFrom:2 -->
 
 - [Installing/upgrading ESGF](#installingupgrading-esgf)
 - [Local test installation with Minikube](#local-test-installation-with-minikube)
 - [Configuring the installation](#configuring-the-installation)
-    - [Setting the version](#setting-the-version)
-    - [Configuring the available datasets](#configuring-the-available-datasets)
-    - [Using existing THREDDS catalogs](#using-existing-thredds-catalogs)
-    - [Improving pod startup time for large catalogs](#improving-pod-startup-time-for-large-catalogs)
-    - [Configuring container resources](#configuring-container-resources)
-    - [Enabling demand-based autoscaling](#enabling-demand-based-autoscaling)
 
 <!-- /TOC -->
 
@@ -74,8 +68,9 @@ minikube addons enable ingress
 minikube ssh "curl -fsSL https://github.com/roocs/mini-esgf-data/tarball/master | sudo tar -xz --strip-components=1 -C / --wildcards */test_data"
 ```
 
-Configure the chart to serve the test data (see [minikube-values.yaml](../deploy/kubernetes/minikube-values.yaml)),
-using a `nip.io` domain pointing to the Minikube server:
+Configure the chart to serve the test data (see
+[minikube-values.yaml](../../deploy/kubernetes/minikube-values.yaml)), using a `nip.io`
+domain pointing to the Minikube server:
 
 ```sh
 helm install esgf ./deploy/kubernetes/chart/ \

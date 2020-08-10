@@ -27,8 +27,6 @@ be a list in which the following keys are required for each item:
   * `name`: Used in the names of Kubernetes resources for the replica
   * `masterUrl`: The URL to replicate, including scheme, port and path, e.g. `https://esgf-index1.ceda.ac.uk/solr`
 
-Other keys a
-
 For example, the following configures two replicas, and will result in four Solr pods:
 
   * `master`
@@ -57,13 +55,15 @@ outside of the Kubernetes cluster for persistence or performance reasons, the ES
 can configure the `esg-search` application to use external Solr instances.
 
 To do this, disable Solr and set the external URLs to use. For any replicas that are specified,
-`esg-search` will be configured to use the replica directly using the `masterUrl`.
+`esg-search` will be configured to use the `masterUrl` directly.
 
 > **WARNING**
 >
-> If you want to use a Solr instance configured using `esgf-ansible` as an external index
-> for publishing, you will need to configure the firewall on that host to expose the port
-> `8984` where the master runs.
+> If you want to use a Solr instance configured using `esgf-ansible` as an external Solr instance,
+> you will need to configure the firewall on that host to expose the port  `8984` where the
+> master listens.
+
+Example configuration using external Solr instances:
 
 ```yaml
 index:
