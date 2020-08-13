@@ -4,7 +4,7 @@
 ## Tasks to configure and deploy the proxy container for this host
 #####
 
-- name: Make config directory
+- name: Make proxy config directory
   file:
     path: /esg/config/proxy
     state: directory
@@ -13,7 +13,7 @@
   docker_network:
     name: esgf
 
-- name: Write Nginx configuration
+- name: Write proxy configuration
   template:
     src: proxy.conf.j2
     dest: /esg/config/proxy/proxy.conf

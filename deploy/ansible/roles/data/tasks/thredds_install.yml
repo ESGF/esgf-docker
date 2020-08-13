@@ -1,0 +1,54 @@
+---
+
+- name: Create Docker network
+  docker_network:
+    name: esgf
+
+- name: Generate THREDDS catalogs
+  block:
+    - name: Make THREDDS config directory
+      file:
+        path: /esg/config/thredds
+        state: directory
+
+    - name: Write THREDDS catalog
+      template:
+        src: catalog.xml.j2
+        dest: /esg/config/thredds/catalog.xml
+
+    - name: Set thredds_catalog_host_path for generated catalogs
+      set_fact:
+        thredds_catalog_host_path: /esg/config/thredds
+  when: thredds_catalog_host_path is not defined
+
+- name: Create THREDDS cache volume
+  docker_volume:
+    name: thredds-cache
+
+- name: Start THREDDS container
+  docker_container:
+    name: thredds
+    image: "{{ thredds_image_prefix }}/{{ thredds_image_repository }}:{{ thredds_image_tag }}"
+    pull: "{{ thredds_image_pull }}"
+    detach: yes
+    restart_policy: on-failure
+    exposed_ports:
+      - "8080"
+    networks:
+      - name: esgf
+    networks_cli_compatible: yes
+    user: "{{ data_security_context_user }}"
+    groups: "{{ data_security_context_groups }}"
+    volumes: >-
+      [
+        # First the catalog volume
+        "{{ thredds_catalog_host_path }}:/opt/tomcat/content/thredds/esgcet:ro",
+        # Then the cache volume
+        "thredds-cache:/opt/tomcat/content/thredds/cache:rw",
+        # Then finally the data mounts
+        {% for mount in data_mounts %}
+        "{{ mount.host_path }}:{{ mount.mount_path }}:ro",
+        {% endfor %}
+      ]
+    state: started
+    restart: yes

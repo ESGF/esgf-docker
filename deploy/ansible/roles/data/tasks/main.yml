@@ -4,93 +4,18 @@
 ## Tasks to configure and deploy containers for a data node
 #####
 
-- name: Make config directories
-  file:
-    path: /esg/config/{{ item }}
-    state: directory
-  loop: [fileserver, thredds]
+- name: Install THREDDS
+  include: thredds_install.yml
+  when: "'data' in group_names and thredds_enabled"
 
-- name: Create Docker network
-  docker_network:
-    name: esgf
+- name: Uninstall THREDDS
+  include: thredds_uninstall.yml
+  when: "'data' not in group_names or not thredds_enabled"
 
-- name: Configure THREDDS
-  block:
-    - name: Generate THREDDS catalogs
-      block:
-        - name: Write THREDDS catalog
-          template:
-            src: catalog.xml.j2
-            dest: /esg/config/thredds/catalog.xml
+- name: Install Nginx fileserver
+  include: fileserver_install.yml
+  when: "'data' in group_names and fileserver_enabled"
 
-        - name: Set thredds_catalog_host_path for generated catalogs
-          set_fact:
-            thredds_catalog_host_path: /esg/config/thredds
-      when: thredds_catalog_host_path is not defined
-
-    - name: Create THREDDS cache volume
-      docker_volume:
-        name: thredds-cache
-
-    - name: Start THREDDS container
-      docker_container:
-        name: thredds
-        image: "{{ thredds_image_prefix }}/{{ thredds_image_repository }}:{{ thredds_image_tag }}"
-        pull: "{{ thredds_image_pull }}"
-        detach: yes
-        restart_policy: on-failure
-        exposed_ports:
-          - "8080"
-        networks:
-          - name: esgf
-        networks_cli_compatible: yes
-        user: "{{ data_security_context_user }}"
-        groups: "{{ data_security_context_groups }}"
-        volumes: >-
-          [
-            # First the catalog volume
-            "{{ thredds_catalog_host_path }}:/opt/tomcat/content/thredds/esgcet:ro",
-            # Then the cache volume
-            "thredds-cache:/opt/tomcat/content/thredds/cache:rw",
-            # Then finally the data mounts
-            {% for mount in data_mounts %}
-            "{{ mount.host_path }}:{{ mount.mount_path }}:ro",
-            {% endfor %}
-          ]
-        state: started
-        restart: yes
-  when: "thredds_enabled | bool"
-
-- name: Configure Nginx fileserver
-  block:
-    - name: Write fileserver configuration
-      template:
-        src: fileserver.conf.j2
-        dest: /esg/config/fileserver/fileserver.conf
-
-    - name: Start fileserver container
-      docker_container:
-        name: fileserver
-        image: "{{ fileserver_image_prefix }}/{{ fileserver_image_repository }}:{{ fileserver_image_tag }}"
-        pull: "{{ fileserver_image_pull }}"
-        detach: yes
-        restart_policy: on-failure
-        exposed_ports:
-          - "8080"
-        networks:
-          - name: esgf
-        networks_cli_compatible: yes
-        user: "{{ data_security_context_user }}"
-        groups: "{{ data_security_context_groups }}"
-        # Append the Nginx config volume to the data mounts
-        # Append the catalog volume to the data mounts
-        volumes: >-
-          [
-            "/esg/config/fileserver:/etc/nginx/conf.d:ro",
-            {% for mount in data_mounts %}
-            "{{ mount.host_path }}:{{ mount.mount_path }}:ro",
-            {% endfor %}
-          ]
-        state: started
-        restart: yes
-  when: "fileserver_enabled | bool"
+- name: Uninstall Nginx fileserver
+  include: fileserver_uninstall.yml
+  when: "'data' not in group_names or not fileserver_enabled"
