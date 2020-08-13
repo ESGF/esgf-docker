@@ -51,6 +51,7 @@ RUN catalina.sh start && \
     catalina.sh stop && \
     # Remove any transient files that were created
     rm -f ./logs/catalina.{log,out} && \
+    rm -rf ./temp/* ./work/* && \
     rm -rf ./content/thredds/cache/* && \
     # Transfer ownership of the entire content directory to the esgf user/group
     chown -R $ESGF_USER:$ESGF_GROUP ./content/thredds && \
