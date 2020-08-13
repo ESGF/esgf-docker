@@ -36,6 +36,10 @@ COPY init.d/* /docker-init.d/
 
 USER $ESGF_UID
 
+# Mark Solr home as a volume
+# This means that permissions are preserved when a Docker named volume is mounted
+VOLUME /var/solr/data
+
 # Start Solr in the foreground
 WORKDIR /opt/solr
 CMD ["solr", "-f"]
