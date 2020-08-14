@@ -4,6 +4,15 @@
     {% if solr_enabled %}
     <value>solr-slave:8983/solr</value>
     {% else %}
-    <value>{{ solr_slave_external_url }}</value>
+    <value>{{ solr_slave_external_url | regex_replace('^http(s)?://', '') }}</value>
     {% endif %}
+
+    <!-- Replicas -->
+    {% for replica in solr_replicas %}
+    {% if solr_enabled %}
+    <value>solr-replica-{{ replica.name }}:8983/solr</value>
+    {% else %}
+    <value>{{ replica.master_url | regex_replace('^http(s)?://', '') }}</value>
+    {% endif %}
+    {% endfor %}
 </shards>

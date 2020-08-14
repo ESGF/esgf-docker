@@ -55,6 +55,12 @@ Vagrant.configure(2) do |config|
         location: "/test_data/group_workspaces/jasmin2/cp4cds1/data/c3s-cordex"
       }
     ]
+    solr_replicas = [
+      {
+        name: "llnl",
+        master_url: "https://esgf-node.llnl.gov/solr"
+      }
+    ]
     ansible.groups = {
       "data" => ["default"],
       "index" => ["default"],
@@ -65,6 +71,9 @@ Vagrant.configure(2) do |config|
       "data:vars" => {
         "data_mounts" => "#{data_mounts.to_json}",
         "data_datasets" => "#{data_datasets.to_json}"
+      },
+      "index:vars" => {
+        "solr_replicas" => "#{solr_replicas.to_json}"
       }
     }
   end

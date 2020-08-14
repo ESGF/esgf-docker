@@ -12,6 +12,9 @@
   include: solr_uninstall.yml
   when: "'index' not in group_names or not solr_enabled"
 
+- name: Reconcile Solr replicas
+  include: solr_replica_reconcile.yml
+
 - name: Install search application
   include: search_install.yml
   when: "'index' in group_names and search_enabled"

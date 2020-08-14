@@ -28,6 +28,18 @@
     state: started
     restart: yes
 
+- name: Set solr_shards_whitelist variable
+  set_fact:
+    solr_shards_whitelist: >-
+      [
+        # First the slave
+        "solr-slave:8983/solr",
+        # Then each replica shard
+        {% for replica in solr_replicas %}
+        "solr-replica-{{ replica.name }}:8983/solr",
+        {% endfor %}
+      ]
+
 - name: Create Solr slave home volume
   docker_volume:
     name: solr-slave-home
@@ -46,7 +58,7 @@
       - "-Dslave.pollInterval={{ solr_slave_poll_interval }}"
       # This is the Solr instance used for queries, so we need to enable shards
       # However we want to use a whitelist so that only queries for configured shards are allowed
-#      - "-Dsolr.shardsWhitelist={{ include "esgf.solr.shardsWhitelist" . }}"
+      - "-Dsolr.shardsWhitelist={{ solr_shards_whitelist | join(',') }}"
     detach: yes
     restart_policy: unless-stopped
     exposed_ports:
