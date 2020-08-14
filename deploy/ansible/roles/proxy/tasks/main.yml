@@ -24,7 +24,7 @@
     image: "{{ proxy_image_prefix }}/{{ proxy_image_repository }}:{{ proxy_image_tag }}"
     pull: "{{ proxy_image_pull }}"
     detach: yes
-    restart_policy: on-failure
+    restart_policy: unless-stopped
     exposed_ports:
       - "8080"
     published_ports:

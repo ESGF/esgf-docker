@@ -1,0 +1,11 @@
+---
+
+- name: Stop search container
+  docker_container:
+    name: search
+    state: absent
+
+- name: Remove search config directory
+  file:
+    path: /esg/config/search
+    state: absent

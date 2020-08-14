@@ -1,0 +1,21 @@
+---
+
+- name: Stop Solr master container
+  docker_container:
+    name: solr-master
+    state: absent
+
+- name: Stop Solr slave container
+  docker_container:
+    name: solr-slave
+    state: absent
+
+- name: Remove Solr master home volume
+  docker_volume:
+    name: solr-master-home
+    state: absent
+
+- name: Remove Solr slave home volume
+  docker_volume:
+    name: solr-slave-home
+    state: absent

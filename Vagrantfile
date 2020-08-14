@@ -57,9 +57,12 @@ Vagrant.configure(2) do |config|
     ]
     ansible.groups = {
       "data" => ["default"],
-      "data:vars" => {
+      "index" => ["default"],
+      "all:vars" => {
         "hostname" => "192.168.100.100.nip.io",
-        "image_tag" => "issue-123-existing-catalogs",
+        "image_tag" => "issue-115-esg-search",
+      },
+      "data:vars" => {
         "data_mounts" => "#{data_mounts.to_json}",
         "data_datasets" => "#{data_datasets.to_json}"
       }

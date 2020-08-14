@@ -32,8 +32,14 @@ proxy_image_tag: "{{ image_tag }}"
 proxy_image_pull: "{{ image_pull }}"
 proxy_image_repository: nginx
 
-# Indicates if THREDDS is enabled or not
+# Indicates if THREDDS is enabled
 thredds_enabled: true
 
-# Indicates if the Nginx file server should be deployed or not
+# Indicates if the Nginx file server is enabled
 fileserver_enabled: true
+
+# Indicates if Solr is enabled
+solr_enabled: true
+
+# Indicates if search is enabled
+search_enabled: true

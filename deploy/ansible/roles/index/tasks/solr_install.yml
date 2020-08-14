@@ -1,0 +1,59 @@
+---
+
+- name: Create Docker network
+  docker_network:
+    name: esgf
+
+- name: Create Solr master home volume
+  docker_volume:
+    name: solr-master-home
+
+- name: Start Solr master container
+  docker_container:
+    name: solr-master
+    image: "{{ solr_image_prefix }}/{{ solr_image_repository }}:{{ solr_image_tag }}"
+    pull: "{{ solr_image_pull }}"
+    command:
+      - solr
+      - -f
+      - "-Dmaster.enable=true"
+    detach: yes
+    restart_policy: unless-stopped
+    exposed_ports:
+      - "8983"
+    networks:
+      - name: esgf
+    networks_cli_compatible: yes
+    volumes: ["solr-master-home:/var/solr/data:rw"]
+    state: started
+    restart: yes
+
+- name: Create Solr slave home volume
+  docker_volume:
+    name: solr-slave-home
+
+- name: Start Solr slave container
+  docker_container:
+    name: solr-slave
+    image: "{{ solr_image_prefix }}/{{ solr_image_repository }}:{{ solr_image_tag }}"
+    pull: "{{ solr_image_pull }}"
+    command:
+      - solr
+      - -f
+      - "-Dmaster.enable=true"
+      - "-Dslave.enable=true"
+      - "-Dslave.masterUrl=http://solr-master:8983/solr"
+      - "-Dslave.pollInterval={{ solr_slave_poll_interval }}"
+      # This is the Solr instance used for queries, so we need to enable shards
+      # However we want to use a whitelist so that only queries for configured shards are allowed
+#      - "-Dsolr.shardsWhitelist={{ include "esgf.solr.shardsWhitelist" . }}"
+    detach: yes
+    restart_policy: unless-stopped
+    exposed_ports:
+      - "8983"
+    networks:
+      - name: esgf
+    networks_cli_compatible: yes
+    volumes: ["solr-slave-home:/var/solr/data:rw"]
+    state: started
+    restart: yes

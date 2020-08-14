@@ -20,7 +20,7 @@
     image: "{{ fileserver_image_prefix }}/{{ fileserver_image_repository }}:{{ fileserver_image_tag }}"
     pull: "{{ fileserver_image_pull }}"
     detach: yes
-    restart_policy: on-failure
+    restart_policy: unless-stopped
     exposed_ports:
       - "8080"
     networks:
