@@ -1,5 +1,5 @@
 {{- $thredds := .Values.data.thredds -}}
-{{- if $thredds.enabled -}}
+{{- if (and .Values.data.enabled $thredds.enabled) -}}
 apiVersion: v1
 kind: Service
 metadata:

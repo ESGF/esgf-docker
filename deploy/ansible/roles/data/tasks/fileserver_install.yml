@@ -1,0 +1,41 @@
+---
+
+- name: Create Docker network
+  docker_network:
+    name: esgf
+
+- name: Make fileserver config directory
+  file:
+    path: /esg/config/fileserver
+    state: directory
+
+- name: Write fileserver configuration
+  template:
+    src: fileserver.conf.j2
+    dest: /esg/config/fileserver/fileserver.conf
+
+- name: Start fileserver container
+  docker_container:
+    name: fileserver
+    image: "{{ fileserver_image_prefix }}/{{ fileserver_image_repository }}:{{ fileserver_image_tag }}"
+    pull: "{{ fileserver_image_pull }}"
+    detach: yes
+    restart_policy: unless-stopped
+    exposed_ports:
+      - "8080"
+    networks:
+      - name: esgf
+    networks_cli_compatible: yes
+    user: "{{ data_security_context_user }}"
+    groups: "{{ data_security_context_groups }}"
+    # Append the Nginx config volume to the data mounts
+    # Append the catalog volume to the data mounts
+    volumes: >-
+      [
+        "/esg/config/fileserver:/etc/nginx/conf.d:ro",
+        {% for mount in data_mounts %}
+        "{{ mount.host_path }}:{{ mount.mount_path }}:ro",
+        {% endfor %}
+      ]
+    state: started
+    restart: yes

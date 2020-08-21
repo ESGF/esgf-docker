@@ -25,15 +25,16 @@ will not benefit from many features provided by Kubernetes, including:
 This project is under heavy active development, with the implementation depending on the ESGF
 Future Architecture discussions.
 
-Currently, only an unauthenticated data node is implemented. The data node uses THREDDS to serve
-catalog and OPeNDAP endpoints, but uses Nginx to do direct file serving which should by more
-performant than THREDDS.
+Currently, data and index nodes are implemented but **without** authentication.
+
+The data node uses THREDDS to serve catalog and OPeNDAP endpoints, but uses Nginx for direct file
+serving which should be more performant than THREDDS.
 
 The data node is capable of using existing catalogs from the current publisher to specify the
-available data, however it can also use a catalog-free configuration which utilises
+available data, however it is designed primarily to use a catalog-free configuration which utilises
 [datasetScan elements](https://www.unidata.ucar.edu/software/tds/current/reference/DatasetScan.html),
-to serve all files under a given dataset root. This is designed to work with the next-generation
-publisher being developed at LLNL that does not rely on THREDDS catalogs for publishing metadata.
+to serve all files under a given dataset root. This will work with the next-generation publisher
+being developed at LLNL that does not rely on THREDDS catalogs for publishing metadata.
 
 ## Image tags
 
@@ -59,8 +60,7 @@ release or a particular commit, in order to avoid unexpected code changes or dif
 the container image between load-balanced nodes.
 
 You can check the [available tags on Docker Hub](https://hub.docker.com/r/esgfdeploy/thredds/tags).
-All the ESGF Docker images are built together, so any given tag will always be available for all
-images.
+All the ESGF Docker images are built together, so any given tag will be available for all images.
 
 ## Making a deployment
 
@@ -80,4 +80,4 @@ git checkout future-architecture
 Then follow the deployment guide for your chosen deployment method:
 
   * [Deploy ESGF using Ansible](./docs/deploy-ansible.md)
-  * [Deploy ESGF to Kubernetes using Helm](./docs/deploy-kubernetes.md)
+  * [Deploy ESGF to Kubernetes using Helm](./docs/kubernetes/deploy.md)

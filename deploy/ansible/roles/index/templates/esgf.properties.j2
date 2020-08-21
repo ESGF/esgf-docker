@@ -1,0 +1,8 @@
+# esgf.properties file for the search application
+{% if solr_enabled %}
+esg.search.solr.query.url=http://solr-slave:8983/solr
+esg.search.solr.publish.url=http://solr-master:8983/solr
+{% else %}
+esg.search.solr.query.url={{ solr_slave_external_url }}
+esg.search.solr.publish.url={{ solr_master_external_url }}
+{% endif %}

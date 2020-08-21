@@ -1,111 +1,19 @@
-# Deploy ESGF using Kubernetes
+# Data node configuration
 
-This project provides a [Helm chart](https://helm.sh/docs/topics/charts/) to deploy ESGF resources
-on a [Kubernetes](https://kubernetes.io/) cluster.
-
-The chart is in [deploy/kubernetes/chart](../deploy/kubernetes/chart/). Please look at the files to
-understand exactly what resources are being created.
-
-For a complete list of all the variables that are available, please look at the
-[values.yaml for the chart](../deploy/kubernetes/chart/values.yaml). The defaults there have extensive
-comments that explain how to use these variables. This document describes how to apply some common
-configurations.
+This section describes the most commonly used data node configuration options.
+For a full list of available variables, please consult the chart at
+[values.yaml](../../deploy/kubernetes/chart/values.yaml).
 
 <!-- TOC depthFrom:2 -->
 
-- [Installing/upgrading ESGF](#installingupgrading-esgf)
-- [Local test installation with Minikube](#local-test-installation-with-minikube)
-- [Configuring the installation](#configuring-the-installation)
-    - [Setting the version](#setting-the-version)
-    - [Configuring the available datasets](#configuring-the-available-datasets)
-    - [Using existing THREDDS catalogs](#using-existing-thredds-catalogs)
-    - [Improving pod startup time for large catalogs](#improving-pod-startup-time-for-large-catalogs)
-    - [Configuring container resources](#configuring-container-resources)
-    - [Enabling demand-based autoscaling](#enabling-demand-based-autoscaling)
+- [Configuring the available datasets](#configuring-the-available-datasets)
+- [Using existing THREDDS catalogs](#using-existing-thredds-catalogs)
+- [Improving pod startup time for large catalogs](#improving-pod-startup-time-for-large-catalogs)
+- [Enabling demand-based autoscaling](#enabling-demand-based-autoscaling)
 
 <!-- /TOC -->
 
-## Installing/upgrading ESGF
-
-Before attempting to install the ESGF Helm chart, you must have the following:
-
-  * A Kubernetes cluster with an
-    [Ingress Controller](https://kubernetes.io/docs/concepts/services-networking/ingress-controllers/) enabled
-  * [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) installed and configured to talk
-    to your cluster
-  * [Helm](https://helm.sh/docs/intro/install/) installed
-
-Next, make a configuration directory - this can be anywhere on your machine that is **not** under
-`esgf-docker`. You can also place this directory under version control if you wish - this can be very
-useful for tracking changes to the configuration, or even triggering deployments automatically when
-configuration changes.
-
-In your configuration directory, make a new YAML file called `values.yaml` and override any variables to fit
-your deployment. The only required variable is `hostname`, which should be the DNS name at which your
-ESGF deployment will be available:
-
-```yaml
-hostname: esgf.example.org
-```
-
-> **NOTE**
->
-> The Helm chart does not create a DNS entry for the hostname. This must be separately configured
-> to point to the ingress controller for your Kubernetes cluster.
-
-Once you have configured your `values.yaml`, you can install or upgrade ESGF using the Helm chart. If no
-namespace is specified, it will use the default namespace for your `kubectl` configuration:
-
-```sh
-helm upgrade -i [-n <namespace>] -f /my/esgf/config/values.yaml --wait esgf ./deploy/kubernetes/chart
-```
-
-## Local test installation with Minikube
-
-For local test deployments, you can use [Minikube](https://kubernetes.io/docs/setup/learning-environment/minikube/)
-with data from [roocs/mini-esgf-data](https://github.com/roocs/mini-esgf-data):
-
-```sh
-# Start the minikube cluster
-minikube start
-# Enable the ingress addon
-minikube addons enable ingress
-# Install the test data
-minikube ssh "curl -fsSL https://github.com/roocs/mini-esgf-data/tarball/master | sudo tar -xz --strip-components=1 -C / --wildcards */test_data"
-```
-
-Configure the chart to serve the test data (see [minikube-values.yaml](../deploy/kubernetes/minikube-values.yaml)),
-using a `nip.io` domain pointing to the Minikube server:
-
-```sh
-helm install esgf ./deploy/kubernetes/chart/ \
-  -f ./deploy/kubernetes/minikube-values.yaml \
-  --set hostname="$(minikube ip).nip.io"
-```
-
-Once the containers have started, the THREDDS interface will be available at `http://$(minikube ip).nip.io/thredds`.
-
-## Configuring the installation
-
-This section describes the most commonly modified configuration options. For a full list of available
-variables, please consult the chart [values.yaml](../deploy/kubernetes/chart/values.yaml).
-
-### Setting the version
-
-By default, the Helm chart will use the `latest` tag when specifying Docker images. For production
-installations, it is recommended to use an immutable tag (see [Image tags](../README.md#image-tags)).
-
-To set the tag to something other than `latest`, set the following variables in your `values.yaml`:
-
-```yaml
-image:
-  # Use the images that were built for a particular commit
-  tag: a031a2ca
-  # If using an immutable tag, don't do unnecessary pulls
-  pullPolicy: IfNotPresent
-```
-
-### Configuring the available datasets
+## Configuring the available datasets
 
 By default, the data node uses a catalog-free configuration where the available data is defined simply by
 a series of datasets. For each dataset, all files under the specified path will be served using both
@@ -160,7 +68,7 @@ data:
       location: /data/cordex
 ```
 
-### Using existing THREDDS catalogs
+## Using existing THREDDS catalogs
 
 The data node can be configured to serve data based on pre-existing THREDDS catalogs, for
 example those generated by the ESGF publisher. To do this, you must specify the volume
@@ -201,7 +109,7 @@ data:
     startTimeout: 3600  # Large catalogs may take an hour or more
 ```
 
-### Improving pod startup time for large catalogs
+## Improving pod startup time for large catalogs
 
 Pods in Kubernetes are ephemeral, meaning they do not preserve state across restarts.
 This includes the THREDDS caches, meaning that every time a pod starts it will spend time
@@ -238,53 +146,7 @@ data:
       enabled: true
 ```
 
-### Configuring container resources
-
-When specifying a pod in Kubernetes, you can optionally [specify how much of each resource
-a container requires](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/).
-Most commonly, this will be CPU and memory (RAM), but it is also possible to specify other resources.
-
-The resources for a container are specified as `requests` and `limits`. The `requests` section
-should specify the minimum amount of each resource that the container needs to run, and is used
-by the scheduler to decide which node to place the pod on and to reserve resources. The
-`limits` section specifies the maximum amount of each resource that the container is allowed to
-consume, and is enforced by Kubernetes. Each pod is given a
-[Quality of Service (QoS) class](https://kubernetes.io/docs/tasks/configure-pod-container/quality-service-pod/)
-based on whether the `requests` and `limits` are the same or different.
-
-Defining `resources.requests` and `resources.limits` is good practice as it prevents a badly
-behaving container from taking out other containers by constraining it. It also allows the
-Kubernetes scheduler to make more intelligent decisions about where to schedule pods to ensure
-they have the resources they need to run.
-
-The ESGF Helm chart allows the resources section to be specified for the THREDDS and Nginx file
-server components:
-
-```yaml
-data:
-  thredds:
-    resources:
-      requests:
-        cpu: 200m
-        memory: 2Gi
-      limits:
-        cpu: 200m
-        memory: 2Gi
-
-  fileServer:
-    resources:
-      requests:
-        cpu: 200m
-        memory: 512Mi
-      limits:
-        cpu: 200m
-        memory: 512Mi
-```
-
-By default, the ESGF Helm chart does not specify any resources, and the pods will be placed
-in the `BestEffort` QoS class.
-
-### Enabling demand-based autoscaling
+## Enabling demand-based autoscaling
 
 Kubernetes allows the number of pods backing a service to be scaled up and down automatically using
 a [Horizontal Pod Autoscaler (HPA)](https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/).

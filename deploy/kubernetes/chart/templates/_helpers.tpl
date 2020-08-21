@@ -1,9 +1,13 @@
 {{/*
 Expand the name of a component.
+
+The arguments are given to the template as a list where the first element is the top
+context and the rest of the elements are components of the name.
 */}}
 {{- define "esgf.component.name" -}}
-  {{- $context := index . 0 -}}
-  {{- printf "%s-%s" $context.Chart.Name (index . 1 | kebabcase) | trunc 63 | trimSuffix "-" -}}
+  {{- $context := first . -}}
+  {{- $name := rest . | join "-" | kebabcase -}}
+  {{- printf "%s-%s" $context.Chart.Name $name | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
 {{/*

@@ -1,5 +1,5 @@
 {{- $fileServer := .Values.data.fileServer -}}
-{{- if $fileServer.enabled -}}
+{{- if (and .Values.data.enabled $fileServer.enabled) -}}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -37,8 +37,8 @@ spec:
             - -c
             - |
               set -ex
-              ln -s /dev/stderr /var/log/nginx/error.log
-              mkfifo /var/log/nginx/access.log
+              ln -sf /dev/stderr /var/log/nginx/error.log
+              rm -f /var/log/nginx/access.log && mkfifo /var/log/nginx/access.log
           {{- with .Values.data.securityContext }}
           securityContext: {{ toYaml . | nindent 12 }}
           {{- end }}

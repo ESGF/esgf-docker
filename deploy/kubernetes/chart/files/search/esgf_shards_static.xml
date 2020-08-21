@@ -1,0 +1,19 @@
+{{- $solr := .Values.index.solr -}}
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<shards xmlns="http://www.esgf.org/whitelist">
+    <!-- Solr slave instance -->
+    {{- if $solr.enabled }}
+    <value>{{ include "esgf.component.fullname" (list . "solr" "slave") }}:8983/solr</value>
+    {{- else }}
+    <value>{{ $solr.slaveExternalUrl }}</value>
+    {{- end }}
+
+    <!-- Replicas -->
+    {{- range $solr.replicas }}
+    {{- if $solr.enabled }}
+    <value>{{ include "esgf.component.fullname" (list $ "solr" .name) }}:8983/solr</value>
+    {{- else }}
+    <value>{{ .masterUrl | required "Replica masterUrl is required" }}</value>
+    {{- end }}
+    {{- end }}
+</shards>

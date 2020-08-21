@@ -1,0 +1,24 @@
+---
+
+#####
+## Tasks to configure and deploy containers for an index node
+#####
+
+- name: Install Solr
+  include: solr_install.yml
+  when: "'index' in group_names and solr_enabled"
+
+- name: Uninstall Solr
+  include: solr_uninstall.yml
+  when: "'index' not in group_names or not solr_enabled"
+
+- name: Reconcile Solr replicas
+  include: solr_replica_reconcile.yml
+
+- name: Install search application
+  include: search_install.yml
+  when: "'index' in group_names and search_enabled"
+
+- name: Uninstall search application
+  include: search_uninstall.yml
+  when: "'index' not in group_names or not search_enabled"

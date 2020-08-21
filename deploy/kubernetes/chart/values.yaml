@@ -29,7 +29,7 @@ globalLabels: {}
 ingress:
   # The annotations for the ingress
   # Depending on your Kubernetes cluster, this can be used to configure things like Let's Encrypt certificates
-  annotations:
+  annotations: {}
   # Extra labels to apply to the ingress resources
   labels: {}
   # TLS configuration
@@ -47,17 +47,17 @@ ingress:
 # Data node configuration
 ###
 data:
-  # The mounts that are required to serve data, as defined by the given datasets
+  # Indicates if the data node is to be enabled
+  enabled: true
+
+  # List of mounts required to serve data, as defined by the given datasets
   #
-  # Each specified mount should include at least the following keys:
+  # Each specified mount should include the following keys:
   #
   #   mountPath: The path to mount the volume inside the container
   #   volumeSpec: A Kubernetes volume specification - see https://kubernetes.io/docs/concepts/storage/volumes/
-  #
-  # The following keys are optional:
-  #
-  #   mountOptions: Additional options for the mount, e.g. mountPropagation for hostPath volumes
-  #   name: The name for the volume - if not given, this is derived from the mount path
+  #   mountOptions (optional): Additional options for the mount, e.g. mountPropagation for hostPath volumes
+  #   name (optional): The name for the volume - if not given, this is derived from the mount path
   mounts: []
     # - name: datacentre   # This is actually the derived name that would be used anyway
     #   mountPath: /datacentre
@@ -67,7 +67,8 @@ data:
     #   mountOptions:
     #     mountPropagation: HostToContainer
 
-  # The datasets to expose - for each dataset, a THREDDS datasetScan element and an Nginx location are generated
+  # List of datasets to expose
+  # For each dataset, a THREDDS datasetScan element and an Nginx location are generated
   #
   # Each specified dataset should have the following keys:
   #
@@ -194,5 +195,107 @@ data:
     # See https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
     affinity:
     # The tolerations for the file server pod
+    # See https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
+    tolerations:
+
+
+###
+# Index node configuration
+###
+index:
+  # Indicates if any index node components are to be enabled
+  enabled: true
+
+  # Configuration for Solr
+  solr:
+    # Indicates if Solr components should be deployed
+    enabled: true
+    # Image overrides for the Solr image
+    image:
+      repository: solr
+    # The pod security context for all Solr pods
+    # This should normally not need to change unless Solr pods are configured to use
+    # specific paths on the host for core storage
+    podSecurityContext:
+      runAsUser: 1000
+      runAsGroup: 1000
+      fsGroup: 1000
+    # The container security context for all Solr containers
+    securityContext:
+      # Run with a read-only root filesystem by default
+      readOnlyRootFilesystem: true
+    # The default resource allocations for all Solr containers
+    # Can be overridden on a per-shard basis
+    # See https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+    resources: {}
+    # Additional labels for all Solr resources
+    labels: {}
+    # The node selector for Solr pods
+    # See https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector
+    nodeSelector:
+    # The affinity rules for Solr pods
+    # See https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
+    affinity:
+    # The tolerations for the Solr pods
+    # See https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
+    tolerations:
+
+    # External URLs for the Solr master and slave
+    # If search is enabled but Solr is not, set these URLs to use external Solr instances
+    # If Solr is enabled, the local instances will be used in preference
+    # masterExternalUrl:
+    # slaveExternalUrl:
+
+    # Master-specific resource allocations
+    masterResources: {}
+    # The slave poll interval (default 60 seconds)
+    slavePollInterval: "00:00:60"
+    # Slave-specific resource allocations
+    slaveResources: {}
+
+    # The default replica poll interval (default one hour)
+    replicaPollInterval: "01:00:00"
+    # The default replica resources
+    replicaResources: {}
+    # List of replicas of external Solr instances to use as replica shards
+    #
+    # If Solr is enabled, a local replica will be created for each specified remote index
+    # If Solr is not enabled, the masterUrl will be used directly in the search
+    #
+    # Each specified replica should contain the following keys:
+    #
+    #   name: The name to use in resources created for the replica
+    #   masterUrl: The URL of the Solr index to replicate, including scheme and path components
+    #   pollInterval (optional): Replica-specific poll interval
+    #   resources (optional): Replica-specific resource allocations
+    replicas: []
+      # - name: remote-site
+      #   masterUrl: https://remote.esgf.node/solr
+      #   pollInterval: "06:00:00"
+
+  # Configuration for the search app
+  search:
+    # Indicates if the search app should be deployed or not
+    enabled: true
+    # Image overrides for the search app
+    image:
+      repository: search
+    # The number of replicas for the search deployment
+    replicaCount: 1
+    # The resource allocations for the search container
+    # See https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+    resources: {}
+    # Extra environment variables for the search container
+    # See https://kubernetes.io/docs/tasks/inject-data-application/define-environment-variable-container/
+    extraEnv: []
+    # Additional labels for search resources
+    labels: {}
+    # The node selector for the search pods
+    # See https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector
+    nodeSelector:
+    # The affinity rules for the search pods
+    # See https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
+    affinity:
+    # The tolerations for the search pods
     # See https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
     tolerations:

@@ -1,5 +1,5 @@
 {{- $thredds := .Values.data.thredds -}}
-{{- if (and $thredds.enabled $thredds.hpa) -}}
+{{- if (and .Values.data.enabled $thredds.enabled $thredds.hpa) -}}
 apiVersion: autoscaling/v2beta2
 kind: HorizontalPodAutoscaler
 metadata:

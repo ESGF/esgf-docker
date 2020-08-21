@@ -1,0 +1,20 @@
+{{- $solr := .Values.index.solr -}}
+{{- if and .Values.index.enabled $solr.enabled -}}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "esgf.component.fullname" (list . "solr" "slave") }}
+  labels:
+    {{ include "esgf.component.labels" (list . "solr" $solr.labels) | indent 4 | trim }}
+    solr.esgf.org/role: "slave"
+spec:
+  type: ClusterIP
+  ports:
+    - name: solr
+      port: 8983
+      targetPort: solr
+      protocol: TCP
+  selector:
+    {{ include "esgf.component.selectorLabels" (list . "solr") | indent 4 | trim }}
+    solr.esgf.org/role: "slave"
+{{- end -}}

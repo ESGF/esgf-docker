@@ -19,6 +19,7 @@ spec:
     - host: {{ .Values.hostname | quote }}
       http:
         paths:
+          {{- if .Values.data.enabled }}
           {{- if .Values.data.thredds.enabled }}
           - path: /thredds
             backend:
@@ -30,4 +31,27 @@ spec:
             backend:
               serviceName: {{ include "esgf.component.fullname" (list . "fileServer") }}
               servicePort: 8080
+          {{- end }}
+          {{- end }}
+          {{- if .Values.index.enabled }}
+          {{- if .Values.index.solr.enabled }}
+          # We only want to permit access to the replication handler for each core from outside
+          # However wildcard paths are not supported on all ingress controllers
+          # So we make a path definition for each core
+          - path: /solr/aggregations/replication
+            backend: &solr
+              # We point to the Solr slave
+              serviceName: {{ include "esgf.component.fullname" (list . "solr" "slave") }}
+              servicePort: 8983
+          - path: /solr/datasets/replication
+            backend: *solr
+          - path: /solr/files/replication
+            backend: *solr
+          {{- end }}
+          {{- if .Values.index.search.enabled }}
+          - path: /esg-search
+            backend:
+              serviceName: {{ include "esgf.component.fullname" (list . "search") }}
+              servicePort: 8080
+          {{- end }}
           {{- end }}

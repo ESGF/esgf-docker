@@ -1,5 +1,5 @@
 {{- $thredds := .Values.data.thredds -}}
-{{- if (and $thredds.enabled $thredds.catalogVolume $thredds.localCache.enabled) -}}
+{{- if (and .Values.data.enabled $thredds.enabled $thredds.catalogVolume $thredds.localCache.enabled) -}}
 ####
 # When the local cache is enabled, this daemonset will initialise the local caches for each host
 ####

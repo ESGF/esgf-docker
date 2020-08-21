@@ -163,11 +163,9 @@
 
   <NetcdfSubsetService>
     <allow>true</allow>
-    <dir>/tmp/thredds/ncSubsetCache/</dir>
+    <dir>/opt/tomcat/content/thredds/cache/ncSubsetCache/</dir>
     <scour>10 min</scour>
     <maxAge>-1 min</maxAge>
-    <metarDataDir>/opt/tomcat/content/thredds/public/stn/</metarDataDir>
-    <metarRawDir>/data/ldm/pub/decoded/netcdf/surface/metar/</metarRawDir>
   </NetcdfSubsetService>
 
   <Opendap>
@@ -183,7 +181,7 @@
   <WCS>
     <allow>true</allow>
     <allowRemote>false</allowRemote>
-    <dir>/tmp/thredds/wcsCache/</dir>
+    <dir>/opt/tomcat/content/thredds/cache/wcsCache/</dir>
     <scour>15 min</scour>
     <maxAge>30 min</maxAge>
   </WCS>
