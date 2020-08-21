@@ -8,7 +8,7 @@ metadata:
     {{ include "esgf.component.labels" (list . "solr" $solr.labels) | indent 4 | trim }}
     solr.esgf.org/role: "master"
 spec:
-  # Solr shards can currently only have one replica
+  # Solr instances can currently only have one replica
   replicas: 1
   # To ensure there are no issues with two pods writing to the same cores, make sure old
   # pods are killed before new ones are started
@@ -73,12 +73,19 @@ spec:
       tolerations: {{ toYaml . | nindent 8 }}
       {{- end }}
       volumes:
+        # If persistence is enabled, use the provisioned pvc for solr-home
+        # If not, use an ephemeral volume
+        - name: solr-home
+          {{- if $solr.persistence.enabled }}
+          persistentVolumeClaim:
+            claimName: {{ include "esgf.component.fullname" (list . "solr" "master") }}
+          {{- else }}
+          emptyDir: {}
+          {{- end }}
         # In order to allow the filesystem to be read-only, mount ephemeral volumes
         # in places where writes are expected
         - name: tmp
           emptyDir: {}
         - name: solr-logs
-          emptyDir: {}
-        - name: solr-home
           emptyDir: {}
 {{- end -}}
