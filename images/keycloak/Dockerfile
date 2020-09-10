@@ -1,6 +1,8 @@
 # CentOS 7 replica of jboss/keycloak (https://hub.docker.com/r/jboss/keycloak/dockerfile)
 
-FROM centos:7.8.2003
+ARG ESGF_REPOSITORY_BASE=esgfdeploy
+ARG ESGF_IMAGES_VERSION=latest
+FROM ${ESGF_REPOSITORY_BASE}/base:${ESGF_IMAGES_VERSION}
 
 ENV KEYCLOAK_VERSION 11.0.0
 ENV JDBC_POSTGRES_VERSION 42.2.5
@@ -19,18 +21,18 @@ ARG KEYCLOAK_DIST=https://downloads.jboss.org/keycloak/$KEYCLOAK_VERSION/keycloa
 
 USER root
 
-RUN yum update -y && yum install -y glibc-langpack-en gzip hostname java-11-openjdk-headless openssl tar which git && yum clean all
+# General yum upgrade and openssl install is handled in the base image
+RUN yum install -y glibc-langpack-en gzip hostname java-11-openjdk-headless tar which git && yum clean all
 
 RUN git clone https://github.com/keycloak/keycloak-containers.git --depth 1 --branch $KEYCLOAK_VERSION /usr/local/keycloak-containers
 RUN mkdir -p /opt/jboss
 RUN cp -r /usr/local/keycloak-containers/server/tools /opt/jboss/
 RUN /opt/jboss/tools/build-keycloak.sh
+RUN mkdir /docker-init.d && cp /opt/jboss/tools/docker-entrypoint.sh /docker-init.d/keycloak-entrypoint.sh
 
 USER 1000
 
 EXPOSE 8080
 EXPOSE 8443
-
-ENTRYPOINT [ "/opt/jboss/tools/docker-entrypoint.sh" ]
 
 CMD ["-b", "0.0.0.0"]
