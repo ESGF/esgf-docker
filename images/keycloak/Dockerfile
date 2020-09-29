@@ -28,11 +28,16 @@ RUN git clone https://github.com/keycloak/keycloak-containers.git --depth 1 --br
 RUN mkdir -p /opt/jboss
 RUN cp -r /usr/local/keycloak-containers/server/tools /opt/jboss/
 RUN /opt/jboss/tools/build-keycloak.sh
-RUN mkdir /docker-init.d && cp /opt/jboss/tools/docker-entrypoint.sh /docker-init.d/keycloak-entrypoint.sh
 
-USER 1000
+# Copy init scripts and configuration
+COPY init.d/* /docker-init.d/
+
+USER $ESGF_UID
 
 EXPOSE 8080
 EXPOSE 8443
 
+# TODO:
+# Start Keycloak in the foreground
+WORKDIR /opt/jboss/keycloak/bin
 CMD ["-b", "0.0.0.0"]
