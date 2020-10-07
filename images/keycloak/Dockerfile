@@ -32,12 +32,10 @@ RUN /opt/jboss/tools/build-keycloak.sh
 # Copy init scripts and configuration
 COPY init.d/* /docker-init.d/
 
-USER $ESGF_UID
-
 EXPOSE 8080
 EXPOSE 8443
 
-# TODO:
-# Start Keycloak in the foreground
+# Start Keycloak as the Keycloak user
+USER $ESGF_UID
 WORKDIR /opt/jboss/keycloak/bin
-CMD ["-b", "0.0.0.0"]
+CMD ["/opt/jboss/keycloak/bin/standalone.sh", "-Djboss.bind.address=0.0.0.0", "-Djboss.bind.address.private=127.0.0.1", "-c=standalone-ha.xml"]

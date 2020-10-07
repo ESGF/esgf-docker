@@ -237,13 +237,3 @@ if [ ! -e "$configured_file" ]; then
     /opt/jboss/tools/autorun.sh
     /opt/jboss/tools/vault.sh
 fi
-
-export SYS_PROPS
-
-##################
-# Start Keycloak #
-##################
-
-#echo "exec /opt/jboss/keycloak/bin/standalone.sh [$SYS_PROPS] [$@]"
-#exec /opt/jboss/keycloak/bin/standalone.sh $SYS_PROPS $@
-#exit $?
