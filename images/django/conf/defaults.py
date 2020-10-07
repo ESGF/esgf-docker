@@ -4,6 +4,8 @@ Default settings, including security best practices.
 
 import os
 
+from django.core.management.utils import get_random_secret_key
+
 
 # By default, don't run in DEBUG mode
 DEBUG = False
@@ -26,7 +28,7 @@ SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 # Set a default random secret key
 # This can be overridden by files included later if desired
-SECRET_KEY = os.urandom(32).hex()
+SECRET_KEY = get_random_secret_key()
 
 # All logging should go to stdout/stderr to be collected
 import logging
