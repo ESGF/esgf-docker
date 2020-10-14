@@ -4,7 +4,7 @@ ARG ESGF_REPOSITORY_BASE=esgfdeploy
 ARG ESGF_IMAGES_VERSION=latest
 FROM ${ESGF_REPOSITORY_BASE}/base:${ESGF_IMAGES_VERSION}
 
-ENV KEYCLOAK_VERSION 11.0.0
+ENV KEYCLOAK_VERSION 11.0.2
 ENV JDBC_POSTGRES_VERSION 42.2.5
 ENV JDBC_MYSQL_VERSION 8.0.19
 ENV JDBC_MARIADB_VERSION 2.5.4
@@ -24,18 +24,15 @@ USER root
 # General yum upgrade and openssl install is handled in the base image
 RUN yum install -y glibc-langpack-en gzip hostname java-11-openjdk-headless tar which git && yum clean all
 
-RUN git clone https://github.com/keycloak/keycloak-containers.git --depth 1 --branch $KEYCLOAK_VERSION /usr/local/keycloak-containers
-RUN mkdir -p /opt/jboss
-RUN cp -r /usr/local/keycloak-containers/server/tools /opt/jboss/
+# Build and configure Keycloak
+RUN git clone --depth 1 https://github.com/keycloak/keycloak-containers.git -b $KEYCLOAK_VERSION /tmp/keycloak-containers; \
+    mkdir -p /opt/jboss; cp -r /tmp/keycloak-containers/server/tools /opt/jboss/
 RUN /opt/jboss/tools/build-keycloak.sh
 
-# Copy init scripts and configuration
-COPY init.d/* /docker-init.d/
+# Start Keycloak as the Keycloak user
+USER $ESGF_UID
 
 EXPOSE 8080
 EXPOSE 8443
 
-# Start Keycloak as the Keycloak user
-USER $ESGF_UID
-WORKDIR /opt/jboss/keycloak/bin
-CMD ["/opt/jboss/keycloak/bin/standalone.sh", "-Djboss.bind.address=0.0.0.0", "-Djboss.bind.address.private=127.0.0.1", "-c=standalone-ha.xml"]
+CMD ["/opt/jboss/tools/docker-entrypoint.sh", "-Djboss.bind.address=0.0.0.0", "-Djboss.bind.address.private=127.0.0.1"]
