@@ -1,0 +1,31 @@
+{{- $wgetApi := .Values.index.wgetApi -}}
+{{- if (and .Values.index.enabled $wgetApi.enabled)  -}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "esgf.component.fullname" (list . "wgetApi") }}
+  labels: {{ include "esgf.component.labels" (list . "wgetApi" $wgetApi.labels) | nindent 4 }}
+data:
+  wget_api_config: |
+    [django]
+    DEBUG = {{ $wgetApi.settings.debug }}
+
+    ALLOWED_HOSTS = {{ $wgetApi.settings.allowedHosts }}
+
+    # Expand the number of fields allowed for wget API
+    DATA_UPLOAD_MAX_NUMBER_FIELDS = {{ $wgetApi.settings.dataUploadMaxNumberFields }}
+    
+    [wget]
+    # Address of ESGF Solr
+    ESGF_SOLR_URL = {{ $wgetApi.settings.esgfSolrUrl }}
+
+    # Path to XML file containing Solr shards
+    ESGF_SOLR_SHARDS_XML = {{ $wgetApi.settings.esgfSolrShardsXml }}
+
+    # Default limit on the number of files allowed in a wget script
+    WGET_SCRIPT_FILE_DEFAULT_LIMIT = {{ $wgetApi.settings.wgetScriptFileDefaultLimit }}
+
+    # Maximum number of files allowed in a wget script
+    WGET_SCRIPT_FILE_MAX_LIMIT = {{ $wgetApi.settings.wgetScriptFileMaxLimit }}
+
+{{- end -}}

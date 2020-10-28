@@ -1,0 +1,25 @@
+[django]
+
+# SECURITY WARNING: don't run with debug turned on in production!
+DEBUG = False
+
+ALLOWED_HOSTS = {{ wget_api.allowed_hosts }} 
+
+# Expand the number of fields allowed for wget API
+DATA_UPLOAD_MAX_NUMBER_FIELDS = 1024
+
+[wget]
+# Address of ESGF Solr
+ESGF_SOLR_URL = {{ wget_api.solr_url }}
+
+# Path to XML file containing Solr shards
+ESGF_SOLR_SHARDS_XML = {{ wget_api.shards_xml }}
+
+# Default limit on the number of files allowed in a wget script
+WGET_SCRIPT_FILE_DEFAULT_LIMIT = {{ wget_api.script_file_default_limit }}
+
+# Maximum number of files allowed in a wget script
+WGET_SCRIPT_FILE_MAX_LIMIT = {{ wget_api.script_file_max_limit }}
+
+
+
