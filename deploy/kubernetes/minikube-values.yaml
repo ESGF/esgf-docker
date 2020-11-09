@@ -18,3 +18,10 @@ data:
     - name: "CORDEX"
       path: "esg_cordex"
       location: "/test_data/group_workspaces/jasmin2/cp4cds1/data/c3s-cordex"
+
+
+index:
+  solr:
+    replicas:
+      - name: "llnl"
+        masterUrl: "https://esgf-node.llnl.gov/solr"
