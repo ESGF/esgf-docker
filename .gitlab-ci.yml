@@ -143,3 +143,10 @@ build:thredds:
   variables:
     CONTEXT_DIR: $CI_PROJECT_DIR/images/thredds
   needs: ["build:jdk", "build:tomcat"]
+
+build:wget-api:
+  extends: .docker-build
+  stage: build-4
+  variables:
+    CONTEXT_DIR: $CI_PROJECT_DIR/images/wget-api
+  needs: ["build:base"]
