@@ -93,7 +93,6 @@
     },
     "smtpServer": {},
     "loginTheme": "esgf",
-    "accountTheme": "esgf",
     "eventsEnabled": false,
     "eventsListeners": [
         "jboss-logging"
