@@ -1,38 +1,83 @@
-# CentOS 7 replica of jboss/keycloak (https://hub.docker.com/r/jboss/keycloak/dockerfile)
+#####
+## Base image for Keycloak
+#####
 
 ARG ESGF_REPOSITORY_BASE=esgfdeploy
 ARG ESGF_IMAGES_VERSION=latest
-FROM ${ESGF_REPOSITORY_BASE}/base:${ESGF_IMAGES_VERSION}
 
-ENV KEYCLOAK_VERSION 11.0.2
-ENV JDBC_POSTGRES_VERSION 42.2.5
-ENV JDBC_MYSQL_VERSION 8.0.19
-ENV JDBC_MARIADB_VERSION 2.5.4
-ENV JDBC_MSSQL_VERSION 7.4.1.jre11
+ARG KEYCLOAK_VERSION=11.0.2
+ARG KEYCLOAK_DIST=https://downloads.jboss.org/keycloak/$KEYCLOAK_VERSION/keycloak-$KEYCLOAK_VERSION.tar.gz
 
+# JDBC library enables an optional PostgreSQL database for Keycloak server deployments
+ARG JDBC_POSTGRES_VERSION=42.2.5
+ARG JDBC_MYSQL_VERSION=8.0.19
+ARG JDBC_MARIADB_VERSION=2.5.4
+ARG JDBC_MSSQL_VERSION=7.4.1.jre11
+
+
+FROM ${ESGF_REPOSITORY_BASE}/base:${ESGF_IMAGES_VERSION} as keycloak-containers-source
+
+# Keycloak's image repository containing build and run scripts
+ARG GIT_REPOSITORY=https://github.com/keycloak/keycloak-containers
+ARG GIT_VERSION=${KEYCLOAK_VERSION}
+
+# Install Git and clone the repository
+RUN yum makecache && yum install -y git && yum clean all
+RUN git clone --single-branch --b $GIT_VERSION $GIT_REPOSITORY /source
+
+
+FROM ${ESGF_REPOSITORY_BASE}/jdk:${ESGF_IMAGES_VERSION} as keycloak-build
+
+# Redeclare the ARGs that are required from the global scope
+ARG KEYCLOAK_VERSION
+ARG KEYCLOAK_DIST
+ARG JDBC_POSTGRES_VERSION
+
+# Environment variables used by the build script
 ENV LAUNCH_JBOSS_IN_BACKGROUND 1
 ENV PROXY_ADDRESS_FORWARDING false
 ENV JBOSS_HOME /opt/jboss/keycloak
 ENV LANG en_US.UTF-8
 
-ARG GIT_REPO
-ARG GIT_BRANCH
-ARG KEYCLOAK_DIST=https://downloads.jboss.org/keycloak/$KEYCLOAK_VERSION/keycloak-$KEYCLOAK_VERSION.tar.gz
+# Yum packages for the Keycloak build process
+RUN yum makecache && \
+    yum install -y glibc-langpack-en gzip hostname tar which && \
+    yum clean all
 
-USER root
+# Copy the keycloak-containers tools directory from the named stage
+COPY --from=keycloak-containers-source /source/server/tools /opt/jboss/tools
 
-# General yum upgrade and openssl install is handled in the base image
-RUN yum install -y glibc-langpack-en gzip hostname java-11-openjdk-headless tar which git && yum clean all
-
-# Build and configure Keycloak
-RUN git clone --depth 1 https://github.com/keycloak/keycloak-containers.git -b $KEYCLOAK_VERSION /tmp/keycloak-containers; \
-    mkdir -p /opt/jboss; cp -r /tmp/keycloak-containers/server/tools /opt/jboss/
+# Run the build script to install Keycloak
 RUN /opt/jboss/tools/build-keycloak.sh
 
-# Start Keycloak as the Keycloak user
+
+FROM ${ESGF_REPOSITORY_BASE}/jdk:${ESGF_IMAGES_VERSION}
+
+# Copy the Keycloak server installation from the named stage
+COPY --from=keycloak-build --chown=$ESGF_UID:root /opt/jboss/keycloak /opt/jboss/keycloak
+COPY --from=keycloak-build --chown=$ESGF_UID:root /opt/jboss/tools /opt/jboss/tools
+
+# Copy configuration files for scripted installation
+COPY --chown=$ESGF_UID:root configuration/* /opt/jboss/deploy/
+
+# Cleanup installation and create required directories
+RUN rm -rf /opt/jboss/keycloak/standalone/data/* && \
+    rm -rf /opt/jboss/keycloak/standalone/configuration/* && \
+    mkdir -p /standalone/configuration/keystores && \
+    chown $ESGF_UID:root -R /standalone
+
+# Install init scripts
+COPY init.d/* /docker-init.d/
+
+# Keycloak runs as the ESGF user
 USER $ESGF_UID
 
 EXPOSE 8080
 EXPOSE 8443
 
-CMD ["/opt/jboss/tools/docker-entrypoint.sh", "-Djboss.bind.address=0.0.0.0", "-Djboss.bind.address.private=127.0.0.1"]
+# Use the custom entrypoint to correctly apply settings before Keycloak is run
+CMD [ \
+    "/opt/jboss/tools/docker-entrypoint.sh", \
+    "-Djboss.bind.address=0.0.0.0", \
+    "-Djboss.bind.address.private=127.0.0.1" \
+]
