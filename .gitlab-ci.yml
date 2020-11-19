@@ -150,3 +150,10 @@ build:thredds:
   variables:
     CONTEXT_DIR: $CI_PROJECT_DIR/images/thredds
   needs: ["build:jdk", "build:tomcat"]
+
+build:idp-proxy:
+  extends: .docker-build
+  stage: build-4
+  variables:
+    CONTEXT_DIR: $CI_PROJECT_DIR/images/idp-proxy
+  needs: ["build:base", "build:keycloak"]
