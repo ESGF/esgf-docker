@@ -1,4 +1,5 @@
 {{- $thredds := .Values.data.thredds -}}
+{{- $accessLogSidecar := .Values.data.accessLogSidecar -}}
 {{- if (and .Values.data.enabled $thredds.enabled) -}}
 apiVersion: apps/v1
 kind: Deployment
@@ -22,6 +23,7 @@ spec:
         # If using templated catalogs, we only need to roll if the configmap changes
         checksum/configmap: {{ include (print $.Template.BasePath "/thredds/configmap.yaml") . | sha256sum }}
         {{- end }}
+        checksum/logstash-configmap: {{ include (print $.Template.BasePath "/logstash/configmap.yaml") . | sha256sum }}
     spec:
       {{- with (default .Values.image.pullSecrets $thredds.image.pullSecrets) }}
       imagePullSecrets: {{ toYaml . | nindent 8 }}
@@ -107,7 +109,7 @@ spec:
           env: {{ toYaml $thredds.extraEnv | nindent 12 }}
           readinessProbe: &probe
             httpGet:
-              path: /thredds/
+              path: /thredds/catalog/catalog.html
               port: 8080
               httpHeaders:
                 - name: Host
@@ -150,18 +152,25 @@ spec:
             {{- end }}
         # Tail the access log separately
         - name: thredds-log-localhost-access-log
-          {{ include "esgf.deployment.image" (list . $thredds.image) }}
-          args:
-            # Just cat the access log
-            - cat
-            - /thredds/logs/localhost_access_log.txt
-          resources: {{ toYaml .Values.data.logTailResources | nindent 12 }}
+          {{ include "esgf.deployment.image" (list . $accessLogSidecar.image) }}
+          env:
+            - name: ACCESS_LOG_FILE
+              value: /thredds/logs/localhost_access_log.txt
+            - name: EXTERNAL_HOSTNAME
+              value: "{{ .Values.hostname }}"
+          resources: {{ toYaml $accessLogSidecar.resources | nindent 12 }}
           {{- with .Values.data.securityContext }}
           securityContext: {{ toYaml . | nindent 12 }}
           {{- end }}
           volumeMounts:
+            - name: logstash-conf
+              mountPath: /etc/logstash/conf.d
             - name: tomcat-logs
               mountPath: /thredds/logs
+            - name: logstash-data
+              mountPath: /usr/share/logstash/data
+            - name: logstash-tmp
+              mountPath: /tmp/logstash
       {{- with $thredds.nodeSelector }}
       nodeSelector: {{ toYaml . | nindent 8 }}
       {{- end }}
@@ -199,6 +208,15 @@ spec:
         - name: tomcat-work
           emptyDir: {}
         - name: tmp-thredds
+          emptyDir: {}
+        # Logstash config is in a configmap
+        - name: logstash-conf
+          configMap:
+            name: {{ include "esgf.component.fullname" (list . "logstash") }}
+        # Logstash also needs a tmp dir and a data dir
+        - name: logstash-data
+          emptyDir: {}
+        - name: logstash-tmp
           emptyDir: {}
         {{- include "esgf.data.volumes" . | nindent 8 }}
         {{- with $thredds.extraVolumes }}

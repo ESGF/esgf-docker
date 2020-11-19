@@ -97,11 +97,14 @@ data:
     # Run with a read-only root filesystem by default
     readOnlyRootFilesystem: true
 
-  # The resources for log-tailing containers
-  logTailResources:
-    requests:
-      cpu: 1m
-      memory: 1Mi
+  # Configuration for the access log sidecar
+  accessLogSidecar:
+    # Image overrides for the access logging sidecar
+    image:
+      repository: logstash
+    # The resource allocations for the access log container
+    # See https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+    resources: {}
 
   # Configuration for the THREDDS pod
   thredds:

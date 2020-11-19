@@ -1,4 +1,5 @@
 {{- $fileServer := .Values.data.fileServer -}}
+{{- $accessLogSidecar := .Values.data.accessLogSidecar -}}
 {{- if (and .Values.data.enabled $fileServer.enabled) -}}
 apiVersion: apps/v1
 kind: Deployment
@@ -18,6 +19,7 @@ spec:
       # https://helm.sh/docs/howto/charts_tips_and_tricks/#automatically-roll-deployments
       annotations:
         checksum/configmap: {{ include (print $.Template.BasePath "/fileServer/configmap.yaml") . | sha256sum }}
+        checksum/logstash-configmap: {{ include (print $.Template.BasePath "/logstash/configmap.yaml") . | sha256sum }}
     spec:
       {{- with (default .Values.image.pullSecrets $fileServer.image.pullSecrets) }}
       imagePullSecrets: {{ toYaml . | nindent 8 }}
@@ -89,18 +91,25 @@ spec:
             {{- end }}
         # Tail the access log separately
         - name: file-server-access-log
-          {{ include "esgf.deployment.image" (list . $fileServer.image) }}
-          args:
-            # Just cat the access log
-            - cat
-            - /var/log/nginx/access.log
-          resources: {{ toYaml .Values.data.logTailResources | nindent 12 }}
+          {{ include "esgf.deployment.image" (list . $accessLogSidecar.image) }}
+          env:
+            - name: ACCESS_LOG_FILE
+              value: /var/log/nginx/access.log
+            - name: EXTERNAL_HOSTNAME
+              value: "{{ .Values.hostname }}"
+          resources: {{ toYaml $accessLogSidecar.resources | nindent 12 }}
           {{- with .Values.data.securityContext }}
           securityContext: {{ toYaml . | nindent 12 }}
           {{- end }}
           volumeMounts:
+            - name: logstash-conf
+              mountPath: /etc/logstash/conf.d
             - name: nginx-logs
               mountPath: /var/log/nginx
+            - name: logstash-data
+              mountPath: /usr/share/logstash/data
+            - name: logstash-tmp
+              mountPath: /tmp/logstash
       {{- with $fileServer.nodeSelector }}
       nodeSelector: {{ toYaml . | nindent 8 }}
       {{- end }}
@@ -122,6 +131,15 @@ spec:
         - name: nginx-cache
           emptyDir: {}
         - name: nginx-run
+          emptyDir: {}
+        # Logstash config is in a configmap
+        - name: logstash-conf
+          configMap:
+            name: {{ include "esgf.component.fullname" (list . "logstash") }}
+        # Logstash also needs a tmp dir and a data dir
+        - name: logstash-data
+          emptyDir: {}
+        - name: logstash-tmp
           emptyDir: {}
         {{- include "esgf.data.volumes" . | nindent 8 }}
         {{- with $fileServer.extraVolumes }}
