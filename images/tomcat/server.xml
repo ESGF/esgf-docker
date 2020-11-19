@@ -175,7 +175,7 @@
         -->
         <Valve className="org.apache.catalina.valves.AccessLogValve" directory="logs"
                prefix="localhost_access_log" suffix=".txt"
-               pattern="%a - %u %t &quot;%r&quot; %s %B &quot;%{Referer}i&quot; &quot;%{User-Agent}i&quot; &quot;%{X-Forwarded-For}i&quot;"
+               pattern="%a - %u %t &quot;%r&quot; %s %B [%T] &quot;%{Referer}i&quot; &quot;%{User-Agent}i&quot; &quot;%{X-Forwarded-For}i&quot;"
                rotatable="false"
         />
 
