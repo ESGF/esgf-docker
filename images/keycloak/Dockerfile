@@ -14,16 +14,19 @@ ARG JDBC_MYSQL_VERSION=8.0.19
 ARG JDBC_MARIADB_VERSION=2.5.4
 ARG JDBC_MSSQL_VERSION=7.4.1.jre11
 
+# Keycloak's image repository containing build and run scripts
+ARG GIT_REPOSITORY=
+ARG GIT_VERSION=${KEYCLOAK_VERSION}
+
 
 FROM ${ESGF_REPOSITORY_BASE}/base:${ESGF_IMAGES_VERSION} as keycloak-containers-source
 
-# Keycloak's image repository containing build and run scripts
-ARG GIT_REPOSITORY=https://github.com/keycloak/keycloak-containers
-ARG GIT_VERSION=${KEYCLOAK_VERSION}
+USER root
+ARG KEYCLOAK_VERSION
 
-# Install Git and clone the repository
+# Install Git and clone the keycloak container repository
 RUN yum makecache && yum install -y git && yum clean all
-RUN git clone --single-branch --b $GIT_VERSION $GIT_REPOSITORY /source
+RUN git clone --single-branch -b $KEYCLOAK_VERSION https://github.com/keycloak/keycloak-containers /source
 
 
 FROM ${ESGF_REPOSITORY_BASE}/jdk:${ESGF_IMAGES_VERSION} as keycloak-build
@@ -32,6 +35,9 @@ FROM ${ESGF_REPOSITORY_BASE}/jdk:${ESGF_IMAGES_VERSION} as keycloak-build
 ARG KEYCLOAK_VERSION
 ARG KEYCLOAK_DIST
 ARG JDBC_POSTGRES_VERSION
+ARG JDBC_MYSQL_VERSION
+ARG JDBC_MARIADB_VERSION
+ARG JDBC_MSSQL_VERSION
 
 # Environment variables used by the build script
 ENV LAUNCH_JBOSS_IN_BACKGROUND 1
