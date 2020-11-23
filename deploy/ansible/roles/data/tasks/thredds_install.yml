@@ -25,6 +25,45 @@
   docker_volume:
     name: thredds-cache
 
+# If the access log exporter is enabled, we use a FIFO pipe for the THREDDS access log
+# This will be followed by the exporter to get the access logs
+# Unfortunately, in order to get the THREDDS container to pick this up we have to splat
+# the whole logs directory, so we also need to set up the other logs as symlinks to stdout
+- name: Set up THREDDS logs directory
+  block:
+    - name: Ensure THREDDS logs directory exists
+      file:
+        path: /esg/logs/thredds
+        state: directory
+
+    - name: Make links to stdout
+      file:
+        path: /esg/logs/thredds/{{ item }}
+        state: link
+        src: /dev/stdout
+        force: yes
+      loop:
+        - serverStartup.log
+        - catalogInit.log
+        - httpout.log
+        - featureCollectionScan.log
+        - fmrc.log
+        - threddsServlet.log
+        - cache.log
+        - localhost.log
+
+    - name: Make the access log pipe
+      command: mkfifo /esg/logs/thredds/localhost_access_log.txt
+      args:
+        creates: /esg/logs/thredds/localhost_access_log.txt
+
+    - name: Transfer ownership of logs to security context user
+      file:
+        path: /esg/logs/thredds
+        recurse: yes
+        owner: "{{ data_security_context_user }}"
+  when: logstash_enabled | bool
+
 - name: Start THREDDS container
   docker_container:
     name: thredds
@@ -45,10 +84,14 @@
         "{{ thredds_catalog_host_path }}:/opt/tomcat/content/thredds/esgcet:ro",
         # Then the cache volume
         "thredds-cache:/opt/tomcat/content/thredds/cache:rw",
+        # If logstash is enabled, mount the log directory
+        {% if logstash_enabled %}
+        "/esg/logs/thredds:/opt/tomcat/logs",
+        {% endif %}
         # Then finally the data mounts
         {% for mount in data_mounts %}
         "{{ mount.host_path }}:{{ mount.mount_path }}:ro",
         {% endfor %}
       ]
     state: started
-    restart: yes
+    recreate: yes

@@ -1,0 +1,36 @@
+---
+
+- name: Create Docker network
+  docker_network:
+    name: esgf
+
+- name: Ensure logstash config directory exists
+  file:
+    path: /esg/config/logstash
+    state: directory
+
+- name: Install logstash configuration
+  template:
+    src: access-log.conf.j2
+    dest: /esg/config/logstash/access-log.conf
+
+# Configure logstash to follow the THREDDS and fileserver logs
+- name: Start logstash container
+  docker_container:
+    name: logstash
+    image: "{{ logstash_image_prefix }}/{{ logstash_image_repository }}:{{ logstash_image_tag }}"
+    pull: "{{ logstash_image_pull }}"
+    detach: yes
+    restart_policy: unless-stopped
+    networks:
+      - name: esgf
+    networks_cli_compatible: yes
+    user: "{{ data_security_context_user }}"
+    groups: "{{ data_security_context_groups }}"
+    volumes:
+      # Logstash configuration
+      - "/esg/config/logstash:/etc/logstash/conf.d:ro"
+      # Log directory
+      - "/esg/logs:/esg/logs:ro"
+    state: started
+    recreate: yes

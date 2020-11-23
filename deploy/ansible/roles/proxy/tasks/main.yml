@@ -36,4 +36,4 @@
       # Mount the Nginx configuration for the proxy
       - "/esg/config/proxy:/etc/nginx/conf.d:ro"
     state: started
-    restart: yes
+    recreate: yes

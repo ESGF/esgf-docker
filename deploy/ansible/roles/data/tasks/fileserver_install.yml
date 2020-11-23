@@ -14,6 +14,36 @@
     src: fileserver.conf.j2
     dest: /esg/config/fileserver/fileserver.conf
 
+# If the access log exporter is enabled, we use a FIFO pipe for the Nginx access log
+# This will be followed by the exporter to get the access logs
+# Unfortunately, in order to get the container to pick this up we have to splat
+# the whole logs directory, so we also need to set up the other logs as symlinks to stdout
+- name: Set up fileserver logs directory
+  block:
+    - name: Ensure fileserver logs directory exists
+      file:
+        path: /esg/logs/fileserver
+        state: directory
+
+    - name: Link error log to stderr
+      file:
+        path: /esg/logs/fileserver/error.log
+        state: link
+        src: /dev/stderr
+        force: yes
+
+    - name: Make the access log pipe
+      command: mkfifo /esg/logs/fileserver/access.log
+      args:
+        creates: /esg/logs/fileserver/access.log
+
+    - name: Transfer ownership of logs to security context user
+      file:
+        path: /esg/logs/fileserver
+        recurse: yes
+        owner: "{{ data_security_context_user }}"
+  when: logstash_enabled | bool
+
 - name: Start fileserver container
   docker_container:
     name: fileserver
@@ -33,9 +63,14 @@
     volumes: >-
       [
         "/esg/config/fileserver:/etc/nginx/conf.d:ro",
+        # If logstash is enabled, mount the log directory
+        {% if logstash_enabled %}
+        "/esg/logs/fileserver:/var/log/nginx",
+        {% endif %}
+        # Then the data mounts
         {% for mount in data_mounts %}
         "{{ mount.host_path }}:{{ mount.mount_path }}:ro",
         {% endfor %}
       ]
     state: started
-    restart: yes
+    recreate: yes

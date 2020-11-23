@@ -1,7 +1,14 @@
 input {
+    {% if thredds_enabled %}
     pipe {
-        command => "cat ${ACCESS_LOG_FILE}"
+        command => "cat /esg/logs/thredds/localhost_access_log.txt"
     }
+    {% endif %}
+    {% if fileserver_enabled %}
+    pipe {
+        command => "cat /esg/logs/fileserver/access.log"
+    }
+    {% endif %}
 }
 filter {
     # Extract components from the access log messages
@@ -10,10 +17,6 @@ filter {
             "message" => "%{IPORHOST:client_ip} - %{USER:user} \[%{HTTPDATE:request_time}\] \"%{WORD:method} %{URIPATHPARAM:request} HTTP/%{NUMBER:http_version}\" %{NUMBER:status_code} %{NUMBER:bytes_sent} \"%{DATA:referrer}\" \"%{DATA:user_agent}\" \"%{DATA:forwarded_for}\" \[%{NUMBER:request_duration}\]"
         }
         remove_field => ["message"]
-    }
-    # Drop any messages from the kube-probe
-    if [user_agent] =~ "^kube-probe" {
-        drop { }
     }
     # Only consider file downloads and OPeNDAP accesses
     if [request] !~ "^/thredds/(fileServer|dodsC)" {
@@ -57,7 +60,7 @@ filter {
     }
     mutate {
         # Replace the host with the specified external hostname
-        replace => { "host" => "${EXTERNAL_HOSTNAME}" }
+        replace => { "host" => "{{ hostname }}" }
         # Move the country code to the top-level
         add_field => { "country_code" => "%{[geoip][country_code2]}" }
         # Remove any unrequired fields

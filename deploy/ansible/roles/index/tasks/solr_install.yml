@@ -26,7 +26,7 @@
     networks_cli_compatible: yes
     volumes: ["solr-master-home:/var/solr/data:rw"]
     state: started
-    restart: yes
+    recreate: yes
 
 - name: Set solr_shards_whitelist variable
   set_fact:
@@ -68,4 +68,4 @@
     networks_cli_compatible: yes
     volumes: ["solr-slave-home:/var/solr/data:rw"]
     state: started
-    restart: yes
+    recreate: yes
