@@ -19,7 +19,11 @@ spec:
       # https://helm.sh/docs/howto/charts_tips_and_tricks/#automatically-roll-deployments
       annotations:
         checksum/configmap: {{ include (print $.Template.BasePath "/fileServer/configmap.yaml") . | sha256sum }}
-        checksum/logstash-configmap: {{ include (print $.Template.BasePath "/logstash/configmap.yaml") . | sha256sum }}
+        {{- if $accessLogSidecar.enabled }}
+        # When the access log sidecar is enabled, roll the deployment if the logstash pipelines or certificates change
+        checksum/logstash-pipelines: {{ include (print $.Template.BasePath "/logstash/pipelines.yaml") . | sha256sum }}
+        checksum/logstash-certs: {{ include (print $.Template.BasePath "/logstash/certs.yaml") . | sha256sum }}
+        {{- end }}
     spec:
       {{- with (default .Values.image.pullSecrets $fileServer.image.pullSecrets) }}
       imagePullSecrets: {{ toYaml . | nindent 8 }}
@@ -28,9 +32,9 @@ spec:
       securityContext: {{ toYaml . | nindent 8 }}
       {{- end }}
       initContainers:
-        # Create a named pipe for the access log
-        # This allows us to separate the access log from the error log, so that it is tagged differently when forwarded
-        # This makes processing the access log for statistics easier
+        # If the access log sidecar is enabled, create a named pipe for the access log so it can be separated
+        # Continue to send the rest of the logs to stdout
+        {{- if $accessLogSidecar.enabled }}
         - name: make-log-pipes
           {{ include "esgf.deployment.image" (list . $fileServer.image) }}
           args:
@@ -47,6 +51,7 @@ spec:
           volumeMounts:
             - name: nginx-logs
               mountPath: /var/log/nginx
+        {{- end }}
         {{- with $fileServer.extraInitContainers }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
@@ -77,8 +82,11 @@ spec:
             - name: nginx-conf
               mountPath: /etc/nginx/conf.d
               readOnly: true
+            # The shared log volume is only required if the access log sidecar is enabled
+            {{- if $accessLogSidecar.enabled }}
             - name: nginx-logs
               mountPath: /var/log/nginx
+            {{- end }}
             # In order to use a read-only root filesystem, we mount emptyDirs in places
             # where files are expected to change
             - name: nginx-cache
@@ -89,7 +97,8 @@ spec:
             {{- with $fileServer.extraVolumeMounts }}
             {{- toYaml . | nindent 12 }}
             {{- end }}
-        # Tail the access log separately
+        # If the access log sidecar is enabled, run the sidecar pod
+        {{- if $accessLogSidecar.enabled }}
         - name: file-server-access-log
           {{ include "esgf.deployment.image" (list . $accessLogSidecar.image) }}
           env:
@@ -104,12 +113,15 @@ spec:
           volumeMounts:
             - name: logstash-conf
               mountPath: /etc/logstash/conf.d
+            - name: logstash-certs
+              mountPath: /etc/logstash/certs
             - name: nginx-logs
               mountPath: /var/log/nginx
             - name: logstash-data
               mountPath: /usr/share/logstash/data
             - name: logstash-tmp
               mountPath: /tmp/logstash
+        {{- end }}
       {{- with $fileServer.nodeSelector }}
       nodeSelector: {{ toYaml . | nindent 8 }}
       {{- end }}
@@ -123,24 +135,31 @@ spec:
         - name: nginx-conf
           configMap:
             name: {{ include "esgf.component.fullname" (list . "fileServer") }}
-        # Each pod gets a directory to hold the named pipes for the logs
-        - name: nginx-logs
-          emptyDir: {}
         # In order to use a read-only root filesystem, we mount emptyDirs in places
         # where files are expected to change
         - name: nginx-cache
           emptyDir: {}
         - name: nginx-run
           emptyDir: {}
-        # Logstash config is in a configmap
+        # These volumes are only required if the access log sidecar is enabled
+        {{- if $accessLogSidecar.enabled }}
+        # Each pod gets a directory to hold the named pipes for the logs
+        - name: nginx-logs
+          emptyDir: {}
+        # Logstash config is in a secret
         - name: logstash-conf
-          configMap:
-            name: {{ include "esgf.component.fullname" (list . "logstash") }}
+          secret:
+            secretName: {{ include "esgf.component.fullname" (list . "logstash-pipelines") }}
+        # As are any certificates that are required
+        - name: logstash-certs
+          secret:
+            secretName: {{ include "esgf.component.fullname" (list . "logstash-certs") }}
         # Logstash also needs a tmp dir and a data dir
         - name: logstash-data
           emptyDir: {}
         - name: logstash-tmp
           emptyDir: {}
+        {{- end }}
         {{- include "esgf.data.volumes" . | nindent 8 }}
         {{- with $fileServer.extraVolumes }}
         {{- toYaml . | nindent 8 }}

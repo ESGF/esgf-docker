@@ -99,12 +99,23 @@ data:
 
   # Configuration for the access log sidecar
   accessLogSidecar:
+    enabled: false
     # Image overrides for the access logging sidecar
     image:
       repository: logstash
     # The resource allocations for the access log container
     # See https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
     resources: {}
+    # Configuration for the stats pipeline
+    statsPipeline:
+      enabled: true
+      # Use these variables to configure the target server
+      # server:
+      # port:
+      # certificate: |
+      #   -----BEGIN CERTIFICATE-----
+      #   CERT HERE
+      #   -----END CERTIFICATE-----
 
   # Configuration for the THREDDS pod
   thredds:

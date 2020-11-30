@@ -1,9 +1,0 @@
-{{- if .Values.data.enabled -}}
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: {{ include "esgf.component.fullname" (list . "logstash") }}
-  labels: {{ include "esgf.component.labels" (list . "logstash" dict) | nindent 4 }}
-data:
-{{ (.Files.Glob "files/logstash/*").AsConfig | indent 2 }}
-{{- end -}}
