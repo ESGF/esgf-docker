@@ -68,6 +68,12 @@ filter {
     }
 }
 output {
+    lumberjack {
+        codec => json
+        hosts => ["{{ logstash_stats_server }}"]
+        port => {{ logstash_stats_port }}
+        ssl_certificate => "/etc/logstash/certs/lumberjack.cert"
+    }
     stdout {
         codec => rubydebug
     }

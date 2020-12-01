@@ -75,10 +75,46 @@ fileserver_image_tag: "{{ image_tag }}"
 fileserver_image_pull: "{{ image_pull }}"
 fileserver_image_repository: nginx
 
-# Configuration for the logstash access log exporter
-logstash_enabled: true
-# Settings for the logstash access log exporter image
+# Configuration for the logstash stats exporter
+logstash_enabled: false
+# Settings for the logstash stats exporter image
 logstash_image_prefix: "{{ image_prefix }}"
 logstash_image_tag: "{{ image_tag }}"
 logstash_image_pull: "{{ image_pull }}"
 logstash_image_repository: logstash
+# Settings for the stats server
+logstash_stats_server: proxy02.cmcc.it
+logstash_stats_port: 5044
+logstash_stats_certificate: |
+  -----BEGIN CERTIFICATE-----
+  MIIFejCCA2KgAwIBAgIBKzANBgkqhkiG9w0BAQsFADBaMQ0wCwYDVQQKDARFU0dG
+  MREwDwYDVQQLDAhFU0dGLk9SRzEcMBoGA1UECwwTc2ltcGxlY2EubnNjLmxpdS5z
+  ZTEYMBYGA1UEAwwPTlNDIFNpbXBsZSBDQS0yMB4XDTIwMDcxNTEwNTEyNFoXDTIx
+  MDcxNTEwNTEyNFowgYMxCzAJBgNVBAYTAklUMQ4wDAYDVQQIDAVJdGFseTENMAsG
+  A1UECgwERVNHRjENMAsGA1UECwwERVNHRjEbMBkGA1UEAwwSb3BoaWRpYWxhYi5j
+  bWNjLml0MSkwJwYJKoZIhvcNAQkBFhpzdGF0aXN0aWNzLXN1cHBvcnRAY21jYy5p
+  dDCCAiIwDQYJKoZIhvcNAQEBBQADggIPADCCAgoCggIBANxYx8/Mv7/tuUMgNGbh
+  /nfAAcckLlpumkeJg/YtHWSd5uJJyFL6Zt3l2SUJnEYKXKSqVTE3pB9q18yB7T9h
+  +9JP5LAsdFAwQoSPcqsboDcusm1yXqv2qucibvZp7vv4+VY7YLRcHLSKxxom/ZLy
+  Kf5bc+7M/e7brqEFzFzDHFPQ6Yah56xnq261MWuyPmRrI7TZ3SGO1PbWytWrlf0k
+  GHBK6dSeHiD7XOie0u5YCOlGUCewrE3TnTKVQH7px1XfrMWcpBihJgB5aRH/ovRD
+  c9P45fvcENKEASsQO92+SOmjsnRMYeKXGQ6Ie3ZvJkZXsNytuHBEaVGnlXaNts9N
+  SsltWNhBRzovWlKCRaUXeikVK4qTyOYhYJathNUIYKrtjNE8RsgmilOnhrC7bQcT
+  ifqThHFfcjLrPO4CsRbsHOjsweCQs+vdIvJxlc/7VCZkXYjbeczJaqXO6CDUjVsi
+  MG+PKdZ3oszuw3DxjE2z5ne0yEoyeLVWIo70b1mJ5GayULw9+Stn1oNPj4z3i/2Z
+  w4w+bb0HdKuJ1DZOZSDL3NnJSWVhGcP5cIv17kA3EibZnBRd+zU/txW6BmM+gvgN
+  fcvD10rr1Az1hBxXb4125D7EJMqBxwBsi+RPMTjburXs8PcKaEfejX1XEY2WvAnN
+  ayxpCeUB7e0hc+VnD3+A/dVjAgMBAAGjITAfMB0GA1UdEQQWMBSCEm9waGlkaWFs
+  YWIuY21jYy5pdDANBgkqhkiG9w0BAQsFAAOCAgEAYweo0xZbx2mUgmquY3PUgdco
+  9cMwgbqtyc8Nm7IQPwla3EM3WsInRl+ZHJdRrqqr5H9cnEKldEhJx4sBXbwiOOjj
+  2whFOl0WhSDDm7FVNL2X9B0+CD6H5GNQpKElWXxQMmkA8UPq0l6cy0WJrtWc5YLd
+  q4eG/Cg7sTHYBTZz74IrfVx4wXubD1hdzjfddNAmfPmZc0hfn4bOvxVyBK+uRgqs
+  X762DkJy/ISMMEnf32Fu0YGWz1UvQDm6kCZ3Z3jSaRL5KqNjlrEVeWbMJOWhbDjU
+  NmOisoLKq1Qir1oHSGAAWdynBsIIIY75rB5rAQyJVU3uamhgkUqZuiokieOXzqZS
+  Yzj24QqSI/kDCQTV0cVOOsehT7N3oVyKGh0o3xEqoMD2i1wvvRjU9B++r7eA1dlZ
+  Cmd8FOnsnCoQct9vPkcRzjMdD2nvJE4M0FCdX+0FubLwT1HbVaoeaFHXxq2poTnK
+  fsWGLD5UbOPqUhO/xTvkoNZxdPp4H5+2H+E9IgL9k9B68VZZ6GQ0Xjphhs/feag0
+  yoC2E29inUcw3zXLOSi0Qm8DhnsLUeM+FYjh+4Zqw6wrG4qFnuPk9VRAEeqRtKoN
+  EbG+ceaYch+AHJYEmAu2uG3ibUA6JLov34ug6yrN+TJC9l1h8/UsWTquz+Z1d4se
+  xetGdzfHDsww/YbJrGY=
+  -----END CERTIFICATE-----
