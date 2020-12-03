@@ -11,18 +11,16 @@ FROM ${ESGF_REPOSITORY_BASE}/conda:${ESGF_IMAGES_VERSION}
 
 USER root
 
-# Install gunicorn
-RUN pip install --no-cache-dir 'gunicorn==20.0.4'
+# Install gunicorn server, whitenoise to handle static files and 
+# django-flexi-settings for smart handling of settings
+RUN pip install --no-cache-dir \
+      'gunicorn==20.0.4' \
+      'django-flexi-settings==0.1.1' \
+      'whitenoise==5.2.0'
 
 # Install gunicorn config file
 COPY gunicorn.conf.py /etc/gunicorn/conf.py
 COPY wsgi-serve.sh /usr/local/bin/
-
-# Install whitenoise to handle static files and django-flexi-settings
-# for smart handling of settings
-RUN pip install --no-cache-dir \
-      'django-flexi-settings==0.1.1' \
-      'whitenoise==5.2.0'
 
 # Configure Django to use the flexi settings module
 ENV DJANGO_SETTINGS_MODULE flexi_settings.settings
