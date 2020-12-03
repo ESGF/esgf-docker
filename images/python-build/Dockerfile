@@ -26,6 +26,12 @@ ONBUILD RUN \
     popd
 
 # Use ONBUILD triggers to build the wheels
+#   Copy the hooks into the image, if specified
+#   Because we need this to work even if there are no hooks, we must also include
+#   a file that is guaranteed to be in the context, so we use the Dockerfile
+ONBUILD COPY Dockerfile hooks/* /context/hooks/
+#   If there is a pre-build hook, run it
+ONBUILD RUN [ ! -x /context/hooks/pre-build ] || /context/hooks/pre-build
 #   Move into the application source directory so that consumers can use relative requirements paths
 ONBUILD WORKDIR /application
 #   Allow the requirements file to be overridden, using /application/requirements.txt by default

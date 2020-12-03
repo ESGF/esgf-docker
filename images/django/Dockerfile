@@ -39,17 +39,19 @@ EXPOSE 8080
 CMD ["/usr/local/bin/django-serve.sh"]
 
 # Use ONBUILD instructions to install and configure the application
-#   Copy the application source from the named stage
-ONBUILD COPY --from=python-build /application /application
-#   Set working directory
-ONBUILD WORKDIR /application
+#   Copy any specified hooks into the image
+#   Because we need this to work even if there are no hooks, we must also include
+#   a file that is guaranteed to be in the context, so we use the Dockerfile
+ONBUILD COPY Dockerfile hooks/* /etc/django/hooks/
+#   If there is a pre-install hook, run it
+ONBUILD RUN [ ! -x /etc/django/hooks/pre-install ] || /etc/django/hooks/pre-install
 #   Copy the wheels from the python-build stage
 ONBUILD COPY --from=python-build /build/wheelhouse /build/wheelhouse
 #   Install the wheels that we copied
 ONBUILD RUN pip install --no-deps /build/wheelhouse/*.whl
+#   If there is a post-install hook, run it
+ONBUILD RUN [ ! -x /etc/django/hooks/post-install ] || /etc/django/hooks/post-install
 #   Install the app settings
 ONBUILD COPY settings.d/* /etc/django/settings.d/
-#   After installing the app settings, collect the static files
-ONBUILD RUN django-admin collectstatic --no-input
-#   Make sure to run as the WSGI user
+#   Make sure to run as the ESGF user
 ONBUILD USER $ESGF_UID
