@@ -14,10 +14,6 @@ ARG JDBC_MYSQL_VERSION=8.0.19
 ARG JDBC_MARIADB_VERSION=2.5.4
 ARG JDBC_MSSQL_VERSION=7.4.1.jre11
 
-# Keycloak's image repository containing build and run scripts
-ARG GIT_REPOSITORY=
-ARG GIT_VERSION=${KEYCLOAK_VERSION}
-
 
 FROM ${ESGF_REPOSITORY_BASE}/base:${ESGF_IMAGES_VERSION} as keycloak-containers-source
 
