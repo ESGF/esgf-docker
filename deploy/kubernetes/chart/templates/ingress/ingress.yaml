@@ -19,6 +19,12 @@ spec:
     - host: {{ .Values.hostname | quote }}
       http:
         paths:
+          {{- if .Values.auth.enabled }}
+          - path: /
+            backend:
+              serviceName: {{ include "esgf.component.fullname" (list . "auth") }}
+              servicePort: 8080
+          {{- end }}
           {{- if .Values.data.enabled }}
           {{- if .Values.data.thredds.enabled }}
           - path: /thredds

@@ -8,7 +8,7 @@ hostname:
 image:
   # The image prefix to use
   # If using a private registry, change this, e.g. registry.ceda.ac.uk/esgfdeploy
-  prefix: esgfdeploy
+  prefix: localhost:5000
   # The tag to use
   tag: latest
   # Indicates whether images should be pulled every time a pod starts
@@ -42,6 +42,40 @@ ingress:
       cert:
       key:
     # If neither are given, then a self-signed certificate is generated
+
+###
+# Auth service configuration
+###
+auth:
+  # Indicates if the file server should be deployed or not
+  enabled: true
+  # Image overrides for the file server image
+  image:
+    repository: auth-service
+  # The number of replicas for the file server pod
+  # If an hpa is configured, this is ignored - the hpa has full control over the number of replicas
+  replicaCount: 1
+  # The horizontal pod autoscaler configuration for file server pods
+  # See https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/
+  # Configuration is the same as for the thredds pod
+  hpa: {}
+  # The resource allocations for the file server container
+  # See https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+  resources: {}
+  # Extra environment variables for the file server container
+  # See https://kubernetes.io/docs/tasks/inject-data-application/define-environment-variable-container/
+  extraEnv: []
+  # Additional labels for file server resources
+  labels: {}
+  # The node selector for the file server pod
+  # See https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector
+  nodeSelector:
+  # The affinity rules for the file server pod
+  # See https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
+  affinity:
+  # The tolerations for the file server pod
+  # See https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
+  tolerations:
 
 ###
 # Data node configuration
