@@ -8,6 +8,7 @@
   become: true
   roles:
     - docker
+    - auth
     - { name: data, tags: [data] }
     - { name: index, tags: [index] }
     - proxy
