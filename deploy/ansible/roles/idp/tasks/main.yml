@@ -1,0 +1,13 @@
+---
+
+#####
+## Tasks to configure and deploy containers for an index node
+#####
+
+- name: Install the IDP
+  include: idp_install.yml
+  when: "'idp' in group_names"
+
+- name: Uninstall the IDP
+  include: solr_uninstall.yml
+  when: "'idp' not in group_names"

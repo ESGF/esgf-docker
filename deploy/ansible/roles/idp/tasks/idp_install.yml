@@ -1,0 +1,32 @@
+---
+
+- name: Create Docker network
+  docker_network:
+    name: esgf
+
+- name: Make idp config directory
+  file:
+    path: /esg/config/idp
+    state: directory
+
+- name: Write idp configuration
+  template:
+    src: "{{ item }}.j2"
+    dest: "/esg/config/idp/{{ item }}"
+  loop: ["realm.json"]
+
+- name: Start idp container
+  docker_container:
+    name: idp
+    image: "{{ idp_image_prefix }}/{{ idp_image_repository }}:{{ idp_image_tag }}"
+    pull: "{{ idp_image_pull }}"
+    detach: yes
+    restart_policy: unless-stopped
+    exposed_ports:
+      - "8080"
+    networks:
+      - name: esgf
+    networks_cli_compatible: yes
+    volumes: ["/esg/config/idp:/esg/config:ro"]
+    state: started
+    restart: yes

@@ -44,4 +44,12 @@ server {
     }
     {% endif %}
     {% endif %}
+
+    {% if 'idp' in group_names %}
+    location / {
+        include /etc/nginx/includes/proxy_params.conf;
+        proxy_pass http://idp:8080;
+    }
+    {% endif %}
+
 }

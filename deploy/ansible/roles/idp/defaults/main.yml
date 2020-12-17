@@ -1,0 +1,27 @@
+---
+
+###
+# Default values used for all images
+# Each of these values can be overidden on a per-image basis if required
+###
+
+# The image prefix to use
+# If using a private registry, change this, e.g. registry.ceda.ac.uk/esgfdeploy
+image_prefix: esgfdeploy
+# The image tag to use
+image_tag: latest
+# Indicates whether images should be pulled every time the playbook runs
+# When using mutable tags, like latest or branch names, this should be true
+# When using immutable tags, like commit shas or release tags, this can be false
+image_pull: true
+
+
+###
+# Proxy configuration
+###
+
+# Settings for the idp image
+idp_image_prefix: "{{ image_prefix }}"
+idp_image_tag: "{{ image_tag }}"
+idp_image_pull: "{{ image_pull }}"
+idp_image_repository: keycloak
