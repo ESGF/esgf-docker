@@ -1,0 +1,117 @@
+{{- $idp := .Values.idp -}}
+{{- if $idp.enabled -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "esgf.component.fullname" (list . "idp") }}
+  labels: {{ include "esgf.component.labels" (list . "idp" $idp.labels) | nindent 4 }}
+spec:
+  replicas: {{ $idp.replicaCount }}
+  selector:
+    matchLabels: {{ include "esgf.component.selectorLabels" (list . "idp") | nindent 6 }}
+  template:
+    metadata:
+      labels: {{ include "esgf.component.selectorLabels" (list . "idp") | nindent 8 }}
+      # Force deployment to roll if the config changes
+      # https://helm.sh/docs/howto/charts_tips_and_tricks/#automatically-roll-deployments
+      annotations:
+        checksum/configmap: {{ include (print $.Template.BasePath "/idp/configmap.yaml") . | sha256sum }}
+        checksum/admin-user: {{ include (print $.Template.BasePath "/idp/admin-user.yaml") . | sha256sum }}
+        checksum/database: {{ include (print $.Template.BasePath "/idp/database.yaml") . | sha256sum }}
+        checksum/realm: {{ include (print $.Template.BasePath "/idp/realm.yaml") . | sha256sum }}
+    spec:
+      {{- with (default .Values.image.pullSecrets $idp.image.pullSecrets) }}
+      imagePullSecrets: {{ toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: idp
+          {{ include "esgf.deployment.image" (list . $idp.image) }}
+          resources: {{ toYaml $idp.resources | nindent 12 }}
+          ports:
+            - name: http
+              containerPort: 8080
+          env: {{ toYaml $idp.extraEnv | nindent 12 }}
+          envFrom:
+            - configMapRef:
+                name: {{ include "esgf.component.fullname" (list . "idp") }}
+            {{- if $idp.adminUser }}
+            - secretRef:
+                name: {{ include "esgf.component.fullname" (list . "adminUser") }}
+            {{- end }}
+            {{- if $idp.database }}
+            - secretRef:
+                name: {{ include "esgf.component.fullname" (list . "database") }}
+            {{- end }}
+          readinessProbe: &probe
+            httpGet:
+              path: /
+              port: 8080
+              httpHeaders:
+                - name: Host
+                  value: "{{ .Values.hostname }}"
+                - name: X-Forwarded-Host
+                  value: "{{ .Values.hostname }}"
+                - name: X-Forwarded-Proto
+                  value: https
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            failureThreshold: 3
+          livenessProbe:
+            <<: *probe
+            initialDelaySeconds: {{ $idp.startTimeout }}
+          startupProbe:
+            <<: *probe
+            # Rather than using initalDelaySeconds, we keep a 10s period but allow more failures before terminating
+            # This means if the container is ready sooner the liveness probe can take over quicker
+            failureThreshold: {{ div $idp.startupTimeout 10 }}
+          volumeMounts:
+            - name: realm
+              mountPath: /opt/jboss/deploy/realm.json
+              subPath: realm.json
+              readOnly: true
+            # In order to use a read-only root filesystem, we mount emptyDirs in places
+            # where files are expected to change
+            - name: tmp
+              mountPath: /tmp
+            - name: tmp
+              mountPath: /opt/jboss/keycloak/standalone/tmp
+            - name: log
+              mountPath: /opt/jboss/keycloak/standalone/log
+            - name: data
+              mountPath: /opt/jboss/keycloak/standalone/data
+            - name: configuration
+              mountPath: /opt/jboss/keycloak/standalone/configuration
+            - name: deployments
+              mountPath: /opt/jboss/keycloak/standalone/deployments
+      {{- with $idp.nodeSelector }}
+      nodeSelector: {{ toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $idp.affinity }}
+      affinity: {{ toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $idp.tolerations }}
+      tolerations: {{ toYaml . | nindent 8 }}
+      {{- end }}
+      volumes:
+        - name: realm
+          secret:
+            secretName: {{ include "esgf.component.fullname" (list . "realm") }}
+        # In order to use a read-only root filesystem, we mount emptyDirs in places
+        # where files are expected to change
+        # Use a tmpfs for /tmp
+        - name: tmp
+          emptyDir:
+            medium: Memory
+        - name: log
+          emptyDir:
+            medium: Memory
+        - name: data
+          emptyDir:
+            medium: Memory
+        - name: configuration
+          emptyDir:
+            medium: Memory
+        - name: deployments
+          emptyDir:
+            medium: Memory
+{{- end -}}

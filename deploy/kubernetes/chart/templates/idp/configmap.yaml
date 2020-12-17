@@ -1,0 +1,10 @@
+{{- $idp := .Values.idp -}}
+{{- if $idp.enabled -}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "esgf.component.fullname" (list . "idp") }}
+  labels: {{ include "esgf.component.labels" (list . "idp" $idp.labels) | nindent 4 }}
+data:
+  PROXY_ADDRESS_FORWARDING: "true"
+{{- end }}

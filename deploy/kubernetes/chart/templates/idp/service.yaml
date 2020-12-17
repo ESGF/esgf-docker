@@ -1,0 +1,16 @@
+{{- $idp := .Values.idp -}}
+{{- if $idp.enabled -}}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "esgf.component.fullname" (list . "idp") }}
+  labels: {{ include "esgf.component.labels" (list . "idp" $idp.labels) | nindent 4 }}
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 8080
+      targetPort: http
+      protocol: TCP
+  selector: {{ include "esgf.component.selectorLabels" (list . "idp") | nindent 4 }}
+{{- end -}}

@@ -55,3 +55,9 @@ spec:
               servicePort: 8080
           {{- end }}
           {{- end }}
+          {{- if .Values.idp.enabled }}
+          - path: /auth
+            backend:
+              serviceName: {{ include "esgf.component.fullname" (list . "idp") }}
+              servicePort: 8080
+          {{- end }}

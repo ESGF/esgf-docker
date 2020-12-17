@@ -1,0 +1,20 @@
+{{- $idp := .Values.idp -}}
+{{- if $idp.database }}
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ include "esgf.component.fullname" (list . "database") }}
+  labels: {{ include "esgf.component.labels" (list . "database" $idp.labels) | nindent 4 }}
+type: Opaque
+data:
+  # Only PostgreSQL is supported
+  DB_VENDOR: {{ "postgres" | b64enc | quote }}
+  {{- with $idp.database }}
+  DB_ADDR: {{ .host | b64enc | quote }}
+  DB_PORT: {{ .port | default "5432" | b64enc | quote }}
+  DB_DATABASE: {{ .name | b64enc | quote }}
+  {{- if .password }}
+  DB_PASSWORD: {{ .password | b64enc | quote }}
+  {{- end }}
+  {{- end }}
+{{- end }}

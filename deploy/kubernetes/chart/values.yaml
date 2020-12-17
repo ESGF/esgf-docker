@@ -299,3 +299,35 @@ index:
     # The tolerations for the search pods
     # See https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
     tolerations:
+
+
+###
+# IDP node configuration
+###
+idp:
+  # Indicates if any IDP node components are to be enabled
+  enabled: true
+  # Image overrides for the search app
+  image:
+    repository: keycloak
+  # The number of replicas for the search deployment
+  replicaCount: 1
+  # Time to wait for Keycloak to load
+  startupTimeout: 300
+  # The resource allocations for the search container
+  # See https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+  resources: {}
+  # Extra environment variables for the search container
+  # See https://kubernetes.io/docs/tasks/inject-data-application/define-environment-variable-container/
+  extraEnv: []
+  # Additional labels for search resources
+  labels: {}
+  # The node selector for the search pods
+  # See https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector
+  nodeSelector:
+  # The affinity rules for the search pods
+  # See https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
+  affinity:
+  # The tolerations for the search pods
+  # See https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
+  tolerations:

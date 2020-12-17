@@ -1,0 +1,12 @@
+{{- $idp := .Values.idp -}}
+{{- if ($idp.enabled) -}}
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ include "esgf.component.fullname" (list . "realm") }}
+  labels: {{ include "esgf.component.labels" (list . "realm" $idp.labels) | nindent 4 }}
+type: Opaque
+data:
+  # Output the realm settings as a JSON file
+  realm.json: {{ toJson $idp.realm | b64enc | quote }}
+{{- end -}}
