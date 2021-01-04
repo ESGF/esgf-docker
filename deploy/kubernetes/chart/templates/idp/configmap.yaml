@@ -9,6 +9,6 @@ data:
   PROXY_ADDRESS_FORWARDING: "true"
   KEYCLOAK_IMPORT: "/opt/jboss/deploy/realm.json"
   {{- if $idp.themeJarUrl }}
-  KEYCLOAK_THEME_JAR_URL: {{ $idp.themeJarUrl | b64enc | quote }}
+  KEYCLOAK_THEME_JAR_URL: {{ $idp.themeJarUrl }}
   {{- end }}
 {{- end }}
