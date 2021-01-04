@@ -7,4 +7,5 @@ metadata:
   labels: {{ include "esgf.component.labels" (list . "idp" $idp.labels) | nindent 4 }}
 data:
   PROXY_ADDRESS_FORWARDING: "true"
+  KEYCLOAK_IMPORT: "/opt/jboss/deploy/realm.json"
 {{- end }}
