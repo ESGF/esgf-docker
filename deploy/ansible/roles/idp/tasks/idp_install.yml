@@ -20,6 +20,7 @@
     name: idp
     image: "{{ idp_image_prefix }}/{{ idp_image_repository }}:{{ idp_image_tag }}"
     pull: "{{ idp_image_pull }}"
+    env: "{{ idp_environment }}"
     detach: yes
     restart_policy: unless-stopped
     exposed_ports:

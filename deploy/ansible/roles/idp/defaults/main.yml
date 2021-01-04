@@ -25,3 +25,8 @@ idp_image_prefix: "{{ image_prefix }}"
 idp_image_tag: "{{ image_tag }}"
 idp_image_pull: "{{ image_pull }}"
 idp_image_repository: keycloak
+
+idp_environment:
+  PROXY_ADDRESS_FORWARDING: "true"
+  KEYCLOAK_IMPORT: "/opt/jboss/deploy/realm.json"
+  KEYCLOAK_THEME_JAR_URL: "{{ theme_jar_url }}"
