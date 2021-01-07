@@ -47,33 +47,33 @@ ingress:
 # Auth service configuration
 ###
 auth:
-  # Indicates if the file server should be deployed or not
+  # Indicates if the auth service should be deployed or not
   enabled: true
-  # Image overrides for the file server image
+  # Image overrides for the auth service image
   image:
     repository: auth-service
-  # The number of replicas for the file server pod
+  # The number of replicas for the auth service pod
   # If an hpa is configured, this is ignored - the hpa has full control over the number of replicas
   replicaCount: 1
-  # The horizontal pod autoscaler configuration for file server pods
+  # The horizontal pod autoscaler configuration for auth service pods
   # See https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/
   # Configuration is the same as for the thredds pod
   hpa: {}
-  # The resource allocations for the file server container
+  # The resource allocations for the auth service container
   # See https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
   resources: {}
-  # Extra environment variables for the file server container
+  # Extra environment variables for the auth service container
   # See https://kubernetes.io/docs/tasks/inject-data-application/define-environment-variable-container/
   extraEnv: []
-  # Additional labels for file server resources
+  # Additional labels for auth service resources
   labels: {}
-  # The node selector for the file server pod
+  # The node selector for the auth service pod
   # See https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector
   nodeSelector:
-  # The affinity rules for the file server pod
+  # The affinity rules for the auth service pod
   # See https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
   affinity:
-  # The tolerations for the file server pod
+  # The tolerations for the auth service pod
   # See https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
   tolerations:
 
