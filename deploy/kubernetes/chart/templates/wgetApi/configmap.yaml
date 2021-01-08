@@ -22,10 +22,29 @@ data:
     # Path to XML file containing Solr shards
     ESGF_SOLR_SHARDS_XML = {{ $wgetApi.settings.esgfSolrShardsXml }}
 
+    # Path to JSON file containing allowed projects to access for datasets
+    ESGF_ALLOWED_PROJECTS_JSON = {{ $wgetApi.config_path}}/{{ $wgetApi.allowed_projects_json }}
+
     # Default limit on the number of files allowed in a wget script
     WGET_SCRIPT_FILE_DEFAULT_LIMIT = {{ $wgetApi.settings.wgetScriptFileDefaultLimit }}
 
     # Maximum number of files allowed in a wget script
     WGET_SCRIPT_FILE_MAX_LIMIT = {{ $wgetApi.settings.wgetScriptFileMaxLimit }}
-
+  esgf_allowed_projects.json: |
+    {
+      "allowed_projects": [{{ $wgetApi.settings.allowed_projects | join "," }}]
+    }
+  esgf_solr_shards.xml: |
+    <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+    <!--
+    This file contains a list of production ESGF Solr indexes.
+    IMPORTANT: use this file as a reference only:
+    checking it out to your local server will override any
+    custom configuration of replica nodes.
+    -->
+    <shards xmlns="http://www.esgf.org/whitelist">
+      {{ range $wgetApi.settings.shards }}
+       <value>{{ . }}</value>
+      {{ end }}
+    </shards>
 {{- end -}}

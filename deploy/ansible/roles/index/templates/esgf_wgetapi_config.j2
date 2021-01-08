@@ -13,7 +13,10 @@ DATA_UPLOAD_MAX_NUMBER_FIELDS = 1024
 ESGF_SOLR_URL = {{ wget_api.solr_url }}
 
 # Path to XML file containing Solr shards
-ESGF_SOLR_SHARDS_XML = {{ wget_api.shards_xml }}
+ESGF_SOLR_SHARDS_XML = {{ wget_api.config_path }}/esgf_wgetapi_solr_shards_static.xml
+
+# Path to JSON file containing allowed projects to access for datasets
+ESGF_ALLOWED_PROJECTS_JSON = {{ wget_api.config_path }}/{{ wget_api.allowed_projects_json }}
 
 # Default limit on the number of files allowed in a wget script
 WGET_SCRIPT_FILE_DEFAULT_LIMIT = {{ wget_api.script_file_default_limit }}
@@ -21,5 +24,6 @@ WGET_SCRIPT_FILE_DEFAULT_LIMIT = {{ wget_api.script_file_default_limit }}
 # Maximum number of files allowed in a wget script
 WGET_SCRIPT_FILE_MAX_LIMIT = {{ wget_api.script_file_max_limit }}
 
-
+# Maximum length for facet values used in the wget directory structure
+WGET_MAX_DIR_LENGTH = {{ wget_api.max_dir_length }}
 

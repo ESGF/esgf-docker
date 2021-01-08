@@ -13,6 +13,16 @@
   template:
     src: "esgf_wgetapi_config.j2"
     dest: "/tmp/esgf_wget/{{ wget_api.config }}"
+    
+- name: Write wget api allowed projects
+  template:
+    src: "esgf_wgetapi_allowed_projects.json.j2"
+    dest: "/tmp/esgf_wget/{{ wget_api.allowed_projects_json }}"
+
+- name: Write XML file containing Solr shards
+  template:
+    src: "esgf_wgetapi_solr_shards_static.xml.j2"
+    dest: "/tmp/esgf_wget/esgf_wgetapi_solr_shards_static.xml"
 
 - name: Start wget_api container
   docker_container:
