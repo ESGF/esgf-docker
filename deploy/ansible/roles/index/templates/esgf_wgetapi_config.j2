@@ -1,7 +1,7 @@
 [django]
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = {{ wget_api.debug }}
 
 ALLOWED_HOSTS = {{ wget_api.allowed_hosts }} 
 
