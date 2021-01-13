@@ -1,0 +1,50 @@
+{{- $opa := .Values.opa -}}
+{{- if ($opa.enabled) -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "esgf.component.fullname" (list . "opa") }}
+  labels: {{ include "esgf.component.labels" (list . "opa" $opa.labels) | nindent 4 }}
+spec:
+  replicas: {{ $opa.replicaCount }}
+  selector:
+    matchLabels: {{ include "esgf.component.selectorLabels" (list . "opa") | nindent 6 }}
+  template:
+    metadata:
+      labels: {{ include "esgf.component.selectorLabels" (list . "opa") | nindent 8 }}
+      # Force deployment to roll if the config changes
+      # https://helm.sh/docs/howto/charts_tips_and_tricks/#automatically-roll-deployments
+      annotations:
+        checksum/configmap: {{ include (print $.Template.BasePath "/opa/configmap.yaml") . | sha256sum }}
+    spec:
+      containers:
+        - name: opa
+          image: openpolicyagent/opa:latest
+          resources: {{ toYaml $opa.resources | nindent 12 }}
+          ports:
+          - name: http
+            containerPort: 8181
+          env: {{ toYaml $opa.extraEnv | nindent 12 }}
+          args:
+          - "run"
+          - "--ignore=.*"  # exclude hidden dirs created by Kubernetes
+          - "--server"
+          - "/policies"
+          volumeMounts:
+            - name: example-policy
+              mountPath: /policies
+              readOnly: true
+      {{- with $opa.nodeSelector }}
+      nodeSelector: {{ toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $opa.affinity }}
+      affinity: {{ toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $opa.tolerations }}
+      tolerations: {{ toYaml . | nindent 8 }}
+      {{- end }}
+      volumes:
+        - name: example-policy
+          configMap:
+            name: {{ include "esgf.component.fullname" (list . "policy") }}
+{{- end -}}
