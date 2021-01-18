@@ -76,6 +76,34 @@ auth:
   # The tolerations for the auth service pod
   # See https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
   tolerations:
+  # Runtime settings for the Django app
+  runtimeSettings:
+    MIDDLEWARE:
+      - django.middleware.security.SecurityMiddleware
+      - django.contrib.sessions.middleware.SessionMiddleware
+      - django.middleware.common.CommonMiddleware
+      - django.middleware.csrf.CsrfViewMiddleware
+      - django.contrib.messages.middleware.MessageMiddleware
+      - django.middleware.clickjacking.XFrameOptionsMiddleware
+      - authenticate.oauth2.middleware.BearerTokenAuthenticationMiddleware
+      - authenticate.oidc.middleware.OpenIDConnectAuthenticationMiddleware
+      - authorize.middleware.LoginAuthorizationMiddleware
+    RESOURCE_URL_QUERY_KEY: rd
+    # OAuth Bearer Token auth settings
+    OAUTH_CLIENT_ID:
+    OAUTH_CLIENT_SECRET:
+    OAUTH_TOKEN_URL:
+    OAUTH_TOKEN_INTROSPECT_URL:
+    # OIDC auth settings
+    OIDC_BACKEND_CLIENT_NAME: esgf
+    AUTHLIB_OAUTH_CLIENTS:
+      esgf:
+        client_id:
+        client_secret:
+        authorize_url:
+        userinfo_endpoint:
+        client_kwargs:
+          scope: openid profile email
 
 ###
 # Data node configuration
