@@ -32,7 +32,7 @@ RUN pushd /src/esgf-security && \
     popd
 
 # # Build esg-search
-ARG ESG_SEARCH_VERSION=2cf9496b512bafcd880e4eb573764641c8971655
+ARG ESG_SEARCH_VERSION=fa1092dae808d15cc623ee5f4b274d94762ad171
 RUN git clone https://github.com/ESGF/esg-search.git /src/esg-search && \
     pushd /src/esg-search && \
     git checkout $ESG_SEARCH_VERSION && \
