@@ -17,9 +17,13 @@ spec:
       annotations:
         checksum/configmap: {{ include (print $.Template.BasePath "/opa/configmap.yaml") . | sha256sum }}
     spec:
+      {{- with (default .Values.image.pullSecrets $opa.image.pullSecrets) }}
+      imagePullSecrets: {{ toYaml . | nindent 8 }}
+      {{- end }}
       containers:
         - name: opa
           image: openpolicyagent/opa:latest
+          #{{ include "esgf.deployment.image" (list . $opq.image) }}
           resources: {{ toYaml $opa.resources | nindent 12 }}
           ports:
           - name: http

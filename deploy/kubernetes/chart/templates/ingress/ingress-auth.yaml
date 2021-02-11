@@ -29,3 +29,9 @@ spec:
               serviceName: {{ include "esgf.component.fullname" (list . "auth") }}
               servicePort: 8080
           {{- end }}
+          {{- if .Values.opa.enabled }}
+          - path: /v1/data
+            backend:
+              serviceName: {{ include "esgf.component.fullname" (list . "opa") }}
+              servicePort: 8181
+          {{- end }}

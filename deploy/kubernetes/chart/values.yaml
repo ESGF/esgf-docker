@@ -111,6 +111,9 @@ auth:
 opa:
   # Indicates if the OPA server should be deployed or not
   enabled: true
+  # Image overrides for the opa image
+  image:
+    repository: opa
   # The number of replicas for the OPA server pod
   # If an hpa is configured, this is ignored - the hpa has full control over the number of replicas
   replicaCount: 1
