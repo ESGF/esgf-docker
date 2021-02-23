@@ -6,6 +6,8 @@ metadata:
   annotations:
     # Auth service configuration
     nginx.ingress.kubernetes.io/auth-url: "http://esgf-auth.default.svc.cluster.local:8080/verify/"
+    nginx.ingress.kubernetes.io/auth-snippet: |
+      proxy_set_header X-Original-URI $request_uri;
     nginx.ingress.kubernetes.io/auth-signin: "https://$host:8443/login/"
     {{- with .Values.ingress.annotations }}
     {{ toYaml . | nindent 4 }}

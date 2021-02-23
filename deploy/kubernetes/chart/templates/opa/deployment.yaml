@@ -23,7 +23,6 @@ spec:
       containers:
         - name: opa
           image: openpolicyagent/opa:latest
-          #{{ include "esgf.deployment.image" (list . $opq.image) }}
           resources: {{ toYaml $opa.resources | nindent 12 }}
           ports:
           - name: http
@@ -35,7 +34,7 @@ spec:
           - "--server"
           - "/policies"
           volumeMounts:
-            - name: example-policy
+            - name: policy
               mountPath: /policies
               readOnly: true
       {{- with $opa.nodeSelector }}
@@ -48,7 +47,7 @@ spec:
       tolerations: {{ toYaml . | nindent 8 }}
       {{- end }}
       volumes:
-        - name: example-policy
+        - name: policy
           configMap:
             name: {{ include "esgf.component.fullname" (list . "policy") }}
 {{- end -}}

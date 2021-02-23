@@ -87,7 +87,12 @@ auth:
       - django.middleware.clickjacking.XFrameOptionsMiddleware
       - authenticate.oauth2.middleware.BearerTokenAuthenticationMiddleware
       - authenticate.oidc.middleware.OpenIDConnectAuthenticationMiddleware
-      - authorize.middleware.LoginAuthorizationMiddleware
+      - authorize.opa.middleware.OPAAuthorizationMiddleware
+    OPA_SERVER:
+      host: esgf-opa.default.svc.cluster.local
+      port: 8181
+      policy_name: policies/policy.rego
+      rule_name: allow
     RESOURCE_URL_QUERY_KEY: rd
     # OAuth Bearer Token auth settings
     OAUTH_CLIENT_ID:

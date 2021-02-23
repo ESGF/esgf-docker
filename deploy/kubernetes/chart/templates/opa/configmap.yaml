@@ -2,13 +2,13 @@
 {{- if ($opa.enabled) -}}
 apiVersion: v1
 data:
-  example.rego: |-
-    package example
+  policy.rego: |-
+    package esgf
 
-    greeting = msg {
-        info := opa.runtime()
-        hostname := info.env["HOSTNAME"] # Kubernetes sets the HOSTNAME environment variable.
-        msg := sprintf("hello from pod %q!", [hostname])
+    default allow = false
+
+    allow {
+        input.subject.groups[_] = "/cordex_research/publish"
     }
 kind: ConfigMap
 metadata:
