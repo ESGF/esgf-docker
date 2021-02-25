@@ -10,4 +10,5 @@
     - docker
     - { name: data, tags: [data] }
     - { name: index, tags: [index] }
+    - { name: idp, tags: [idp] }
     - proxy

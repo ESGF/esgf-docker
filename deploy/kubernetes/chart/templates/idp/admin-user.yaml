@@ -1,0 +1,16 @@
+{{- $idp := .Values.idp -}}
+{{- if $idp.adminUser -}}
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ include "esgf.component.fullname" (list . "adminUser") }}
+  labels: {{ include "esgf.component.labels" (list . "adminUser" $idp.labels) | nindent 4 }}
+type: Opaque
+data:
+  {{- with $idp.adminUser }}
+  KEYCLOAK_USER: {{ .username | b64enc | quote }}
+  {{- if .password }}
+  KEYCLOAK_PASSWORD: {{ .password | b64enc | quote }}
+  {{- end }}
+  {{- end }}
+{{- end }}

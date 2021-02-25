@@ -130,6 +130,13 @@ build:tomcat:
     CONTEXT_DIR: $CI_PROJECT_DIR/images/tomcat
   needs: ["build:jre"]
 
+build:keycloak:
+  extends: .docker-build
+  stage: build-3
+  variables:
+    CONTEXT_DIR: $CI_PROJECT_DIR/images/keycloak
+  needs: ["build:jdk"]
+
 build:search:
   extends: .docker-build
   stage: build-4

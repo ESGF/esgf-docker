@@ -1,0 +1,11 @@
+---
+
+- name: Stop idp container
+  docker_container:
+    name: idp
+    state: absent
+
+- name: Remove idp config directory
+  file:
+    path: /esg/config/idp
+    state: absent
