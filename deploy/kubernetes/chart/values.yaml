@@ -240,6 +240,22 @@ index:
     # See https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
     tolerations:
 
+    # Persistence for Solr
+    persistence:
+      enabled: false
+      size:
+        # The size of volumes to use for the master, slave and replicas respectively
+        master: 10Gi
+        slave: 10Gi
+        # The replica volume size can be overridden on a per-replica basis
+        replica: 10Gi
+      # The storage class to use
+      # See https://kubernetes.io/docs/concepts/storage/persistent-volumes/#class-1
+      storageClassName:
+      # Optional volume selector
+      # See https://kubernetes.io/docs/concepts/storage/persistent-volumes/#selector
+      selector: {}
+
     # External URLs for the Solr master and slave
     # If search is enabled but Solr is not, set these URLs to use external Solr instances
     # If Solr is enabled, the local instances will be used in preference
@@ -268,6 +284,7 @@ index:
     #   masterUrl: The URL of the Solr index to replicate, including scheme and path components
     #   pollInterval (optional): Replica-specific poll interval
     #   resources (optional): Replica-specific resource allocations
+    #   persistentVolumeSize (optional): The size of the persistent volume to use for this replica, if persistence is enabled
     replicas: []
       # - name: remote-site
       #   masterUrl: https://remote.esgf.node/solr

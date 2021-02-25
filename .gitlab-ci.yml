@@ -109,6 +109,13 @@ build:nginx:
     CONTEXT_DIR: $CI_PROJECT_DIR/images/nginx
   needs: ["build:base"]
 
+build:conda:
+  extends: .docker-build
+  stage: build-2
+  variables:
+    CONTEXT_DIR: $CI_PROJECT_DIR/images/conda
+  needs: ["build:base"]
+
 build:search-builder:
   extends: .docker-build
   stage: build-3
@@ -137,6 +144,20 @@ build:keycloak:
     CONTEXT_DIR: $CI_PROJECT_DIR/images/keycloak
   needs: ["build:jdk"]
 
+build:python-build:
+  extends: .docker-build
+  stage: build-3
+  variables:
+    CONTEXT_DIR: $CI_PROJECT_DIR/images/python-build
+  needs: ["build:conda"]
+
+build:django:
+  extends: .docker-build
+  stage: build-3
+  variables:
+    CONTEXT_DIR: $CI_PROJECT_DIR/images/django
+  needs: ["build:conda"]
+
 build:search:
   extends: .docker-build
   stage: build-4
@@ -150,3 +171,10 @@ build:thredds:
   variables:
     CONTEXT_DIR: $CI_PROJECT_DIR/images/thredds
   needs: ["build:jdk", "build:tomcat"]
+
+build:auth-service:
+  extends: .docker-build
+  stage: build-4
+  variables:
+    CONTEXT_DIR: $CI_PROJECT_DIR/images/auth-service
+  needs: ["build:python-build", "build:django"]
