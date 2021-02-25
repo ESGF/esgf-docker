@@ -17,7 +17,7 @@
 # If the access log exporter is enabled, we use a FIFO pipe for the Nginx access log
 # This will be followed by the exporter to get the access logs
 # Unfortunately, in order to get the container to pick this up we have to splat
-# the whole logs directory, so we also need to set up the other logs as symlinks to stdout
+# the whole logs directory, so we also need to set up the other logs as symlinks to stdout/err
 - name: Set up fileserver logs directory
   block:
     - name: Ensure fileserver logs directory exists
