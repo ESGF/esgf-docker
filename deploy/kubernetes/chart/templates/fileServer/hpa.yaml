@@ -1,0 +1,14 @@
+{{- $fileServer := .Values.data.fileServer -}}
+{{- if (and .Values.data.enabled $fileServer.enabled $fileServer.hpa) -}}
+apiVersion: autoscaling/v2beta2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ include "esgf.component.fullname" (list . "fileServer") }}
+  labels: {{ include "esgf.component.labels" (list . "fileServer" $fileServer.labels) | nindent 4 }}
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ include "esgf.component.fullname" (list . "fileServer") }}
+{{ toYaml $fileServer.hpa | indent 2 }}
+{{- end -}}

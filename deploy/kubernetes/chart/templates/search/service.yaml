@@ -1,0 +1,16 @@
+{{- $search := .Values.index.search -}}
+{{- if (and .Values.index.enabled $search.enabled) -}}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "esgf.component.fullname" (list . "search") }}
+  labels: {{ include "esgf.component.labels" (list . "search" $search.labels) | nindent 4 }}
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 8080
+      targetPort: http
+      protocol: TCP
+  selector: {{ include "esgf.component.selectorLabels" (list . "search") | nindent 4 }}
+{{- end -}}

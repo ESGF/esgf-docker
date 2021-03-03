@@ -1,0 +1,100 @@
+{{- $solr := .Values.index.solr -}}
+{{- if and .Values.index.enabled $solr.enabled -}}
+{{- range $index, $replica := $solr.replicas -}}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "esgf.component.fullname" (list $ "solr" $replica.name) }}
+  labels:
+    {{ include "esgf.component.labels" (list $ "solr" $solr.labels) | indent 4 | trim }}
+    solr.esgf.org/role: "replica"
+    solr.esgf.org/replica-name: {{ $replica.name }}
+spec:
+  # Solr instances can currently only have one replica
+  replicas: 1
+  # To ensure there are no issues with two pods writing to the same cores, make sure old
+  # pods are killed before new ones are started
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      {{ include "esgf.component.selectorLabels" (list $ "solr") | indent 6 | trim }}
+      solr.esgf.org/role: "replica"
+      solr.esgf.org/replica-name: {{ $replica.name }}
+  template:
+    metadata:
+      labels:
+        {{ include "esgf.component.selectorLabels" (list $ "solr") | indent 8 | trim }}
+        solr.esgf.org/role: "replica"
+        solr.esgf.org/replica-name: {{ $replica.name }}
+    spec:
+      {{- with (default $.Values.image.pullSecrets $solr.image.pullSecrets) }}
+      imagePullSecrets: {{ toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $solr.podSecurityContext }}
+      securityContext: {{ toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: solr
+          {{ include "esgf.deployment.image" (list $ $solr.image) }}
+          args:
+            - solr
+            - -f
+            - "-Dmaster.enable=true"
+            - "-Dslave.enable=true"
+            - "-Dslave.masterUrl={{ $replica.masterUrl | required "Replica masterUrl is required" }}"
+            - "-Dslave.pollInterval={{ $replica.pollInterval | default $solr.replicaPollInterval }}"
+          # Merge the resource-specific resources with the Solr ones
+          resources: {{ $replica.resources | default dict | mergeOverwrite $solr.resources $solr.replicaResources | toYaml | nindent 12 }}
+          ports:
+            - name: solr
+              containerPort: 8983
+          readinessProbe: &probe
+            httpGet:
+              path: /solr/
+              port: 8983
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            <<: *probe
+            initialDelaySeconds: 60
+          {{- with $solr.securityContext }}
+          securityContext: {{ toYaml . | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+            # In order to allow the filesystem to be read-only, mount ephemeral volumes
+            # in places where writes are expected
+            - name: tmp
+              mountPath: /tmp
+            - name: solr-logs
+              mountPath: /var/solr/logs
+            - name: solr-home
+              mountPath: /var/solr/data
+      {{- with $solr.nodeSelector }}
+      nodeSelector: {{ toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $solr.affinity }}
+      affinity: {{ toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $solr.tolerations }}
+      tolerations: {{ toYaml . | nindent 8 }}
+      {{- end }}
+      volumes:
+        # If persistence is enabled, use the provisioned pvc for solr-home
+        # If not, use an ephemeral volume
+        - name: solr-home
+          {{- if $solr.persistence.enabled }}
+          persistentVolumeClaim:
+            claimName: {{ include "esgf.component.fullname" (list $ "solr" $replica.name) }}
+          {{- else }}
+          emptyDir: {}
+          {{- end }}
+        # In order to allow the filesystem to be read-only, mount ephemeral volumes
+        # in places where writes are expected
+        - name: tmp
+          emptyDir: {}
+        - name: solr-logs
+          emptyDir: {}
+{{- end -}}
+{{- end -}}

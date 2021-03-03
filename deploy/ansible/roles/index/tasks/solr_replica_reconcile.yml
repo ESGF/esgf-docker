@@ -1,0 +1,79 @@
+---
+
+# Use the created volumes to detect the names of running replicas
+- name: Get existing volumes
+  docker_host_info:
+    volumes: yes
+  register: docker_host_info
+
+- name: Set replica information facts
+  set_fact:
+    running_replicas: >-
+      [
+        {% for volume in docker_host_info.volumes %}
+        {% if volume.Name is match('solr-replica-') %}
+        "{{ volume.Name | regex_replace('^solr-replica-', '') | regex_replace('-home$', '') }}",
+        {% endif %}
+        {% endfor %}
+      ]
+    # If the index node or Solr is disabled, the number of desired replicas is zero
+    # whatever solr_replicas is set to
+    desired_replicas: >-
+      [
+        {% if 'index' in group_names and solr_enabled %}
+        {% for replica in solr_replicas %}
+        "{{ replica.name }}",
+        {% endfor %}
+        {% endif %}
+      ]
+
+# Ensure volumes exist for all the desired replicas
+- name: Create Solr replica home volume
+  docker_volume:
+    name: "solr-replica-{{ item.name }}-home"
+  loop: "{{ solr_replicas }}"
+  when: "item.name in desired_replicas"
+  loop_control:
+    label: "{{ item.name }}"
+
+# Ensure containers exist for all the desired replicas
+- name: Start Solr replica container
+  docker_container:
+    name: "solr-replica-{{ item.name }}"
+    image: "{{ solr_image_prefix }}/{{ solr_image_repository }}:{{ solr_image_tag }}"
+    pull: "{{ solr_image_pull }}"
+    command:
+      - solr
+      - -f
+      - "-Dmaster.enable=true"
+      - "-Dslave.enable=true"
+      - "-Dslave.masterUrl={{ item.master_url }}"
+      - "-Dslave.pollInterval={{ item.poll_interval | default(solr_replica_poll_interval) }}"
+    detach: yes
+    restart_policy: unless-stopped
+    exposed_ports:
+      - "8983"
+    networks:
+      - name: esgf
+    networks_cli_compatible: yes
+    volumes: ["solr-replica-{{ item.name }}-home:/var/solr/data:rw"]
+    state: started
+    restart: yes
+  loop: "{{ solr_replicas }}"
+  when: "item.name in desired_replicas"
+  loop_control:
+    label: "{{ item.name }}"
+
+# Stop any running replicas that are no longer desired
+- name: Stop Solr replica container
+  docker_container:
+    name: "solr-replica-{{ item }}"
+    state: absent
+  loop: "{{ running_replicas | difference(desired_replicas) }}"
+
+# Remove the volumes for any running replicas that are no longer desired
+- name: Remove Solr replica home volume
+  docker_volume:
+    name: "solr-replica-{{ item }}-home"
+    state: absent
+  loop: "{{ running_replicas | difference(desired_replicas) }}"

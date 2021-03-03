@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<catalog name="Earth System Root Catalog"
+         xmlns="http://www.unidata.ucar.edu/namespaces/thredds/InvCatalog/v1.0"
+         xmlns:xlink="http://www.w3.org/1999/xlink"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://www.unidata.ucar.edu/namespaces/thredds/InvCatalog/v1.0
+                             http://www.unidata.ucar.edu/schemas/thredds/InvCatalog.1.0.6.xsd">
+    <!-- Configure the available services -->
+    <service name="all" serviceType="Compound" base="">
+        <service name="fileserver" serviceType="HTTPServer" base="/thredds/fileServer/" />
+        <service name="opendap" serviceType="OPeNDAP" base="/thredds/dodsC/" />
+    </service>
+
+    <!-- Produce a scan element for each of the given datasets -->
+    {{- range .Values.data.datasets }}
+    <datasetScan name="{{ .name }}" ID="{{ .path }}" path="{{ .path }}" location="{{ .location }}">
+        <metadata inherited="true">
+            <serviceName>all</serviceName>
+        </metadata>
+        <filter>
+            <!-- Exclude files or directories beginning with a dot -->
+            <exclude wildcard=".*" collection="true" />
+            {{- range .filters }}
+            <{{ .type }} {{ range $k, $v := (omit . "type") }}{{ $k }}={{ $v | quote }} {{ end }}/>
+            {{- end }}
+        </filter>
+    </datasetScan>
+    {{- end }}
+</catalog>

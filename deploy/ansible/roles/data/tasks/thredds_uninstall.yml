@@ -1,0 +1,16 @@
+---
+
+- name: Stop THREDDS container
+  docker_container:
+    name: thredds
+    state: absent
+
+- name: Remove THREDDS cache volume
+  docker_volume:
+    name: thredds-cache
+    state: absent
+
+- name: Remove THREDDS config directory
+  file:
+    path: /esg/config/thredds
+    state: absent

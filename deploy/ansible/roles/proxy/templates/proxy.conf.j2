@@ -1,0 +1,47 @@
+# HTTP and HTTPS server blocks that proxy to the other containers running on this host
+
+server {
+    listen       8080 default_server;
+    server_name  _;
+
+    # Use the Docker embedded DNS server to allow us to resolve container names
+    resolver 127.0.0.11 ipv6=off;
+
+    # By default, return 404
+    location / {
+        return 404;
+    }
+
+    {% if 'data' in group_names %}
+    {% if thredds_enabled %}
+    location /thredds {
+        include /etc/nginx/includes/proxy_params.conf;
+        proxy_pass http://thredds:8080;
+    }
+    {% endif %}
+
+    {% if fileserver_enabled %}
+    location /thredds/fileServer {
+        include /etc/nginx/includes/proxy_params.conf;
+        proxy_pass http://fileserver:8080;
+    }
+    {% endif %}
+    {% endif %}
+
+    {% if 'index' in group_names %}
+    {% if solr_enabled %}
+    # We only want to permit access to the replication handler for each core from outside
+    location ~ ^/solr/[a-z]+/replication {
+        include /etc/nginx/includes/proxy_params.conf;
+        proxy_pass http://solr-slave:8983;
+    }
+    {% endif %}
+
+    {% if search_enabled %}
+    location /esg-search {
+        include /etc/nginx/includes/proxy_params.conf;
+        proxy_pass http://search:8080;
+    }
+    {% endif %}
+    {% endif %}
+}

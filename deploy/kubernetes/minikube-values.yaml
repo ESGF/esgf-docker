@@ -1,0 +1,27 @@
+#####
+# Values for running in Minikube with test data from roocs/mini-esgf-data
+#####
+
+data:
+  # Mount the /test_data volume on the host as /test_data in the container
+  mounts:
+    - mountPath: /test_data
+      volumeSpec:
+        hostPath:
+          path: /test_data
+
+  # Configure the datasets in the test data
+  datasets:
+    - name: "CMIP5"
+      path: "esg_cmip5"
+      location: "/test_data/badc/cmip5/data"
+    - name: "CORDEX"
+      path: "esg_cordex"
+      location: "/test_data/group_workspaces/jasmin2/cp4cds1/data/c3s-cordex"
+
+
+index:
+  solr:
+    replicas:
+      - name: "llnl"
+        masterUrl: "https://esgf-node.llnl.gov/solr"

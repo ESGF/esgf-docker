@@ -1,0 +1,14 @@
+{{- $thredds := .Values.data.thredds -}}
+{{- if (and .Values.data.enabled $thredds.enabled $thredds.hpa) -}}
+apiVersion: autoscaling/v2beta2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ include "esgf.component.fullname" (list . "thredds") }}
+  labels: {{ include "esgf.component.labels" (list . "thredds" $thredds.labels) | nindent 4 }}
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ include "esgf.component.fullname" (list . "thredds") }}
+{{ toYaml $thredds.hpa | indent 2 }}
+{{- end -}}

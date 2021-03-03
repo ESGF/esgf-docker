@@ -1,0 +1,207 @@
+{{- $thredds := .Values.data.thredds -}}
+{{- if (and .Values.data.enabled $thredds.enabled) -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "esgf.component.fullname" (list . "thredds") }}
+  labels: {{ include "esgf.component.labels" (list . "thredds" $thredds.labels) | nindent 4 }}
+spec:
+  {{- if not $thredds.hpa }}
+  replicas: {{ $thredds.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels: {{ include "esgf.component.selectorLabels" (list . "thredds") | nindent 6 }}
+  template:
+    metadata:
+      labels: {{ include "esgf.component.selectorLabels" (list . "thredds") | nindent 8 }}
+      annotations:
+        {{- if $thredds.catalogVolume }}
+        # If using catalogs from a volume, roll the deployment on each revision to pick up new catalogs
+        release/revision: {{ .Release.Revision | quote }}
+        {{- else }}
+        # If using templated catalogs, we only need to roll if the configmap changes
+        checksum/configmap: {{ include (print $.Template.BasePath "/thredds/configmap.yaml") . | sha256sum }}
+        {{- end }}
+    spec:
+      {{- with (default .Values.image.pullSecrets $thredds.image.pullSecrets) }}
+      imagePullSecrets: {{ toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.data.podSecurityContext }}
+      securityContext: {{ toYaml . | nindent 8 }}
+      {{- end }}
+      initContainers:
+        {{- if (and $thredds.catalogVolume $thredds.localCache.enabled) }}
+        # If the local cache is enabled, wait for the node we have landed on to be initialised before starting
+        - name: wait-for-cache
+          {{ include "esgf.deployment.image" (list . $thredds.image) }}
+          env:
+            - name: RELEASE_REVISION
+              value: {{ .Release.Revision | quote }}
+          args:
+            # Loop until the sentinel file exists and contains the correct revision
+            # This indicates that the daemonset has initialised the node for this revision
+            - bash
+            - -c
+            - |
+              set -ex
+              until [ -r /thredds/cache/revision.txt ]; do sleep 5; done
+              until [ "$(cat /thredds/cache/revision.txt)" == "$RELEASE_REVISION" ]; do sleep 5; done
+          {{- with .Values.data.securityContext }}
+          securityContext: {{ toYaml . | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+            - name: thredds-cache-shared
+              mountPath: /thredds/cache
+              readOnly: true
+        - name: copy-cache
+          {{ include "esgf.deployment.image" (list . $thredds.image) }}
+          args:
+            # Just copy the shared cache as the initial state of the pod cache
+            - bash
+            - -c
+            - cp -r /thredds/cache-shared/* /thredds/cache
+          {{- with .Values.data.securityContext }}
+          securityContext: {{ toYaml . | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+            - name: thredds-cache-shared
+              mountPath: /thredds/cache-shared
+              readOnly: true
+            - name: thredds-cache
+              mountPath: /thredds/cache
+        {{- end }}
+        # Create a named pipe for the access log so it can be separated
+        # Continue to send the rest of the logs to stdout
+        - name: make-log-pipes
+          {{ include "esgf.deployment.image" (list . $thredds.image) }}
+          args:
+            - bash
+            - -c
+            - |
+              set -ex
+              ln -sf /dev/stdout /thredds/logs/serverStartup.log
+              ln -sf /dev/stdout /thredds/logs/catalogInit.log
+              ln -sf /dev/stdout /thredds/logs/httpout.log
+              ln -sf /dev/stdout /thredds/logs/featureCollectionScan.log
+              ln -sf /dev/stdout /thredds/logs/fmrc.log
+              ln -sf /dev/stdout /thredds/logs/threddsServlet.log
+              ln -sf /dev/stdout /thredds/logs/cache.log
+              ln -sf /dev/stdout /thredds/logs/localhost.log
+              rm -f /thredds/logs/localhost_access_log.txt && mkfifo /thredds/logs/localhost_access_log.txt
+          {{- with .Values.data.securityContext }}
+          securityContext: {{ toYaml . | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+            - name: tomcat-logs
+              mountPath: /thredds/logs
+        {{- with $thredds.extraInitContainers }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      containers:
+        - name: thredds
+          {{ include "esgf.deployment.image" (list . $thredds.image) }}
+          resources: {{ toYaml $thredds.resources | nindent 12 }}
+          ports:
+            - name: http
+              containerPort: 8080
+          env: {{ toYaml $thredds.extraEnv | nindent 12 }}
+          readinessProbe: &probe
+            httpGet:
+              path: /thredds/
+              port: 8080
+              httpHeaders:
+                - name: Host
+                  value: "{{ .Values.hostname }}"
+                - name: X-Forwarded-Host
+                  value: "{{ .Values.hostname }}"
+                - name: X-Forwarded-Proto
+                  value: https
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            <<: *probe
+            initialDelaySeconds: {{ $thredds.startTimeout }}
+          {{- with .Values.data.securityContext }}
+          securityContext: {{ toYaml . | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+            - name: thredds-catalogs
+              mountPath: /opt/tomcat/content/thredds/esgcet
+              readOnly: true
+              {{- if (and $thredds.catalogVolume (not $thredds.localCache.enabled)) }}
+              {{- with (omit (default dict $thredds.catalogVolume.mountOptions) "readOnly") }}
+              {{ toYaml . | indent 14 | trim }}
+              {{- end }}
+              {{- end }}
+            - name: thredds-cache
+              mountPath: /opt/tomcat/content/thredds/cache
+            - name: tomcat-logs
+              mountPath: /opt/tomcat/logs
+            # In order to use a read-only rootfs, we must put emptyDirs where we expect tomcat to write
+            - name: tomcat-temp
+              mountPath: /opt/tomcat/temp
+            - name: tomcat-work
+              mountPath: /opt/tomcat/work
+            - name: tmp-thredds
+              mountPath: /tmp/thredds
+            {{- include "esgf.data.volumeMounts" . | nindent 12 }}
+            {{- with $thredds.extraVolumeMounts }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+        # Tail the access log separately
+        - name: thredds-log-localhost-access-log
+          {{ include "esgf.deployment.image" (list . $thredds.image) }}
+          args:
+            # Just cat the access log
+            - cat
+            - /thredds/logs/localhost_access_log.txt
+          resources: {{ toYaml .Values.data.logTailResources | nindent 12 }}
+          {{- with .Values.data.securityContext }}
+          securityContext: {{ toYaml . | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+            - name: tomcat-logs
+              mountPath: /thredds/logs
+      {{- with $thredds.nodeSelector }}
+      nodeSelector: {{ toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $thredds.affinity }}
+      affinity: {{ toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $thredds.tolerations }}
+      tolerations: {{ toYaml . | nindent 8 }}
+      {{- end }}
+      volumes:
+        {{- if (and $thredds.catalogVolume $thredds.localCache.enabled) }}
+        - name: thredds-catalogs
+          hostPath:
+            path: {{ printf "%s/%s/%s/catalogs" $thredds.localCache.pathPrefix .Release.Namespace .Release.Name | quote }}
+        - name: thredds-cache-shared
+          hostPath:
+            path: {{ printf "%s/%s/%s/cache" $thredds.localCache.pathPrefix .Release.Namespace .Release.Name | quote }}
+        {{- else if $thredds.catalogVolume }}
+        - name: thredds-catalogs
+          {{ toYaml $thredds.catalogVolume.volumeSpec | indent 10 | trim }}
+        {{- else }}
+        - name: thredds-catalogs
+          configMap:
+            name: {{ include "esgf.component.fullname" (list . "thredds") }}
+        {{- end }}
+        # Each pod gets its own THREDDS cache directory on the local disk
+        - name: thredds-cache
+          emptyDir: {}
+        # Each pod gets a directory to hold the named pipes for log files
+        - name: tomcat-logs
+          emptyDir: {}
+        # In order to use a read-only rootfs, we must put emptyDirs where we expect tomcat to write
+        - name: tomcat-temp
+          emptyDir: {}
+        - name: tomcat-work
+          emptyDir: {}
+        - name: tmp-thredds
+          emptyDir: {}
+        {{- include "esgf.data.volumes" . | nindent 8 }}
+        {{- with $thredds.extraVolumes }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+{{- end -}}

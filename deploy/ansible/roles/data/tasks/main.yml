@@ -1,0 +1,21 @@
+---
+
+#####
+## Tasks to configure and deploy containers for a data node
+#####
+
+- name: Install THREDDS
+  include: thredds_install.yml
+  when: "'data' in group_names and thredds_enabled"
+
+- name: Uninstall THREDDS
+  include: thredds_uninstall.yml
+  when: "'data' not in group_names or not thredds_enabled"
+
+- name: Install Nginx fileserver
+  include: fileserver_install.yml
+  when: "'data' in group_names and fileserver_enabled"
+
+- name: Uninstall Nginx fileserver
+  include: fileserver_uninstall.yml
+  when: "'data' not in group_names or not fileserver_enabled"

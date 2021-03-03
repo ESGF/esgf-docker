@@ -1,0 +1,11 @@
+---
+
+- name: Stop fileserver container
+  docker_container:
+    name: fileserver
+    state: absent
+
+- name: Remove fileserver config directory
+  file:
+    path: /esg/config/fileserver
+    state: absent

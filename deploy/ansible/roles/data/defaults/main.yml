@@ -1,0 +1,75 @@
+---
+
+###
+# Default values used for all images
+# Each of these values can be overidden on a per-image basis if required
+###
+
+# The image prefix to use
+# If using a private registry, change this, e.g. registry.ceda.ac.uk/esgfdeploy
+image_prefix: esgfdeploy
+# The image tag to use
+image_tag: latest
+# Indicates whether images should be pulled every time the playbook runs
+# When using mutable tags, like latest or branch names, this should be true
+# When using immutable tags, like commit shas or release tags, this can be false
+image_pull: true
+
+
+###
+# Data node configuration
+###
+
+# The mounts that are required to serve data, as defined by the given datasets
+#
+# Each specified mount should include the following keys:
+#
+#   host_path: The path on the host that should be mounted into the container
+#   mount_path: The mount path to use inside the container
+data_mounts: []
+  # - host_path: /datacentre/archiveroots/archive/badc
+  #   mount_path: /badc
+
+# The datasets to expose - for each dataset, a THREDDS datasetScan element and an Nginx location are generated
+#
+# Each specified dataset should have the following keys:
+#
+#   name: The name of the dataset
+#   path: The URL path for the dataset
+#   location: The location of the dataset *inside the container* (see mounts above)
+#   filters (optional): A list of filter specifications for the datasetScan element
+data_datasets: []
+  # - name: CMIP5
+  #   path: esg_dataroot
+  #   location: /badc/cmip5/data
+
+# If specified, catalogs from this directory are used instead of the generated catalogs
+# thredds_catalog_host_path:
+
+# Security parameters required to run Nginx and serve data
+#
+# If a special user or groups are required to access data, they can be set here, which
+# will result in the data node containers launching with the specified UID and GIDs
+# By default, use the ESGF user
+data_security_context_user: "1000"
+# Due to permissions set inside the container, the user *must* belong to group 1000
+# in addition to the groups required to access data
+data_security_context_groups: ["1000"]
+
+# Configuration for the THREDDS container
+# Indicates if THREDDS should be deployed or not
+thredds_enabled: true
+# Settings for the THREDDS image
+thredds_image_prefix: "{{ image_prefix }}"
+thredds_image_tag: "{{ image_tag }}"
+thredds_image_pull: "{{ image_pull }}"
+thredds_image_repository: thredds
+
+# Configuration for the file server container
+# Indicates if the Nginx file server should be deployed or not
+fileserver_enabled: true
+# Settings for the fileserver image
+fileserver_image_prefix: "{{ image_prefix }}"
+fileserver_image_tag: "{{ image_tag }}"
+fileserver_image_pull: "{{ image_pull }}"
+fileserver_image_repository: nginx

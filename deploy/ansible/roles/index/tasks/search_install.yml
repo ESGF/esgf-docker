@@ -1,0 +1,32 @@
+---
+
+- name: Create Docker network
+  docker_network:
+    name: esgf
+
+- name: Make search config directory
+  file:
+    path: /esg/config/search
+    state: directory
+
+- name: Write search configuration
+  template:
+    src: "{{ item }}.j2"
+    dest: "/esg/config/search/{{ item }}"
+  loop: ["esgf.properties", "esgf_shards_static.xml"]
+
+- name: Start search container
+  docker_container:
+    name: search
+    image: "{{ search_image_prefix }}/{{ search_image_repository }}:{{ search_image_tag }}"
+    pull: "{{ search_image_pull }}"
+    detach: yes
+    restart_policy: unless-stopped
+    exposed_ports:
+      - "8080"
+    networks:
+      - name: esgf
+    networks_cli_compatible: yes
+    volumes: ["/esg/config/search:/esg/config:ro"]
+    state: started
+    restart: yes

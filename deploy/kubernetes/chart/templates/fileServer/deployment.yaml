@@ -1,0 +1,130 @@
+{{- $fileServer := .Values.data.fileServer -}}
+{{- if (and .Values.data.enabled $fileServer.enabled) -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "esgf.component.fullname" (list . "fileServer") }}
+  labels: {{ include "esgf.component.labels" (list . "fileServer" $fileServer.labels) | nindent 4 }}
+spec:
+  {{- if not $fileServer.hpa }}
+  replicas: {{ $fileServer.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels: {{ include "esgf.component.selectorLabels" (list . "fileServer") | nindent 6 }}
+  template:
+    metadata:
+      labels: {{ include "esgf.component.selectorLabels" (list . "fileServer") | nindent 8 }}
+      # Force deployment to roll if the config changes
+      # https://helm.sh/docs/howto/charts_tips_and_tricks/#automatically-roll-deployments
+      annotations:
+        checksum/configmap: {{ include (print $.Template.BasePath "/fileServer/configmap.yaml") . | sha256sum }}
+    spec:
+      {{- with (default .Values.image.pullSecrets $fileServer.image.pullSecrets) }}
+      imagePullSecrets: {{ toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.data.podSecurityContext }}
+      securityContext: {{ toYaml . | nindent 8 }}
+      {{- end }}
+      initContainers:
+        # Create a named pipe for the access log
+        # This allows us to separate the access log from the error log, so that it is tagged differently when forwarded
+        # This makes processing the access log for statistics easier
+        - name: make-log-pipes
+          {{ include "esgf.deployment.image" (list . $fileServer.image) }}
+          args:
+            # Continue to send the error log to stderr, but send the access log to a named pipe
+            - bash
+            - -c
+            - |
+              set -ex
+              ln -sf /dev/stderr /var/log/nginx/error.log
+              rm -f /var/log/nginx/access.log && mkfifo /var/log/nginx/access.log
+          {{- with .Values.data.securityContext }}
+          securityContext: {{ toYaml . | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+            - name: nginx-logs
+              mountPath: /var/log/nginx
+        {{- with $fileServer.extraInitContainers }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      containers:
+        - name: file-server
+          {{ include "esgf.deployment.image" (list . $fileServer.image) }}
+          resources: {{ toYaml $fileServer.resources | nindent 12 }}
+          ports:
+            - name: http
+              containerPort: 8080
+          env: {{ toYaml $fileServer.extraEnv | nindent 12 }}
+          readinessProbe: &probe
+            httpGet:
+              path: /
+              port: 8080
+              httpHeaders:
+                - name: Host
+                  value: healthz.local
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            <<: *probe
+            initialDelaySeconds: 300
+          {{- with .Values.data.securityContext }}
+          securityContext: {{ toYaml . | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+            - name: nginx-conf
+              mountPath: /etc/nginx/conf.d
+              readOnly: true
+            - name: nginx-logs
+              mountPath: /var/log/nginx
+            # In order to use a read-only root filesystem, we mount emptyDirs in places
+            # where files are expected to change
+            - name: nginx-cache
+              mountPath: /var/lib/nginx/tmp
+            - name: nginx-run
+              mountPath: /run/nginx
+            {{- include "esgf.data.volumeMounts" . | nindent 12 }}
+            {{- with $fileServer.extraVolumeMounts }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+        # Tail the access log separately
+        - name: file-server-access-log
+          {{ include "esgf.deployment.image" (list . $fileServer.image) }}
+          args:
+            # Just cat the access log
+            - cat
+            - /var/log/nginx/access.log
+          resources: {{ toYaml .Values.data.logTailResources | nindent 12 }}
+          {{- with .Values.data.securityContext }}
+          securityContext: {{ toYaml . | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+            - name: nginx-logs
+              mountPath: /var/log/nginx
+      {{- with $fileServer.nodeSelector }}
+      nodeSelector: {{ toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $fileServer.affinity }}
+      affinity: {{ toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $fileServer.tolerations }}
+      tolerations: {{ toYaml . | nindent 8 }}
+      {{- end }}
+      volumes:
+        - name: nginx-conf
+          configMap:
+            name: {{ include "esgf.component.fullname" (list . "fileServer") }}
+        # Each pod gets a directory to hold the named pipes for the logs
+        - name: nginx-logs
+          emptyDir: {}
+        # In order to use a read-only root filesystem, we mount emptyDirs in places
+        # where files are expected to change
+        - name: nginx-cache
+          emptyDir: {}
+        - name: nginx-run
+          emptyDir: {}
+        {{- include "esgf.data.volumes" . | nindent 8 }}
+        {{- with $fileServer.extraVolumes }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+{{- end -}}

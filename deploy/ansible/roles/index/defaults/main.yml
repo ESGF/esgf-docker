@@ -1,0 +1,70 @@
+---
+
+###
+# Default values used for all images
+# Each of these values can be overidden on a per-image basis if required
+###
+
+# The image prefix to use
+# If using a private registry, change this, e.g. registry.ceda.ac.uk/esgfdeploy
+image_prefix: esgfdeploy
+# The image tag to use
+image_tag: latest
+# Indicates whether images should be pulled every time the playbook runs
+# When using mutable tags, like latest or branch names, this should be true
+# When using immutable tags, like commit shas or release tags, this can be false
+image_pull: true
+
+
+###
+# Solr configuration
+###
+
+# Indicates if Solr should be deployed or not
+solr_enabled: true
+
+# Settings for the Solr image
+solr_image_prefix: "{{ image_prefix }}"
+solr_image_tag: "{{ image_tag }}"
+solr_image_pull: "{{ image_pull }}"
+solr_image_repository: solr
+
+# External URLs for the Solr master and slave
+# If search is enabled but Solr is not, set these URLs to use external Solr instances
+# If Solr is enabled, the local instances will be used in preference
+solr_master_external_url:
+solr_slave_external_url:
+
+# The slave poll interval (default 60 seconds)
+solr_slave_poll_interval: "00:00:60"
+
+# The default replica poll interval (default one hour)
+solr_replica_poll_interval: "01:00:00"
+
+# List of replicas of external Solr instances to use as replica shards
+#
+# If Solr is enabled, a local replica will be created for each specified remote index
+# If Solr is not enabled, the masterUrl will be used directly in the search
+#
+# Each specified replica should contain the following keys:
+#
+#   name: The name to use in resources created for the replica
+#   master_url: The URL of the Solr index to replicate, including scheme and path components
+#   poll_interval (optional): Replica-specific poll interval
+solr_replicas: []
+  # - name: remote-site
+  #   master_url: https://remote.esgf.node/solr
+  #   poll_interval: "06:00:00"
+
+
+###
+# Search configuration
+###
+# Indicates if the search app should be deployed or not
+search_enabled: true
+
+# Settings for the search image
+search_image_prefix: "{{ image_prefix }}"
+search_image_tag: "{{ image_tag }}"
+search_image_pull: "{{ image_pull }}"
+search_image_repository: search
