@@ -68,3 +68,21 @@ search_image_prefix: "{{ image_prefix }}"
 search_image_tag: "{{ image_tag }}"
 search_image_pull: "{{ image_pull }}"
 search_image_repository: search
+
+###
+# wgetApi configuration
+###
+wget_api_enabled: true
+wget_api_image_prefix: "{{ image_prefix }}"
+wget_api_tag: "{{ image_tag }}"
+wget_api_image_pull: "{{ image_pull }}"
+wget_api_image_repository: wget_api
+wget_api:
+  debug: False
+  allowed_hosts: "{{ wget_api.allowed_hosts }}"
+  solr_url: "{{ wget_api.solr_url }}"
+  shards_xml: "{{ wget_api.shards_xml }}"
+  script_file_default_limit: "{{ wget_api.script_file_default_limit }}"
+  script_file_max_limit: "{{ wget_api.script_file_max_limit }}"
+  data_upload_max_number_fields: "{{ wget_api.data_upload_max_number_fields }}"
+

@@ -1,0 +1,44 @@
+---
+
+- name: Create Docker network
+  docker_network:
+    name: esgf
+
+- name: Make wget api config directory
+  file:
+    path: /tmp/esgf_wget
+    state: directory
+
+- name: Write wget api local settings
+  template:
+    src: "esgf_wgetapi_config.j2"
+    dest: "/tmp/esgf_wget/{{ wget_api.config }}"
+    
+- name: Write wget api allowed projects
+  template:
+    src: "esgf_wgetapi_allowed_projects.json.j2"
+    dest: "/tmp/esgf_wget/{{ wget_api.allowed_projects_json }}"
+
+- name: Write XML file containing Solr shards
+  template:
+    src: "esgf_wgetapi_solr_shards_static.xml.j2"
+    dest: "/tmp/esgf_wget/esgf_wgetapi_solr_shards_static.xml"
+
+- name: Start wget_api container
+  docker_container:
+    name: wget_api
+    env:
+      ESGF_WGET_CONFIG: "{{ wget_api.config_path }}/{{ wget_api.config }}"
+      ESGF_WGET_SECRET_KEY: "{{ wget_api.secret_key }}"
+    image: "{{ wget_api_image_prefix }}/{{ wget_api_image_repository }}:{{ wget_api_image_tag }}"
+    pull: "{{ wget_api_image_pull }}"
+    detach: yes
+    restart_policy: unless-stopped
+    exposed_ports:
+      - "8000"
+    networks:
+      - name: esgf
+    networks_cli_compatible: yes
+    volumes: ["/tmp/esgf_wget:{{ wget_api.config_path }}:ro"]
+    state: started
+    restart: yes

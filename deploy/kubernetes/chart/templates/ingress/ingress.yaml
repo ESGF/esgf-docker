@@ -54,4 +54,10 @@ spec:
               serviceName: {{ include "esgf.component.fullname" (list . "search") }}
               servicePort: 8080
           {{- end }}
+          {{- if .Values.index.wgetApi.enabled }}
+          - path: /wget
+            backend:
+              serviceName: {{ include "esgf.component.fullname" (list . "wget-api") }}
+              servicePort: 8000
+          {{- end }}
           {{- end }}

@@ -1,0 +1,49 @@
+{{- $wgetApi := .Values.index.wgetApi -}}
+{{- if (and .Values.index.enabled $wgetApi.enabled) -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "esgf.component.fullname" (list . "wgetApi") }}
+  labels: {{ include "esgf.component.labels" (list . "wgetApi" $wgetApi.labels) | nindent 4 }}
+spec:
+  replicas: {{ $wgetApi.replicaCount }}
+  selector:
+    matchLabels: {{ include "esgf.component.selectorLabels" (list . "wgetApi") | nindent 6 }}
+  template:
+    metadata:
+      labels: {{ include "esgf.component.selectorLabels" (list . "wgetApi") | nindent 8 }}
+    spec:
+      {{- with $wgetApi.podSecurityContext }}
+      securityContext: {{ toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: wget-api
+          {{ include "esgf.deployment.image" (list . $wgetApi.image) }}
+          env:
+          - name: ESGF_WGET_CONFIG
+            value: {{ $wgetApi.config_path }}/{{ $wgetApi.config }}
+          - name: ESGF_WGET_SECRET_KEY
+            valueFrom:
+              secretKeyRef:
+                name: wget-api-secret
+                key: secret
+          ports:
+          - name: http
+            containerPort: 8000
+          readinessProbe: &probe
+            httpGet:
+              path: /wget
+              port: 8000
+            initialDelaySeconds: 20
+            periodSeconds: 20
+          livenessProbe:
+            <<: *probe
+            initialDelaySeconds: 30
+          volumeMounts:
+          - name: config
+            mountPath: {{ $wgetApi.config_path }}
+      volumes:
+        - name: config
+          configMap:
+            name: {{ include "esgf.component.fullname" (list . "wgetApi") }}
+{{- end -}}
