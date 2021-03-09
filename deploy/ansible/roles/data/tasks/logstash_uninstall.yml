@@ -1,0 +1,11 @@
+---
+
+- name: Stop logstash container
+  docker_container:
+    name: logstash
+    state: absent
+
+- name: Remove logstash config directory
+  file:
+    path: /esg/config/logstash
+    state: absent
