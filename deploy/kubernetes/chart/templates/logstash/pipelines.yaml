@@ -1,0 +1,12 @@
+{{- $accessLogSidecar := .Values.data.accessLogSidecar -}}
+{{- if (and .Values.data.enabled $accessLogSidecar.enabled) -}}
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ include "esgf.component.fullname" (list . "logstash-pipelines") }}
+  labels: {{ include "esgf.component.labels" (list . "logstash" dict) | nindent 4 }}
+data:
+{{ range $path, $_ := .Files.Glob "files/logstash/*" }}
+  {{ base $path }}: {{ tpl ($.Files.Get $path) $ | b64enc | quote }}
+{{ end }}
+{{- end -}}
