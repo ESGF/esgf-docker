@@ -1,0 +1,80 @@
+input {
+    {% if thredds_enabled %}
+    pipe {
+        command => "cat /esg/logs/thredds/localhost_access_log.txt"
+    }
+    {% endif %}
+    {% if fileserver_enabled %}
+    pipe {
+        command => "cat /esg/logs/fileserver/access.log"
+    }
+    {% endif %}
+}
+filter {
+    # Extract components from the access log messages
+    grok {
+        match => {
+            "message" => "%{IPORHOST:client_ip} - %{USER:user} \[%{HTTPDATE:request_time}\] \"%{WORD:method} %{URIPATHPARAM:request} HTTP/%{NUMBER:http_version}\" %{NUMBER:status_code} %{NUMBER:bytes_sent} \"%{DATA:referrer}\" \"%{DATA:user_agent}\" \"%{DATA:forwarded_for}\" \[%{NUMBER:request_duration}\]"
+        }
+        remove_field => ["message"]
+    }
+    # Only consider file downloads and OPeNDAP accesses
+    if [request] !~ "^/thredds/(fileServer|dodsC)" {
+        drop { }
+    }
+    # Replace the logstash timestamp with the timestamp from the request
+    date {
+        match => ["request_time", "dd/MMM/yyyy:HH:mm:ss Z"]
+        remove_field => ["request_time"]
+    }
+    # Turn the date into a Unix timestamp and add it to the record
+    ruby {
+        code => "event.set('request_time', event.get('@timestamp').to_i)"
+    }
+    # Replace the client IP with the forwarded for IP if present
+    if [forwarded_for] != "-" {
+        mutate {
+            rename => { "forwarded_for" => "client_ip" }
+        }
+    }
+    # Flag local clients, as we won't bother with the geoip lookup
+    cidr {
+        address => ["%{client_ip}"]
+        network => ["10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16"]
+        add_tag => ["localnet"]
+        add_field => { "[geoip][country_code2]" => "-" }
+    }
+    # For non-local networks, get the country for the IP
+    if "localnet" not in [tags] {
+        geoip {
+            source => "client_ip"
+            fields => ["country_code2"]
+        }
+    }
+    # If the geoip lookup failed, set the country code to "-"
+    if "_geoip_lookup_failure" in [tags] {
+        mutate {
+            add_field => { "[geoip][country_code2]" => "-" }
+            remove_tag => ["_geoip_lookup_failure"]
+        }
+    }
+    mutate {
+        # Replace the host with the specified external hostname
+        replace => { "host" => "{{ hostname }}" }
+        # Move the country code to the top-level
+        add_field => { "country_code" => "%{[geoip][country_code2]}" }
+        # Remove any unrequired fields
+        remove_field => ["client_ip", "command", "geoip", "tags", "user"]
+    }
+}
+output {
+    lumberjack {
+        codec => json
+        hosts => ["{{ logstash_stats_server }}"]
+        port => {{ logstash_stats_port }}
+        ssl_certificate => "/etc/logstash/certs/lumberjack.cert"
+    }
+    stdout {
+        codec => rubydebug
+    }
+}
