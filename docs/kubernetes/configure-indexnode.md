@@ -7,6 +7,7 @@ For a full list of available variables, please consult the chart at
 <!-- TOC depthFrom:2 -->
 
 - [Configuring Solr replicas](#configuring-solr-replicas)
+- [Enabling persistence for Solr instances](#enabling-persistence-for-solr-instances)
 - [Using external Solr instances](#using-external-solr-instances)
 
 <!-- /TOC -->
@@ -47,6 +48,45 @@ index:
 There are several other variables available in the ESGF Helm chart to customise Solr
 behaviour - please see the [values.yaml](../../deploy/kubernetes/chart/values.yaml) for a
 full list of available variables.
+
+## Enabling persistence for Solr instances
+
+By default, the ESGF Helm chart configures Solr instances to use local ephemeral storage for the
+`SOLR_HOME` directories. This means that if a pod gets rescheduled for any reason, all the data
+stored in that Solr instance is lost, which is (probably) OK for testing but clearly not ideal
+for a production setup.
+
+In order to provide persistent storage for Solr instances, the ESGF Helm chart leverages
+Kubernetes [Persistent Volumes](https://kubernetes.io/docs/concepts/storage/persistent-volumes/)
+and [Storage Classes](https://kubernetes.io/docs/concepts/storage/storage-classes/). In this way, the
+ESGF Helm chart can specify the required storage using
+[PersistentVolumeClaim](https://kubernetes.io/docs/concepts/storage/persistent-volumes/#persistentvolumeclaims)
+resources while leaving it up to the cluster operator to attach suitable storage and make it
+available using a `StorageClass` (the configuration of storage classes is site-specific and beyond the scope
+of this documentation).
+
+To configure persistence for Solr instances, just set the following options:
+
+```yaml
+solr:
+  persistence:
+    # Enable persistence for Solr instances
+    enabled: true
+    # The storage class to use for Solr volumes
+    # If not given, the default storage class is used
+    storageClassName: fast-ssd
+    # The size of the volume to provision for each type of Solr instance
+    # Defaults to 10Gi for each
+    size:
+      master: 40Gi
+      slave: 40Gi
+      # This is the default size for replica volumes
+      # It can be overridden per-replica if required for large replicas
+      replica: 20Gi
+```
+
+There are additional options for advanced storage configurations - please consult the
+[values.yaml](../../deploy/kubernetes/chart/values.yaml) for a full list.
 
 ## Using external Solr instances
 

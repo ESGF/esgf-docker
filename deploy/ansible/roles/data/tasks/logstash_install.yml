@@ -1,0 +1,46 @@
+---
+
+- name: Create Docker network
+  docker_network:
+    name: esgf
+
+- name: Ensure logstash config directories exist
+  file:
+    path: /esg/config/logstash/{{ item }}
+    state: directory
+  loop:
+    - certs
+    - pipelines
+
+- name: Install certificate for stats server
+  copy:
+    content: "{{ logstash_stats_certificate }}"
+    dest: /esg/config/logstash/certs/lumberjack.cert
+
+- name: Install stats logstash configuration
+  template:
+    src: stats.conf.j2
+    dest: /esg/config/logstash/pipelines/stats.conf
+
+# Configure logstash to follow the THREDDS and fileserver logs
+- name: Start logstash container
+  docker_container:
+    name: logstash
+    image: "{{ logstash_image_prefix }}/{{ logstash_image_repository }}:{{ logstash_image_tag }}"
+    pull: "{{ logstash_image_pull }}"
+    detach: yes
+    restart_policy: unless-stopped
+    networks:
+      - name: esgf
+    networks_cli_compatible: yes
+    user: "{{ data_security_context_user }}"
+    groups: "{{ data_security_context_groups }}"
+    volumes:
+      # Logstash certificates
+      - "/esg/config/logstash/certs:/etc/logstash/certs:ro"
+      # Logstash configuration
+      - "/esg/config/logstash/pipelines:/etc/logstash/conf.d:ro"
+      # Log directory
+      - "/esg/logs:/esg/logs:ro"
+    state: started
+    recreate: yes

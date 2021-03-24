@@ -1,0 +1,22 @@
+{{- $solr := .Values.index.solr -}}
+{{- if and .Values.index.enabled $solr.enabled $solr.persistence.enabled -}}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "esgf.component.fullname" (list . "solr" "slave") }}
+  labels:
+    {{ include "esgf.component.labels" (list . "solr" $solr.labels) | indent 4 | trim }}
+    solr.esgf.org/role: "slave"
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: {{ $solr.persistence.size.slave }}
+  {{- if kindIs "string" $solr.persistence.storageClassName }}
+  storageClassName: {{ $solr.persistence.storageClassName | quote }}
+  {{- end }}
+  {{- with $solr.persistence.selector }}
+  selector: {{ toYaml . | nindent 10 }}
+  {{- end }}
+{{- end }}

@@ -50,6 +50,7 @@ data_datasets: []
 #
 # If a special user or groups are required to access data, they can be set here, which
 # will result in the data node containers launching with the specified UID and GIDs
+#
 # By default, use the ESGF user
 data_security_context_user: "1000"
 # Due to permissions set inside the container, the user *must* belong to group 1000
@@ -73,3 +74,38 @@ fileserver_image_prefix: "{{ image_prefix }}"
 fileserver_image_tag: "{{ image_tag }}"
 fileserver_image_pull: "{{ image_pull }}"
 fileserver_image_repository: nginx
+
+# Configuration for the logstash stats exporter
+logstash_enabled: false
+# Settings for the logstash stats exporter image
+logstash_image_prefix: "{{ image_prefix }}"
+logstash_image_tag: "{{ image_tag }}"
+logstash_image_pull: "{{ image_pull }}"
+logstash_image_repository: logstash
+# Settings for the stats server
+logstash_stats_server: proxy02.cmcc.it
+logstash_stats_port: 5044
+logstash_stats_certificate: |
+  -----BEGIN CERTIFICATE-----
+  MIIDyjCCArICCQDSgl2omUxgLTANBgkqhkiG9w0BAQsFADCBpjELMAkGA1UEBhMC
+  SVQxDjAMBgNVBAgMBUl0YWx5MQ4wDAYDVQQHDAVMZWNjZTEYMBYGA1UECgwPQ01D
+  QyBGb3VuZGF0aW9uMRgwFgYDVQQLDA9DTUNDIEZvdW5kYXRpb24xGDAWBgNVBAMM
+  D3Byb3h5MDIuY21jYy5pdDEpMCcGCSqGSIb3DQEJARYac3RhdGlzdGljcy1zdXBw
+  b3J0QGNtY2MuaXQwHhcNMjEwMTE4MTQ0MzUxWhcNMjIwMTE4MTQ0MzUxWjCBpjEL
+  MAkGA1UEBhMCSVQxDjAMBgNVBAgMBUl0YWx5MQ4wDAYDVQQHDAVMZWNjZTEYMBYG
+  A1UECgwPQ01DQyBGb3VuZGF0aW9uMRgwFgYDVQQLDA9DTUNDIEZvdW5kYXRpb24x
+  GDAWBgNVBAMMD3Byb3h5MDIuY21jYy5pdDEpMCcGCSqGSIb3DQEJARYac3RhdGlz
+  dGljcy1zdXBwb3J0QGNtY2MuaXQwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEK
+  AoIBAQDgvKp/26Raq/BNtycxGk9mWfC/o4XO6GiFk7vSB2WrinMWR60vwwoFxx9u
+  cAcm4YsagvC/RIJ7uRZuNDMZloPhA/Eb8qzA9lvLi9msf3W8a5GPKI+KWQ8xoRzt
+  aOGCApsFr4Kd2KYJNx/KvcR8aVOOTpHR39aA9ne8L25HpSA96Uw8HwX99yO5Dlh7
+  VDC6u8+j3s57jxmGdpCq9bKJzpClnueLjy83L3bnumEhLN1j7rhSUANuBBoPyibS
+  T3ngKZJZ/ZdEb0TzAwltv11XvepFcy1SAMoOjcFhfpD1EIIGnOdefvLc0DiB6mD5
+  zwTWDlAWANQmZDdU1YsxIsdW8OHfAgMBAAEwDQYJKoZIhvcNAQELBQADggEBAM/u
+  gs9qOKzVLiaSqIc2N+++x9wsPnzr0sSXR5liAtpG2PbnCcl9Q9ajsFTJOloaAYRC
+  rXX7GaeLhgjZvtP45D6UDJB0NwfAam5udH0wen8DM2eG9y/0rvSyfmg4mARZcnVE
+  eXfihMNBiA/+01NrPdNCdBfeLL9aAu2uigek6Uyyk5a7yXck0rJOpFTKYX3XS2q6
+  i37PvE8vpwCoFJ1qaxq/i9pQQfCWUnY+Dt+Odn7+xZn2B1M0GOTfgLbLhKH3i8jP
+  pi/9dHkTcvpE8o52xb8CbYFfL2cXp5uGqwxB2grNJFIgxfaVXZbL2NxSoGlN5scU
+  82kdgbLq+v/uzhNxT7E=
+  -----END CERTIFICATE-----

@@ -159,11 +159,47 @@ data:
     # Run with a read-only root filesystem by default
     readOnlyRootFilesystem: true
 
-  # The resources for log-tailing containers
-  logTailResources:
-    requests:
-      cpu: 1m
-      memory: 1Mi
+  # Configuration for the access log sidecar
+  accessLogSidecar:
+    enabled: false
+    # Image overrides for the access logging sidecar
+    image:
+      repository: logstash
+    # The resource allocations for the access log container
+    # See https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+    resources: {}
+    # Configuration for the stats pipeline
+    statsPipeline:
+      enabled: true
+      # Use these variables to configure the target server
+      # The default server is the CMCC server
+      # Your IP must be whitelisted in order to send data to the CMCC service
+      server: proxy02.cmcc.it
+      port: 5044
+      certificate: |
+        -----BEGIN CERTIFICATE-----
+        MIIDyjCCArICCQDSgl2omUxgLTANBgkqhkiG9w0BAQsFADCBpjELMAkGA1UEBhMC
+        SVQxDjAMBgNVBAgMBUl0YWx5MQ4wDAYDVQQHDAVMZWNjZTEYMBYGA1UECgwPQ01D
+        QyBGb3VuZGF0aW9uMRgwFgYDVQQLDA9DTUNDIEZvdW5kYXRpb24xGDAWBgNVBAMM
+        D3Byb3h5MDIuY21jYy5pdDEpMCcGCSqGSIb3DQEJARYac3RhdGlzdGljcy1zdXBw
+        b3J0QGNtY2MuaXQwHhcNMjEwMTE4MTQ0MzUxWhcNMjIwMTE4MTQ0MzUxWjCBpjEL
+        MAkGA1UEBhMCSVQxDjAMBgNVBAgMBUl0YWx5MQ4wDAYDVQQHDAVMZWNjZTEYMBYG
+        A1UECgwPQ01DQyBGb3VuZGF0aW9uMRgwFgYDVQQLDA9DTUNDIEZvdW5kYXRpb24x
+        GDAWBgNVBAMMD3Byb3h5MDIuY21jYy5pdDEpMCcGCSqGSIb3DQEJARYac3RhdGlz
+        dGljcy1zdXBwb3J0QGNtY2MuaXQwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEK
+        AoIBAQDgvKp/26Raq/BNtycxGk9mWfC/o4XO6GiFk7vSB2WrinMWR60vwwoFxx9u
+        cAcm4YsagvC/RIJ7uRZuNDMZloPhA/Eb8qzA9lvLi9msf3W8a5GPKI+KWQ8xoRzt
+        aOGCApsFr4Kd2KYJNx/KvcR8aVOOTpHR39aA9ne8L25HpSA96Uw8HwX99yO5Dlh7
+        VDC6u8+j3s57jxmGdpCq9bKJzpClnueLjy83L3bnumEhLN1j7rhSUANuBBoPyibS
+        T3ngKZJZ/ZdEb0TzAwltv11XvepFcy1SAMoOjcFhfpD1EIIGnOdefvLc0DiB6mD5
+        zwTWDlAWANQmZDdU1YsxIsdW8OHfAgMBAAEwDQYJKoZIhvcNAQELBQADggEBAM/u
+        gs9qOKzVLiaSqIc2N+++x9wsPnzr0sSXR5liAtpG2PbnCcl9Q9ajsFTJOloaAYRC
+        rXX7GaeLhgjZvtP45D6UDJB0NwfAam5udH0wen8DM2eG9y/0rvSyfmg4mARZcnVE
+        eXfihMNBiA/+01NrPdNCdBfeLL9aAu2uigek6Uyyk5a7yXck0rJOpFTKYX3XS2q6
+        i37PvE8vpwCoFJ1qaxq/i9pQQfCWUnY+Dt+Odn7+xZn2B1M0GOTfgLbLhKH3i8jP
+        pi/9dHkTcvpE8o52xb8CbYFfL2cXp5uGqwxB2grNJFIgxfaVXZbL2NxSoGlN5scU
+        82kdgbLq+v/uzhNxT7E=
+        -----END CERTIFICATE-----
 
   # Configuration for the THREDDS pod
   thredds:
@@ -302,6 +338,22 @@ index:
     # See https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
     tolerations:
 
+    # Persistence for Solr
+    persistence:
+      enabled: false
+      size:
+        # The size of volumes to use for the master, slave and replicas respectively
+        master: 10Gi
+        slave: 10Gi
+        # The replica volume size can be overridden on a per-replica basis
+        replica: 10Gi
+      # The storage class to use
+      # See https://kubernetes.io/docs/concepts/storage/persistent-volumes/#class-1
+      storageClassName:
+      # Optional volume selector
+      # See https://kubernetes.io/docs/concepts/storage/persistent-volumes/#selector
+      selector: {}
+
     # External URLs for the Solr master and slave
     # If search is enabled but Solr is not, set these URLs to use external Solr instances
     # If Solr is enabled, the local instances will be used in preference
@@ -330,6 +382,7 @@ index:
     #   masterUrl: The URL of the Solr index to replicate, including scheme and path components
     #   pollInterval (optional): Replica-specific poll interval
     #   resources (optional): Replica-specific resource allocations
+    #   persistentVolumeSize (optional): The size of the persistent volume to use for this replica, if persistence is enabled
     replicas: []
       # - name: remote-site
       #   masterUrl: https://remote.esgf.node/solr
