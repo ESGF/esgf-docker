@@ -93,7 +93,8 @@ auth:
       port: 8181
       policy_name: policies/policy.rego
       rule_name: allow
-    RESOURCE_URL_QUERY_KEY: rd
+    RESOURCE_URI_QUERY_KEY: rd
+    RESOURCE_URI_HEADER_KEY: HTTP_X_ORIGINAL_URI
     # OAuth Bearer Token auth settings
     OAUTH_CLIENT_ID:
     OAUTH_CLIENT_SECRET:
