@@ -22,7 +22,7 @@ spec:
       {{- end }}
       containers:
         - name: opa
-          image: openpolicyagent/opa:latest
+          {{ include "esgf.deployment.image" (list . $opa.image) }}
           resources: {{ toYaml $opa.resources | nindent 12 }}
           ports:
           - name: http
