@@ -1,3 +1,4 @@
+{{- if .Values.auth.enabled }}
 apiVersion: networking.k8s.io/v1beta1
 kind: Ingress
 metadata:
@@ -19,7 +20,6 @@ spec:
     - host: {{ .Values.hostname | quote }}
       http:
         paths:
-          {{- if .Values.auth.enabled }}
           - path: /verify
             backend:
               serviceName: {{ include "esgf.component.fullname" (list . "auth") }}
@@ -28,10 +28,10 @@ spec:
             backend:
               serviceName: {{ include "esgf.component.fullname" (list . "auth") }}
               servicePort: 8080
-          {{- end }}
           {{- if .Values.opa.enabled }}
           - path: /v1/data
             backend:
               serviceName: {{ include "esgf.component.fullname" (list . "opa") }}
               servicePort: 8181
           {{- end }}
+{{- end }}
