@@ -8,7 +8,7 @@ hostname:
 image:
   # The image prefix to use
   # If using a private registry, change this, e.g. registry.ceda.ac.uk/esgfdeploy
-  prefix: localhost:5000
+  prefix: esgfdeploy
   # The tag to use
   tag: latest
   # Indicates whether images should be pulled every time a pod starts
