@@ -13,6 +13,9 @@ metadata:
     {{- with .Values.ingress.annotations }}
     {{ toYaml . | nindent 4 }}
     {{- end }}
+  {{- else }}
+  {{- with .Values.ingress.annotations }}
+  annotations: {{ toYaml . | nindent 4 }}
   {{- end }}
 spec:
   tls:
