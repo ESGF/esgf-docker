@@ -91,7 +91,7 @@ auth:
     OPA_SERVER:
       host: esgf-opa.default.svc.cluster.local
       port: 8181
-      policy_name: policies/policy.rego
+      package_path: esgf
       rule_name: allow
     RESOURCE_URI_QUERY_KEY: rd
     RESOURCE_URI_HEADER_KEY: HTTP_X_ORIGINAL_URI

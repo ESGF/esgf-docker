@@ -8,7 +8,14 @@ data:
     default allow = false
 
     allow {
+        re_match("^/thredds/(fileServer|dodsC)/cmip5..*.aggregation.*", input.resource)
+        input.action = "Read"
+    }
+
+    allow {
+        regex.match("^/thredds/catalog/esgcet/c3s-cordex/.*", input.resource)
         input.subject.groups[_] = "/cordex_research/publish"
+        input.action = "Write"
     }
 kind: ConfigMap
 metadata:
