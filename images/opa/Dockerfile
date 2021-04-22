@@ -4,7 +4,7 @@
 
 ARG ESGF_REPOSITORY_BASE=esgfdeploy
 ARG ESGF_IMAGES_VERSION=latest
-ARG OPA_URL=https://github.com/open-policy-agent/opa/releases/download/v0.11.0/opa_linux_amd64
+ARG OPA_URL=https://github.com/open-policy-agent/opa/releases/download/v0.27.1/opa_linux_amd64
 
 FROM ${ESGF_REPOSITORY_BASE}/base:${ESGF_IMAGES_VERSION}
 
