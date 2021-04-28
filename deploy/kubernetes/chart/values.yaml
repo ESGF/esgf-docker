@@ -89,7 +89,7 @@ auth:
       - authenticate.oidc.middleware.OpenIDConnectAuthenticationMiddleware
       - authorize.opa.middleware.OPAAuthorizationMiddleware
     OPA_SERVER:
-      host: esgf-opa.default.svc.cluster.local
+      # Host is defined in the settings template
       port: 8181
       package_path: esgf
       rule_name: allow
