@@ -12,11 +12,51 @@ server {
         return 404;
     }
 
+    {% if auth_enabled %}
+    location /verify {
+        set $query '';
+        if ($request_uri ~* "[^\?]+\?(.*)$") {
+            set $query $1;
+        }
+
+        proxy_pass http://auth:8080/verify/?next=$scheme://$http_host$http_port$request_uri;
+        proxy_pass_request_body off;
+
+        proxy_set_header Content-Length '0';
+        proxy_set_header Host $host;
+        proxy_set_header X-Origin-URI $request_uri;
+        proxy_set_header X-Origin-Query $query;
+        proxy_set_header X-Forwarded-Host $host;
+    }
+
+    location /login {
+        proxy_pass http://auth:8080/login;
+        proxy_pass_request_body off;
+
+        proxy_set_header Content-Length '0';
+        proxy_set_header Host $host;
+        proxy_set_header X-Origin-URI $request_uri;
+        proxy_set_header X-Origin-Query $query;
+        proxy_set_header X-Forwarded-Host $host;
+    }
+
+    location @error401 {
+        return 302 /login;
+    }
+    {% endif %}
+
     {% if 'data' in group_names %}
     {% if thredds_enabled %}
     location /thredds {
         include /etc/nginx/includes/proxy_params.conf;
         proxy_pass http://thredds:8080;
+
+        {% if auth_enabled %}
+        error_page 401 = @error401;
+        auth_request /auth/verify;
+        auth_request_set $username $upstream_http_x_username;
+        auth_request_set $sid $upstream_http_x_session;
+        {% endif %}
     }
     {% endif %}
 

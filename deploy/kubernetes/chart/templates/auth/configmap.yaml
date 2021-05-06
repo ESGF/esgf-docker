@@ -1,0 +1,8 @@
+{{- $auth := .Values.auth -}}
+{{- if ($auth.enabled) -}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "esgf.component.fullname" (list . "auth") }}
+  labels: {{ include "esgf.component.labels" (list . "auth" $auth.labels) | nindent 4 }}
+{{- end -}}

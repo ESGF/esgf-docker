@@ -1,0 +1,31 @@
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: {{ include "esgf.component.fullname" (list . "ingressAuth") }}
+  labels: {{ include "esgf.component.labels" (list . "ingressAuth" .Values.ingress.labels) | nindent 4 }}
+  {{- with .Values.ingress.annotations }}
+  annotations: {{ toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  tls:
+    - hosts:
+        - {{ .Values.hostname | quote }}
+      {{- if .Values.ingress.tls.secretName }}
+      secretName: {{ .Values.ingress.tls.secretName }}
+      {{- else }}
+      secretName: {{ include "esgf.component.fullname" (list . "hostcert") }}
+      {{- end }}
+  rules:
+    - host: {{ .Values.hostname | quote }}
+      http:
+        paths:
+          {{- if .Values.auth.enabled }}
+          - path: /verify
+            backend:
+              serviceName: {{ include "esgf.component.fullname" (list . "auth") }}
+              servicePort: 8080
+          - path: /login
+            backend:
+              serviceName: {{ include "esgf.component.fullname" (list . "auth") }}
+              servicePort: 8080
+          {{- end }}
