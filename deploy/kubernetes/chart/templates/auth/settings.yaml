@@ -1,4 +1,5 @@
 {{- $auth := .Values.auth -}}
+{{- $opa := .Values.opa -}}
 {{- if ($auth.enabled) -}}
 apiVersion: v1
 kind: Secret
