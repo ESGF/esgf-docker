@@ -1,30 +1,10 @@
 {{- $opa := .Values.opa -}}
 {{- if ($opa.enabled) -}}
 apiVersion: v1
-data:
-  policy.rego: |-
-    package esgf
-
-    default allow = false
-
-    allow {
-        regex.match("^/thredds/(fileServer|dodsC)/cmip5..*.aggregation.*", input.resource)
-        input.action = "Read"
-    }
-
-    allow {
-        regex.match("^/thredds/(fileServer|dodsC)/esg_cordex/.*", input.resource)
-        input.subject.groups[_] = "/cordex_research"
-        input.action = "Read"
-    }
-
-    allow {
-        regex.match("^/esg-search/ws/publish", input.resource)
-        input.subject.groups[_] = "/cordex_research/publish"
-        input.action = "Read"
-    }
 kind: ConfigMap
 metadata:
   name: {{ include "esgf.component.fullname" (list . "policy") }}
   labels: {{ include "esgf.component.labels" (list . "policy" $opa.labels) | nindent 4 }}
+data:
+  policy.rego: {{ tpl (.Files.Get "files/opa/policy.rego") . | quote }}
 {{- end -}}
