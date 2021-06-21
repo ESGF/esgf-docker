@@ -144,6 +144,8 @@ opa:
   # The tolerations for the OPA server pod
   # See https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
   tolerations:
+  # Log level for the OPA server
+  logLevel: info
 
 ###
 # Data node configuration

@@ -1,41 +1,15 @@
+{{- $opa := .Values.opa -}}
 package esgf
 
-default allow = true
+default allow = false
 
-allow {
-    regex.match("^/thredds/(fileServer|dodsC)/esg_cordex/.*", input.resource)
-    input.subject.groups[_] = "/cordex_research"
+allow = true {
+    count(violation) == 0
 }
 
-allow {
-    regex.match("^/esg-search/ws/publish", input.resource)
-    input.subject.groups[_] = "/cordex_research/publish"
+{{- range .opa.restrictedPaths }}
+violation[{{ .name }}] {
+    regex.match("{{ .path }}", input.resource)
+    not input.subject.user
 }
-
-allow {
-    regex.match("^/login/.*", input.resource)
-}
-
-allow {
-    regex.match("^/esg-search/.*", input.resource)
-}
-
-allow {
-    regex.match("^/thredds/.*", input.resource)
-}
-
-
-#allow = true {                                      # allow is true if...
-#    count(violation) == 0                           # there are zero violations.
-#}
-
-#violation["cordex"] {
-#    regex.match("^/thredds/(fileServer|dodsC)/esg_cordex/.*", input.resource)
-#    input.subject.name == "wtucker"
-#}
-
-#violation["cordex_publish"] {
-#    regex.match("^/esg-search/ws/publish", input.resource)
-#    input.subject.groups[_] = "/cordex_research/publish"
-#}
-
+{{- end }}
