@@ -71,11 +71,6 @@ git clone https://github.com/ESGF/esgf-docker.git
 cd esgf-docker
 ```
 
-These changes have not yet been committed to `master`, so you will need to check out the development branch:
-
-```sh
-git checkout future-architecture
-```
 
 Then follow the deployment guide for your chosen deployment method:
 
