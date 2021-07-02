@@ -146,6 +146,8 @@ opa:
   tolerations:
   # Log level for the OPA server
   logLevel: info
+  # Paths to restrict
+  restrictedPaths: []
 
 ###
 # Data node configuration
