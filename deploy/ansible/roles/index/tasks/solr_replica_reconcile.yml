@@ -58,7 +58,7 @@
     networks_cli_compatible: yes
     volumes: ["solr-replica-{{ item.name }}-home:/var/solr/data:rw"]
     state: started
-    restart: yes
+    recreate: yes
   loop: "{{ solr_replicas }}"
   when: "item.name in desired_replicas"
   loop_control:

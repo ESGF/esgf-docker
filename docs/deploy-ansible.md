@@ -23,6 +23,7 @@ configurations.
     - [Using existing THREDDS catalogs](#using-existing-thredds-catalogs)
     - [Configuring Solr replicas](#configuring-solr-replicas)
     - [Using external Solr instances](#using-external-solr-instances)
+    - [Fowarding access logs](#fowarding-access-logs)
 
 <!-- /TOC -->
 
@@ -291,3 +292,21 @@ solr_replicas:
   - name: llnl
     master_url: https://esgf-node.llnl.gov/solr
 ```
+
+### Fowarding access logs
+
+ESGF data nodes can be configured to forward access logs to [CMCC](https://www.cmcc.it/)
+for processing in order to produce download statistics for the federation.
+
+Before enabling this functionality you must first contact CMCC to arrange for the IP addresses
+of your ESGF nodes, as visible from the internet, to be whitelisted.
+
+Then set the following variable to enable the forwarding of access logs:
+
+```yaml
+logstash_enabled: true
+```
+
+Additional variables are available to configure the server to which logs should be forwarded -
+please see the [role defaults for the data role](../deploy/ansible/roles/data/defaults/main.yml) -
+however the vast majority of deployments will not need to change these.

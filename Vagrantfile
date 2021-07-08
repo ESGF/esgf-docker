@@ -11,17 +11,19 @@ Vagrant.configure(2) do |config|
   config.vm.network :private_network, ip: "192.168.100.100"
 
   # Set some virtualbox flags to improve time synchronisation between host and guest
-  config.vm.provider :virtualbox do |virtualbox|
+  config.vm.provider :virtualbox do |v|
+    # 512MB RAM is not really enough
+    v.memory = 4096
     # sync time every 10 seconds
-    virtualbox.customize [ "guestproperty", "set", :id, "/VirtualBox/GuestAdd/VBoxService/--timesync-interval", 10000 ]
+    v.customize [ "guestproperty", "set", :id, "/VirtualBox/GuestAdd/VBoxService/--timesync-interval", 10000 ]
     # adjustments if drift > 100 ms
-    virtualbox.customize [ "guestproperty", "set", :id, "/VirtualBox/GuestAdd/VBoxService/--timesync-min-adjust", 100 ]
+    v.customize [ "guestproperty", "set", :id, "/VirtualBox/GuestAdd/VBoxService/--timesync-min-adjust", 100 ]
     # sync time on restore
-    virtualbox.customize [ "guestproperty", "set", :id, "/VirtualBox/GuestAdd/VBoxService/--timesync-set-on-restore", 1 ]
+    v.customize [ "guestproperty", "set", :id, "/VirtualBox/GuestAdd/VBoxService/--timesync-set-on-restore", 1 ]
     # sync time on start
-    virtualbox.customize [ "guestproperty", "set", :id, "/VirtualBox/GuestAdd/VBoxService/--timesync-set-start", 1 ]
+    v.customize [ "guestproperty", "set", :id, "/VirtualBox/GuestAdd/VBoxService/--timesync-set-start", 1 ]
     # at 1 second drift, the time will be set and not "smoothly" adjusted
-    virtualbox.customize [ "guestproperty", "set", :id, "/VirtualBox/GuestAdd/VBoxService/--timesync-set-threshold", 1000 ]
+    v.customize [ "guestproperty", "set", :id, "/VirtualBox/GuestAdd/VBoxService/--timesync-set-threshold", 1000 ]
   end
 
   config.vm.provision :shell, inline: <<-SHELL
@@ -52,7 +54,7 @@ Vagrant.configure(2) do |config|
       {
         name: "CORDEX",
         path: "esg_cordex",
-        location: "/test_data/group_workspaces/jasmin2/cp4cds1/data/c3s-cordex"
+        location: "/test_data/group_workspaces/jasmin2/cp4cds1/vol1/data/c3s-cordex"
       }
     ]
     solr_replicas = [
@@ -66,7 +68,7 @@ Vagrant.configure(2) do |config|
       "index" => ["default"],
       "all:vars" => {
         "hostname" => "192.168.100.100.nip.io",
-        "image_tag" => "issue-115-esg-search",
+        "image_tag" => "future-architecture",
       },
       "data:vars" => {
         "data_mounts" => "#{data_mounts.to_json}",

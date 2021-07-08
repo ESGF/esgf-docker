@@ -95,6 +95,13 @@ build:jre:
     CONTEXT_DIR: $CI_PROJECT_DIR/images/jre
   needs: ["build:base"]
 
+build:logstash:
+  extends: .docker-build
+  stage: build-2
+  variables:
+    CONTEXT_DIR: $CI_PROJECT_DIR/images/logstash
+  needs: ["build:base"]
+
 build:rsync:
   extends: .docker-build
   stage: build-2
