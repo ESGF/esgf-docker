@@ -53,7 +53,9 @@ COPY --from=keycloak-containers-source /source/server/tools /opt/jboss/tools
 RUN /opt/jboss/tools/build-keycloak.sh
 
 
-FROM ${ESGF_REPOSITORY_BASE}/jdk:${ESGF_IMAGES_VERSION}
+FROM ${ESGF_REPOSITORY_BASE}/jre:${ESGF_IMAGES_VERSION}
+
+USER root
 
 # Copy the Keycloak server installation from the named stage
 COPY --from=keycloak-build --chown=$ESGF_UID:root /opt/jboss/keycloak /opt/jboss/keycloak
