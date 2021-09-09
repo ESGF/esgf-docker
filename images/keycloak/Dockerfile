@@ -5,14 +5,14 @@
 ARG ESGF_REPOSITORY_BASE=esgfdeploy
 ARG ESGF_IMAGES_VERSION=latest
 
-ARG KEYCLOAK_VERSION=11.0.2
-ARG KEYCLOAK_DIST=https://downloads.jboss.org/keycloak/$KEYCLOAK_VERSION/keycloak-$KEYCLOAK_VERSION.tar.gz
+ARG KEYCLOAK_VERSION=15.0.1
+ARG KEYCLOAK_DIST=https://github.com/keycloak/keycloak/releases/download/$KEYCLOAK_VERSION/keycloak-$KEYCLOAK_VERSION.tar.gz
 
 # JDBC library enables an optional PostgreSQL database for Keycloak server deployments
 ARG JDBC_POSTGRES_VERSION=42.2.5
-ARG JDBC_MYSQL_VERSION=8.0.19
+ARG JDBC_MYSQL_VERSION=8.0.22
 ARG JDBC_MARIADB_VERSION=2.5.4
-ARG JDBC_MSSQL_VERSION=7.4.1.jre11
+ARG JDBC_MSSQL_VERSION=8.2.2.jre11
 
 
 FROM ${ESGF_REPOSITORY_BASE}/base:${ESGF_IMAGES_VERSION} as keycloak-containers-source
@@ -68,7 +68,8 @@ COPY --chown=$ESGF_UID:root configuration/* /opt/jboss/deploy/
 RUN rm -rf /opt/jboss/keycloak/standalone/data/* && \
     rm -rf /opt/jboss/keycloak/standalone/configuration/* && \
     mkdir -p /standalone/configuration/keystores && \
-    chown $ESGF_UID:root -R /standalone
+    chown $ESGF_UID:root -R /standalone && \
+    chown $ESGF_UID:root -R /opt/jboss
 
 # Install init scripts
 COPY init.d/* /docker-init.d/

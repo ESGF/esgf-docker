@@ -8,9 +8,6 @@
 # Copy XML configuration
 cp /opt/jboss/deploy/standalone-ha.xml /opt/jboss/keycloak/standalone/configuration/
 
-# Copy logging properties
-cp /opt/jboss/deploy/logging.properties /opt/jboss/keycloak/standalone/configuration/
-
 # Ensure required properties files exist
 declare -a filenames=("application-roles" "application-users" "logging" "mgmt-groups" "mgmt-users")
 for i in "${filenames[@]}"
