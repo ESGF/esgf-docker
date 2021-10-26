@@ -6,7 +6,11 @@ metadata:
   {{- if .Values.auth.enabled }}
   annotations:
     # Auth service configuration
+    {{- if .Values.ingress.authUrl }}
+    nginx.ingress.kubernetes.io/auth-url: {{ .Values.ingress.authUrl }}
+    {{- else }}
     nginx.ingress.kubernetes.io/auth-url: http://{{ include "esgf.component.fullname" (list . "auth") }}.{{ .Release.Namespace }}.svc.cluster.local:8080/verify/
+    {{- end }}
     nginx.ingress.kubernetes.io/auth-snippet: |
       proxy_set_header X-Original-URI $request_uri;
     nginx.ingress.kubernetes.io/auth-signin: https://$host/login/
