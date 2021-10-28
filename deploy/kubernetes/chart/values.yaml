@@ -32,8 +32,8 @@ ingress:
   annotations: {}
   # Extra labels to apply to the ingress resources
   labels: {}
-  # Auth URL
-  authUrl:
+  # Sign-in URL for unauthenticated requests
+  authSignin:
   # TLS configuration
   tls:
     # Either give the name of an existing TLS secret
