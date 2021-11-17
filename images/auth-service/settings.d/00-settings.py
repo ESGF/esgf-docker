@@ -27,12 +27,13 @@ def is_exempt(request):
         return False
 
     resource = get_requested_resource(request)
-    path = urlparse(resource).path.lstrip("/")
+    if resource:
 
-    # Check exempt path patterns against requested URL
-    for expr in settings.AUTHORIZATION_EXEMPT_PATHS:
-        if re.compile(expr).match(path):
-            return True
+        # Check exempt path patterns against requested URL
+        path = urlparse(resource).path.lstrip("/")
+        for expr in settings.AUTHORIZATION_EXEMPT_PATHS:
+            if re.compile(expr).match(path):
+                return True
 
 AUTHORIZATION_EXEMPT_PATHS = [] # e.g. [".*"]
 AUTHORIZATION_EXEMPT_FILTER = is_exempt
