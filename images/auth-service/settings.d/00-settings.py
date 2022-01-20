@@ -20,20 +20,26 @@ WSGI_APPLICATION = 'auth_service.wsgi.application'
 SESSION_ENGINE = 'django.contrib.sessions.backends.signed_cookies'
 SESSION_COOKIE_SECURE = False
 
-# Authorization bypass function for exempt paths
+# Authorization exemption function
 def is_exempt(request):
 
-    if not settings.AUTHORIZATION_EXEMPT_PATHS:
+    if not settings.SECURED_PATHS:
         return False
 
     resource = get_requested_resource(request)
     if resource:
 
+        is_secured_path = False
+
         # Check exempt path patterns against requested URL
         path = urlparse(resource).path.lstrip("/")
-        for expr in settings.AUTHORIZATION_EXEMPT_PATHS:
-            if re.compile(expr).match(path):
-                return True
+        for expr in settings.SECURED_PATHS:
 
-AUTHORIZATION_EXEMPT_PATHS = [] # e.g. [".*"]
+            if re.compile(expr).match(path):
+                is_secured_path = True
+                break
+
+        return not is_secured_path
+
+SECURED_PATHS = [] # e.g. [".*"]
 AUTHORIZATION_EXEMPT_FILTER = is_exempt
