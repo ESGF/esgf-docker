@@ -5,7 +5,7 @@
 ARG ESGF_REPOSITORY_BASE=esgfdeploy
 ARG ESGF_IMAGES_VERSION=latest
 
-ARG KEYCLOAK_VERSION=15.0.1
+ARG KEYCLOAK_VERSION=16.1.1
 ARG KEYCLOAK_DIST=https://github.com/keycloak/keycloak/releases/download/$KEYCLOAK_VERSION/keycloak-$KEYCLOAK_VERSION.tar.gz
 
 # JDBC library enables an optional PostgreSQL database for Keycloak server deployments
