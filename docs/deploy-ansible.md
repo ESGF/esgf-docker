@@ -29,7 +29,7 @@ configurations.
 
 ## Prerequisites
 
-The prerequisites for running the Ansible node are similar to the existing node requirements.  Specifically, the assumed target host for deployment assumes a RHEL 7 or CentOS 7 deployment.  Additionally, the playbook operator must have full host control with sudo / root access.  You may want to familiarize yourself with additional requirements here https://esgf.github.io/esgf-ansible/requirements/requirements.html#system
+The prerequisites for running the Ansible node with Docker containers are similar to the node requirements for the classic deployment of ESGF services (without the use of containers).  Specifically, the assumed target host for deployment assumes a RHEL 7 or CentOS 7 deployment.  Additionally, the playbook operator must have full host control with sudo / root access.  You may want to familiarize yourself with additional requirements here https://esgf.github.io/esgf-ansible/requirements/requirements.html#system
 
 ## Running the playbook
 
