@@ -7,14 +7,7 @@ metadata:
   annotations: {{ toYaml . | nindent 4 }}
   {{- end }}
 spec:
-  tls:
-    - hosts:
-        - {{ .Values.hostname | quote }}
-      {{- if .Values.ingress.tls.secretName }}
-      secretName: {{ .Values.ingress.tls.secretName }}
-      {{- else }}
-      secretName: {{ include "esgf.component.fullname" (list . "hostcert") }}
-      {{- end }}
+{{ include "ingress.tls" . | indent 2 }}
   rules:
     - host: {{ .Values.hostname | quote }}
       http:
