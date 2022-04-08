@@ -6,11 +6,12 @@ metadata:
   labels: {{ include "esgf.component.labels" (list . "ingressPublish" .Values.ingress.labels) | nindent 4 }}
   annotations:
     nginx.ingress.kubernetes.io/whitelist-source-range: {{ .Values.index.search.publishIpRange }}
+    {{ include "esgf.ingress.auth" . | indent 4 }}
     {{- with .Values.ingress.annotations }}
     {{ toYaml . | nindent 4 }}
     {{- end }}
 spec:
-{{ include "ingress.tls" . | indent 2 }}
+  {{ include "esgf.ingress.tls" . | indent 2 }}
   rules:
     - host: {{ .Values.hostname | quote }}
       http:

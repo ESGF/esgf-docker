@@ -3,27 +3,13 @@ kind: Ingress
 metadata:
   name: {{ include "esgf.component.fullname" (list . "ingress") }}
   labels: {{ include "esgf.component.labels" (list . "ingress" .Values.ingress.labels) | nindent 4 }}
-  {{- if .Values.auth.enabled }}
   annotations:
-    # Auth service configuration
-    nginx.ingress.kubernetes.io/auth-url: http://{{ include "esgf.component.fullname" (list . "auth") }}.{{ .Release.Namespace }}.svc.cluster.local:8080/verify/
-    nginx.ingress.kubernetes.io/auth-snippet: |
-      proxy_set_header X-Original-URI $request_uri;
-    {{- if .Values.ingress.authSignin }}
-    nginx.ingress.kubernetes.io/auth-signin: {{ .Values.ingress.authSignin }}
-    {{- else }}
-    nginx.ingress.kubernetes.io/auth-signin: https://$host/login/
-    {{- end }}
+    {{ include "esgf.ingress.auth" . | indent 4 }}
     {{- with .Values.ingress.annotations }}
     {{ toYaml . | nindent 4 }}
     {{- end }}
-  {{- else }}
-  {{- with .Values.ingress.annotations }}
-  annotations: {{ toYaml . | nindent 4 }}
-  {{- end }}
-  {{- end }}
 spec:
-{{ include "ingress.tls" . | indent 2 }}
+  {{ include "esgf.ingress.tls" . | indent 2 }}
   rules:
     - host: {{ .Values.hostname | quote }}
       http:
