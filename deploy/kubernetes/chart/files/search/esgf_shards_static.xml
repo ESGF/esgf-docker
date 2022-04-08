@@ -13,7 +13,7 @@
     {{- if $solr.enabled }}
     <value>{{ include "esgf.component.fullname" (list $ "solr" .name) }}:8983/solr</value>
     {{- else }}
-    <value>{{ .masterUrl | required "Replica masterUrl is required" }}</value>
+    <value>{{ .masterUrl | required "Replica masterUrl is required" }}</value> {{- if .name }} <!-- {{ .name }} -->{{- end }}
     {{- end }}
     {{- end }}
 </shards>

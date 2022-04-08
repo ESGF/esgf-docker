@@ -112,3 +112,15 @@ The produced mounts will always be read-only.
   {{- end }}
 {{- end }}
 {{- end -}}
+
+{{/* Generate TLS config for ingress */}}
+{{- define "esgf.ingress.tls" }}
+tls:
+  - hosts:
+      - {{ .Values.hostname | quote }}
+    {{- if .Values.ingress.tls.secretName }}
+    secretName: {{ .Values.ingress.tls.secretName }}
+    {{- else }}
+    secretName: {{ include "esgf.component.fullname" (list . "hostcert") }}
+    {{- end }}
+{{- end }}
