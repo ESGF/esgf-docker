@@ -30,11 +30,7 @@ RUN chmod -R g+rwX /opt/keycloak
 
 FROM ${ESGF_REPOSITORY_BASE}/jre:${ESGF_IMAGES_VERSION} as builder
 
-COPY --from=build-env --chown=1000:0 /opt/keycloak /opt/keycloak
-
-# Create user for Keycloak
-RUN echo "keycloak:x:0:root" >> /etc/group && \
-    echo "keycloak:x:1000:0:keycloak user:/opt/keycloak:/sbin/nologin" >> /etc/passwd
+COPY --from=build-env --chown=$ESGF_UID:0 /opt/keycloak /opt/keycloak
 
 # Keycloak runs as the ESGF user
 USER $ESGF_UID
