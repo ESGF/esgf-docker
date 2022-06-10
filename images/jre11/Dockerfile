@@ -11,7 +11,7 @@ FROM ${ESGF_REPOSITORY_BASE}/base:${ESGF_IMAGES_VERSION}
 USER root
 
 RUN yum makecache && \
-    yum install -y java-1.8.0-openjdk-headless-1.8.0.322.b06 && \
+    yum install -y java-11-openjdk-headless-11.0.15.0.9 && \
     yum clean all
 
 USER $ESGF_UID
