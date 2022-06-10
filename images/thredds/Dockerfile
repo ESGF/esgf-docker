@@ -19,7 +19,7 @@ RUN mkdir /application && \
     rm thredds.war
 
 
-FROM ${ESGF_REPOSITORY_BASE}/tomcat:${ESGF_IMAGES_VERSION}
+FROM ${ESGF_REPOSITORY_BASE}/tomcat11:${ESGF_IMAGES_VERSION}
 
 USER root
 
