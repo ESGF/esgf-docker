@@ -9,7 +9,7 @@ ARG KEYCLOAK_VERSION=18.0.0
 ARG KEYCLOAK_DIST=https://github.com/keycloak/keycloak/releases/download/$KEYCLOAK_VERSION/keycloak-$KEYCLOAK_VERSION.tar.gz
 
 
-FROM ${ESGF_REPOSITORY_BASE}/jre:${ESGF_IMAGES_VERSION} as build-env
+FROM ${ESGF_REPOSITORY_BASE}/jdk:${ESGF_IMAGES_VERSION} as build-env
 
 # Redeclare the ARGs that are required from the global scope
 ARG KEYCLOAK_VERSION
