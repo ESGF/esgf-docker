@@ -12,5 +12,5 @@ FROM ${ESGF_REPOSITORY_BASE}/base:${ESGF_IMAGES_VERSION}
 USER root
 
 RUN yum makecache && \
-    yum install -y java-1.8.0-openjdk-devel-1.8.0.332.b09 && \
+    yum install -y java-11-openjdk-devel-11.0.15.0.9 && \
     yum clean all
