@@ -26,7 +26,7 @@ ENV LC_ALL en_US.UTF-8
 
 # Upgrade all existing packages
 # Updating CACHE_BUST to the current time will bust the cache and force a rebuild
-RUN CACHE_BUST="20220421"; \
+RUN CACHE_BUST="20220628"; \
     yum makecache && yum upgrade -y && yum clean all
 
 # Install ca-certificates and openssl
