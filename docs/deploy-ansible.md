@@ -27,10 +27,15 @@ configurations.
 
 <!-- /TOC -->
 
+## Prerequisites
+
+The prerequisites for running the Ansible node with Docker containers are similar to the node requirements for the classic deployment of ESGF services (without the use of containers).  Specifically, the assumed target host for deployment assumes a RHEL 7 or CentOS 7 deployment.  Additionally, the playbook operator must have full host control with sudo / root access.  You may want to familiarize yourself with additional requirements here https://esgf.github.io/esgf-ansible/requirements/requirements.html#system
+
 ## Running the playbook
 
 Before attempting to run the playbook, make sure that you have
 [installed Ansible](https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html).
+
 
 Next, make a configuration directory - this can be anywhere on your machine that is **not** under
 `esgf-docker`. You can also place this directory under version control if you wish - this can be very
