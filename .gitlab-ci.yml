@@ -88,25 +88,11 @@ build:jdk:
     CONTEXT_DIR: $CI_PROJECT_DIR/images/jdk
   needs: ["build:base"]
 
-build:jdk11:
-  extends: .docker-build
-  stage: build-2
-  variables:
-    CONTEXT_DIR: $CI_PROJECT_DIR/images/jdk11
-  needs: ["build:base"]
-
 build:jre:
   extends: .docker-build
   stage: build-2
   variables:
     CONTEXT_DIR: $CI_PROJECT_DIR/images/jre
-  needs: ["build:base"]
-
-build:jre11:
-  extends: .docker-build
-  stage: build-2
-  variables:
-    CONTEXT_DIR: $CI_PROJECT_DIR/images/jre11
   needs: ["build:base"]
 
 build:logstash:
@@ -165,13 +151,6 @@ build:tomcat:
     CONTEXT_DIR: $CI_PROJECT_DIR/images/tomcat
   needs: ["build:jre"]
 
-build:tomcat11:
-  extends: .docker-build
-  stage: build-3
-  variables:
-    CONTEXT_DIR: $CI_PROJECT_DIR/images/tomcat11
-  needs: ["build:jre11"]
-
 build:python-build:
   extends: .docker-build
   stage: build-3
@@ -198,7 +177,7 @@ build:thredds:
   stage: build-4
   variables:
     CONTEXT_DIR: $CI_PROJECT_DIR/images/thredds
-  needs: ["build:jdk11", "build:tomcat11"]
+  needs: ["build:jdk", "build:tomcat"]
 
 build:auth-service:
   extends: .docker-build

@@ -5,11 +5,11 @@
 ARG ESGF_REPOSITORY_BASE=esgfdeploy
 ARG ESGF_IMAGES_VERSION=latest
 
-FROM ${ESGF_REPOSITORY_BASE}/jdk11:${ESGF_IMAGES_VERSION} as builder
+FROM ${ESGF_REPOSITORY_BASE}/jdk:${ESGF_IMAGES_VERSION} as builder
 
 # Unpack the THREDDS war
 ARG THREDDS_VERSION=5.4
-ARG THREDDS_SHA1=dd89beb6f49374080fd82d5408462d4d3a7738f5
+ARG THREDDS_SHA1=efac50a7b2fe139500802d3dd71b06745d02e22a
 ARG THREDDS_URL=https://downloads.unidata.ucar.edu/tds/$THREDDS_VERSION/thredds-$THREDDS_VERSION-SNAPSHOT.war
 RUN mkdir /application && \
     cd /application && \
@@ -19,7 +19,7 @@ RUN mkdir /application && \
     rm thredds.war
 
 
-FROM ${ESGF_REPOSITORY_BASE}/tomcat11:${ESGF_IMAGES_VERSION}
+FROM ${ESGF_REPOSITORY_BASE}/tomcat:${ESGF_IMAGES_VERSION}
 
 USER root
 
