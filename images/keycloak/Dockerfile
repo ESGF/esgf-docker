@@ -5,7 +5,7 @@
 ARG ESGF_REPOSITORY_BASE=esgfdeploy
 ARG ESGF_IMAGES_VERSION=latest
 
-ARG KEYCLOAK_VERSION=19.0.2
+ARG KEYCLOAK_VERSION=18.0.2
 ARG KEYCLOAK_DIST=https://github.com/keycloak/keycloak/releases/download/$KEYCLOAK_VERSION/keycloak-$KEYCLOAK_VERSION.tar.gz
 
 
