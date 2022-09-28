@@ -1,0 +1,43 @@
+### EDIT THIS
+
+### Example of a group_vars/index.yml
+### Provides variables specific to index nodes (hosts in the [index] group).
+
+### See: https://github.com/ESGF/esgf-docker/blob/master/docs/deploy-ansible.md
+### For more information about configuring an Ansible installation.
+
+
+
+## OPTIONAL: Configure replicas for the SOLR server:
+
+#solr_replicas:
+#  - name: ceda-index-3
+#    master_url: https://esgf-index3.ceda.ac.uk/solr
+#  - name: llnl
+#    master_url: https://esgf-node.llnl.gov/solr
+
+## https://github.com/ESGF/esgf-docker/blob/master/docs/deploy-ansible.md#configuring-solr-replicas
+
+
+
+## OPTIONAL: This configuration disables the SOLR installation and uses an existing
+## SOLR server instead:
+
+## Disable local Solr instances
+#solr_enabled: false
+## Set the external URLs for Solr
+#solr_master_external_url: http://external.solr:8984/solr
+#solr_slave_external_url: http://external.solr:8983/solr
+## Configure the replicas
+## No local containers will be deployed - esg-search will use the master_url directly
+#solr_replicas:
+#  - name: ceda-index-3
+#    master_url: https://esgf-index3.ceda.ac.uk/solr
+#  - name: llnl
+#    master_url: https://esgf-node.llnl.gov/solr
+
+## WARNING: If you want to use a Solr instance configured using esgf-ansible as an
+## external Solr instance, you will need to configure the firewall on that host to
+## expose the port 8984 where the master listens.
+
+## https://github.com/ESGF/esgf-docker/blob/master/docs/deploy-ansible.md#using-external-solr-instances
