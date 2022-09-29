@@ -46,6 +46,11 @@
     name: python-pip
     state: latest
 
+- name: Update pip to more recent version (but not py3 latest)
+  pip:
+    name: pip
+    version: 19.0
+
 - name: Install Docker SDK
   pip:
     name: docker

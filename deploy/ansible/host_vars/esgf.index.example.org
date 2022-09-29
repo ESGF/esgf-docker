@@ -1,16 +1,20 @@
 ### EDIT THIS
 
 ### Example of a host_vars file specific to the host "esgf.index.example.org".
+
 ### Provides variables for only this host machine.
 
 ### See: https://github.com/ESGF/esgf-docker/blob/master/docs/deploy-ansible.md
-### For more information about configuring an Ansible installation.
+
+### for more information about configuring an Ansible installation.
 
 
 
 ## OPTIONAL: Enabling and disabling components:
 
 #solr_enabled: true/false
+
 #search_enabled: true/false
 
-# https://github.com/ESGF/esgf-docker/blob/master/docs/deploy-ansible.md#enabling-and-disabling-components
+### See: https://github.com/ESGF/esgf-docker/blob/master/docs/deploy-ansible.md#enabling-and-disabling-components
+
