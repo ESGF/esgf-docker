@@ -19,8 +19,6 @@ ARG KEYCLOAK_DIST
 
 ADD $KEYCLOAK_DIST /tmp/keycloak/
 
-# The next step makes it uniform for local development and upstream built.
-# If it is a local tar archive then it is unpacked, if from remote is just downloaded.
 RUN (cd /tmp/keycloak && \
     echo "$KEYCLOAK_SHA1 *keycloak-$KEYCLOAK_VERSION.tar.gz" | sha1sum --strict --check && \
     tar -xvf /tmp/keycloak/keycloak-*.tar.gz && \
