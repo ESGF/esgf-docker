@@ -6,10 +6,16 @@ that will place [Docker containers](https://www.docker.com/) onto specific hosts
 The playbook and associated roles and variables are in [deploy/ansible/](../deploy/ansible/).
 Please look at these files to understand exactly what the playbook is doing.
 
+Ansible requires that you have `root` access on the hosts that you are deploying to.
+
 For a complete list of all variables that are available, please look at the defaults for each
 of the [playbook roles](../deploy/ansible/roles/). The defaults have extensive comments that
 explain how to use these variables. This document describes how to apply some common
 configurations.
+
+**NOTE: The installation has a footprint of around 4GB. Please ensure there is enough disk
+space before you run Ansible.**
+
 
 <!-- TOC depthFrom:2 -->
 
@@ -30,8 +36,10 @@ configurations.
 
 ## Running the playbook
 
-Before attempting to run the playbook, make sure that you have
-[installed Ansible](https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html).
+Before attempting to run the playbook, make sure that you have:
+- [installed Ansible](https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html)
+- `root` access on the target hosts where the services will be deployed
+- checked that there is at least 4GB of free disk space on the target hosts
 
 Next, make a configuration directory - this can be anywhere on your machine that is **not** under
 `esgf-docker`. You can also place this directory under version control if you wish - this can be very
