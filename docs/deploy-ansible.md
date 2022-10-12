@@ -24,6 +24,7 @@ configurations.
     - [Configuring Solr replicas](#configuring-solr-replicas)
     - [Using external Solr instances](#using-external-solr-instances)
     - [Fowarding access logs](#fowarding-access-logs)
+- [Testing the service endpoints](#testing-service-endpoints)
 
 <!-- /TOC -->
 
@@ -82,6 +83,9 @@ vagrant up
 ```
 
 After waiting for the containers to start, the THREDDS interface will be available at http://192.168.100.100.nip.io/thredds.
+
+**NOTE:** The Vagrant installation is known to have problems when run from a Windows host. We do not recommend
+installing from Windows.
 
 ## Configuring the installation
 
@@ -310,3 +314,14 @@ logstash_enabled: true
 Additional variables are available to configure the server to which logs should be forwarded -
 please see the [role defaults for the data role](../deploy/ansible/roles/data/defaults/main.yml) -
 however the vast majority of deployments will not need to change these.
+
+## Testing the service endpoints
+
+Once the playbook has successfully then you should see a THREDDS catalog webpage at this URL:
+
+ `http://<data:host_name>/thredds`
+
+And the following should return a JSON response:
+
+ `http://<index:host_name>/esg-search/search?fields=*&type=File&latest=true&format=application%2Fsolr%2Bjson&limit=10&offset=0`
+

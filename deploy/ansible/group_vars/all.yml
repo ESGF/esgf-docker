@@ -1,0 +1,28 @@
+### EDIT THIS
+
+### Example of a group_vars/all.yml
+### Provides variables common to both [data] and [index] index nodes
+
+### See: https://github.com/ESGF/esgf-docker/blob/master/docs/deploy-ansible.md
+### For more information about configuring an Ansible installation.
+
+
+
+## OPTIONAL: Use the images that were built for a particular commit:
+
+#image_tag: a031a2ca
+
+## OPTIONAL: If using an immutable tag, don't do unnecessary pulls:
+
+#image_pull: false
+
+## OPTIONAL: Set the prefix for the images:
+
+#image_prefix: registry.example.com/esgf
+
+## OPTIONAL: Use a different branch for the THREDDS image:
+
+#thredds_image_tag: my-branch
+#thredds_image_pull: true
+
+## https://github.com/ESGF/esgf-docker/blob/master/docs/deploy-ansible.md#setting-the-image-version
