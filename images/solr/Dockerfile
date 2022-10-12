@@ -10,7 +10,7 @@ USER root
 
 # Specific version of Java required by SOLR
 RUN yum makecache && \
-    yum install -y java-1.8.0-openjdk-headless-1.8.0.332.b09 && \
+    yum install -y java-1.8.0-openjdk-headless-1.8.0.345.b01 && \
     yum clean all
 
 # Create Solr home directory
