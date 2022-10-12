@@ -16,6 +16,7 @@ configurations.
 **NOTE: The installation has a footprint of around 4GB. Please ensure there is enough disk
 space before you run Ansible.**
 
+
 <!-- TOC depthFrom:2 -->
 
 - [Running the playbook](#running-the-playbook)
