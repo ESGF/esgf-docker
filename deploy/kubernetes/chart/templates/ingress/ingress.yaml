@@ -71,7 +71,9 @@ spec:
           {{- if .Values.index.wgetApi.enabled }}
           - path: /wget
             backend:
-              serviceName: {{ include "esgf.component.fullname" (list . "wget-api") }}
-              servicePort: 8000
+              service:
+                name: {{ include "esgf.component.fullname" (list . "wget-api") }}
+                port:
+                number: 8000
           {{- end }}
           {{- end }}
