@@ -43,3 +43,8 @@ solr_enabled: true
 
 # Indicates if search is enabled
 search_enabled: true
+
+# Indicates if wget_api is enabled
+wget_api_enabled: true
+
+
