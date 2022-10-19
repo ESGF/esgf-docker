@@ -18,7 +18,7 @@ FROM ${ESGF_REPOSITORY_BASE}/base:${ESGF_IMAGES_VERSION}
 
 USER root
 RUN yum install -y python3 python3-pip  && \
-    pip3 install gunicorn "django>=3.0,<3.1"
+    pip3 install gunicorn requests "django>=3.0,<3.1"
 
 WORKDIR /wgetApi
 
