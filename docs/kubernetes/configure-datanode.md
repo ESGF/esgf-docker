@@ -7,9 +7,10 @@ For a full list of available variables, please consult the chart at
 <!-- TOC depthFrom:2 -->
 
 - [Configuring the available datasets](#configuring-the-available-datasets)
+- [Fowarding access logs](#fowarding-access-logs)
+- [Enabling demand-based autoscaling](#enabling-demand-based-autoscaling)
 - [Using existing THREDDS catalogs](#using-existing-thredds-catalogs)
 - [Improving pod startup time for large catalogs](#improving-pod-startup-time-for-large-catalogs)
-- [Enabling demand-based autoscaling](#enabling-demand-based-autoscaling)
 
 <!-- /TOC -->
 
@@ -66,6 +67,89 @@ data:
     - name: CORDEX
       path: esg_cordex
       location: /data/cordex
+```
+
+## Fowarding access logs
+
+The THREDDS and Nginx file server components can be configured to forward access logs to
+[CMCC](https://www.cmcc.it/) for processing in order to produce download statistics for
+the federation.
+
+Before enabling this functionality you must first contact CMCC to arrange for the IP addresses
+of your Kubernetes nodes, as visible from the internet, to be whitelisted.
+
+> If your Kubernetes nodes are not directly exposed to the internet then they are probably using
+> [Network Address Translation (NAT)](https://en.wikipedia.org/wiki/Network_address_translation)
+> when accessing resources on the internet.
+>
+> In this case, the address that you need to give to CMCC is the translated address.
+
+To enable the forwarding of access logs for THREDDS and Nginx file server pods, add the following
+to your `values.yaml`:
+
+```yaml
+data:
+  accessLogSidecar:
+    enabled: true
+```
+
+Additional variables are available to configure the server to which logs should be forwarded,
+however the vast majority of deployments will not need to change these.
+
+## Enabling demand-based autoscaling
+
+Kubernetes allows the number of pods backing a service to be scaled up and down automatically using
+a [Horizontal Pod Autoscaler (HPA)](https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/).
+This allows the service to respond to spikes in demand by creating more pods to respond to requests.
+A Kubernetes `Service` ensures that requests are routed to the new replicas as they become ready.
+
+A HPA can be configured to automatically adjust the number of replicas based on any metrics that are exposed via
+the [Metrics API](https://kubernetes.io/docs/tasks/debug-application-cluster/resource-metrics-pipeline/).
+By default, this allows scaling based on the CPU or memory usage of the pods backing a service. However
+it is possible to integrate other metrics gathering systems, such as [Prometheus](https://prometheus.io/),
+to allow scaling based on any of the collected metrics (e.g. network I/O, requests per second).
+
+By default, autoscaling is disabled in the ESGF Helm chart. To enable autoscaling for the THREDDS and
+Nginx file server components, the chart allows `HorizontalPodAutoscaler` resources to be defined using
+the `data.{thredds,fileServer}.hpa` variables. These variables define the `spec` section of the HPA, except
+for the `scaleTargetRef` section which is automatically populated with the correct reference.
+For more information about HPA configuration, see the
+[Kubernetes HPA Walkthrough](https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale-walkthrough/).
+
+> **WARNING**
+>
+> In order to scale based on utilisation (as opposed to absolute value), you must define
+> `resources.requests` for the service
+> (see [Configuring container resources](#configuring-container-resources) above).
+
+For example, the following configuration would attempt to keep the average CPU utilisation
+below 80% of the requested amount by scaling out up to a maximum of 10 replicas:
+
+```yaml
+data:
+  thredds:
+    hpa:
+      minReplicas: 1
+      maxReplicas: 10
+      metrics:
+        - type: Resource
+          resource:
+            name: cpu
+            target:
+              type: Utilization
+              averageUtilization: 80
+
+  fileServer:
+    hpa:
+      minReplicas: 1
+      maxReplicas: 10
+      metrics:
+        - type: Resource
+          resource:
+            name: cpu
+            target:
+              type: Utilization
+              averageUtilization: 80
 ```
 
 ## Using existing THREDDS catalogs
@@ -144,60 +228,4 @@ data:
   thredds:
     localCache:
       enabled: true
-```
-
-## Enabling demand-based autoscaling
-
-Kubernetes allows the number of pods backing a service to be scaled up and down automatically using
-a [Horizontal Pod Autoscaler (HPA)](https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/).
-This allows the service to respond to spikes in demand by creating more pods to respond to requests.
-A Kubernetes `Service` ensures that requests are routed to the new replicas as they become ready.
-
-A HPA can be configured to automatically adjust the number of replicas based on any metrics that are exposed via
-the [Metrics API](https://kubernetes.io/docs/tasks/debug-application-cluster/resource-metrics-pipeline/).
-By default, this allows scaling based on the CPU or memory usage of the pods backing a service. However
-it is possible to integrate other metrics gathering systems, such as [Prometheus](https://prometheus.io/),
-to allow scaling based on any of the collected metrics (e.g. network I/O, requests per second).
-
-By default, autoscaling is disabled in the ESGF Helm chart. To enable autoscaling for the THREDDS and
-Nginx file server components, the chart allows `HorizontalPodAutoscaler` resources to be defined using
-the `data.{thredds,fileServer}.hpa` variables. These variables define the `spec` section of the HPA, except
-for the `scaleTargetRef` section which is automatically populated with the correct reference.
-For more information about HPA configuration, see the
-[Kubernetes HPA Walkthrough](https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale-walkthrough/).
-
-> **WARNING**
->
-> In order to scale based on utilisation (as opposed to absolute value), you must define
-> `resources.requests` for the service
-> (see [Configuring container resources](#configuring-container-resources) above).
-
-For example, the following configuration would attempt to keep the average CPU utilisation
-below 80% of the requested amount by scaling out up to a maximum of 10 replicas:
-
-```yaml
-data:
-  thredds:
-    hpa:
-      minReplicas: 1
-      maxReplicas: 10
-      metrics:
-        - type: Resource
-          resource:
-            name: cpu
-            target:
-              type: Utilization
-              averageUtilization: 80
-
-  fileServer:
-    hpa:
-      minReplicas: 1
-      maxReplicas: 10
-      metrics:
-        - type: Resource
-          resource:
-            name: cpu
-            target:
-              type: Utilization
-              averageUtilization: 80
 ```

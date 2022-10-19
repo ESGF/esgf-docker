@@ -22,3 +22,11 @@
 - name: Uninstall search application
   include: search_uninstall.yml
   when: "'index' not in group_names or not search_enabled"
+
+- name: Install wget_api application
+  include: wget_api_install.yml
+  when: "'index' in group_names and wget_api_enabled"
+
+- name: Uninstall wget_api application
+  include: wget_api_uninstall.yml
+  when: "'index' not in group_names or not wget_api_enabled"

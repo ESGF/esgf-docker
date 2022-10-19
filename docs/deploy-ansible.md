@@ -6,10 +6,16 @@ that will place [Docker containers](https://www.docker.com/) onto specific hosts
 The playbook and associated roles and variables are in [deploy/ansible/](../deploy/ansible/).
 Please look at these files to understand exactly what the playbook is doing.
 
+Ansible requires that you have `root` access on the hosts that you are deploying to.
+
 For a complete list of all variables that are available, please look at the defaults for each
 of the [playbook roles](../deploy/ansible/roles/). The defaults have extensive comments that
 explain how to use these variables. This document describes how to apply some common
 configurations.
+
+**NOTE: The installation has a footprint of around 4GB. Please ensure there is enough disk
+space before you run Ansible.**
+
 
 <!-- TOC depthFrom:2 -->
 
@@ -23,13 +29,17 @@ configurations.
     - [Using existing THREDDS catalogs](#using-existing-thredds-catalogs)
     - [Configuring Solr replicas](#configuring-solr-replicas)
     - [Using external Solr instances](#using-external-solr-instances)
+    - [Fowarding access logs](#fowarding-access-logs)
+- [Testing the service endpoints](#testing-service-endpoints)
 
 <!-- /TOC -->
 
 ## Running the playbook
 
-Before attempting to run the playbook, make sure that you have
-[installed Ansible](https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html).
+Before attempting to run the playbook, make sure that you have:
+- [installed Ansible](https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html)
+- `root` access on the target hosts where the services will be deployed
+- checked that there is at least 4GB of free disk space on the target hosts
 
 Next, make a configuration directory - this can be anywhere on your machine that is **not** under
 `esgf-docker`. You can also place this directory under version control if you wish - this can be very
@@ -81,6 +91,9 @@ vagrant up
 ```
 
 After waiting for the containers to start, the THREDDS interface will be available at http://192.168.100.100.nip.io/thredds.
+
+**NOTE:** The Vagrant installation is known to have problems when run from a Windows host. We do not recommend
+installing from Windows.
 
 ## Configuring the installation
 
@@ -291,3 +304,32 @@ solr_replicas:
   - name: llnl
     master_url: https://esgf-node.llnl.gov/solr
 ```
+
+### Fowarding access logs
+
+ESGF data nodes can be configured to forward access logs to [CMCC](https://www.cmcc.it/)
+for processing in order to produce download statistics for the federation.
+
+Before enabling this functionality you must first contact CMCC to arrange for the IP addresses
+of your ESGF nodes, as visible from the internet, to be whitelisted.
+
+Then set the following variable to enable the forwarding of access logs:
+
+```yaml
+logstash_enabled: true
+```
+
+Additional variables are available to configure the server to which logs should be forwarded -
+please see the [role defaults for the data role](../deploy/ansible/roles/data/defaults/main.yml) -
+however the vast majority of deployments will not need to change these.
+
+## Testing the service endpoints
+
+Once the playbook has successfully then you should see a THREDDS catalog webpage at this URL:
+
+ `http://<data:host_name>/thredds`
+
+And the following should return a JSON response:
+
+ `http://<index:host_name>/esg-search/search?fields=*&type=File&latest=true&format=application%2Fsolr%2Bjson&limit=10&offset=0`
+

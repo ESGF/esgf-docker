@@ -4,9 +4,14 @@
 
 ARG ESGF_REPOSITORY_BASE=esgfdeploy
 ARG ESGF_IMAGES_VERSION=latest
-FROM ${ESGF_REPOSITORY_BASE}/jre:${ESGF_IMAGES_VERSION}
+FROM ${ESGF_REPOSITORY_BASE}/base:${ESGF_IMAGES_VERSION}
 
 USER root
+
+# Specific version of Java required by SOLR
+RUN yum makecache && \
+    yum install -y java-1.8.0-openjdk-headless-1.8.0.345.b01 && \
+    yum clean all
 
 # Create Solr home directory
 ENV SOLR_HOME="/var/solr/data" \
