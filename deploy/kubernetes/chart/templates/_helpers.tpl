@@ -133,8 +133,6 @@ Generate auth config for ingress.
 {{- define "esgf.ingress.auth" }}
 {{- if .Values.auth.enabled }}
 nginx.ingress.kubernetes.io/auth-url: http://{{ include "esgf.component.fullname" (list . "auth") }}.{{ .Release.Namespace }}.svc.cluster.local:8080/verify/
-nginx.ingress.kubernetes.io/auth-snippet: |
-  proxy_set_header X-Original-URI $request_uri;
 {{- if .Values.ingress.authSignin }}
 nginx.ingress.kubernetes.io/auth-signin: {{ .Values.ingress.authSignin }}
 {{- else }}

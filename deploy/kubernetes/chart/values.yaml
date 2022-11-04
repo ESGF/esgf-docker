@@ -96,7 +96,7 @@ auth:
       package_path: esgf
       rule_name: allow
     RESOURCE_URI_QUERY_KEY: rd
-    RESOURCE_URI_HEADER_KEY: HTTP_X_ORIGINAL_URI
+    RESOURCE_URI_HEADER_KEY: HTTP_X_ORIGINAL_URL
     # OAuth Bearer Token auth settings
     OAUTH_CLIENT_ID:
     OAUTH_CLIENT_SECRET:

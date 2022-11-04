@@ -5,7 +5,7 @@
 ARG ESGF_REPOSITORY_BASE=esgfdeploy
 ARG ESGF_IMAGES_VERSION=latest
 ARG GIT_REPOSITORY=https://github.com/cedadev/django-auth-service.git
-ARG GIT_VERSION=88efa02
+ARG GIT_VERSION=4560b8f
 
 FROM ${ESGF_REPOSITORY_BASE}/python-build:${ESGF_IMAGES_VERSION} as python-build
 
