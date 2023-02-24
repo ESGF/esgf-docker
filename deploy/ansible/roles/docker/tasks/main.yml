@@ -4,6 +4,9 @@
   command: dnf config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
   register: docker_install
 
+- name: Install Docker
+  command: dnf install -y docker-ce docker-ce-cli containerd.io
+
 - name: Start Docker Daemon
   command: systemctl start docker
 
@@ -50,7 +53,12 @@
 - name: Update pip to more recent version (but not py3 latest)
   pip:
     name: pip
-    version: 19.0
+    version: 23.0
+
+- name: Install Docker Dependencies
+  pip:
+    name: requests
+    state: latest
 
 # Requires super user sudo prompt?
 - name: Install Docker SDK
