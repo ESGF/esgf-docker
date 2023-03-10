@@ -1,0 +1,9 @@
+---
+
+###
+# Configuration for private registries that require authentication
+###
+docker_registries: []
+  # - registry: my.registry.org
+  #   username: registryuser
+  #   password: registrypassword

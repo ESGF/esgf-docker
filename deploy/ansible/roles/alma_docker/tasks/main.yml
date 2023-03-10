@@ -4,6 +4,9 @@
   command: dnf config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
   register: docker_install
 
+- name: Remove podman installation
+  command: dnf remove -y podman buildah
+
 - name: Install Docker
   command: dnf install -y docker-ce docker-ce-cli containerd.io
 
@@ -40,33 +43,14 @@
   when: docker_install is changed or system_daemon_reload is changed
 
 # The Ansible Docker modules require the Docker Python SDK, which requires pip to install, which requires EPEL
-- name: Install EPEL
-  yum:
-    name: epel-release
-    state: latest
 
-- name: Install pip for system python
-  yum:
-    name: python-pip
-    state: latest
+- name: Install python-pip
+  command: dnf install -y python-pip
 
-- name: Update pip to more recent version (but not py3 latest)
-  pip:
-    name: pip
-    version: 23.0
-
-- name: Install Docker Dependencies
-  pip:
-    name: requests
-    state: latest
-
-# Requires super user sudo prompt?
 - name: Install Docker SDK
-  pip:
-    name: docker
-    state: latest
+  command: python3 -m pip install docker
 
-# Log in to the configured registries
+## Log in to the configured registries
 - name: Log in to Docker registry
   docker_login:
     registry: "{{ item.registry }}"

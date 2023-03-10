@@ -76,7 +76,7 @@
     networks:
       - name: esgf
     networks_cli_compatible: yes
-    user: "{{ data_security_context_user }}"
+    user: "root" #"{{ data_security_context_user }}"
     groups: "{{ data_security_context_groups }}"
     volumes: >-
       [

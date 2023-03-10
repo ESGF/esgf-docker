@@ -7,7 +7,7 @@
 - hosts: all
   become: true
   roles:
-    - docker
+    - alma_docker
     - { name: data, tags: [data] }
     - { name: index, tags: [index] }
     - proxy
