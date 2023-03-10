@@ -29,7 +29,7 @@ RUN ln -s /dev/stdout ./logs/esgf-search.log
 
 ARG LIB_PATH=/opt/tomcat/webapps/esg-search/WEB-INF/lib
 
-# Remove all log4j jars and classes
+# Remove all Log4j jars and classes
 RUN rm -f $LIB_PATH/log4j-1.2.17.jar
 RUN zip $LIB_PATH/esgf-node-manager-accesslog-client-1.0.5.jar -d org/apache/log4j/\*
 RUN zip $LIB_PATH/esgf-node-manager-connector-1.0.5.jar -d org/apache/log4j/\*
