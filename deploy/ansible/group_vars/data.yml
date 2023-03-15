@@ -1,0 +1,52 @@
+### EDIT THIS
+
+### Example of a group_vars/data.yml
+### Provides variables specific to data nodes (hosts in the [data] group).
+
+### See: https://github.com/ESGF/esgf-docker/blob/master/docs/deploy-ansible.md
+### For more information about configuring an Ansible installation.
+
+
+
+## Data mounts must be declared here to mount data paths to the Docker containers:
+
+data_mounts:
+  # This will mount /datacentre/archive on the host as /data in the containers
+  - host_path: /datacentre/archive
+    mount_path: /data
+
+## Datasets are used by the THREDDS container to construct the initial catalog
+## and by the Nginx file server:
+
+data_datasets:
+  # This will expose files at /data/cmip6/[path] in the container
+  # as http://esgf-data.example.org/thredds/{dodsC,fileServer}/esg_cmip6/[path]
+  - name: CMIP6
+    path: esg_cmip6
+    location: /data/cmip6
+  # Similarly, this exposes files at /data/cordex/[path] in the container
+  # as http://esgf-data.example.org/thredds/{dodsC,fileServer}/esg_cordex/[path]
+  - name: CORDEX
+    path: esg_cordex
+    location: /data/cordex
+
+# https://github.com/ESGF/esgf-docker/blob/master/docs/deploy-ansible.md#configuring-the-available-datasets
+
+
+
+## OPTIONAL: It's possible to use an existing catalog with the THREDDS server:
+
+#thredds_catalog_host_path: /path/to/existing/catalogs
+
+## You must still configure data_mounts and data_datasets as above, except in this
+## case the datasets should correspond the to the datasetRoots in your THREDDS catalogs.
+
+## https://github.com/ESGF/esgf-docker/blob/master/docs/deploy-ansible.md#using-existing-thredds-catalogs
+
+
+
+## OPTIONAL: Forwarding access logs for stats using LogStash:
+
+#logstash_enabled: true
+
+## https://github.com/ESGF/esgf-docker/blob/master/docs/deploy-ansible.md#using-external-solr-instances
