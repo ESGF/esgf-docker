@@ -6,24 +6,15 @@
 
 - name: Make proxy config directory
   file:
-    path: /esg/config/proxy
+    path: "{{ item }}"
     state: directory
+  with_items:
+    - /esg/config/proxy/conf.d
+    - /esg/config/proxy/ssl
 
 - name: Create Docker network
   docker_network:
     name: esgf
-
-# TMP
-- name: Generate self-signed SSL certificate
-  command: >
-    openssl req -new -nodes -x509 -subj "/C=GB/ST=Oxfordshire/L=Didcot/O=Science and Technology Facilities Council/OU=Centre for Environmental Data Analysis/CN=localhost" -days 3650
-      -keyout /esg/config/proxy/ssl/proxy.key
-      -out /esg/config/proxy/ssl/proxy.crt -extensions v3_ca
-  args:
-    creates: "/esg/config/proxy/ssl/proxy.crt"
-  when: use_self_signed_ssl_cert is defined and use_self_signed_ssl_cert
-  notify: "restart web server"
-# TMP
 
 - name: Install a provided certificate
   block:
