@@ -26,6 +26,12 @@ image_pull: true
 # Proxy configuration
 ###
 
+# Default Nginx config using only HTTP
+nginx_config_template: proxy.conf.j2
+
+# Generates a Diffie-Helmet file for the server if enabled
+generate_dhparam: false
+
 # Settings for the proxy image
 proxy_image_prefix: "{{ image_prefix }}"
 proxy_image_tag: "{{ image_tag }}"

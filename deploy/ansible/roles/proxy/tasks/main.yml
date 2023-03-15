@@ -13,10 +13,46 @@
   docker_network:
     name: esgf
 
+# TMP
+- name: Generate self-signed SSL certificate
+  command: >
+    openssl req -new -nodes -x509 -subj "/C=GB/ST=Oxfordshire/L=Didcot/O=Science and Technology Facilities Council/OU=Centre for Environmental Data Analysis/CN=localhost" -days 3650
+      -keyout /esg/config/proxy/ssl/proxy.key
+      -out /esg/config/proxy/ssl/proxy.crt -extensions v3_ca
+  args:
+    creates: "/esg/config/proxy/ssl/proxy.crt"
+  when: use_self_signed_ssl_cert is defined and use_self_signed_ssl_cert
+  notify: "restart web server"
+# TMP
+
+- name: Install a provided certificate
+  block:
+    - name: Set paths for the SSL certificate and key
+      set_fact:
+        ssl_certificate_path: /esg/config/proxy/ssl/proxy.crt
+        ssl_private_key_path: /esg/config/proxy/ssl/proxy.key
+
+    - name: Install SSL certificate
+      copy:
+        content: "{{ ssl_certificate }}"
+        dest: "{{ ssl_certificate_path }}"
+
+    - name: Install SSL private key
+      copy:
+        content: "{{ ssl_private_key }}"
+        dest: "{{ ssl_private_key_path }}"
+  when: ssl_certificate is defined and ssl_private_key is defined
+
+- name: Create Ephemeral Diffie-Helman parameters file
+  command: openssl dhparam -dsaparam -out /etc/nginx/ssl/dhparam.pem 4096
+  args:
+    creates: /esg/config/proxy/ssl/dhparam.pem
+  when: generate_dhparam
+
 - name: Write proxy configuration
   template:
-    src: proxy.conf.j2
-    dest: /esg/config/proxy/proxy.conf
+    src: "{{ nginx_config_template }}"
+    dest: /esg/config/proxy/conf.d/proxy.conf
 
 - name: Start proxy container
   docker_container:
@@ -34,6 +70,8 @@
     networks_cli_compatible: yes
     volumes:
       # Mount the Nginx configuration for the proxy
-      - "/esg/config/proxy:/etc/nginx/conf.d:ro"
+      - "/esg/config/proxy/conf.d:/etc/nginx/conf.d:ro"
+      # Mount any SSL files for the proxy
+      - "/esg/config/proxy/ssl:/etc/nginx/ssl:ro"
     state: started
     recreate: yes
