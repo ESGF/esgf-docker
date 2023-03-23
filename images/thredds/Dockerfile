@@ -9,8 +9,7 @@ FROM ${ESGF_REPOSITORY_BASE}/jdk:${ESGF_IMAGES_VERSION} as builder
 
 # Unpack the THREDDS war
 ARG THREDDS_VERSION=5.5
-# Keep SHA1 value up to date - changes cause the checksum to fail
-ARG THREDDS_SHA1=cd9063eb5053ffcfea75ae8d65ead734a162a91d
+ARG THREDDS_SHA1=ff6f378892cdd78a1c686802325d7a6021c78253
 ARG THREDDS_URL=https://downloads.unidata.ucar.edu/tds/$THREDDS_VERSION/thredds-$THREDDS_VERSION-SNAPSHOT.war
 RUN mkdir /application && \
     cd /application && \
