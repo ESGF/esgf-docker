@@ -60,7 +60,7 @@
     name: docker
     state: latest
 
-## Log in to the configured registries
+# Log in to the configured registries
 - name: Log in to Docker registry
   docker_login:
     registry: "{{ item.registry }}"
