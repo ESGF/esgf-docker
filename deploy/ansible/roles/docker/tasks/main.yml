@@ -6,6 +6,7 @@
 
 - name: Remove podman installation
   command: dnf remove -y podman buildah
+  when: ansible_distribution == 'AlmaLinux'
 
 - name: Install Docker
   command: dnf install -y docker-ce docker-ce-cli containerd.io
@@ -44,11 +45,20 @@
 
 # The Ansible Docker modules require the Docker Python SDK, which requires pip to install, which requires EPEL
 
-- name: Install python-pip
+- name: Install pip for system python on CentOS / RHEL
+  yum:
+    name: pip
+    state: latest
+  when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
+
+- name: Install python-pip on AlmaLinux
   command: dnf install -y python-pip
+  when: ansible_distribution == 'AlmaLinux'
 
 - name: Install Docker SDK
-  command: python3 -m pip install docker
+  pip:
+    name: docker
+    state: latest
 
 ## Log in to the configured registries
 - name: Log in to Docker registry
