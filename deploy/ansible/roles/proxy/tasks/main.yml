@@ -16,13 +16,13 @@
   docker_network:
     name: esgf
 
+- name: Set paths for the SSL certificate and key
+  set_fact:
+    ssl_certificate_path: /esg/config/proxy/ssl/proxy.crt
+    ssl_private_key_path: /esg/config/proxy/ssl/proxy.key
+
 - name: Install a provided certificate
   block:
-    - name: Set paths for the SSL certificate and key
-      set_fact:
-        ssl_certificate_path: /esg/config/proxy/ssl/proxy.crt
-        ssl_private_key_path: /esg/config/proxy/ssl/proxy.key
-
     - name: Install SSL certificate
       copy:
         content: "{{ ssl_certificate }}"
@@ -55,7 +55,7 @@
     exposed_ports:
       - "8080"
     published_ports:
-      - "80:8080"
+      - "{{ published_port }}:8080"
     networks:
       - name: esgf
     networks_cli_compatible: yes
