@@ -4,11 +4,11 @@
   docker_network:
     name: esgf
 
-- name: Create Solr master home volume
+- name: Create Solr parent home volume
   docker_volume:
     name: solr-master-home
 
-- name: Start Solr master container
+- name: Start Solr parent container
   docker_container:
     name: solr-master
     image: "{{ solr_image_prefix }}/{{ solr_image_repository }}:{{ solr_image_tag }}"
@@ -40,11 +40,11 @@
         {% endfor %}
       ]
 
-- name: Create Solr slave home volume
+- name: Create Solr child home volume
   docker_volume:
     name: solr-slave-home
 
-- name: Start Solr slave container
+- name: Start Solr child container
   docker_container:
     name: solr-slave
     image: "{{ solr_image_prefix }}/{{ solr_image_repository }}:{{ solr_image_tag }}"
