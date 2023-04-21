@@ -7,8 +7,8 @@ server {
     # Use the Docker embedded DNS server to allow us to resolve container names
     resolver 127.0.0.11 ipv6=off;
 
-    ssl_certificate     {{ ssl_certificate_path }};
-    ssl_certificate_key {{ ssl_private_key_path }};
+    ssl_certificate     /etc/nginx/ssl/proxy.crt;
+    ssl_certificate_key /etc/nginx/ssl/proxy.key;
 
     # SSL configuration from Mozilla SSL config generator
     # https://mozilla.github.io/server-side-tls/ssl-config-generator/
