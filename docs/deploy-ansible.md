@@ -333,3 +333,38 @@ And the following should return a JSON response:
 
  `http://<index:host_name>/esg-search/search?fields=*&type=File&latest=true&format=application%2Fsolr%2Bjson&limit=10&offset=0`
 
+## Enabling SSL
+
+To use SSL, you will need to swap the Nginx template used to configure the proxy container.
+For an SSL enabled server, it's recommended to specify "443" as the `published_port`.
+In your host_vars file for your server, add the following:
+
+```yaml
+nginx_config_template: ssl.proxy.conf.j2
+published_port: 443
+```
+
+This proxy configuration will not work by itself, since it requires an SSL certificate and key.
+Assuming you have a certificate for your server already, this can be specifies in the host vars like this:
+
+```yaml
+ssl_certificate: |
+  -----BEGIN CERTIFICATE-----
+  ...
+
+ssl_private_key: |
+  -----BEGIN RSA PRIVATE KEY-----
+  ...
+```
+
+Alternatively, you can also prepare your certificate/key on the target host (e.g. with letsencrypt),
+and copy them to the following paths:
+
+```
+/esg/config/proxy/ssl/proxy.crt
+/esg/config/proxy/ssl/proxy.key
+```
+
+As long as the files are not symlinks, they will be automatically installed to the proxy container.
+
+*Note: The SSL certificate or certificate file should contain the complete certificate chain, including intermediate certificates.*
