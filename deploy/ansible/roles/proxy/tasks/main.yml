@@ -34,7 +34,7 @@
         dest: "{{ ssl_private_key_path }}"
   when: ssl_certificate is defined and ssl_private_key is defined
 
-- name: Make SSL cert files readable by the Docker user only
+- name: Make SSL cert files readable by the container user only
   file:
     path: "{{ item }}"
     owner: 1000
