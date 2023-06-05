@@ -1,10 +1,18 @@
 ---
 
-- name: Install Docker
-  yum:
-    name: docker
-    state: latest
+- name: Add Docker Repo
+  command: dnf config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
   register: docker_install
+
+- name: Remove podman installation
+  command: dnf remove -y podman buildah
+  when: ansible_distribution == 'AlmaLinux'
+
+- name: Install Docker
+  command: dnf install -y docker-ce docker-ce-cli containerd.io
+
+- name: Start Docker Daemon
+  command: systemctl start docker
 
 - name: Make docker.service.d directory
   file:
@@ -36,15 +44,16 @@
   when: docker_install is changed or system_daemon_reload is changed
 
 # The Ansible Docker modules require the Docker Python SDK, which requires pip to install, which requires EPEL
-- name: Install EPEL
-  yum:
-    name: epel-release
-    state: latest
 
-- name: Install pip for system python
+- name: Install pip for system python on CentOS / RHEL
   yum:
-    name: python-pip
+    name: pip
     state: latest
+  when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
+
+- name: Install python-pip on AlmaLinux
+  command: dnf install -y python-pip
+  when: ansible_distribution == 'AlmaLinux'
 
 - name: Install Docker SDK
   pip:

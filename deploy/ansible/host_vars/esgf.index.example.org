@@ -1,0 +1,37 @@
+### EDIT THIS
+
+### Example of a host_vars file specific to the host "esgf.index.example.org".
+
+### Provides variables for only this host machine.
+
+### See: https://github.com/ESGF/esgf-docker/blob/master/docs/deploy-ansible.md
+
+### for more information about configuring an Ansible installation.
+
+
+
+## OPTIONAL: Enabling and disabling components:
+
+#solr_enabled: true/false
+
+#search_enabled: true/false
+
+### See: https://github.com/ESGF/esgf-docker/blob/master/docs/deploy-ansible.md#enabling-and-disabling-components
+
+
+## OPTIONAL: Enabling SSL for the server
+
+#nginx_config_template: ssl.proxy.conf.j2
+
+#published_port: 443
+
+#ssl_certificate: |
+#  -----BEGIN CERTIFICATE-----
+#  ...
+
+#ssl_private_key: |
+#  -----BEGIN RSA PRIVATE KEY-----
+#  ...
+
+### See: https://github.com/ESGF/esgf-docker/blob/master/docs/deploy-ansible.md#enabling-ssl
+

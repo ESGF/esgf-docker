@@ -9,7 +9,7 @@ FROM ${ESGF_REPOSITORY_BASE}/jdk:${ESGF_IMAGES_VERSION} as builder
 
 # Unpack the THREDDS war
 ARG THREDDS_VERSION=5.5
-ARG THREDDS_SHA1=b149a12fd1d327129fc635855140517c4f2a47a0
+ARG THREDDS_SHA1=0a5ff524938ff94e5f554d99543e9fbe3f178f2a
 ARG THREDDS_URL=https://downloads.unidata.ucar.edu/tds/$THREDDS_VERSION/thredds-$THREDDS_VERSION-SNAPSHOT.war
 RUN mkdir /application && \
     cd /application && \
