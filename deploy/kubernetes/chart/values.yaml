@@ -50,7 +50,7 @@ ingress:
 ###
 auth:
   # Indicates if the auth service should be deployed or not
-  enabled: true
+  enabled: false
   # Image overrides for the auth service image
   image:
     repository: auth-service
@@ -121,7 +121,7 @@ auth:
 ###
 opa:
   # Indicates if the OPA server should be deployed or not
-  enabled: true
+  enabled: false
   # Image overrides for the opa image
   image:
     repository: opa
