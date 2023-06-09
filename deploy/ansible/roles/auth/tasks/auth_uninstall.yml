@@ -1,0 +1,11 @@
+---
+
+- name: Stop auth container
+  docker_container:
+    name: auth
+    state: absent
+
+- name: Remove auth config directory
+  file:
+    path: /esg/config/auth
+    state: absent

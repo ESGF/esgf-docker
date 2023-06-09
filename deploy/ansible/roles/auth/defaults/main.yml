@@ -19,7 +19,7 @@ image_pull: true
 # Auth configuration
 ###
 # Indicates if the auth service should be deployed or not
-auth_enabled: true
+auth_enabled: false
 
 # Settings for the auth-service image
 auth_image_prefix: "{{ image_prefix }}"
