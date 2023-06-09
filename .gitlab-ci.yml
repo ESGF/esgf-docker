@@ -123,6 +123,13 @@ build:conda:
     CONTEXT_DIR: $CI_PROJECT_DIR/images/conda
   needs: ["build:base"]
 
+build:opa:
+  extends: .docker-build
+  stage: build-2
+  variables:
+    CONTEXT_DIR: $CI_PROJECT_DIR/images/opa
+  needs: ["build:base"]
+
 build:search-builder:
   extends: .docker-build
   stage: build-3

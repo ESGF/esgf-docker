@@ -1,0 +1,26 @@
+{{- if .Values.index.enabled }}{{- if .Values.index.search.enabled }}{{- if .Values.index.search.publishIpRange }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "esgf.component.fullname" (list . "ingressPublish") }}
+  labels: {{ include "esgf.component.labels" (list . "ingressPublish" .Values.ingress.labels) | nindent 4 }}
+  annotations:
+    nginx.ingress.kubernetes.io/whitelist-source-range: {{ .Values.index.search.publishIpRange }}
+    {{ include "esgf.ingress.auth" . | indent 4 }}
+    {{- with .Values.ingress.annotations }}
+    {{ toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  {{ include "esgf.ingress.tls" . | indent 2 }}
+  rules:
+    - host: {{ .Values.hostname | quote }}
+      http:
+        paths:
+          - path: /esg-search/ws/publish
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ include "esgf.component.fullname" (list . "search") }}
+                port:
+                  number: 8080
+{{- end }}{{- end }}{{- end }}

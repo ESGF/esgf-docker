@@ -1,0 +1,13 @@
+---
+
+#####
+## Tasks to configure and deploy containers for the auth and opa services
+#####
+
+- name: Install auth application
+  include: auth_install.yml
+  when: auth_enabled
+
+- name: Uninstall auth application
+  include: auth_uninstall.yml
+  when: not auth_enabled

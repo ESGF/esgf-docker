@@ -1,0 +1,10 @@
+{{- $opa := .Values.opa -}}
+{{- if ($opa.enabled) -}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "esgf.component.fullname" (list . "policy") }}
+  labels: {{ include "esgf.component.labels" (list . "policy" $opa.labels) | nindent 4 }}
+data:
+  policy.rego: {{ tpl (.Files.Get "files/opa/policy.rego") . | quote }}
+{{- end -}}

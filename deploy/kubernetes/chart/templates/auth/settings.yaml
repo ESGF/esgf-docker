@@ -1,0 +1,22 @@
+{{- $auth := .Values.auth -}}
+{{- $opa := .Values.opa -}}
+{{- if ($auth.enabled) -}}
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ include "esgf.component.fullname" (list . "settings") }}
+  labels: {{ include "esgf.component.labels" (list . "settings" $auth.labels) | nindent 4 }}
+type: Opaque
+data:
+  # If SECRET_KEY is not given in the runtime settings, generate one
+  # Doing this instead of relying on the container-generated value ensures that the same
+  # secret key is used across all replicas, which is important for session handling etc.
+  {{- $runtimeSettings := merge $auth.runtimeSettings (dict "SECRET_KEY" (randAlphaNum 64)) }}
+  # Add the OPA server to the settings
+  {{- if ($opa.enabled) -}}
+  {{- $runtimeSettings := merge $runtimeSettings (dict "OPA_SERVER" (dict "host" (print "esgf-opa." .Release.Namespace  ".svc.cluster.local"))) }}
+  {{- end -}}
+  # Output the runtime settings as a YAML file
+  # Use 20- so that they run after the app settings, which are 10-
+  20-runtime-settings.yaml: {{ toYaml $runtimeSettings | b64enc | quote }}
+{{- end -}}

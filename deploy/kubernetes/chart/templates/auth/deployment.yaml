@@ -1,0 +1,78 @@
+{{- $auth := .Values.auth -}}
+{{- if ($auth.enabled) -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "esgf.component.fullname" (list . "auth") }}
+  labels: {{ include "esgf.component.labels" (list . "auth" $auth.labels) | nindent 4 }}
+spec:
+  replicas: {{ $auth.replicaCount }}
+  selector:
+    matchLabels: {{ include "esgf.component.selectorLabels" (list . "auth") | nindent 6 }}
+  template:
+    metadata:
+      labels: {{ include "esgf.component.selectorLabels" (list . "auth") | nindent 8 }}
+      # Force deployment to roll if the config changes
+      # https://helm.sh/docs/howto/charts_tips_and_tricks/#automatically-roll-deployments
+      annotations:
+        checksum/configmap: {{ include (print $.Template.BasePath "/auth/configmap.yaml") . | sha256sum }}
+        checksum/settings: {{ include (print $.Template.BasePath "/auth/settings.yaml") . | sha256sum }}
+    spec:
+      {{- with (default .Values.image.pullSecrets $auth.image.pullSecrets) }}
+      imagePullSecrets: {{ toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: auth-service
+          {{ include "esgf.deployment.image" (list . $auth.image) }}
+          resources: {{ toYaml $auth.resources | nindent 12 }}
+          ports:
+            - name: http
+              containerPort: 8080
+          env: {{ toYaml $auth.extraEnv | nindent 12 }}
+          readinessProbe: &probe
+            httpGet:
+              path: /
+              port: 8080
+              httpHeaders:
+                - name: Host
+                  value: healthz.local
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            <<: *probe
+            initialDelaySeconds: 300
+          volumeMounts:
+            - name: runtime-settings
+              mountPath: /etc/django/settings.d/20-runtime-settings.yaml
+              subPath: 20-runtime-settings.yaml
+              readOnly: true
+            - name: staticfiles
+              mountPath: /var/django/staticfiles
+              readOnly: true
+            # In order to use a read-only root filesystem, we mount emptyDirs in places
+            # where files are expected to change
+            - name: tmp
+              mountPath: /tmp
+      {{- with $auth.nodeSelector }}
+      nodeSelector: {{ toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $auth.affinity }}
+      affinity: {{ toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $auth.tolerations }}
+      tolerations: {{ toYaml . | nindent 8 }}
+      {{- end }}
+      volumes:
+        - name: runtime-settings
+          secret:
+            secretName: {{ include "esgf.component.fullname" (list . "settings") }}
+        # Volume to store the static files
+        - name: staticfiles
+          emptyDir: {}
+        # In order to use a read-only root filesystem, we mount emptyDirs in places
+        # where files are expected to change
+        # Use a tmpfs for /tmp
+        - name: tmp
+          emptyDir:
+            medium: Memory
+{{- end -}}

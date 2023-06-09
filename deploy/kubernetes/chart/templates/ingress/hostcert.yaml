@@ -1,3 +1,6 @@
+{{- /* If we are asking for a certificate from cert-manager, we should not deploy our own becausue
+this will break upon redeployment. */ -}}
+{{- if not (hasKey .Values.ingress.annotations "cert-manager.io/cluster-issuer") -}}
 {{- $tls := .Values.ingress.tls -}}
 {{- if not $tls.secretName -}}
 apiVersion: v1
@@ -15,4 +18,5 @@ data:
   tls.crt: {{ $cert.Cert | b64enc | quote }}
   tls.key: {{ $cert.Key | b64enc | quote }}
   {{- end }}
+{{- end -}}
 {{- end -}}

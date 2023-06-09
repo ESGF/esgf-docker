@@ -1,0 +1,39 @@
+{{- if .Values.auth.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "esgf.component.fullname" (list . "ingressAuth") }}
+  labels: {{ include "esgf.component.labels" (list . "ingressAuth" .Values.ingress.labels) | nindent 4 }}
+  {{- with .Values.ingress.annotations }}
+  annotations: {{ toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  {{ include "esgf.ingress.tls" . | indent 2 }}
+  rules:
+    - host: {{ .Values.hostname | quote }}
+      http:
+        paths:
+          - path: /verify
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ include "esgf.component.fullname" (list . "auth") }}
+                port:
+                  number: 8080
+          - path: /login
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ include "esgf.component.fullname" (list . "auth") }}
+                port:
+                  number: 8080
+          {{- if .Values.opa.enabled }}
+          - path: /v1/data
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ include "esgf.component.fullname" (list . "opa") }}
+                port:
+                  number: 8181
+          {{- end }}
+{{- end }}

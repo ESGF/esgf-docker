@@ -1,0 +1,16 @@
+{{- $opa := .Values.opa -}}
+{{- if ($opa.enabled) -}}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "esgf.component.fullname" (list . "opa") }}
+  labels: {{ include "esgf.component.labels" (list . "opa" $opa.labels) | nindent 4 }}
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 8181
+      targetPort: http
+      protocol: TCP
+  selector: {{ include "esgf.component.selectorLabels" (list . "opa") | nindent 4 }}
+{{- end -}}
