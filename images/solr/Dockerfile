@@ -34,6 +34,21 @@ RUN mkdir -p /opt/solr && \
     chown $ESGF_UID:$ESGF_GID $SOLR_LOGS_DIR $SOLR_HOME && \
     chmod 0770 $SOLR_LOGS_DIR $SOLR_HOME
 
+# Patch log4j
+ARG LIB_PATH=/opt/solr/server/lib/ext
+RUN rm -f $LIB_PATH/log4j-1.2.17.jar
+
+# Install Log4j 1.x to 2.x jars
+RUN export JAR=log4j-1.2-api-2.20.0.jar && \
+    curl https://repo1.maven.org/maven2/org/apache/logging/log4j/log4j-1.2-api/2.20.0/$JAR --output $LIB_PATH/$JAR && \
+    echo "689151374756cb809cb029f2501015bdc7733179 *$LIB_PATH/$JAR" | sha1sum --strict --check
+RUN export JAR=log4j-core-2.20.0.jar && \
+    curl https://repo1.maven.org/maven2/org/apache/logging/log4j/log4j-core/2.20.0/$JAR --output $LIB_PATH/$JAR && \
+    echo "eb2a9a47b1396e00b5eee1264296729a70565cc0 *$LIB_PATH/$JAR" | sha1sum --strict --check
+RUN export JAR=log4j-api-2.20.0.jar && \
+    curl https://repo1.maven.org/maven2/org/apache/logging/log4j/log4j-api/2.20.0/$JAR --output $LIB_PATH/$JAR && \
+    echo "1fe6082e660daf07c689a89c94dc0f49c26b44bb *$LIB_PATH/$JAR" | sha1sum --strict --check
+
 # Copy init scripts and configuration
 COPY solr.in.sh /etc/default/solr.in.sh
 COPY core-template/ /esg/core-template
