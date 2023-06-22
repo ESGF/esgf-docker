@@ -32,6 +32,8 @@ ingress:
   annotations: {}
   # Extra labels to apply to the ingress resources
   labels: {}
+  # Sign-in URL for unauthenticated requests
+  authSignin:
   # TLS configuration
   tls:
     # Either give the name of an existing TLS secret
@@ -42,6 +44,115 @@ ingress:
       cert:
       key:
     # If neither are given, then a self-signed certificate is generated
+
+###
+# Auth service configuration
+###
+auth:
+  # Indicates if the auth service should be deployed or not
+  enabled: false
+  # Image overrides for the auth service image
+  image:
+    repository: auth-service
+  # The number of replicas for the auth service pod
+  # If an hpa is configured, this is ignored - the hpa has full control over the number of replicas
+  replicaCount: 1
+  # The horizontal pod autoscaler configuration for auth service pods
+  # See https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/
+  # Configuration is the same as for the thredds pod
+  hpa: {}
+  # The resource allocations for the auth service container
+  # See https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+  resources: {}
+  # Extra environment variables for the auth service container
+  # See https://kubernetes.io/docs/tasks/inject-data-application/define-environment-variable-container/
+  extraEnv: []
+  # Additional labels for auth service resources
+  labels: {}
+  # The node selector for the auth service pod
+  # See https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector
+  nodeSelector:
+  # The affinity rules for the auth service pod
+  # See https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
+  affinity:
+  # The tolerations for the auth service pod
+  # See https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
+  tolerations:
+  # Runtime settings for the Django app
+  runtimeSettings:
+    MIDDLEWARE:
+      - django.middleware.security.SecurityMiddleware
+      - django.contrib.sessions.middleware.SessionMiddleware
+      - django.middleware.common.CommonMiddleware
+      - django.middleware.csrf.CsrfViewMiddleware
+      - django.contrib.messages.middleware.MessageMiddleware
+      - django.middleware.clickjacking.XFrameOptionsMiddleware
+      - authenticate.oauth2.middleware.BearerTokenAuthenticationMiddleware
+      - authenticate.oidc.middleware.OpenIDConnectAuthenticationMiddleware
+      - authorize.opa.middleware.OPAAuthorizationMiddleware
+    OPA_SERVER:
+      # Host is defined in the settings template
+      port: 8181
+      package_path: esgf
+      rule_name: allow
+    RESOURCE_URI_QUERY_KEY: rd
+    RESOURCE_URI_HEADER_KEY: HTTP_X_ORIGINAL_URL
+    # Group info keys for authorization
+    OAUTH2_GROUPS_KEY: group_membership
+    OIDC_GROUPS_KEY: group_membership
+    # OAuth Bearer Token auth settings
+    OAUTH_CLIENT_ID:
+    OAUTH_CLIENT_SECRET:
+    OAUTH_TOKEN_URL:
+    OAUTH_TOKEN_INTROSPECT_URL:
+    # OIDC auth settings
+    OIDC_BACKEND_CLIENT_NAME: esgf
+    AUTHLIB_OAUTH_CLIENTS:
+      esgf:
+        client_id:
+        client_secret:
+        authorize_url:
+        userinfo_endpoint:
+        client_kwargs:
+          scope: openid profile email
+
+###
+# OPA server configuration
+###
+opa:
+  # Indicates if the OPA server should be deployed or not
+  enabled: false
+  # Image overrides for the opa image
+  image:
+    repository: opa
+  # The number of replicas for the OPA server pod
+  # If an hpa is configured, this is ignored - the hpa has full control over the number of replicas
+  replicaCount: 1
+  # The horizontal pod autoscaler configuration for OPA server pods
+  # See https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/
+  # Configuration is the same as for the thredds pod
+  hpa: {}
+  # The resource allocations for the OPA server container
+  # See https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+  resources: {}
+  # Extra environment variables for the OPA server container
+  # See https://kubernetes.io/docs/tasks/inject-data-application/define-environment-variable-container/
+  extraEnv: []
+  # Additional labels for OPA server resources
+  labels: {}
+  # The node selector for the OPA server pod
+  # See https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector
+  nodeSelector:
+  # The affinity rules for the OPA server pod
+  # See https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
+  affinity:
+  # The tolerations for the OPA server pod
+  # See https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
+  tolerations:
+  # Log level for the OPA server
+  logLevel: info
+  # Paths to restrict
+  restrictedPaths: []
 
 ###
 # Data node configuration

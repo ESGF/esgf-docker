@@ -1,0 +1,79 @@
+# HTTP and HTTPS server blocks that proxy to the other containers running on this host
+
+server {
+    listen 8080 ssl http2 default_server;
+    server_name  _;
+
+    # Use the Docker embedded DNS server to allow us to resolve container names
+    resolver 127.0.0.11 ipv6=off;
+
+    ssl_certificate     /etc/nginx/ssl/proxy.crt;
+    ssl_certificate_key /etc/nginx/ssl/proxy.key;
+
+    # SSL configuration from Mozilla SSL config generator
+    # https://mozilla.github.io/server-side-tls/ssl-config-generator/
+    ssl_session_timeout 1d;
+    ssl_session_cache shared:SSL:50m;
+    ssl_session_tickets off;
+
+    {% if generate_dhparam %}
+    # Diffie-Hellman parameter for DHE ciphersuites
+    ssl_dhparam /etc/nginx/ssl/dhparam.pem;
+    {% endif %}
+
+    # Enables server-side protection from BEAST attacks
+    # http://blog.ivanristic.com/2013/09/is-beast-still-a-threat.html
+    ssl_prefer_server_ciphers on;
+
+    # Disable SSLv3 since it's less secure then TLS http://en.wikipedia.org/wiki/Secure_Sockets_Layer#SSL_3.0
+    ssl_protocols TLSv1 TLSv1.1 TLSv1.2;
+    ssl_ciphers 'ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA256:ECDHE-ECDSA-AES128-SHA:ECDHE-RSA-AES256-SHA384:ECDHE-RSA-AES128-SHA:ECDHE-ECDSA-AES256-SHA384:ECDHE-ECDSA-AES256-SHA:ECDHE-RSA-AES256-SHA:DHE-RSA-AES128-SHA256:DHE-RSA-AES128-SHA:DHE-RSA-AES256-SHA256:DHE-RSA-AES256-SHA:ECDHE-ECDSA-DES-CBC3-SHA:ECDHE-RSA-DES-CBC3-SHA:EDH-RSA-DES-CBC3-SHA:AES128-GCM-SHA256:AES256-GCM-SHA384:AES128-SHA256:AES256-SHA256:AES128-SHA:AES256-SHA:DES-CBC3-SHA:!DSS:!3DES';
+
+    ssl_stapling on;
+    ssl_stapling_verify on;
+    ssl_trusted_certificate /etc/nginx/ssl/proxy.crt;
+
+    # Enable HSTS (HTTP Strict Transport Security) to avoid ssl stripping
+    # https://developer.mozilla.org/en-US/docs/Security/HTTP_Strict_Transport_Security
+    # https://en.wikipedia.org/wiki/SSL_stripping#SSL_stripping
+    # 15768000 seconds = 6 months
+    add_header Strict-Transport-Security max-age=15768000;
+
+    # By default, return 404
+    location / {
+        return 404;
+    }
+
+    {% if 'data' in group_names %}
+    {% if thredds_enabled %}
+    location /thredds {
+        include /etc/nginx/includes/proxy_params.conf;
+        proxy_pass http://thredds:8080;
+    }
+    {% endif %}
+
+    {% if fileserver_enabled %}
+    location /thredds/fileServer {
+        include /etc/nginx/includes/proxy_params.conf;
+        proxy_pass http://fileserver:8080;
+    }
+    {% endif %}
+    {% endif %}
+
+    {% if 'index' in group_names %}
+    {% if solr_enabled %}
+    # We only want to permit access to the replication handler for each core from outside
+    location ~ ^/solr/[a-z]+/replication {
+        include /etc/nginx/includes/proxy_params.conf;
+        proxy_pass http://solr-slave:8983;
+    }
+    {% endif %}
+
+    {% if search_enabled %}
+    location /esg-search {
+        include /etc/nginx/includes/proxy_params.conf;
+        proxy_pass http://search:8080;
+    }
+    {% endif %}
+    {% endif %}
+}

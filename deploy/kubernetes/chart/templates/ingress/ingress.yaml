@@ -3,18 +3,13 @@ kind: Ingress
 metadata:
   name: {{ include "esgf.component.fullname" (list . "ingress") }}
   labels: {{ include "esgf.component.labels" (list . "ingress" .Values.ingress.labels) | nindent 4 }}
-  {{- with .Values.ingress.annotations }}
-  annotations: {{ toYaml . | nindent 4 }}
-  {{- end }}
+  annotations:
+    {{ include "esgf.ingress.auth" . | indent 4 }}
+    {{- with .Values.ingress.annotations }}
+    {{ toYaml . | nindent 4 }}
+    {{- end }}
 spec:
-  tls:
-    - hosts:
-        - {{ .Values.hostname | quote }}
-      {{- if .Values.ingress.tls.secretName }}
-      secretName: {{ .Values.ingress.tls.secretName }}
-      {{- else }}
-      secretName: {{ include "esgf.component.fullname" (list . "hostcert") }}
-      {{- end }}
+  {{ include "esgf.ingress.tls" . | indent 2 }}
   rules:
     - host: {{ .Values.hostname | quote }}
       http:

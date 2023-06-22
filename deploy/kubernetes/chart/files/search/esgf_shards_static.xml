@@ -5,7 +5,7 @@
     {{- if $solr.enabled }}
     <value>{{ include "esgf.component.fullname" (list . "solr" "slave") }}:8983/solr</value>
     {{- else }}
-    <value>{{ $solr.slaveExternalUrl }}</value>
+    <value>{{ regexReplaceAll "^https?://" $solr.slaveExternalUrl "" }}</value>
     {{- end }}
 
     <!-- Replicas -->

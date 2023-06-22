@@ -1,0 +1,17 @@
+---
+
+- name: Create Docker network
+  docker_network:
+    name: esgf
+
+- name: Start auth container
+  docker_container:
+    name: auth
+    image: "{{ auth_image_prefix }}/{{ auth_image_repository }}:{{ auth_image_tag }}"
+    pull: "{{ auth_image_pull }}"
+    detach: yes
+    restart_policy: unless-stopped
+    exposed_ports:
+      - "8080"
+    networks:
+      - name: esgf

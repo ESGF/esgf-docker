@@ -112,3 +112,31 @@ The produced mounts will always be read-only.
   {{- end }}
 {{- end }}
 {{- end -}}
+
+{{/*
+Generate TLS config for ingress.
+*/}}
+{{- define "esgf.ingress.tls" }}
+tls:
+  - hosts:
+      - {{ .Values.hostname | quote }}
+    {{- if .Values.ingress.tls.secretName }}
+    secretName: {{ .Values.ingress.tls.secretName }}
+    {{- else }}
+    secretName: {{ include "esgf.component.fullname" (list . "hostcert") }}
+    {{- end }}
+{{- end }}
+
+{{/*
+Generate auth config for ingress.
+*/}}
+{{- define "esgf.ingress.auth" }}
+{{- if .Values.auth.enabled }}
+nginx.ingress.kubernetes.io/auth-url: http://{{ include "esgf.component.fullname" (list . "auth") }}.{{ .Release.Namespace }}.svc.cluster.local:8080/verify/
+{{- if .Values.ingress.authSignin }}
+nginx.ingress.kubernetes.io/auth-signin: {{ .Values.ingress.authSignin }}
+{{- else }}
+nginx.ingress.kubernetes.io/auth-signin: https://$host/login/
+{{- end }}
+{{- end }}
+{{- end }}
