@@ -13,7 +13,12 @@
 
     <!-- Produce a scan element for each of the given datasets -->
     {{- range .Values.data.datasets }}
+    {{- if $solr.s3Location }}
+    {{- $s3 := $solr.s3Location -}}
+    <datasetScan name="{{ .name }}" ID="{{ .path }}" path="{{ .path }}" location="cdms3://{{ $s3.host }}:{{ $s3.port }}/{{ $s3.bucket }}?{{ $s3.dataPath }}/#delimiter=/">
+    {{- else }}
     <datasetScan name="{{ .name }}" ID="{{ .path }}" path="{{ .path }}" location="{{ .location }}">
+    {{- end }}
         <metadata inherited="true">
             <serviceName>all</serviceName>
         </metadata>
