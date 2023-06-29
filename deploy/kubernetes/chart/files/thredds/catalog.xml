@@ -15,7 +15,7 @@
     {{- range .Values.data.datasets }}
     {{- if .s3Location }}
     {{- $s3 := .s3Location }}
-    <datasetScan name="{{ .name }}" ID="{{ .path }}" path="{{ .path }}" location="cdms3://{{ $s3.host }}:{{ $s3.port }}/{{ $s3.bucket }}?{{ trimAll '/' $s3.dataPath }}/#delimiter=/">
+    <datasetScan name="{{ .name }}" ID="{{ .path }}" path="{{ .path }}" location="cdms3://{{ $s3.host }}:{{ $s3.port }}/{{ $s3.bucket }}?{{ trimAll "/" $s3.dataPath }}/#delimiter=/">
     {{- else }}
     <datasetScan name="{{ .name }}" ID="{{ .path }}" path="{{ .path }}" location="{{ .location }}">
     {{- end }}
