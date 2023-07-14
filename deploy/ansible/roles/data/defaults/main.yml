@@ -84,7 +84,7 @@ logstash_image_pull: "{{ image_pull }}"
 logstash_image_repository: logstash
 # Settings for the stats server
 logstash_stats_server: proxy02.cmcc.it
-logstash_stats_port: 5044
+logstash_stats_port: 5045
 logstash_stats_certificate: |
   -----BEGIN CERTIFICATE-----
   MIIDyjCCArICCQDSgl2omUxgLTANBgkqhkiG9w0BAQsFADCBpjELMAkGA1UEBhMC

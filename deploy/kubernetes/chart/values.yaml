@@ -224,7 +224,7 @@ data:
       # The default server is the CMCC server
       # Your IP must be whitelisted in order to send data to the CMCC service
       server: proxy02.cmcc.it
-      port: 5044
+      port: 5045
       certificate: |
         -----BEGIN CERTIFICATE-----
         MIIDyjCCArICCQDSgl2omUxgLTANBgkqhkiG9w0BAQsFADCBpjELMAkGA1UEBhMC
