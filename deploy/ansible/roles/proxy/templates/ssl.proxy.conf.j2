@@ -1,6 +1,6 @@
 # HTTP and HTTPS server blocks that proxy to the other containers running on this host
 server {
-    listen 8080;
+    listen 8080 default_server;
     server_name _;
 
     return 301 https://$host$request_uri;
