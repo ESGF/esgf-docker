@@ -29,6 +29,7 @@ image_pull: true
 # Default Nginx config using only HTTP
 nginx_config_template: proxy.conf.j2
 published_port: 80
+published_port_ssl: 443
 
 # Generates a Diffie-Helmet file for the server if enabled
 generate_dhparam: false

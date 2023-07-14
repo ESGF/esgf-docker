@@ -64,10 +64,10 @@
     restart_policy: unless-stopped
     exposed_ports:
       - "8080"
-      - "8081"
+      - "8443"
     published_ports:
       - "{{ published_port }}:8080"
-      - "80:8081"
+      - "{{ published_port_ssl }}:8443"
     networks:
       - name: esgf
     networks_cli_compatible: yes
