@@ -1,0 +1,12 @@
+---
+
+- name: Stop wget_api container
+  docker_container:
+    name: wget_api
+    state: absent
+
+- name: Remove wget api config directory
+  file:
+    path: /tmp/esgf_wget
+    state: absent
+

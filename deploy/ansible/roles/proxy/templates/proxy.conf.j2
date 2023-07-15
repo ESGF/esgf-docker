@@ -83,5 +83,13 @@ server {
         proxy_pass http://search:8080;
     }
     {% endif %}
+
+    {% if wget_api_enabled %}
+    location /wget {
+        include /etc/nginx/includes/proxy_params.conf;
+        proxy_pass http://wget_api:8000;
+    }
+    {% endif %}
     {% endif %}
 }
+

@@ -463,3 +463,43 @@ index:
     # The tolerations for the search pods
     # See https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
     tolerations:
+
+  # Configuration for wgetApi
+  wgetApi:
+    # Indicates if wgetApi component should be deployed
+    enabled: true
+    # Image overrides for the wgetApi image
+    image:
+      # prefix:
+      repository: esgf-wget
+      # tag: 
+    # The pod security context for all wgetApi pods
+    # This should normally not need to change unless Solr pods are configured to use
+    # specific paths on the host for core storage
+    podSecurityContext:
+      runAsUser: 1000
+      runAsGroup: 1000
+      fsGroup: 1000
+    # The container security context for all Solr containers
+    securityContext:
+      # Run with a read-only root filesystem by default
+      readOnlyRootFilesystem: true
+    # The absolute path where wget api config file will be stored.  
+    config_path: /esg/esgf_wget
+    # The wget api config file name to be created under config_path
+    config: wget_api_config
+    settings:
+      debug: False
+      allowedHosts: "*"
+      # ESGF solr url. For ex: https://esgf-node.llnl.gov/solr
+      esgfSolrUrl:
+      # Path to XML file containing Solr shards. For ex: /esg/config/esgf_shards_static.xml
+      esgfSolrShardsXml:
+      # Default limit on the number of files allowed in a wget script
+      wgetScriptFileDefaultLimit: 1000
+      # Maximum number of files allowed in a wget script
+      wgetScriptFileMaxLimit: 100000
+      # Expand the number of fields allowed for wget API
+      dataUploadMaxNumberFields: 10240
+    # The number of replicas for the wgetApi pod.
+    replicaCount: 1
