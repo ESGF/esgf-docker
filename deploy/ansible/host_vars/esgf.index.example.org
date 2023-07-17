@@ -23,8 +23,6 @@
 
 #nginx_config_template: ssl.proxy.conf.j2
 
-#published_port: 443
-
 #ssl_certificate: |
 #  -----BEGIN CERTIFICATE-----
 #  ...
