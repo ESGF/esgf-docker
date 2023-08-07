@@ -18,10 +18,10 @@ ENV LS_SETTINGS_DIR /etc/logstash
 # Use Elastic's RPM repository to install logstash
 # In the same command, in order to avoid another layer, transfer ownership of
 # /usr/share/logstash to the ESGF user and group
-COPY logstash.repo /etc/yum.repos.d/logstash.repo
-RUN yum makecache && \
-    yum install -y logstash-7.10.0 && \
-    yum clean all && \
+COPY logstash.repo /etc/dnf.repos.d/logstash.repo
+RUN dnf makecache && \
+    dnf install -y logstash-7.10.0 && \
+    dnf clean all && \
     chown -R $ESGF_UID:$ESGF_GID /usr/share/logstash
 
 # Install configuration files

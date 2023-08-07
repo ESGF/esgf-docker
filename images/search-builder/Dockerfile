@@ -7,9 +7,9 @@ ARG ESGF_IMAGES_VERSION=latest
 FROM ${ESGF_REPOSITORY_BASE}/jdk:${ESGF_IMAGES_VERSION}
 
 # Install dependencies
-RUN yum makecache && \
-    yum install -y git ant ivy && \
-    yum clean all
+RUN dnf makecache && \
+    dnf install -y git ant ivy && \
+    dnf clean all
 
 # Build esgf-node-manager
 ARG ESGF_NODE_MANAGER_VERSION=15682f64212782a56eacdb356432e9e21d643e1d

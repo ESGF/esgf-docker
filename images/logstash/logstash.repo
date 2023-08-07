@@ -1,6 +1,6 @@
 [logstash]
 name=Elastic repository for 7.x packages
-baseurl=https://artifacts.elastic.co/packages/7.x/yum
+baseurl=https://artifacts.elastic.co/packages/7.x/dnf
 gpgcheck=1
 gpgkey=https://artifacts.elastic.co/GPG-KEY-elasticsearch
 enabled=1

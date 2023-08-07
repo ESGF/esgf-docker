@@ -14,11 +14,11 @@ FROM ${ESGF_REPOSITORY_BASE}/tomcat:${ESGF_IMAGES_VERSION}
 
 USER root
 
-RUN yum makecache && \
-    yum remove -y java-11-openjdk-headless && \
-    yum install -y java-1.8.0-openjdk-headless-1.8.0.345.b01 && \
-    yum install -y zip && \
-    yum clean all
+RUN dnf makecache && \
+    dnf remove -y java-11-openjdk-headless && \
+    dnf install -y java-1.8.0-openjdk-headless-1.8.0.345.b01 && \
+    dnf install -y zip && \
+    dnf clean all
 
 # Copy the unpacked webapp from the builder
 COPY --from=builder /application ./webapps/esg-search
