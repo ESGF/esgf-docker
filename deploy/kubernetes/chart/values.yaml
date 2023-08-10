@@ -223,7 +223,7 @@ data:
       # Use these variables to configure the target server
       # The default server is the CMCC server
       # Your IP must be whitelisted in order to send data to the CMCC service
-      server: proxy02.cmcc.it
+      server: ophidialab.cmcc.it
       port: 5045
       certificate: |
         -----BEGIN CERTIFICATE-----
