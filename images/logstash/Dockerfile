@@ -18,7 +18,12 @@ ENV LS_SETTINGS_DIR /etc/logstash
 # Use Elastic's RPM repository to install logstash
 # In the same command, in order to avoid another layer, transfer ownership of
 # /usr/share/logstash to the ESGF user and group
-COPY logstash.repo /etc/dnf.repos.d/logstash.repo
+COPY logstash.repo /etc/yum.repos.d/logstash.repo
+
+# SHA1 is disabled by default in rocky9. 
+# Logstash does not have a SHA512 hash yet.
+# So SHA1 needs to be enabled to install it.
+RUN update-crypto-policies --set DEFAULT:SHA1
 RUN dnf makecache && \
     dnf install -y logstash-7.10.0 && \
     dnf clean all && \

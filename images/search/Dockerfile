@@ -7,7 +7,7 @@ ARG ESGF_IMAGES_VERSION=latest
 
 # Make a reference to the builder
 # We have to do this as a FROM because we can't use variables in COPY --from
-FROM ${ESGF_REPOSITORY_BASE}/search-builder:${ESGF_IMAGES_VERSION} as builder
+FROM esgfdeploy/search-builder:latest as builder
 
 # Build the runtime image
 FROM ${ESGF_REPOSITORY_BASE}/tomcat:${ESGF_IMAGES_VERSION}
@@ -16,7 +16,7 @@ USER root
 
 RUN dnf makecache && \
     dnf remove -y java-11-openjdk-headless && \
-    dnf install -y java-1.8.0-openjdk-headless-1.8.0.345.b01 && \
+    dnf install -y java-1.8.0-openjdk-headless-1.8.0.382.b05-2.el9.x86_64 && \
     dnf install -y zip && \
     dnf clean all
 
