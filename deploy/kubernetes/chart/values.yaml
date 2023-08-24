@@ -115,6 +115,10 @@ auth:
         userinfo_endpoint:
         client_kwargs:
           scope: openid profile email
+  # Security context for auth container.
+  securityContext:
+    # Run with a read-only root filesystem by default
+    readOnlyRootFilesystem: true
 
 ###
 # OPA server configuration
@@ -153,6 +157,10 @@ opa:
   logLevel: info
   # Paths to restrict
   restrictedPaths: []
+  # Security context for OPA container.
+  securityContext:
+    # Run with a read-only root filesystem by default
+    readOnlyRootFilesystem: true
 
 ###
 # Data node configuration
@@ -345,7 +353,6 @@ data:
     # See https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
     tolerations:
 
-
 ###
 # Index node configuration
 ###
@@ -463,3 +470,8 @@ index:
     # The tolerations for the search pods
     # See https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
     tolerations:
+  # Security context for search container.
+
+    securityContext:
+      # Run with a read-only root filesystem by default
+      readOnlyRootFilesystem: true
