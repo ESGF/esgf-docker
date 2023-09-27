@@ -45,7 +45,7 @@
     - "{{ ssl_private_key_path }}"
 
 - name: Create Ephemeral Diffie-Helman parameters file
-  command: openssl dhparam -dsaparam -out /etc/nginx/tls/dhparam.pem 4096
+  command: openssl dhparam -dsaparam -out /esg/config/proxy/ssl/dhparam.pem 4096
   args:
     creates: /esg/config/proxy/ssl/dhparam.pem
   when: generate_dhparam
