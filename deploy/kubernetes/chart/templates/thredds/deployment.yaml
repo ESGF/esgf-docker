@@ -144,10 +144,9 @@ spec:
             - name: thredds-cache
               mountPath: /opt/tomcat/content/thredds/cache
             # The shared log volume is only required if the access log sidecar is enabled
-            {{- if $accessLogSidecar.enabled }}
+            # It is also required for a readOnly root filesystem.
             - name: tomcat-logs
               mountPath: /opt/tomcat/logs
-            {{- end }}
             # In order to use a read-only rootfs, we must put emptyDirs where we expect tomcat to write
             - name: tomcat-temp
               mountPath: /opt/tomcat/temp
@@ -219,11 +218,11 @@ spec:
           emptyDir: {}
         - name: tmp-thredds
           emptyDir: {}
-        # These volumes are only required if the access log sidecar is enabled
-        {{- if $accessLogSidecar.enabled }}
         # Volume to hold the log pipes
         - name: tomcat-logs
           emptyDir: {}
+        # These volumes are only required if the access log sidecar is enabled
+        {{- if $accessLogSidecar.enabled }}
         # Logstash config is in a secret
         - name: logstash-conf
           secret:

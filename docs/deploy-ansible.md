@@ -336,12 +336,10 @@ And the following should return a JSON response:
 ## Enabling SSL
 
 To use SSL, you will need to swap the Nginx template used to configure the proxy container.
-For an SSL enabled server, it's recommended to specify "443" as the `published_port`.
 In your host_vars file for your server, add the following:
 
 ```yaml
 nginx_config_template: ssl.proxy.conf.j2
-published_port: 443
 ```
 
 This proxy configuration will not work by itself, since it requires an SSL certificate and key.
