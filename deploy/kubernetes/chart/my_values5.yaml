@@ -1,0 +1,341 @@
+
+# The hostname for the deployment
+# hostname: localhost
+hostname: nimbus6.llnl.gov
+
+###
+# Image defaultS
+###
+# All image properties can be overridden on a per-service basis
+image:
+  # The image prefix to use
+  # If using a private registry, change this, e.g. registry.ceda.ac.uk/esgfdeploy
+  prefix: esgfdeploy
+  # The tag to use
+  tag: latest
+  # Indicates whether images should be pulled every time a pod starts
+  # When using mutable tags, like latest or branch names, this should be Always
+  # When using immutable tags, like commit shas or release tags, this should be IfNotPresent
+  pullPolicy: Always
+  # A list of names of existing secrets providing Docker registry credentials
+  # Required if using a private registry that requires authentication
+  # See https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+  pullSecrets:
+
+# Extra labels to be applied to all resources
+globalLabels: {}
+
+###
+# Ingress confiGuration
+###
+ingress:
+  # The annotations for the ingress
+  # Depending on your Kubernetes cluster, this can be used to configure things like Let's Encrypt certificates
+  # Extra labels to apply to the ingress resources
+  labels: {}
+  # TLS configuration
+
+###
+# Data node configuration
+###
+data:
+  # Indicates if the data node is to be enabled
+  enabled: true
+
+  # List of mounts required to serve data, as defined by the given datasets
+  #
+  # Each specified mount should include the following keys:
+  #
+  #   mountPath: The path to mount the volume inside the container
+  #   volumeSpec: A Kubernetes volume specification - see https://kubernetes.io/docs/concepts/storage/volumes/
+  #   mountOptions (optional): Additional options for the mount, e.g. mountPropagation for hostPath volumes
+  #   name (optional): The name for the volume - if not given, this is derived from the mount path
+  mounts:
+    - name: css03data
+      mountPath: /css03_data
+      volumeSpec:
+        hostPath:
+          path: /p/css03/esgf_publish
+      mountOptions:
+        mountPropagation: HostToContainer
+    - name: cmip5data1
+      mountPath: /cmip5_css01_data
+      volumeSpec:
+        hostPath:
+          path: /p/css03/cmip5_css01/data
+      mountOptions:
+        mountPropagation: HostToContainer
+    - name: cmip5data2
+      mountPath: /cmip5_css02_data
+      volumeSpec:
+        hostPath:
+          path: /p/css03/cmip5_css02/data
+      mountOptions:
+        mountPropagation: HostToContainer
+    - name: userpubwork
+      mountPath: /user_pub_work
+      volumeSpec:
+        hostPath:
+          path: /p/user_pub/work
+      mountOptions:
+        mountPropagation: HostToContainer
+    # - name: datacentre   # This is actually the derived name that would be used anyway
+    #   mountPath: /datacentre
+    #   volumeSpec:
+    #     hostPath:
+    #       path: /datacentre
+    #   mountOptions:
+    #     mountPropagation: HostToContainer
+
+  # List of datasets to expose
+  # For each dataset, a THREDDS datasetScan element and an Nginx location are generated
+  #
+  # Each specified dataset should have the following keys:
+  #
+  #   name: The name of the dataset
+  #   path: The URL path for the dataset
+  #   location: The location of the dataset *inside the container* (see mounts above)
+  #   filters (optional): A list of filter specifications for the datasetScan element
+  datasets:
+    - name: CSS03
+      path: css03_data
+      location: /css03_data
+    - name: CMIP5-1
+      path: cmip5_css01_data
+      location: /cmip5_css01_data
+    - name: CMIP5-2
+      path: cmip5_css02_data
+      location: /cmip5_css02_data
+    - name: USERPUB
+      path: user_pub_work
+      location: /user_pub_work
+    # e.g.
+    # - name: CMIP5
+    #   path: esg_dataroot
+    #   location: /datacentre/archiveroots/archive/badc/cmip5/data
+
+  # The pod and container security contexts for data serving pods
+  # In particular, these may be required if using hostPath volumes for data, depending
+  # on the permissions of that data
+  # See https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
+  # WARNING: Due to permissions set inside the container, the user *must* belong to group 1000
+  #          in addition to the groups required to access data
+  # By default, we run as the esgf user/group
+  podSecurityContext:
+    runAsUser: 56140
+    runAsGroup: 1000
+    fsGroup: 1000
+  securityContext:
+    # Run with a read-only root filesystem by default
+    readOnlyRootFilesystem: true
+
+  # The resources for log-tailing containers
+  logTailResources:
+    requests:
+      cpu: 1m
+      memory: 1Mi
+
+  # Configuration for the THREDDS pod
+  thredds:
+    # Indicates if THREDDS should be deployed or not
+    enabled: true
+    # Image overrides for the THREDDS image
+    # Volume containing pre-existing THREDDS catalogs
+    # If not given, a catalog will be generated containing datasetScan elements for the configured datasets
+    # Format is the same as items in mounts except that name and mountPath are ignored
+    catalogVolume: {}
+    # Configuration for the node-local cache
+    # If the local cache is enabled, catalogs will be copied to the local disk of each node
+    # where THREDDS pods will run, and will be loaded from there by the THREDDS pods
+    localCache:
+      enabled: false
+      # The image to use for rsync
+      rsyncImage:
+        repository: rsync
+      # A folder will be created within this directory using the namespace and release name
+      pathPrefix: /var/cache/esgf
+    # The number of replicas for the THREDDS pod
+    # If an hpa is configured, this is ignored - the hpa has full control over the number of replicas
+    replicaCount: 1
+    # The horizontal pod autoscaler configuration for THREDDS pods
+    # See https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/
+    hpa: {}
+      # minReplicas: 1
+      # maxReplicas: 20
+      # metrics:
+      #   - type: Resource
+      #     resource:
+      #       name: cpu
+      #       target:
+      #         type: Utilization
+      #         averageUtilization: 80
+      #   - type: Resource
+      #     resource:
+      #       name: memory
+      #       target:
+      #         type: Utilization
+      #         averageUtilization: 70
+    # The startup time for the THREDDS container
+    # For large pre-existing catalogs, this maybe need to be large (default 5 mins)
+    startTimeout: 600
+    # The resource allocations for the THREDDS container
+    # See https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+    resources:
+      limits:
+        cpu: 2
+        memory: 4Gi
+    # Extra environment variables for the THREDDS container
+    # See https://kubernetes.io/docs/tasks/inject-data-application/define-environment-variable-container/
+    extraEnv: []
+    # Additional labels for THREDDS resources
+    labels: {}
+    # The node selector for the THREDDS pod
+    # See https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector
+    nodeSelector:
+    # The affinity rules for the THREDDS pod
+    # See https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
+    affinity:
+    # The tolerations for the THREDDS pod
+    # See https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
+    tolerations:
+
+  # Configuration for the file server pod
+  fileServer:
+    # Indicates if the file server should be deployed or not
+    enabled: true
+    # Image overrides for the file server image
+    image:
+      repository: nginx
+      tag: future-architecture
+    # The number of replicas for the file server pod
+    # If an hpa is configured, this is ignored - the hpa has full control over the number of replicas
+    replicaCount: 1
+    # The horizontal pod autoscaler configuration for file server pods
+    # See https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/
+    # Configuration is the same as for the thredds pod
+    hpa: {}
+    # The resource allocations for the file server container
+    # See https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+    resources:
+      limits:
+        cpu: 1
+        memory: 2Gi
+    # Extra environment variables for the file server container
+    # See https://kubernetes.io/docs/tasks/inject-data-application/define-environment-variable-container/
+    extraEnv: []
+    # Additional labels for file server resources
+    labels: {}
+    # The node selector for the file server pod
+    # See https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector
+    nodeSelector:
+    # The affinity rules for the file server pod
+    # See https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
+    affinity:
+    # The tolerations for the file server pod
+    # See https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
+    tolerations:
+
+
+###
+# Index node configuration
+###
+index:
+  # Indicates if any index node components are to be enabled
+  enabled: true
+
+  # Configuration for Solr
+  solr:
+    # Indicates if Solr components should be deployed
+    enabled: false
+    # External URLs for the Solr master and slave
+    # If search is enabled but Solr is not, set these URLs to use external Solr instances
+    # If Solr is enabled, the local instances will be used in preference
+    masterExternalUrl: http://esgf-node.llnl.gov:8984/solr 
+    slaveExternalUrl: http://esgf-node.llnl.gov/solr
+    #   resources (optional): Replica-specific resource allocations
+#    replicas: 
+#      - name: fedtest
+#        masterUrl: https://esgf-fedtest.llnl.gov/solr
+
+  # Configuration for the search app
+  search:
+    # Indicates if the search app should be deployed or not
+    enabled: true
+    # Image overrides for the search app
+#    image:
+#      repository: search
+#      tag: master
+    # The number of replicas for the search deployment
+    replicaCount: 1
+    # The resource allocations for the search container
+    # See https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+    resources:
+      limits:
+        cpu: 1
+        memory: 1Gi
+    # Extra environment variables for the search container
+    # See https://kubernetes.io/docs/tasks/inject-data-application/define-environment-variable-container/
+    extraEnv: []
+    # Additional labels for search resources
+    labels: {}
+    # The node selector for the search pods
+    # See https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector
+    nodeSelector:
+    # The affinity rules for the search pods
+    # See https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
+    affinity:
+    # The tolerations for the search pods
+    # See https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
+    tolerations:
+  # Configuration for wgetApi
+  wgetApi:
+    # Indicates if wgetApi component should be deployed
+    enabled: true
+    # Image overrides for the wgetApi image
+    image:
+      prefix: sashakames
+      repository: esgf-ska
+      tag: devel
+    # The pod security context for all wgetApi pods
+    # This should normally not need to change unless Solr pods are configured to use
+    # specific paths on the host for core storage
+    podSecurityContext:
+      # runAsUser: 56140
+      runAsUser: 1000
+      runAsGroup: 1000
+      fsGroup: 1000
+    # The container security context for all Solr containers
+    securityContext:
+      # Run with a read-only root filesystem by default
+      readOnlyRootFilesystem: true
+    config_path: /esg/esgf_wget
+    config: wget_api_config
+    allowed_projects_json: esgf_allowed_projects.json
+    settings:
+      debug: False
+      allowedHosts: "*"
+      esgfSolrUrl: https://esgf-node.llnl.gov/solr
+      esgfSolrShardsXml: /esg/esgf_wget/esgf_solr_shards.xml
+      wgetScriptFileDefaultLimit: 10000
+      wgetScriptFileMaxLimit: 50000
+      dataUploadMaxNumberFields: 10240
+      wgetMaxDirLength: 50
+      # Allowed projects for wget api
+      allowed_projects:
+        - '"CMIP6"'
+        - '"CMIP5"'
+        - '"CMIP3"'
+        - '"cmip3"'
+        - '"input4MIPs"'
+        - '"CREATE-IP"'
+        - '"E3SM"'
+      shards:
+        - localhost:8983/solr
+        - localhost:8985/solr
+        - localhost:8988/solr
+        - localhost:8990/solr
+        - localhost:8993/solr
+        - localhost:8995/solr
+        - localhost:8987/solr
+    # The number of replicas for the wgetApi pod.
+    replicaCount: 1
