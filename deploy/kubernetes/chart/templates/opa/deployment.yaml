@@ -38,6 +38,9 @@ spec:
             - name: policy
               mountPath: /policies
               readOnly: true
+          {{- with $opa.securityContext }}
+          securityContext: {{ toYaml . | nindent 12 }}
+          {{- end }}
       {{- with $opa.nodeSelector }}
       nodeSelector: {{ toYaml . | nindent 8 }}
       {{- end }}

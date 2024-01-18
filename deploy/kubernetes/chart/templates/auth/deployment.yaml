@@ -53,6 +53,9 @@ spec:
             # where files are expected to change
             - name: tmp
               mountPath: /tmp
+          {{- with $auth.securityContext }}
+          securityContext: {{ toYaml . | nindent 12 }}
+          {{- end }}
       {{- with $auth.nodeSelector }}
       nodeSelector: {{ toYaml . | nindent 8 }}
       {{- end }}
