@@ -46,7 +46,7 @@
 # The Ansible Docker modules require the Docker Python SDK, which requires pip to install, which requires EPEL
 
 - name: Install pip for system python on CentOS / RHEL
-  yum:
+  dnf:
     name: pip
     state: latest
   when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'

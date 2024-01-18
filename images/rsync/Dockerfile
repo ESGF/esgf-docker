@@ -8,6 +8,6 @@ FROM ${ESGF_REPOSITORY_BASE}/base:${ESGF_IMAGES_VERSION}
 
 USER root
 
-RUN yum makecache && yum install -y rsync && yum clean all
+RUN dnf makecache && dnf install -y rsync && dnf clean all
 
 USER $ESGF_UID

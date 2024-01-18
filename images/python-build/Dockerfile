@@ -11,7 +11,7 @@ USER root
 # Install common dependencies:
 #   gcc as it is often required to build things
 #   git for projects that use setuptools_scm
-RUN yum makecache && yum install -y gcc git && yum clean all
+RUN dnf makecache && dnf install -y gcc git && dnf clean all
 
 # Use ONBUILD triggers to checkout the application code
 #   Clone the repository and checkout the version

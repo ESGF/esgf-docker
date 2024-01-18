@@ -10,7 +10,7 @@ FROM ${ESGF_REPOSITORY_BASE}/base:${ESGF_IMAGES_VERSION}
 
 USER root
 
-RUN yum makecache && yum install -y nginx && yum clean all
+RUN dnf makecache && dnf install -y nginx && dnf clean all
 
 # Make the default log locations go to stdout and stderr
 # Also fix some permissions so that any user in the esgf group can run the container
