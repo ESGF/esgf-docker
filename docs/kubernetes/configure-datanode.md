@@ -69,6 +69,23 @@ data:
       location: /data/cordex
 ```
 
+## Using S3 buckets for data
+
+An S3 location for a dataset can be specified using `s3Location` instead of `location` in the yaml config, e.g.:
+
+```yaml
+  datasets:
+    - name: CMIP6
+      path: esg_cmip6
+      s3Location:
+        host: example.com
+        port: 443
+        bucket: bucket_name
+        dataPath: path/to/files
+```
+
+We don't currently support adding security parameters for accessing secured S3 buckets.
+
 ## Fowarding access logs
 
 The THREDDS and Nginx file server components can be configured to forward access logs to
