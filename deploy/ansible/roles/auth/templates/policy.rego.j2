@@ -1,0 +1,33 @@
+package esgf
+
+default allow = false
+
+# Determine access to the resource
+allow = true {
+    allowed_hosts[resource_host]
+    count(violation) == 0
+}
+
+# Check that the user belongs to a certain group
+has_group(name) {
+    some i
+    input.subject.groups[i] == name
+}
+
+# Separate parts of a resource URL, if applicable
+parts := regex.find_all_string_submatch_n("^(?:(?:http|https|ftp):\/\/([^\/ ]*))?(\/.*)", input.resource, -1)
+resource_host := parts[_][1]
+resource_path := parts[_][2]
+
+# Declare all allowed resource hosts
+allowed_hosts := {
+    "{{ ansible_host }}",
+}
+
+# Check requested path against restricted paths
+{% for restricted_path in auth_policy_restricted_paths %}
+violation["{{ restricted_path['name'] }}"] {
+    regex.match("{{ restricted_path['path'] }}", resource_path)
+    not has_group("{{ restricted_path['group'] }}")
+}
+{% endfor %}

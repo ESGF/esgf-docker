@@ -4,7 +4,40 @@
   docker_network:
     name: esgf
 
-- name: Start auth container
+- name: Make auth config directory
+  file:
+    path: /esg/config/auth
+    state: directory
+
+- name: Write rego policy file
+  template:
+    src: "{{ auth_policy_template }}"
+    dest: /esg/config/auth/policy.rego
+
+- name: Write auth service settings
+  template:
+    src: settings.yaml.j2
+    dest: /esg/config/auth/settings.yaml
+
+- name: Start the opa container
+  docker_container:
+    name: opa
+    image: "{{ opa_image_prefix }}/{{ opa_image_repository }}:{{ opa_image_tag }}"
+    pull: "{{ opa_image_pull }}"
+    detach: yes
+    restart_policy: unless-stopped
+    exposed_ports:
+      - "8181"
+    networks:
+      - name: esgf
+    networks_cli_compatible: yes
+    volumes:
+      # Mount the policy for the opa server
+      - "/esg/config/auth/policy.rego:/policies/policy.rego:ro"
+    state: started
+    recreate: yes
+
+- name: Start auth service container
   docker_container:
     name: auth
     image: "{{ auth_image_prefix }}/{{ auth_image_repository }}:{{ auth_image_tag }}"
@@ -15,3 +48,11 @@
       - "8080"
     networks:
       - name: esgf
+    networks_cli_compatible: yes
+    volumes:
+      # Mount the settings for the auth service
+      - "/esg/config/auth/settings.yaml:/etc/django/settings.d/20-runtime-settings.yaml:ro"
+      # Mount the settings for the auth service
+      - "/esg/config/auth/staticfiles:/var/django/staticfiles:ro"
+    state: started
+    recreate: yes

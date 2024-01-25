@@ -21,6 +21,16 @@ image_pull: true
 # Indicates if the auth service should be deployed or not
 auth_enabled: false
 
+# Default rego template (override this to use your own)
+auth_policy_template: policy.rego.j2
+auth_policy_restricted_paths: []
+
+# Settings for the opa image
+opa_image_prefix: "{{ image_prefix }}"
+opa_image_tag: "{{ image_tag }}"
+opa_image_pull: "{{ image_pull }}"
+opa_image_repository: opa
+
 # Settings for the auth-service image
 auth_image_prefix: "{{ image_prefix }}"
 auth_image_tag: "{{ image_tag }}"
