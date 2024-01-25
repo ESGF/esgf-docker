@@ -25,6 +25,9 @@ auth_enabled: false
 auth_policy_template: policy.rego.j2
 auth_policy_restricted_paths: []
 
+# Logging level for the OPA server
+opa_log_level: debug
+
 # Settings for the opa image
 opa_image_prefix: "{{ image_prefix }}"
 opa_image_tag: "{{ image_tag }}"

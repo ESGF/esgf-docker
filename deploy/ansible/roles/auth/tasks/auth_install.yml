@@ -34,6 +34,13 @@
     volumes:
       # Mount the policy for the opa server
       - "/esg/config/auth/policy.rego:/policies/policy.rego:ro"
+    entrypoint:
+      - "/opa"
+      - "run"
+      - "--ignore=.*"  # exclude hidden dirs created by Kubernetes
+      - "--log-level={{ opa_log_level }}"
+      - "--server"
+      - "/policies"
     state: started
     recreate: yes
 
