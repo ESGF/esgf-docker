@@ -48,7 +48,7 @@ server {
     }
 
     location @error401 {
-        return 302 https://$host/login;
+        return 302 http://$host/login;
     }
     {% endif %}
 
