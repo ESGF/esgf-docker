@@ -21,6 +21,20 @@ image_pull: true
 # Indicates if the auth service should be deployed or not
 auth_enabled: false
 
+auth_settings_base:
+  MIDDLEWARE:
+    - django.middleware.security.SecurityMiddleware
+    - django.contrib.sessions.middleware.SessionMiddleware
+    - django.middleware.common.CommonMiddleware
+    - django.middleware.csrf.CsrfViewMiddleware
+    - django.contrib.messages.middleware.MessageMiddleware
+    - django.middleware.clickjacking.XFrameOptionsMiddleware
+  OPA_SERVER:
+    host: opa
+    port: 8181
+  RESOURCE_URI_QUERY_KEY: rd
+  RESOURCE_URI_HEADER_KEY: HTTP_X_ORIGINAL_URL
+
 # Default rego template (override this to use your own)
 opa_policy_template: policy.rego.j2
 
