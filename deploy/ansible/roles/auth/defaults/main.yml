@@ -22,11 +22,16 @@ image_pull: true
 auth_enabled: false
 
 # Default rego template (override this to use your own)
-auth_policy_template: policy.rego.j2
-auth_policy_restricted_paths: []
+opa_policy_template: policy.rego.j2
+
+# Paths to apply security restrictions to
+opa_policy_restricted_paths: []
+
+# Whitelist access based on the server's hostname
+opa_policy_server_host: "{{ ansible_host }}"
 
 # Logging level for the OPA server
-opa_log_level: debug
+opa_log_level: info
 
 # Settings for the opa image
 opa_image_prefix: "{{ image_prefix }}"

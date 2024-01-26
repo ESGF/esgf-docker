@@ -25,7 +25,7 @@ allowed_hosts := {
 }
 
 # Check requested path against restricted paths
-{% for restricted_path in auth_policy_restricted_paths %}
+{% for restricted_path in opa_policy_restricted_paths %}
 violation["{{ restricted_path['name'] }}"] {
     regex.match("{{ restricted_path['path'] }}", resource_path)
     not has_group("{{ restricted_path['group'] }}")

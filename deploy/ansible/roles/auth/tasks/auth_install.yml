@@ -11,7 +11,7 @@
 
 - name: Write rego policy file
   template:
-    src: "{{ auth_policy_template }}"
+    src: "{{ opa_policy_template }}"
     dest: /esg/config/auth/policy.rego
 
 - name: Write auth service settings
