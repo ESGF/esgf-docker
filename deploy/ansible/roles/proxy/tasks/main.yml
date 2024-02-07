@@ -50,6 +50,13 @@
     creates: /esg/config/proxy/ssl/dhparam.pem
   when: generate_dhparam
 
+- name: Set permissions on Diffie-Helman file
+  file:
+    path: /esg/config/proxy/ssl/dhparam.pem
+    owner: 1000
+    group: 1000
+    mode: "u=r,g=,o="
+
 - name: Write proxy configuration
   template:
     src: "{{ nginx_config_template }}"
