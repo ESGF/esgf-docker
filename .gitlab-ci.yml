@@ -62,7 +62,7 @@ variables:
     #   If building master, also tag latest
     - test "$CI_COMMIT_REF_NAME" == "master" && docker tag "$REPOSITORY:$CI_COMMIT_SHORT_SHA" "$REPOSITORY:latest"
     # Push all tags
-    - docker push $REPOSITORY
+    - docker push --all-tags $REPOSITORY
   only:
     # Only run build jobs for branches in the repo, not MRs
     refs:
