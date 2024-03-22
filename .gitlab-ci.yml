@@ -76,10 +76,15 @@ variables:
     - external_pull_requests
 
 build:base:
-  extends: .docker-build
+  # Skipped because the runner can't build the Rocky base image
+  # extends: .docker-build
+  # stage: build-1
+  # variables:
+  #   CONTEXT_DIR: $CI_PROJECT_DIR/images/base
   stage: build-1
-  variables:
-    CONTEXT_DIR: $CI_PROJECT_DIR/images/base
+  script:
+    - REPOSITORY="${REPOSITORY:-"$REPOSITORY_BASE/base"}"
+    - echo "Skipping base image build for $REPOSITORY:$CI_COMMIT_SHORT_SHA"
 
 build:jdk:
   extends: .docker-build
