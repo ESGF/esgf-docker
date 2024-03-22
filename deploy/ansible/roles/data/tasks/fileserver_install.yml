@@ -32,10 +32,10 @@
         src: /dev/stderr
         force: yes
 
-    - name: Make the access log pipe
-      command: mkfifo /esg/logs/fileserver/access.log
-      args:
-        creates: /esg/logs/fileserver/access.log
+    - name: Ensure access log file exists
+      file:
+        path: /esg/logs/fileserver/access.log
+        state: touch
 
     - name: Transfer ownership of logs to security context user
       file:

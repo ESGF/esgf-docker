@@ -1,5 +1,13 @@
 ---
 
+- name: Ensure logrotate is installed
+  command: dnf install -y logrotate
+
+- name: Install the logrotate configuration file
+  template:
+    src: esg.logrotate.j2
+    dest: /etc/logrotate.d/esg
+
 - name: Create Docker network
   docker_network:
     name: esgf
