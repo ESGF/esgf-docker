@@ -366,3 +366,7 @@ and copy them to the following paths:
 As long as the files are not symlinks, they will be automatically installed to the proxy container.
 
 *Note: The SSL certificate or certificate file should contain the complete certificate chain, including intermediate certificates.*
+
+## Enabling access control
+
+WIP
