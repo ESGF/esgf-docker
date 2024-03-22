@@ -15,8 +15,8 @@ variables:
 # Sets up authentication with the configured registry, which defaults to Docker Hub
 .dind:
   services:
-    - docker:19.03-dind
-  image: docker:19.03
+    - docker:26.0.0-dind
+  image: docker:26.0.0
   variables:
     DOCKER_HOST: tcp://docker:2375
     DOCKER_TLS_CERTDIR: ""
