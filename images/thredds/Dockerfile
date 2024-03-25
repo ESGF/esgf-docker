@@ -24,9 +24,9 @@ FROM ${ESGF_REPOSITORY_BASE}/tomcat:${ESGF_IMAGES_VERSION}
 USER root
 
 # Install netcdf 
-RUN yum makecache && \
-    yum install -y netcdf && \
-    yum clean all
+RUN dnf makecache && \
+    dnf install -y netcdf && \
+    dnf clean all
 
 # Create symlinks for log files to stdout
 RUN ln -s /dev/stdout ./logs/serverStartup.log && \
