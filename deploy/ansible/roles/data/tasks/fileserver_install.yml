@@ -32,6 +32,17 @@
         src: /dev/stderr
         force: yes
 
+    - name: Get stats of a file
+      stat:
+        path: /esg/logs/fileserver/access.log
+      register: log_file
+
+    - name: Delete log pipe from previous playbook versions
+      file:
+        path: /esg/logs/fileserver/access.log
+        state: absent
+      when: log_file.stat.isfifo
+
     - name: Ensure access log file exists
       file:
         path: /esg/logs/fileserver/access.log

@@ -52,10 +52,21 @@
         - cache.log
         - localhost.log
 
-    - name: Make the access log pipe
-      command: mkfifo /esg/logs/thredds/localhost_access_log.txt
-      args:
-        creates: /esg/logs/thredds/localhost_access_log.txt
+    - name: Get stats of a file
+      stat:
+        path: /esg/logs/thredds/localhost_access_log.txt
+      register: log_file
+
+    - name: Delete log pipe from previous playbook versions
+      file:
+        path: /esg/logs/thredds/localhost_access_log.txt
+        state: absent
+      when: log_file.stat.isfifo
+
+    - name: Ensure access log file exists
+      file:
+        path: /esg/logs/thredds/localhost_access_log.txt
+        state: touch
 
     - name: Transfer ownership of logs to security context user
       file:
