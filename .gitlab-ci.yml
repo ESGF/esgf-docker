@@ -15,8 +15,8 @@ variables:
 # Sets up authentication with the configured registry, which defaults to Docker Hub
 .dind:
   services:
-    - docker:19.03-dind
-  image: docker:19.03
+    - docker:26.0.0-dind
+  image: docker:26.0.0
   variables:
     DOCKER_HOST: tcp://docker:2375
     DOCKER_TLS_CERTDIR: ""
@@ -62,7 +62,7 @@ variables:
     #   If building master, also tag latest
     - test "$CI_COMMIT_REF_NAME" == "master" && docker tag "$REPOSITORY:$CI_COMMIT_SHORT_SHA" "$REPOSITORY:latest"
     # Push all tags
-    - docker push $REPOSITORY
+    - docker push --all-tags $REPOSITORY
   only:
     # Only run build jobs for branches in the repo, not MRs
     refs:
