@@ -130,12 +130,15 @@ build:opa:
     CONTEXT_DIR: $CI_PROJECT_DIR/images/opa
   needs: ["build:base"]
 
-build:search-builder:
-  extends: .docker-build
-  stage: build-3
-  variables:
-    CONTEXT_DIR: $CI_PROJECT_DIR/images/search-builder
-  needs: ["build:jdk"]
+# Ironically, search-builder no longer builds due to an Ivy issue.
+# Later Ivy versions resolve that issue, but wont build search.
+# For now, we'll rely on already-built versions of the search app.
+# build:search-builder:
+#   extends: .docker-build
+#   stage: build-3
+#   variables:
+#     CONTEXT_DIR: $CI_PROJECT_DIR/images/search-builder
+#   needs: ["build:jdk"]
 
 build:solr:
   extends: .docker-build
@@ -177,7 +180,7 @@ build:search:
   stage: build-4
   variables:
     CONTEXT_DIR: $CI_PROJECT_DIR/images/search
-  needs: ["build:search-builder", "build:tomcat"]
+  needs: ["build:tomcat"]
 
 build:thredds:
   extends: .docker-build
