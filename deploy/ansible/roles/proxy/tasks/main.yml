@@ -45,10 +45,17 @@
     - "{{ ssl_private_key_path }}"
 
 - name: Create Ephemeral Diffie-Helman parameters file
-  command: openssl dhparam -dsaparam -out /etc/nginx/ssl/dhparam.pem 4096
+  command: openssl dhparam -dsaparam -out /esg/config/proxy/ssl/dhparam.pem 4096
   args:
     creates: /esg/config/proxy/ssl/dhparam.pem
   when: generate_dhparam
+
+- name: Set permissions on Diffie-Helman file
+  file:
+    path: /esg/config/proxy/ssl/dhparam.pem
+    owner: 1000
+    group: 1000
+    mode: "u=r,g=,o="
 
 - name: Write proxy configuration
   template:
@@ -75,6 +82,6 @@
       # Mount the Nginx configuration for the proxy
       - "/esg/config/proxy/conf.d:/etc/nginx/conf.d:ro"
       # Mount any SSL files for the proxy
-      - "/esg/config/proxy/ssl:/etc/nginx/ssl:ro"
+      - "/esg/config/proxy/ssl:/etc/nginx/tls:ro"
     state: started
     recreate: yes
