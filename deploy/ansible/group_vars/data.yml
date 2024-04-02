@@ -30,6 +30,17 @@ data_datasets:
     path: esg_cordex
     location: /data/cordex
 
+# An S3 location for a dataset can be specified using `s3Location` instead of `location` in the yaml config.
+# We don't currently support adding security parameters for accessing secured S3 buckets.
+data_datasets:
+  - name: CMIP6
+    path: esg_cmip6
+    s3Location:
+      host: example.com
+      port: 443
+      bucket: bucket_name
+      dataPath: path/to/files
+
 # https://github.com/ESGF/esgf-docker/blob/master/docs/deploy-ansible.md#configuring-the-available-datasets
 
 
