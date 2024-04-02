@@ -15,8 +15,8 @@ variables:
 # Sets up authentication with the configured registry, which defaults to Docker Hub
 .dind:
   services:
-    - docker:19.03-dind
-  image: docker:19.03
+    - docker:26.0.0-dind
+  image: docker:26.0.0
   variables:
     DOCKER_HOST: tcp://docker:2375
     DOCKER_TLS_CERTDIR: ""
@@ -62,7 +62,7 @@ variables:
     #   If building master, also tag latest
     - test "$CI_COMMIT_REF_NAME" == "master" && docker tag "$REPOSITORY:$CI_COMMIT_SHORT_SHA" "$REPOSITORY:latest"
     # Push all tags
-    - docker push $REPOSITORY
+    - docker push --all-tags $REPOSITORY
   only:
     # Only run build jobs for branches in the repo, not MRs
     refs:
@@ -130,12 +130,15 @@ build:opa:
     CONTEXT_DIR: $CI_PROJECT_DIR/images/opa
   needs: ["build:base"]
 
-build:search-builder:
-  extends: .docker-build
-  stage: build-3
-  variables:
-    CONTEXT_DIR: $CI_PROJECT_DIR/images/search-builder
-  needs: ["build:jdk"]
+# Ironically, search-builder no longer builds due to an Ivy issue.
+# Later Ivy versions resolve that issue, but wont build search.
+# For now, we'll rely on already-built versions of the search app.
+# build:search-builder:
+#   extends: .docker-build
+#   stage: build-3
+#   variables:
+#     CONTEXT_DIR: $CI_PROJECT_DIR/images/search-builder
+#   needs: ["build:jdk"]
 
 build:solr:
   extends: .docker-build
@@ -165,19 +168,12 @@ build:python-build:
     CONTEXT_DIR: $CI_PROJECT_DIR/images/python-build
   needs: ["build:conda"]
 
-build:django:
-  extends: .docker-build
-  stage: build-3
-  variables:
-    CONTEXT_DIR: $CI_PROJECT_DIR/images/django
-  needs: ["build:conda"]
-
 build:search:
   extends: .docker-build
   stage: build-4
   variables:
     CONTEXT_DIR: $CI_PROJECT_DIR/images/search
-  needs: ["build:search-builder", "build:tomcat"]
+  needs: ["build:tomcat"]
 
 build:thredds:
   extends: .docker-build
@@ -191,4 +187,4 @@ build:auth-service:
   stage: build-4
   variables:
     CONTEXT_DIR: $CI_PROJECT_DIR/images/auth-service
-  needs: ["build:python-build", "build:django"]
+  needs: ["build:python-build", "build:conda"]

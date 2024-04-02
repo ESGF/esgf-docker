@@ -11,7 +11,7 @@ USER root
 # Install common dependencies:
 #   gcc as it is often required to build things
 #   git for projects that use setuptools_scm
-RUN yum makecache && yum install -y gcc git && yum clean all
+RUN dnf makecache && dnf install -y gcc git && dnf clean all
 
 # Use ONBUILD triggers to checkout the application code
 #   Clone the repository and checkout the version
@@ -25,13 +25,18 @@ ONBUILD RUN \
     git submodule update --init --recursive && \
     popd
 
+# Because we are using poetry, generate a requirements file from poetry.lock
+# So it can be installed by python-build.
+ONBUILD RUN python -m pip install --quiet poetry
+ONBUILD RUN poetry self add poetry-plugin-export
+ONBUILD WORKDIR /application
+ONBUILD RUN poetry export \
+      --format requirements.txt \
+      --output requirements.txt \
+      --without-hashes \
+      --no-interaction
+
 # Use ONBUILD triggers to build the wheels
-#   Copy the hooks into the image, if specified
-#   Because we need this to work even if there are no hooks, we must also include
-#   a file that is guaranteed to be in the context, so we use the Dockerfile
-ONBUILD COPY Dockerfile hooks/* /context/hooks/
-#   If there is a pre-build hook, run it
-ONBUILD RUN [ ! -x /context/hooks/pre-build ] || /context/hooks/pre-build
 #   Move into the application source directory so that consumers can use relative requirements paths
 ONBUILD WORKDIR /application
 #   Allow the requirements file to be overridden, using /application/requirements.txt by default

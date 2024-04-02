@@ -19,9 +19,14 @@ ENV LS_SETTINGS_DIR /etc/logstash
 # In the same command, in order to avoid another layer, transfer ownership of
 # /usr/share/logstash to the ESGF user and group
 COPY logstash.repo /etc/yum.repos.d/logstash.repo
-RUN yum makecache && \
-    yum install -y logstash-7.10.0 && \
-    yum clean all && \
+
+# SHA1 is disabled by default in rocky9. 
+# Logstash does not have a SHA512 hash yet.
+# So SHA1 needs to be enabled to install it.
+RUN update-crypto-policies --set DEFAULT:SHA1
+RUN dnf makecache && \
+    dnf install -y logstash-7.10.0 && \
+    dnf clean all && \
     chown -R $ESGF_UID:$ESGF_GID /usr/share/logstash
 
 # Install configuration files

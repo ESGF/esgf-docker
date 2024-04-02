@@ -9,7 +9,7 @@ FROM ${ESGF_REPOSITORY_BASE}/jdk:${ESGF_IMAGES_VERSION} as builder
 
 # Unpack the THREDDS war
 ARG THREDDS_VERSION=5.5
-ARG THREDDS_SHA1=974979e98ad6cca15b45ccd53ee3f482d1ebb955
+ARG THREDDS_SHA1=148e7745edcdabaf42ff4af6a02ceb1fc4bb9bbd
 ARG THREDDS_URL=https://downloads.unidata.ucar.edu/tds/$THREDDS_VERSION/thredds-$THREDDS_VERSION-SNAPSHOT.war
 RUN mkdir /application && \
     cd /application && \
@@ -24,9 +24,9 @@ FROM ${ESGF_REPOSITORY_BASE}/tomcat:${ESGF_IMAGES_VERSION}
 USER root
 
 # Install netcdf 
-RUN yum makecache && \
-    yum install -y netcdf && \
-    yum clean all
+RUN dnf makecache && \
+    dnf install -y netcdf && \
+    dnf clean all
 
 # Create symlinks for log files to stdout
 RUN ln -s /dev/stdout ./logs/serverStartup.log && \
