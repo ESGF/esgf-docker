@@ -17,8 +17,12 @@ server {
     # Create a location block for each dataset
     {% for dataset in data_datasets %}
     location /thredds/fileServer/{{ dataset.path }}/ {
+        {% if dataset.s3Location %}
+        proxy_pass https://{{ dataset.s3Location.host }}:{{ dataset.s3Location.port }}/{{ dataset.s3Location.bucket }}/{{ dataset.s3Location.dataPath.strip("/") }}/;
+        {% else %}
         alias {{ dataset.location }}/;
         try_files $uri =404;
+        {% endif %}
     }
     {% endfor %}
 }

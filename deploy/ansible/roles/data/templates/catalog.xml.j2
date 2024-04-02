@@ -13,7 +13,11 @@
 
     <!-- Produce a scan element for each of the given datasets -->
     {% for dataset in data_datasets %}
+    {% if dataset.s3Location %}
+    <datasetScan name="{{ dataset.s3Location.name }}" ID="{{ dataset.s3Location.path }}" path="{{ dataset.s3Location.path }}" location="cdms3://{{ dataset.s3Location.host }}:{{ dataset.s3Location.port }}/{{ dataset.s3Location.bucket }}?{{ dataset.s3Location.dataPath.strip("/") }}/#delimiter=/">
+    {% else %}
     <datasetScan name="{{ dataset.name }}" ID="{{ dataset.path }}" path="{{ dataset.path }}" location="{{ dataset.location }}">
+    {% endif %}
         <metadata inherited="true">
             <serviceName>all</serviceName>
         </metadata>
