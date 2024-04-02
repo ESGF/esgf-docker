@@ -1,0 +1,66 @@
+{{- $search := .Values.index.search -}}
+{{- if (and .Values.index.enabled $search.separatePublishApi) -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "esgf.component.fullname" (list . "publish") }}
+  labels: {{ include "esgf.component.labels" (list . "publish" $search.labels) | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels: {{ include "esgf.component.selectorLabels" (list . "publish") | nindent 6 }}
+  template:
+    metadata:
+      labels: {{ include "esgf.component.selectorLabels" (list . "publish") | nindent 8 }}
+      annotations:
+        # Roll the deployment when the configmap changes
+        checksum/configmap: {{ include (print $.Template.BasePath "/search/configmap.yaml") . | sha256sum }}
+    spec:
+      {{- with (default .Values.image.pullSecrets $search.image.pullSecrets) }}
+      imagePullSecrets: {{ toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: publish
+          {{ include "esgf.deployment.image" (list . $search.image) }}
+          resources: {{ toYaml $search.resources | nindent 12 }}
+          ports:
+            - name: http
+              containerPort: 8080
+          env: {{ toYaml $search.extraEnv | nindent 12 }}
+          readinessProbe: &probe
+            httpGet:
+              path: /esg-search/ws/publish
+              port: 8080
+              httpHeaders:
+                - name: Host
+                  value: "{{ .Values.hostname }}"
+                - name: X-Forwarded-Host
+                  value: "{{ .Values.hostname }}"
+                - name: X-Forwarded-Proto
+                  value: https
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            <<: *probe
+            initialDelaySeconds: 120
+          {{- with $search.securityContext }}
+          securityContext: {{ toYaml . | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+            - name: esg-config
+              mountPath: /esg/config
+              readOnly: true
+      {{- with $search.nodeSelector }}
+      nodeSelector: {{ toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $search.affinity }}
+      affinity: {{ toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $search.tolerations }}
+      tolerations: {{ toYaml . | nindent 8 }}
+      {{- end }}
+      volumes:
+        - name: esg-config
+          configMap:
+            name: {{ include "esgf.component.fullname" (list . "search") }}
+{{- end -}}

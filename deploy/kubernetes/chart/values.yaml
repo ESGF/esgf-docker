@@ -458,6 +458,8 @@ index:
   search:
     # Indicates if the search app should be deployed or not
     enabled: true
+    # Indicates if the publication API should run as a separate pod or not
+    separatePublishApi: false
     # Image overrides for the search app
     image:
       repository: search
