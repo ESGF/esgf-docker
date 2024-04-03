@@ -27,22 +27,6 @@ spec:
             - name: http
               containerPort: 8080
           env: {{ toYaml $search.extraEnv | nindent 12 }}
-          readinessProbe: &probe
-            httpGet:
-              path: /esg-search/ws/publish
-              port: 8080
-              httpHeaders:
-                - name: Host
-                  value: "{{ .Values.hostname }}"
-                - name: X-Forwarded-Host
-                  value: "{{ .Values.hostname }}"
-                - name: X-Forwarded-Proto
-                  value: https
-            initialDelaySeconds: 10
-            periodSeconds: 10
-          livenessProbe:
-            <<: *probe
-            initialDelaySeconds: 120
           {{- with $search.securityContext }}
           securityContext: {{ toYaml . | nindent 12 }}
           {{- end }}
