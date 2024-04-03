@@ -117,8 +117,14 @@ auth:
           scope: openid profile email
   # Security context for auth container.
   securityContext:
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop:
+        - ALL
     # Run with a read-only root filesystem by default
     readOnlyRootFilesystem: true
+    # The containers will run as the ESGF user by default
+    runAsNonRoot: true
 
 ###
 # OPA server configuration
@@ -159,8 +165,14 @@ opa:
   restrictedPaths: []
   # Security context for OPA container.
   securityContext:
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop:
+        - ALL
     # Run with a read-only root filesystem by default
     readOnlyRootFilesystem: true
+    # The containers will run as the ESGF user by default
+    runAsNonRoot: true
 
 ###
 # Data node configuration
@@ -213,8 +225,14 @@ data:
     runAsGroup: 1000
     fsGroup: 1000
   securityContext:
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop:
+        - ALL
     # Run with a read-only root filesystem by default
     readOnlyRootFilesystem: true
+    # The containers will run as the ESGF user by default
+    runAsNonRoot: true
 
   # Configuration for the access log sidecar
   accessLogSidecar:
@@ -386,8 +404,14 @@ index:
       fsGroup: 1000
     # The container security context for all Solr containers
     securityContext:
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop:
+          - ALL
       # Run with a read-only root filesystem by default
       readOnlyRootFilesystem: true
+      # The containers will run as the ESGF user by default
+      runAsNonRoot: true
     # The default resource allocations for all Solr containers
     # Can be overridden on a per-shard basis
     # See https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
@@ -485,5 +509,11 @@ index:
   # Security context for search container.
 
     securityContext:
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop:
+          - ALL
       # Run with a read-only root filesystem by default
       readOnlyRootFilesystem: true
+      # The containers will run as the ESGF user by default
+      runAsNonRoot: true
