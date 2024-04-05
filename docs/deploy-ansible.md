@@ -416,7 +416,7 @@ auth_settings:
         scope: openid profile email
 ```
 
-Generally, the missing values can be found in the client and well-known configuration for your chosen Identity Provider (IDP). Please see the [Django Suth Service README](https://github.com/cedadev/django-auth-service/blob/master/README.md#authentication-settings) for more information about what each setting does.
+Generally, the missing values can be found in the client and well-known configuration for your chosen Identity Provider (IDP). Please see the [Django Auth Service README](https://github.com/cedadev/django-auth-service/blob/master/README.md#authentication-settings) for more information about what each setting does.
 
 ### Configurating the opa container
 
