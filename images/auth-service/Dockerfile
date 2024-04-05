@@ -34,7 +34,6 @@ RUN mkdir -p /etc/django/settings.d
 
 # Install init scripts and serving script
 COPY django-serve.sh /usr/local/bin/
-COPY init.d/* /docker-init.d/
 
 # Use ONBUILD instructions to install and configure the application
 COPY --from=python-build /build/wheelhouse /build/wheelhouse
