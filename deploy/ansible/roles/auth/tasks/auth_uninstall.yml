@@ -1,6 +1,11 @@
 ---
 
-- name: Stop auth container
+- name: Stop opa container
+  docker_container:
+    name: opa
+    state: absent
+
+- name: Stop auth service container
   docker_container:
     name: auth
     state: absent

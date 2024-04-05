@@ -1,3 +1,10 @@
+{% macro auth_check() -%}
+        error_page 401 = @error401;
+        auth_request /verify;
+        auth_request_set $username $upstream_http_x_username;
+        auth_request_set $sid $upstream_http_x_session;
+{%- endmacro %}
+
 # HTTP and HTTPS server blocks that proxy to the other containers running on this host
 
 server {
@@ -41,7 +48,7 @@ server {
     }
 
     location @error401 {
-        return 302 /login;
+        return 302 http://$host/login;
     }
     {% endif %}
 
@@ -51,12 +58,7 @@ server {
         include /etc/nginx/includes/proxy_params.conf;
         proxy_pass http://thredds:8080;
 
-        {% if auth_enabled %}
-        error_page 401 = @error401;
-        auth_request /auth/verify;
-        auth_request_set $username $upstream_http_x_username;
-        auth_request_set $sid $upstream_http_x_session;
-        {% endif %}
+        {% if auth_enabled %}{{ auth_check() }}{% endif %}
     }
     {% endif %}
 
@@ -64,6 +66,8 @@ server {
     location /thredds/fileServer {
         include /etc/nginx/includes/proxy_params.conf;
         proxy_pass http://fileserver:8080;
+
+        {% if auth_enabled %}{{ auth_check() }}{% endif %}
     }
     {% endif %}
     {% endif %}
@@ -74,6 +78,8 @@ server {
     location ~ ^/solr/[a-z]+/replication {
         include /etc/nginx/includes/proxy_params.conf;
         proxy_pass http://solr-slave:8983;
+
+        {% if auth_enabled %}{{ auth_check() }}{% endif %}
     }
     {% endif %}
 
@@ -81,6 +87,8 @@ server {
     location /esg-search {
         include /etc/nginx/includes/proxy_params.conf;
         proxy_pass http://search:8080;
+
+        {% if auth_enabled %}{{ auth_check() }}{% endif %}
     }
     {% endif %}
     {% endif %}
