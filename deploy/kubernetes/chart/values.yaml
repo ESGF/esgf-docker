@@ -119,6 +119,12 @@ auth:
   securityContext:
     # Run with a read-only root filesystem by default
     readOnlyRootFilesystem: true
+    # The containers will run as the ESGF user by default
+    runAsNonRoot: true
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop:
+        - ALL
 
 ###
 # OPA server configuration
@@ -161,6 +167,12 @@ opa:
   securityContext:
     # Run with a read-only root filesystem by default
     readOnlyRootFilesystem: true
+    # The containers will run as the ESGF user by default
+    runAsNonRoot: true
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop:
+        - ALL
 
 ###
 # Data node configuration
@@ -215,6 +227,12 @@ data:
   securityContext:
     # Run with a read-only root filesystem by default
     readOnlyRootFilesystem: true
+    # The containers will run as the ESGF user by default
+    runAsNonRoot: true
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop:
+        - ALL
 
   # Configuration for the access log sidecar
   accessLogSidecar:
@@ -388,6 +406,12 @@ index:
     securityContext:
       # Run with a read-only root filesystem by default
       readOnlyRootFilesystem: true
+      # The containers will run as the ESGF user by default
+      runAsNonRoot: true
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop:
+          - ALL
     # The default resource allocations for all Solr containers
     # Can be overridden on a per-shard basis
     # See https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
@@ -458,6 +482,8 @@ index:
   search:
     # Indicates if the search app should be deployed or not
     enabled: true
+    # Indicates if the publication API should run as a separate pod or not
+    separatePublishApi: false
     # Image overrides for the search app
     image:
       repository: search
@@ -485,3 +511,9 @@ index:
     securityContext:
       # Run with a read-only root filesystem by default
       readOnlyRootFilesystem: true
+      # The containers will run as the ESGF user by default
+      runAsNonRoot: true
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop:
+          - ALL

@@ -1,0 +1,23 @@
+{% set containers = [] %}
+{% if 'data' in group_names and fileserver_enabled %}
+{{ containers.append(['fileserver', 'access.log']) }}
+{% endif %}
+{% if 'data' in group_names and thredds_enabled %}
+{{ containers.append(['thredds', 'localhost_access_log.txt']) }}
+{% endif %}
+{% for container in containers %}
+/esg/logs/{{ container.0 }}/{{ container.1 }} {
+    create 0640 root root
+    daily
+    rotate 10
+    missingok
+    notifempty
+    compress
+    delaycompress
+    sharedscripts
+    postrotate
+        /usr/bin/docker restart {{ container.0 }} > /dev/null 2>/dev/null || true
+    endscript
+}
+
+{% endfor %}

@@ -20,7 +20,7 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: {{ include "esgf.component.fullname" (list . "search") }}
+                name: {{ include "esgf.component.fullname" (list . "publish") }}
                 port:
                   number: 8080
 {{- end }}{{- end }}{{- end }}

@@ -9,9 +9,9 @@ FROM ${ESGF_REPOSITORY_BASE}/base:${ESGF_IMAGES_VERSION}
 USER root
 
 # Specific version of Java required by SOLR
-RUN yum makecache && \
-    yum install -y java-1.8.0-openjdk-headless-1.8.0.345.b01 && \
-    yum clean all
+RUN dnf makecache && \
+    dnf install -y java-1.8.0-openjdk-headless-1.8.0.402.b06-2.el9 && \
+    dnf clean all
 
 # Create Solr home directory
 ENV SOLR_HOME="/var/solr/data" \

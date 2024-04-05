@@ -7,18 +7,20 @@ ARG ESGF_IMAGES_VERSION=latest
 
 # Make a reference to the builder
 # We have to do this as a FROM because we can't use variables in COPY --from
-FROM ${ESGF_REPOSITORY_BASE}/search-builder:${ESGF_IMAGES_VERSION} as builder
+# We've disabled the builder build so the latest available version is used
+# Replace "latest" with "${ESGF_IMAGES_VERSION}" if building a new builder
+FROM esgfdeploy/search-builder:latest as builder
 
 # Build the runtime image
 FROM ${ESGF_REPOSITORY_BASE}/tomcat:${ESGF_IMAGES_VERSION}
 
 USER root
 
-RUN yum makecache && \
-    yum remove -y java-11-openjdk-headless && \
-    yum install -y java-1.8.0-openjdk-headless-1.8.0.345.b01 && \
-    yum install -y zip && \
-    yum clean all
+RUN dnf makecache && \
+    dnf remove -y java-11-openjdk-headless && \
+    dnf install -y java-1.8.0-openjdk-headless-1.8.0.402.b06-2.el9 && \
+    dnf install -y zip && \
+    dnf clean all
 
 # Copy the unpacked webapp from the builder
 COPY --from=builder /application ./webapps/esg-search
