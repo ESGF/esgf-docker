@@ -369,4 +369,91 @@ As long as the files are not symlinks, they will be automatically installed to t
 
 ## Enabling access control
 
-WIP
+By enabling and configurating the "auth service" and "opa" containers, you will be able to restrict access to any part of the installation based on a customisable authorization policy. This is useful if you want to restrict download or subsetting operations for certain datasets, or access to resources on an index node such as publication endpoints.
+
+To enable the auth components, you will need to add the following to either your group or host vars:
+
+```yaml
+auth_enabled: true
+```
+
+Before these components will work, you will need to configure each one. Keep reading below to find out how.
+
+*Note: All configuration options below can be added to any of your Ansible variable files. However, if you have a multi-node deployment you will need to make sure that the variables will apply to the node you want to secure.*
+
+### Configurating the auth service container
+
+The "auth service" is a Policy Enforcement Points (PEP), or a simple service responsible for allowing or disallowing access to resources on your node. It will check the authentication status and access groups of a user depending on what kind of Identity Provider (IDP) you've configured and pass this information to the OPA [authorization service](#configurating-the-opa-container).
+
+Below is an example of the settings you'll need to configure in your vars for authorization container to run:
+
+```yaml
+auth_settings:
+  MIDDLEWARE:
+    - authenticate.oauth2.middleware.BearerTokenAuthenticationMiddleware
+    - authenticate.oidc.middleware.OpenIDConnectAuthenticationMiddleware
+    - authorize.opa.middleware.OPAAuthorizationMiddleware
+  OPA_SERVER:
+    package_path: esgf
+    rule_name: allow
+  # Group info keys for authorization
+  OAUTH2_GROUPS_KEY: group_membership
+  OIDC_GROUPS_KEY: group_membership
+  # OAuth Bearer Token auth settings
+  OAUTH_CLIENT_ID:
+  OAUTH_CLIENT_SECRET:
+  OAUTH_TOKEN_URL:
+  OAUTH_TOKEN_INTROSPECT_URL:
+  # OIDC auth settings
+  OIDC_BACKEND_CLIENT_NAME: esgf
+  AUTHLIB_OAUTH_CLIENTS:
+    esgf:
+      client_id:
+      client_secret:
+      authorize_url:
+      userinfo_endpoint:
+      client_kwargs:
+        scope: openid profile email
+```
+
+Generally, the missing values can be found in the client and well-known configuration for your chosen Identity Provider (IDP). Please see the [Django Suth Service README](https://github.com/cedadev/django-auth-service/blob/master/README.md#authentication-settings) for more information about what each setting does.
+
+### Configurating the opa container
+
+The "opa" container provides a Policy Decision Point (PDP), or a way to define a set of authorization rules which will determine which parts of your node are restricted and who can access them. This container runs an [Open Policy Agent](https://www.openpolicyagent.org/) (OPA) server and uses an authorization policy document written in the [Rego language](https://www.openpolicyagent.org/docs/latest/policy-language/). If using the default policy provided by the playbook, you wont need to write your own rego, and the authorization server can be configured entirely using Ansible variables.
+
+The "opa_policy_restricted_paths" variable is a list of paths to apply the authorisation policy to and the IDP access group that a user will need. For example:
+
+```yaml
+opa_policy_restricted_paths:
+  - name: threddsdata
+    path: /thredds/fileServer/restricted/.*
+    group: admins
+  - name: example
+    path: /some/restricted/path/.*
+    group: admins
+```
+
+The default policy will deny requests from hostnames other than the one configured using the "opa_policy_server_host" setting:
+
+```yaml
+opa_policy_server_host: example.com
+```
+
+*Note: If you have multiple nodes with different server names, e.g. "esgf.data.example.org" and "esgf.index.example.org", then you'll need to configure this separately for each host using host vars*
+
+Optionally, use the "opa_log_level" variable to configure the logging level of the OPA container. Set this to `debug` for troubleshooting.
+
+```yaml
+opa_log_level: info
+```
+
+#### Custom Rego policies
+
+Finally, if you want to use a different Rego policy for authorization, you can change the default by modifying the variable bellow:
+
+```yaml
+opa_policy_template: mypolicy.rego.j2
+```
+
+This file can be a Jinja2 template, so its possible to reference Ansible variables in your authorization policy. See the default [policy.rego.j2](../deploy/ansible/roles/auth/templates/policy.rego.j2) file as an example of what this file can look like.
