@@ -7,4 +7,7 @@ metadata:
   labels: {{ include "esgf.component.labels" (list . "fileServer" $fileServer.labels) | nindent 4 }}
 data:
   datasets.conf: {{ tpl (.Files.Get "files/fileServer/datasets.conf") . | quote }}
+{{ range $file, $content := $fileServer.extraNginxConf }}
+  {{ $file }}: {{ tpl $content . | quote }}
+{{- end }}
 {{- end -}}

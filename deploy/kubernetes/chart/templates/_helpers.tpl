@@ -117,6 +117,7 @@ The produced mounts will always be read-only.
 Generate TLS config for ingress.
 */}}
 {{- define "esgf.ingress.tls" }}
+{{- if .Capabilities.APIVersions.Has "security.openshift.io/v1" }}
 tls:
   - hosts:
       - {{ .Values.hostname | quote }}
@@ -125,6 +126,7 @@ tls:
     {{- else }}
     secretName: {{ include "esgf.component.fullname" (list . "hostcert") }}
     {{- end }}
+{{- end }}
 {{- end }}
 
 {{/*

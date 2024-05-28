@@ -24,6 +24,9 @@ spec:
         checksum/logstash-pipelines: {{ include (print $.Template.BasePath "/logstash/pipelines.yaml") . | sha256sum }}
         checksum/logstash-certs: {{ include (print $.Template.BasePath "/logstash/certs.yaml") . | sha256sum }}
         {{- end }}
+        {{- with $fileServer.annotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
     spec:
       {{- with (default .Values.image.pullSecrets $fileServer.image.pullSecrets) }}
       imagePullSecrets: {{ toYaml . | nindent 8 }}
