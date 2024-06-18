@@ -5,9 +5,9 @@
 #####
 
 - name: Install auth application
-  include: auth_install.yml
+  include_tasks: auth_install.yml
   when: auth_enabled
 
 - name: Uninstall auth application
-  include: auth_uninstall.yml
+  include_tasks: auth_uninstall.yml
   when: not auth_enabled

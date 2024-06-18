@@ -5,25 +5,25 @@
 #####
 
 - name: Install THREDDS
-  include: thredds_install.yml
+  include_tasks: thredds_install.yml
   when: "'data' in group_names and thredds_enabled"
 
 - name: Uninstall THREDDS
-  include: thredds_uninstall.yml
+  include_tasks: thredds_uninstall.yml
   when: "'data' not in group_names or not thredds_enabled"
 
 - name: Install Nginx fileserver
-  include: fileserver_install.yml
+  include_tasks: fileserver_install.yml
   when: "'data' in group_names and fileserver_enabled"
 
 - name: Uninstall Nginx fileserver
-  include: fileserver_uninstall.yml
+  include_tasks: fileserver_uninstall.yml
   when: "'data' not in group_names or not fileserver_enabled"
 
 - name: Install logstash log exporter
-  include: logstash_install.yml
+  include_tasks: logstash_install.yml
   when: "'data' in group_names and logstash_enabled"
 
 - name: Uninstall logstash log exporter
-  include: logstash_uninstall.yml
+  include_tasks: logstash_uninstall.yml
   when: "'data' not in group_names or not logstash_enabled"

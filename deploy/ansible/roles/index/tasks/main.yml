@@ -5,20 +5,20 @@
 #####
 
 - name: Install Solr
-  include: solr_install.yml
+  include_tasks: solr_install.yml
   when: "'index' in group_names and solr_enabled"
 
 - name: Uninstall Solr
-  include: solr_uninstall.yml
+  include_tasks: solr_uninstall.yml
   when: "'index' not in group_names or not solr_enabled"
 
 - name: Reconcile Solr replicas
-  include: solr_replica_reconcile.yml
+  include_tasks: solr_replica_reconcile.yml
 
 - name: Install search application
-  include: search_install.yml
+  include_tasks: search_install.yml
   when: "'index' in group_names and search_enabled"
 
 - name: Uninstall search application
-  include: search_uninstall.yml
+  include_tasks: search_uninstall.yml
   when: "'index' not in group_names or not search_enabled"
