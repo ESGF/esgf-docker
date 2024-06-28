@@ -47,6 +47,9 @@ spec:
           securityContext: {{ toYaml . | nindent 12 }}
           {{- end }}
           volumeMounts:
+            # In order to use a read-only rootfs, we must put emptyDirs where we expect tomcat to write
+            - name: tomcat-temp
+              mountPath: /opt/tomcat/temp
             - name: esg-config
               mountPath: /esg/config
               readOnly: true
@@ -60,6 +63,9 @@ spec:
       tolerations: {{ toYaml . | nindent 8 }}
       {{- end }}
       volumes:
+        # In order to use a read-only rootfs, we must put emptyDirs where we expect tomcat to write
+        - name: tomcat-temp
+          emptyDir: {}
         - name: esg-config
           configMap:
             name: {{ include "esgf.component.fullname" (list . "search") }}
