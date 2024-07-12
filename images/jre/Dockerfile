@@ -11,7 +11,7 @@ FROM ${ESGF_REPOSITORY_BASE}/base:${ESGF_IMAGES_VERSION}
 USER root
 
 RUN dnf makecache && \
-    dnf install -y java-11-openjdk-headless-11.0.22.0.7-2.el9 && \
+    dnf install -y java-11-openjdk-headless-11.0.23.0.9-3.el9 && \
     dnf clean all
 
 USER $ESGF_UID
