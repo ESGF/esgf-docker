@@ -18,7 +18,7 @@ USER root
 
 RUN dnf makecache && \
     dnf remove -y java-11-openjdk-headless && \
-    dnf install -y java-1.8.0-openjdk-headless-1.8.0.402.b06-2.el9 && \
+    dnf install -y java-1.8.0-openjdk-headless-1.8.0.412.b08-2.el9 && \
     dnf install -y zip && \
     dnf clean all
 
