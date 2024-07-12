@@ -51,3 +51,6 @@ solr_enabled: true
 
 # Indicates if search is enabled
 search_enabled: true
+
+# Indicates if the auth service should be deployed or not
+auth_enabled: false
