@@ -356,6 +356,7 @@ data:
     # Image overrides for the file server image
     image:
       repository: nginx
+    extraNginxConf:
     # The number of replicas for the file server pod
     # If an hpa is configured, this is ignored - the hpa has full control over the number of replicas
     replicaCount: 1
