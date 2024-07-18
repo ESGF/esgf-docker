@@ -508,7 +508,7 @@ index:
     # See https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
     tolerations:
     # Timeout settings
-    connectionTimeout: "1000"
+    connectionTimeout: "20000"
     datasetsTimeout: "20000"
     filesTimeout: "3600000"
     # Security context for search container.
