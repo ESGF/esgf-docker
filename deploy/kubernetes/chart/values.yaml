@@ -36,6 +36,7 @@ ingress:
   authSignin:
   # TLS configuration
   tls:
+    enabled: false
     # Either give the name of an existing TLS secret
     # See https://kubernetes.io/docs/concepts/services-networking/ingress/#tls
     secretName:
