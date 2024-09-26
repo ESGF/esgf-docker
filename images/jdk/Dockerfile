@@ -12,5 +12,5 @@ FROM ${ESGF_REPOSITORY_BASE}/base:${ESGF_IMAGES_VERSION}
 USER root
 
 RUN dnf makecache && \
-    dnf install -y java-11-openjdk-devel-11 && \
+    dnf install -y java-11-openjdk-devel && \
     dnf clean all
