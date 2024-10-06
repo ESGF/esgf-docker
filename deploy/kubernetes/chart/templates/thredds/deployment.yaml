@@ -21,13 +21,14 @@ spec:
         release/revision: {{ .Release.Revision | quote }}
         {{- else }}
         # If using templated catalogs, we only need to roll if the configmap changes
-        checksum/configmap: {{ include (print $.Template.BasePath "/thredds/configmap.yaml") . | sha256sum }}
+        checksum/catalog: {{ include (print $.Template.BasePath "/thredds/configmap-catalog.yaml") . | sha256sum }}
         {{- end }}
         {{- if $accessLogSidecar.enabled }}
         # When the access log sidecar is enabled, roll the deployment if the logstash pipelines or certificates change
         checksum/logstash-pipelines: {{ include (print $.Template.BasePath "/logstash/pipelines.yaml") . | sha256sum }}
         checksum/logstash-certs: {{ include (print $.Template.BasePath "/logstash/certs.yaml") . | sha256sum }}
         {{- end }}
+        checksum/config: {{ include (print $.Template.BasePath "/thredds/configmap-config.yaml") . | sha256sum }}
         {{- with $thredds.annotations }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
@@ -137,15 +138,20 @@ spec:
           {{- end }}
           volumeMounts:
             - name: thredds-catalogs
-              mountPath: /opt/tomcat/content/thredds/esgcet
+              mountPath: /opt/tomcat/content/thredds/catalog.xml
+              subPath: catalog.xml
               readOnly: true
               {{- if (and $thredds.catalogVolume (not $thredds.localCache.enabled)) }}
               {{- with (omit (default dict $thredds.catalogVolume.mountOptions) "readOnly") }}
               {{ toYaml . | indent 14 | trim }}
               {{- end }}
               {{- end }}
-            - name: thredds-cache
-              mountPath: /opt/tomcat/content/thredds/cache
+            - name: thredds-config
+              mountPath: /opt/tomcat/content/thredds/threddsConfig.xml
+              subPath: threddsConfig.xml
+              readOnly: true
+            - name: thredds-work
+              mountPath: /opt/tomcat/content/thredds
             # The shared log volume is only required if the access log sidecar is enabled
             # It is also required for a readOnly root filesystem.
             - name: tomcat-logs
@@ -209,10 +215,13 @@ spec:
         {{- else }}
         - name: thredds-catalogs
           configMap:
-            name: {{ include "esgf.component.fullname" (list . "thredds") }}
+            name: {{ include "esgf.component.fullname" (list . "thredds") }}-catalog
         {{- end }}
-        # Each pod gets its own THREDDS cache directory on the local disk
-        - name: thredds-cache
+        - name: thredds-config
+          configMap:
+            name: {{ include "esgf.component.fullname" (list . "thredds") }}-config
+        # When ran with an arbitrary uid, give Thredds a writable space to copy its files into
+        - name: thredds-work
           emptyDir: {}
         # In order to use a read-only rootfs, we must put emptyDirs where we expect tomcat to write
         - name: tomcat-temp
