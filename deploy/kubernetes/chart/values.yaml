@@ -349,6 +349,9 @@ data:
     # The tolerations for the THREDDS pod
     # See https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
     tolerations:
+    config:
+      catalog.xml:
+      threddsConfig.xml:
 
   # Configuration for the file server pod
   fileServer:
