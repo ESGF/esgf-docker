@@ -15,8 +15,8 @@ server {
     }
 
     # Health check
-    location /healthcheck {
-        return 200 'OK';
+    location /thredds/fileServer/healthcheck {
+        return 200;
     }
 
     # Create a location block for each dataset
