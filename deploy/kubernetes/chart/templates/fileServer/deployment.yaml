@@ -66,18 +66,8 @@ spec:
             - name: http
               containerPort: 8080
           env: {{ toYaml $fileServer.extraEnv | nindent 12 }}
-          readinessProbe: &probe
-            httpGet:
-              path: /
-              port: 8080
-              httpHeaders:
-                - name: Host
-                  value: healthz.local
-            initialDelaySeconds: 10
-            periodSeconds: 10
-          livenessProbe:
-            <<: *probe
-            initialDelaySeconds: 300
+          readinessProbe: {{ toYaml $fileServer.readinessProbe | nindent 12 }}
+          livenessProbe: {{ toYaml $fileServer.livenessProbe | nindent 12 }}
           {{- with .Values.data.securityContext }}
           securityContext: {{ toYaml . | nindent 12 }}
           {{- end }}

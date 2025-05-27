@@ -385,6 +385,24 @@ data:
     # The tolerations for the file server pod
     # See https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
     tolerations:
+    readinessProbe:
+      httpGet:
+        path: /
+        port: 8080
+        httpHeaders:
+          - name: Host
+            value: healthz.local
+      initialDelaySeconds: 10
+      periodSeconds: 10
+    livenessProbe:
+      httpGet:
+        path: /
+        port: 8080
+        httpHeaders:
+          - name: Host
+            value: healthz.local
+      initialDelaySeconds: 300
+      periodSeconds: 10
 
 ###
 # Index node configuration
