@@ -1,6 +1,6 @@
 {{- $fileServer := .Values.data.fileServer -}}
 {{- if (and .Values.data.enabled $fileServer.enabled $fileServer.hpa) -}}
-apiVersion: autoscaling/v2beta2
+apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
   name: {{ include "esgf.component.fullname" (list . "fileServer") }}

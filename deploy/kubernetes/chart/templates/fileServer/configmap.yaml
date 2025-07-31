@@ -8,6 +8,6 @@ metadata:
 data:
   datasets.conf: {{ tpl (.Files.Get "files/fileServer/datasets.conf") . | quote }}
 {{ range $file, $content := $fileServer.extraNginxConf }}
-  {{ $file }}: {{ tpl $content . | quote }}
+  {{ $file }}: {{ tpl $content $ | quote }}
 {{- end }}
 {{- end -}}

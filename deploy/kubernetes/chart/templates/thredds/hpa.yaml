@@ -1,6 +1,6 @@
 {{- $thredds := .Values.data.thredds -}}
 {{- if (and .Values.data.enabled $thredds.enabled $thredds.hpa) -}}
-apiVersion: autoscaling/v2beta2
+apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
   name: {{ include "esgf.component.fullname" (list . "thredds") }}
