@@ -1,0 +1,69 @@
+name: K8S Build & Test
+
+on:
+  pull_request:
+
+permissions: {}
+
+jobs:
+  helm:
+    name: Publish Helm chart
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+    outputs:
+      generated-semver: ${{ steps.semantic-version.outputs.generated-semver }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+      - name: Install jq
+        run: |
+          sudo apt-get install --yes jq
+      - name: Install yq
+        run: |
+          pip install yq
+      - name: Generate SemVer
+        id: semantic-version
+        run: |
+          CHART_VERSION=$(yq -r '.version' helm/Chart.yaml)
+          LOCAL_SEGMENT=+pr-${{ github.event.pull_request.number }}
+          GENERATED_VERSION=${CHART_VERSION}${LOCAL_SEGMENT}
+          yq -Y -i ".version = \"$GENERATED_VERSION\"" helm/Chart.yaml
+          echo "generated-semver=$GENERATED_VERSION" >> $GITHUB_OUTPUT
+      - name: Chart | Push
+        uses: appany/helm-oci-chart-releaser@v0.5.0
+        with:
+          name: esgf
+          repository: ESGF/charts
+          tag: ${{ steps.semantic-version.outputs.generated-semver }}
+          path: helm
+          registry: ghcr.io
+          registry_username: ${{ github.actor }}
+          registry_password: ${{ secrets.GITHUB_TOKEN }}
+          update_dependencies: "true"
+
+  test:
+    name: Test deployment
+    runs-on: ubuntu-latest
+    needs: [container, helm]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Start minikube
+        uses: medyagh/setup-minikube@latest
+      - name: Set up Helm
+        uses: azure/setup-helm@v4.3.0
+      - name: Install Helm Chart
+        run: |
+          helm install test oci://ghcr.io/ESGF/charts/esgf \
+            --version=${{ needs.helm.outputs.generated-semver }} \
+            --set image.tag=pr-${{ github.event.pull_request.number }} \
+            --set hostname=esg-esgf.test \
+            --set service.type=NodePort \
+            --debug \
+            --wait
+      - name: Test File Server
+        run: |
+          kubectl get pods --all-namespaces
+          SVC_URL=$(minikube service test-esgf-file-server --url)
+          echo "Service URL: $SVC_URL"
+          curl -s "${SVC_URL}/thredds/fileServer/"
