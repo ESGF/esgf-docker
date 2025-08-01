@@ -386,6 +386,55 @@ data:
     # See https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
     tolerations:
 
+    # Options related to observability
+    metrics:
+      # Whether or not to create a Prometheus Operator PodMonitor
+      # See https://prometheus-operator.dev/docs/developer/getting-started/#using-podmonitors
+      podMonitor:
+        enabled: true
+        # Set the API version of the ServiceMonitor
+        apiVersion: "monitoring.coreos.com/v1"
+        # Set how frequently Prometheus should scrape
+        interval: 30s
+        # Set path to nginx-exporter telemtery-path
+        path: /metrics
+        honorLabels: true
+        # Set labels for the ServiceMonitor, use this to define your scrape label for Prometheus Operator
+        additionalLabels: {}
+        # Set timeout for scrape
+        scrapeTimeout: 10s
+        # Set which labels which are transferred from the associated Kubernetes Pod object onto the ingested metrics.
+        podTargetLabels: []
+        # Set relabeling rules to apply to metrics after scraping but before ingestion
+        metricRelabelings: []
+        # Set relabeling rules to configure how scrape targets are discovered and labeled before scraping
+        relabelings: []
+      exporter:
+        enabled: true
+        image:
+          prefix: nginx
+          repository: nginx-prometheus-exporter
+        # Extra arguments passed to the nginx prometheus exporter
+        # See https://github.com/nginx/nginx-prometheus-exporter?tab=readme-ov-file#command-line-arguments
+        extraArgs: []
+        extraEnv: {}
+        extraVolumeMounts: {}
+        # The resource allocations for the nginx prometheus exporter container
+        # See https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+        resources: {}
+        livenessProbe:
+          httpGet:
+            path: /
+            port: prom-metrics
+          initialDelaySeconds: 30
+          timeoutSeconds: 10
+
+        readinessProbe:
+          httpGet:
+            path: /
+            port: prom-metrics
+          initialDelaySeconds: 30
+          timeoutSeconds: 10
 ###
 # Index node configuration
 ###

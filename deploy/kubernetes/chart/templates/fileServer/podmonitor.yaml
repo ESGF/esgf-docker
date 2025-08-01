@@ -1,0 +1,35 @@
+{{- $fileServer := .Values.data.fileServer -}}
+{{- if $fileServer.metrics.podMonitor.enabled }}
+apiVersion: {{ $fileServer.metrics.podMonitor.apiVersion }}
+kind: PodMonitor
+metadata:
+  name: {{ include "esgf.component.fullname" (list . "fileServer") }}
+  labels: {{ include "esgf.component.labels" (list . "fileServer" $fileServer.labels) | nindent 4 }}
+spec:
+  jobLabel: {{ include "esgf.component.fullname" (list . "fileServer") }}
+  {{- if $fileServer.metrics.podMonitor.podTargetLabels }}
+  podTargetLabels:
+  {{ toYaml $fileServer.metrics.podMonitor.podTargetLabels | indent 4 }}
+  {{- end }}
+  podMetricsEndpoints:
+  - port: prom-metrics
+    interval: {{ $fileServer.metrics.podMonitor.interval }}
+    scrapeTimeout: {{ $fileServer.metrics.podMonitor.scrapeTimeout }}
+    path: {{ $fileServer.metrics.podMonitor.path }}
+    {{- if $fileServer.metrics.podMonitor.honorLabels }}
+    honorLabels: true
+    {{- end }}
+    {{- if $fileServer.metrics.podMonitor.metricRelabelings }}
+    metricRelabelings:
+    {{ toYaml $fileServer.metrics.podMonitor.metricRelabelings | indent 4 }}
+    {{- end }}
+    {{- if $fileServer.metrics.podMonitor.relabelings }}
+    relabelings:
+    {{ toYaml $fileServer.metrics.podMonitor.relabelings | indent 4 }}
+    {{- end }}
+  selector:
+    matchLabels: {{ include "esgf.component.selectorLabels" (list . "fileServer") | nindent 6 }}
+  namespaceSelector:
+    matchNames:
+    - {{ $.Release.Namespace }}
+{{- end }}
