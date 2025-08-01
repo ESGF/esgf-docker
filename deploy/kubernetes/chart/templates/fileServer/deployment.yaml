@@ -125,6 +125,34 @@ spec:
             - name: logstash-tmp
               mountPath: /tmp/logstash
         {{- end }}
+        # Metrics exporter, if enabled
+        {{- if $fileServer.metrics.exporter.enabled }}
+        - name: nginx-prometheus-exporter
+          {{ include "esgf.deployment.image" (list . $fileServer.metrics.exporter.image) }}
+          args:
+            - "--nginx.scrape-uri=http://localhost:8080/stub_status"
+            {{- range $key, $value := $fileServer.metrics.exporter.extraArgs }}
+            - "--{{ $key }}{{ if $value }}={{ $value }}{{ end }}"
+            {{- end }}
+          {{- with $fileServer.metrics.exporter.extraEnv }}
+          env: {{ toYaml . | nindent 12 }}
+          {{- end }}
+          resources: {{ toYaml $fileServer.metrics.exporter.resources | nindent 12 }}
+          {{- with .Values.data.securityContext }}
+          securityContext: {{ toYaml . | nindent 12 }}
+          {{- end }}
+          ports:
+          - name: prom-metrics
+            containerPort: 9113
+            protocol: TCP
+          livenessProbe:
+            {{- toYaml $fileServer.metrics.exporter.livenessProbe | trim | nindent 12 }}
+          readinessProbe:
+            {{- toYaml $fileServer.metrics.exporter.readinessProbe | trim | nindent 12 }}
+          {{- with $fileServer.metrics.exporter.extraVolumeMounts }}
+          volumeMounts: {{ toYaml . | nindent 12 }}
+          {{- end }}
+        {{- end }}
       {{- with $fileServer.nodeSelector }}
       nodeSelector: {{ toYaml . | nindent 8 }}
       {{- end }}
