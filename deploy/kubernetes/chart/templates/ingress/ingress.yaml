@@ -15,21 +15,28 @@ spec:
       http:
         paths:
           {{- if .Values.data.enabled }}
+          {{- if .Values.data.fileServer.enabled }}
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ include "esgf.component.fullname" (list . "fileServer") }}
+                port:
+                  number: 8080
+          - path: /thredds/fileServer
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ include "esgf.component.fullname" (list . "fileServer") }}
+                port:
+                  number: 8080
+          {{- end }}
           {{- if .Values.data.thredds.enabled }}
           - path: /thredds
             pathType: Prefix
             backend:
               service:
                 name: {{ include "esgf.component.fullname" (list . "thredds") }}
-                port:
-                  number: 8080
-          {{- end }}
-          {{- if .Values.data.fileServer.enabled }}
-          - path: /thredds/fileServer
-            pathType: Prefix
-            backend:
-              service:
-                name: {{ include "esgf.component.fullname" (list . "fileServer") }}
                 port:
                   number: 8080
           {{- end }}

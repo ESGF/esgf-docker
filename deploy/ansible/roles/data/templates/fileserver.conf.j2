@@ -15,7 +15,10 @@ server {
     }
 
     # Health check
-    location /thredds/fileServer/healthcheck {
+    location /health {
+        return 200;
+    }
+    location /thredds/fileServer/health {
         return 200;
     }
 
