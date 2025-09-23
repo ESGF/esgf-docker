@@ -357,6 +357,8 @@ data:
   fileServer:
     # Indicates if the file server should be deployed or not
     enabled: true
+    # Whether or not to serve a robots.txt file at /robots.txt
+    robotsTxtEnabled: false
     # Image overrides for the file server image
     image:
       repository: nginx
