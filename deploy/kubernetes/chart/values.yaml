@@ -34,6 +34,8 @@ ingress:
   labels: {}
   # Sign-in URL for unauthenticated requests
   authSignin:
+  # Use this to customise the value for ingressClassName, otherwise the default will be used
+  className:
   # TLS configuration
   tls:
     enabled: true
