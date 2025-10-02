@@ -34,6 +34,8 @@ ingress:
   labels: {}
   # Sign-in URL for unauthenticated requests
   authSignin:
+  # Use this to customise the value for ingressClassName, otherwise the default will be used
+  className:
   # TLS configuration
   tls:
     enabled: true
@@ -357,6 +359,8 @@ data:
   fileServer:
     # Indicates if the file server should be deployed or not
     enabled: true
+    # Whether or not to serve a robots.txt file at /robots.txt
+    robotsTxtEnabled: false
     # Image overrides for the file server image
     image:
       repository: nginx

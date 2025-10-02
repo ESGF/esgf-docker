@@ -1,0 +1,12 @@
+{{- $fileServer := .Values.data.fileServer -}}
+{{- if (and .Values.data.enabled $fileServer.enabled) -}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "esgf.component.fullname" (list . "staticContent") }}
+  labels: {{ include "esgf.component.labels" (list . "staticContent" $fileServer.labels) | nindent 4 }}
+data:
+{{ if $fileServer.robotsTxtEnabled }}
+  robots.txt: {{ (tpl (.Files.Get "files/fileServer/robots.txt") . | quote ) }}
+{{ end }}
+{{- end -}}
