@@ -4,7 +4,7 @@
 ## Currently just a fully-updated CentOS 7 with common packages and entrypoint
 #####
 
-FROM rockylinux:9.2.20230513
+FROM rockylinux:9
 
 # Create the esgf user that will be used to run apps
 ENV ESGF_UID 1000
@@ -26,7 +26,7 @@ ENV LC_ALL en_US.UTF-8
 
 # Upgrade all existing packages
 # Updating CACHE_BUST to the current time will bust the cache and force a rebuild
-RUN CACHE_BUST="20220923"; \
+RUN CACHE_BUST="20251028"; \
     dnf makecache && dnf upgrade -y && dnf clean all
 
 # Install ca-certificates and openssl
