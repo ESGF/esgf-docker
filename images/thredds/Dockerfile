@@ -50,7 +50,7 @@ COPY catalog-esgcet.xml ./content/thredds/esgcet/catalog.xml
 # This means that later we can run with a readonly root filesystem for security purposes
 RUN catalina.sh start && \
     # Sleep for 5s to avoid connection refused errors (curl version is too old for --retry-connrefused)
-    sleep 30 && \
+    sleep 60 && \
     # Try to fetch the catalog every 5s for 5m before failing
     curl -fsSL -o /dev/null --retry 60 --retry-delay 5 --retry-max-time 300 http://127.0.0.1:8080/thredds/catalog/catalog.html && \
     catalina.sh stop && \
