@@ -85,6 +85,9 @@ spec:
             - name: nginx-conf
               mountPath: /etc/nginx/conf.d
               readOnly: true
+            - name: static-content
+              mountPath: /var/www/html
+              readOnly: true
             # The shared log volume is only required if the access log sidecar is enabled
             {{- if $accessLogSidecar.enabled }}
             - name: nginx-logs
@@ -166,6 +169,9 @@ spec:
         - name: nginx-conf
           configMap:
             name: {{ include "esgf.component.fullname" (list . "fileServer") }}
+        - name: static-content
+          configMap:
+            name: {{ include "esgf.component.fullname" (list . "staticContent") }}
         # In order to use a read-only root filesystem, we mount emptyDirs in places
         # where files are expected to change
         - name: nginx-cache

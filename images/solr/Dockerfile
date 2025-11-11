@@ -10,7 +10,7 @@ USER root
 
 # Specific version of Java required by SOLR
 RUN dnf makecache && \
-    dnf install -y java-1.8.0-openjdk-headless-1.8.0.412.b08-2.el9 && \
+    dnf install -y java-1.8.0-openjdk-headless && \
     dnf clean all
 
 # Create Solr home directory

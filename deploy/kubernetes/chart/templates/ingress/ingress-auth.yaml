@@ -9,6 +9,9 @@ metadata:
   {{- end }}
 spec:
   {{ include "esgf.ingress.tls" . | indent 2 }}
+  {{- if .Values.ingress.className }}
+  ingressClassName: {{ .Values.ingress.className }}
+  {{- end }}
   rules:
     - host: {{ .Values.hostname | quote }}
       http:
