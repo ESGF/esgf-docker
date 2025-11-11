@@ -3,8 +3,8 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ include "esgf.component.fullname" (list . "thredds") }}
+  name: {{ include "esgf.component.fullname" (list . "thredds") }}-config
   labels: {{ include "esgf.component.labels" (list . "thredds" $thredds.labels) | nindent 4 }}
 data:
-  catalog.xml: {{ tpl (.Files.Get "files/thredds/catalog.xml") . | quote }}
+  threddsConfig.xml: {{ tpl (default (.Files.Get "files/thredds/threddsConfig.xml") (index $thredds.config "threddsConfig.xml")) . | quote }}
 {{- end -}}

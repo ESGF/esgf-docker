@@ -34,6 +34,8 @@ ingress:
   labels: {}
   # Sign-in URL for unauthenticated requests
   authSignin:
+  # Use this to customise the value for ingressClassName, otherwise the default will be used
+  className:
   # TLS configuration
   tls:
     enabled: true
@@ -213,7 +215,18 @@ data:
     # - name: CMIP5
     #   path: esg_dataroot
     #   location: /datacentre/archiveroots/archive/badc/cmip5/data
-
+    # - name: "CMIP6Plus"
+    #   path: "esg_cmip6"
+    #   s3Location:
+    #     host: hostname
+    #     protocol: http or https
+    #     port: port number
+    #     bucket: bucket name
+    #     dataPath: CMIP6Plus
+    #     extraNginxConf (optional): a list of additional Nginx configurations
+    #       - conf: proxy_set_header Host hostname;
+    #       - conf: proxy_set_header X-Debug-Host hostname;
+    #       - conf: proxy_set_header X-Forwarded-Host hostname;
   # The pod and container security contexts for data serving pods
   # In particular, these may be required if using hostPath volumes for data, depending
   # on the permissions of that data
@@ -349,14 +362,31 @@ data:
     # The tolerations for the THREDDS pod
     # See https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
     tolerations:
+    config:
+      catalog.xml:
+      threddsConfig.xml:
 
   # Configuration for the file server pod
   fileServer:
     # Indicates if the file server should be deployed or not
     enabled: true
+    # Whether or not to serve a robots.txt file at /robots.txt
+    robotsTxtEnabled: false
     # Image overrides for the file server image
     image:
       repository: nginx
+    # Override the default /etc/nginx/nginx.conf
+    nginxConf:
+    # Expects a dict of file name -> content as strings
+    # The files with the specified content will be created in /etc/nginx/conf.d/
+    # Ex:
+    # extraNginxConf:
+    #   openshift.conf: |-
+    #     scgi_temp_path /tmp/uwsgi;
+    #     uwsgi_temp_path /tmp/uwsgi;
+    #     proxy_temp_path /tmp/proxy_temp;
+    #     fastcgi_temp_path /tmp/fastcgi_temp;
+    #     client_body_temp_path /tmp/client_temp;
     extraNginxConf:
     # The number of replicas for the file server pod
     # If an hpa is configured, this is ignored - the hpa has full control over the number of replicas
@@ -383,6 +413,55 @@ data:
     # See https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
     tolerations:
 
+    # Options related to observability
+    metrics:
+      # Whether or not to create a Prometheus Operator PodMonitor
+      # See https://prometheus-operator.dev/docs/developer/getting-started/#using-podmonitors
+      podMonitor:
+        enabled: true
+        # Set the API version of the ServiceMonitor
+        apiVersion: "monitoring.coreos.com/v1"
+        # Set how frequently Prometheus should scrape
+        interval: 30s
+        # Set path to nginx-exporter telemtery-path
+        path: /metrics
+        honorLabels: true
+        # Set labels for the ServiceMonitor, use this to define your scrape label for Prometheus Operator
+        additionalLabels: {}
+        # Set timeout for scrape
+        scrapeTimeout: 10s
+        # Set which labels which are transferred from the associated Kubernetes Pod object onto the ingested metrics.
+        podTargetLabels: []
+        # Set relabeling rules to apply to metrics after scraping but before ingestion
+        metricRelabelings: []
+        # Set relabeling rules to configure how scrape targets are discovered and labeled before scraping
+        relabelings: []
+      exporter:
+        enabled: true
+        image:
+          prefix: nginx
+          repository: nginx-prometheus-exporter
+        # Extra arguments passed to the nginx prometheus exporter
+        # See https://github.com/nginx/nginx-prometheus-exporter?tab=readme-ov-file#command-line-arguments
+        extraArgs: []
+        extraEnv: {}
+        extraVolumeMounts: {}
+        # The resource allocations for the nginx prometheus exporter container
+        # See https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+        resources: {}
+        livenessProbe:
+          httpGet:
+            path: /
+            port: prom-metrics
+          initialDelaySeconds: 30
+          timeoutSeconds: 10
+
+        readinessProbe:
+          httpGet:
+            path: /
+            port: prom-metrics
+          initialDelaySeconds: 30
+          timeoutSeconds: 10
 ###
 # Index node configuration
 ###

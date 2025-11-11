@@ -19,6 +19,11 @@ server {
         return 404;
     }
 
+    # Health check
+    location /health {
+        return 200;
+    }
+
     {% if auth_enabled %}
     location /verify {
         set $query '';
