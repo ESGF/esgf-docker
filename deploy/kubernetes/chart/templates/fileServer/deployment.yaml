@@ -19,6 +19,9 @@ spec:
       # https://helm.sh/docs/howto/charts_tips_and_tricks/#automatically-roll-deployments
       annotations:
         checksum/configmap: {{ include (print $.Template.BasePath "/fileServer/configmap.yaml") . | sha256sum }}
+        {{- if (index $fileServer "nginx.conf") }}
+        checksum/configmap-nginx: {{ include (print $.Template.BasePath "/fileServer/configmap-nginx.yaml") . | sha256sum }}
+        {{- end }}
         {{- if $accessLogSidecar.enabled }}
         # When the access log sidecar is enabled, roll the deployment if the logstash pipelines or certificates change
         checksum/logstash-pipelines: {{ include (print $.Template.BasePath "/logstash/pipelines.yaml") . | sha256sum }}
@@ -82,7 +85,7 @@ spec:
           securityContext: {{ toYaml . | nindent 12 }}
           {{- end }}
           volumeMounts:
-            - name: nginx-conf
+            - name: nginx-extra
               mountPath: /etc/nginx/conf.d
               readOnly: true
             - name: static-content
@@ -99,6 +102,11 @@ spec:
               mountPath: /var/lib/nginx/tmp
             - name: nginx-run
               mountPath: /run/nginx
+            {{- if (index $fileServer "nginx.conf") }}
+            - name: nginx-conf
+              mountPath: /etc/nginx/nginx.conf
+              subPath: nginx.conf
+            {{- end }}
             {{- include "esgf.data.volumeMounts" . | nindent 12 }}
             {{- with $fileServer.extraVolumeMounts }}
             {{- toYaml . | nindent 12 }}
@@ -166,7 +174,7 @@ spec:
       tolerations: {{ toYaml . | nindent 8 }}
       {{- end }}
       volumes:
-        - name: nginx-conf
+        - name: nginx-extra
           configMap:
             name: {{ include "esgf.component.fullname" (list . "fileServer") }}
         - name: static-content
@@ -178,6 +186,11 @@ spec:
           emptyDir: {}
         - name: nginx-run
           emptyDir: {}
+        {{- if (index $fileServer "nginx.conf") }}
+        - name: nginx-conf
+          configMap:
+            name: {{ include "esgf.component.fullname" (list . "fileServer") }}-nginx
+        {{- end }}
         # These volumes are only required if the access log sidecar is enabled
         {{- if $accessLogSidecar.enabled }}
         # Each pod gets a directory to hold the named pipes for the logs

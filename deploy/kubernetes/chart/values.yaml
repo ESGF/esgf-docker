@@ -364,6 +364,18 @@ data:
     # Image overrides for the file server image
     image:
       repository: nginx
+    # Override the default /etc/nginx/nginx.conf
+    nginxConf:
+    # Expects a dict of file name -> content as strings
+    # The files with the specified content will be created in /etc/nginx/conf.d/
+    # Ex:
+    # extraNginxConf:
+    #   openshift.conf: |-
+    #     scgi_temp_path /tmp/uwsgi;
+    #     uwsgi_temp_path /tmp/uwsgi;
+    #     proxy_temp_path /tmp/proxy_temp;
+    #     fastcgi_temp_path /tmp/fastcgi_temp;
+    #     client_body_temp_path /tmp/client_temp;
     extraNginxConf:
     # The number of replicas for the file server pod
     # If an hpa is configured, this is ignored - the hpa has full control over the number of replicas

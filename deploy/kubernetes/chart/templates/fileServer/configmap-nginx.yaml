@@ -1,0 +1,10 @@
+{{- $fileServer := .Values.data.fileServer -}}
+{{- if (and .Values.data.enabled $fileServer.enabled (index $fileServer "nginx.conf")) -}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "esgf.component.fullname" (list . "fileServer") }}-nginx-conf
+  labels: {{ include "esgf.component.labels" (list . "fileServer" $fileServer.labels) | nindent 4 }}
+data:
+  nginx.conf: {{ tpl (index $fileServer "nginx.conf") . | quote }}
+{{- end -}}
