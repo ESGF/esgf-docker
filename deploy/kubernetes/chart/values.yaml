@@ -215,7 +215,18 @@ data:
     # - name: CMIP5
     #   path: esg_dataroot
     #   location: /datacentre/archiveroots/archive/badc/cmip5/data
-
+    # - name: "CMIP6Plus"
+    #   path: "esg_cmip6"
+    #   s3Location:
+    #     host: hostname
+    #     protocol: http or https
+    #     port: port number
+    #     bucket: bucket name
+    #     dataPath: CMIP6Plus
+    #     extraNginxConf (optional): a list of additional Nginx configurations
+    #       - conf: proxy_set_header Host hostname;
+    #       - conf: proxy_set_header X-Debug-Host hostname;
+    #       - conf: proxy_set_header X-Forwarded-Host hostname;
   # The pod and container security contexts for data serving pods
   # In particular, these may be required if using hostPath volumes for data, depending
   # on the permissions of that data
