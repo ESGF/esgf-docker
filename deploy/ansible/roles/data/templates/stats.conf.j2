@@ -60,7 +60,7 @@ filter {
     }
     mutate {
         # Replace the host with the specified external hostname
-        replace => { "host" => "${EXTERNAL_HOSTNAME}" }
+        replace => { "host" => "{{ hostname }}" }
         # Move the country code to the top-level
         add_field => { "country_code" => "%{[geoip][country_code2]}" }
         # Construct a new message string
