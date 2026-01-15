@@ -83,39 +83,5 @@ logstash_image_tag: "{{ image_tag }}"
 logstash_image_pull: "{{ image_pull }}"
 logstash_image_repository: logstash
 # Settings for the stats server
-logstash_stats_server: ophidialab.cmcc.it
-logstash_stats_port: 5045
-logstash_stats_certificate: |
-  -----BEGIN CERTIFICATE-----
-  MIIFpDCCA4wCCQDwfiQImQrAHjANBgkqhkiG9w0BAQsFADCBkzELMAkGA1UEBhMC
-  SVQxDjAMBgNVBAgMBUl0YWx5MQ4wDAYDVQQHDAVMZWNjZTENMAsGA1UECgwERVNH
-  RjENMAsGA1UECwwERVNHRjEbMBkGA1UEAwwSb3BoaWRpYWxhYi5jbWNjLml0MSkw
-  JwYJKoZIhvcNAQkBFhpzdGF0aXN0aWNzLXN1cHBvcnRAY21jYy5pdDAeFw0yMzA5
-  MjUxNDAwMzRaFw0yNDA5MjQxNDAwMzRaMIGTMQswCQYDVQQGEwJJVDEOMAwGA1UE
-  CAwFSXRhbHkxDjAMBgNVBAcMBUxlY2NlMQ0wCwYDVQQKDARFU0dGMQ0wCwYDVQQL
-  DARFU0dGMRswGQYDVQQDDBJvcGhpZGlhbGFiLmNtY2MuaXQxKTAnBgkqhkiG9w0B
-  CQEWGnN0YXRpc3RpY3Mtc3VwcG9ydEBjbWNjLml0MIICIjANBgkqhkiG9w0BAQEF
-  AAOCAg8AMIICCgKCAgEA0ink9ncyjBGU9207PiK/26Ue1lx+fCVjKUVDl569t7Kg
-  n5XELdAdgyWQRuTGG1w7H03OFVKPsUGFb80agZBb5T6eP8yRXLz5Ejp5DQHlo0nh
-  9ia4bMNJcx0jE1WdYfCP7GCKohTKlFpuThvuu3IhXGHLzgR06ygvDI7Hf554P59D
-  OxQ6JO3fTUutO9z78xvyxtY4MBZyMSDRmiJJLc4hzJ1AaPvFjNgU7AZBZ/X8Rl3Y
-  69k/sWQtGZlJGZ4ZR66+OMJZEk5NiqrnShBRsczJuUwehpLv8kWVfQ/0nfRmI1aZ
-  BGjq1pUH6611G2A42PqseaCMXGEbidPVUZIRwMbMPXud0bdf4+wVAJftehnCHg5G
-  LizNgK2/jQWTo69BPbJyAMgI4qjK+NAfNwknRgpamvikQ66GuV4YCOKUV8/GUtLO
-  uYMXfYlg2wNhnXJ2YDiEKJAY1/NnAkPxvYpS+r9pi6kd+6uTH8H11G+kjDzK+29y
-  /6O1V2LSZL902KF7gdTA104r3HCYOf9BfRWA3C/C5P2vf376fLwskcUy5iQSX0Tc
-  IORRkjUKsoKN/FZ2IsPS9I05o5uUW1075Lf6aS/kyg0cEVfTSPyiWug0ozS1oIP4
-  dvfbvJv/R7Sz6nz04rcEq6CYaqlw+65WMDlBoUIVu65Gsg05gbnLO3fcNDPlbBsC
-  AwEAATANBgkqhkiG9w0BAQsFAAOCAgEAm6iITRmACwLZqSRMC0X9mb0/dwo75n3q
-  H6bXHHSU9tozJkrq+OywTNCnWQV9oqUZvh9Iect2tQHmp00LxKrRKgPLEJ3PCq1n
-  adQifN10CeKt9b/657X8DgfitaaPYdDu4bVbITRLyeiMJRXfGAzBbEO1hIGapyuI
-  5FmuwicCIxxwHU3Ej9fc7ZJr7zQFbmLuLLr6ntsIddNwoMlOrzgj9U3VpZeKoyXo
-  rdn2Nnl0WkVowic+Q7mSkQ2dYU4pflVkDHKuFHRZxc8OBEr2QOSzEgx/57BDDsd+
-  KTJ6n951f4w0IdviRV7U23H+YojKPIrXsAyaT+axd3C71eE5ZidggAgk0u4dE6Hq
-  W/sEIlzlY+JMPQj8ynLpJUeoSO3osHoKn7S4SxCwQQLdaWeUWcLq8t1tCQOYf6CX
-  B+6Hvjq5tAH7DVmDcqdXgFQYb/1rdOWiZsuChD2jNEENw7YoJAq0yQPH4BcpkmPU
-  qxT26GCw9q8dHas7LkL4oXovUCozKyS02FEud/fan+5jSaiHvbQ1Ge7pHQeclhqr
-  3k9JO5ZfOvZad3FRBEVnsEYb0VX+JuEqZarnZhqrzxc/764StngT7zd+YT3O1P+f
-  ZOSy8kG7ZaRItC+KjVwOma4rEF6/kKCBUu/LeOgbHnXmwVPBoFiNUQA1FHMRwGPH
-  HWB6z/apQUM=
-  -----END CERTIFICATE-----
+logstash_stats_url: https://esgf-logstash.cmcc.it/api/exchanges/%2f/log_exchange/publish
+logstash_stats_authorization_key: ""

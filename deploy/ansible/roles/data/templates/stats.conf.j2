@@ -63,16 +63,34 @@ filter {
         replace => { "host" => "{{ hostname }}" }
         # Move the country code to the top-level
         add_field => { "country_code" => "%{[geoip][country_code2]}" }
+        # Construct a new message string
+        add_field => {
+            "rabbitmq_message" => '%{host} %{country_code} %{request_time} %{method} %{request} HTTP/%{http_version} %{status_code} %{bytes_sent} %{request_duration} \"%{user_agent}\"'
+        }
+    }
+    mutate {
+        # For Rabbit queue compatibility
+        add_field => {
+            "rabbitmq_payload" => '{ "properties": { "delivery_mode": 2 }, "routing_key": "log_queue", "payload": "%{rabbitmq_message}", "payload_encoding": "string" }'
+        }
         # Remove any unrequired fields
-        remove_field => ["client_ip", "command", "geoip", "tags", "user"]
+        remove_field => ["rabbitmq_message", "command", "geoip", "tags", "user", "host", "country_code", "request_time", "method", "request", "http_version", "status_code", "bytes_sent", "referrer", "user_agent", "client_ip", "request_duration"]
     }
 }
 output {
-    lumberjack {
-        codec => json
-        hosts => ["{{ logstash_stats_server }}"]
-        port => {{ logstash_stats_port }}
-        ssl_certificate => "/etc/logstash/certs/lumberjack.cert"
+    http {
+        url => "{{ logstash_stats_url }}"
+        http_method => "post"
+        headers => {
+            "Authorization" => "Basic {{ logstash_stats_authorization_key }}"
+            "Content-Type" => "application/json"
+        }
+        
+        format => "message" 
+        
+        message => "%{rabbitmq_payload}"
+        
+        http_compression => false
     }
     stdout {
         codec => rubydebug

@@ -26,7 +26,6 @@ spec:
         {{- if $accessLogSidecar.enabled }}
         # When the access log sidecar is enabled, roll the deployment if the logstash pipelines or certificates change
         checksum/logstash-pipelines: {{ include (print $.Template.BasePath "/logstash/pipelines.yaml") . | sha256sum }}
-        checksum/logstash-certs: {{ include (print $.Template.BasePath "/logstash/certs.yaml") . | sha256sum }}
         {{- end }}
         checksum/config: {{ include (print $.Template.BasePath "/thredds/configmap-config.yaml") . | sha256sum }}
         {{- with $thredds.annotations }}
@@ -183,8 +182,6 @@ spec:
           volumeMounts:
             - name: logstash-conf
               mountPath: /etc/logstash/conf.d
-            - name: logstash-certs
-              mountPath: /etc/logstash/certs
             - name: tomcat-logs
               mountPath: /thredds/logs
             - name: logstash-data
@@ -239,10 +236,6 @@ spec:
         - name: logstash-conf
           secret:
             secretName: {{ include "esgf.component.fullname" (list . "logstash-pipelines") }}
-        # As are any certificates that are required
-        - name: logstash-certs
-          secret:
-            secretName: {{ include "esgf.component.fullname" (list . "logstash-certs") }}
         # Logstash also needs a tmp dir and a data dir
         - name: logstash-data
           emptyDir: {}

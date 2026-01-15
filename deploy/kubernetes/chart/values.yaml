@@ -264,7 +264,7 @@ data:
       # The default server is the CMCC server
       # Your IP must be whitelisted in order to send data to the CMCC service
       url: https://esgf-logstash.cmcc.it/api/exchanges/%2f/log_exchange/publish
-      authorizationKey: 
+      authorizationKey: ""
 
   # Configuration for the THREDDS pod
   thredds:
