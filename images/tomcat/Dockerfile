@@ -4,7 +4,11 @@
 
 ARG ESGF_REPOSITORY_BASE=esgfdeploy
 ARG ESGF_IMAGES_VERSION=latest
-FROM ${ESGF_REPOSITORY_BASE}/jre:${ESGF_IMAGES_VERSION}
+FROM ${ESGF_REPOSITORY_BASE}/base:${ESGF_IMAGES_VERSION}
+
+RUN dnf makecache && \
+    dnf install -y java-21-openjdk-headless && \
+    dnf clean all
 
 USER root
 
