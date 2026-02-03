@@ -14,6 +14,6 @@ Below are some recommendations for server resources when running a data node usi
 _Keep in mind that THREDDS may eat up the available memory on a node under heavy use. Especially when subsetting larger files._
 
 For Kubernetes nodes, follow the same guidance as above when configuring
-[data.thredds.resources](https://github.com/ESGF/esgf-docker/blob/ace917dc33098a06bc853e1d65be6a9fe0844486/deploy/kubernetes/chart/values.yaml#L366)
+[data.thredds.resources](https://github.com/ESGF/esgf-docker/blob/ace917dc33098a06bc853e1d65be6a9fe0844486/deploy/kubernetes/chart/values.yaml#L316)
 and [data.fileServer.resources](https://github.com/ESGF/esgf-docker/blob/ace917dc33098a06bc853e1d65be6a9fe0844486/deploy/kubernetes/chart/values.yaml#L366),
 but keep in mind that smaller memory limit may be needed if autoscaling is enabled, or using multiple replicas
