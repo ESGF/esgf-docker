@@ -25,7 +25,7 @@ COPY logstash.repo /etc/yum.repos.d/logstash.repo
 # So SHA1 needs to be enabled to install it.
 RUN update-crypto-policies --set DEFAULT:SHA1
 RUN dnf makecache && \
-    dnf install -y logstash-7.10.0 && \
+    dnf install -y logstash && \
     dnf clean all && \
     chown -R $ESGF_UID:$ESGF_GID /usr/share/logstash
 

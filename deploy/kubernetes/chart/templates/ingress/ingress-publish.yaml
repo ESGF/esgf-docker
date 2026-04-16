@@ -6,6 +6,7 @@ metadata:
   labels: {{ include "esgf.component.labels" (list . "ingressPublish" .Values.ingress.labels) | nindent 4 }}
   annotations:
     nginx.ingress.kubernetes.io/whitelist-source-range: {{ .Values.index.search.publishIpRange }}
+    haproxy-ingress.github.io/allowlist-source-range: {{ .Values.index.search.publishIpRange }}
     {{ include "esgf.ingress.auth" . | indent 4 }}
     {{- with .Values.ingress.annotations }}
     {{ toYaml . | nindent 4 }}
