@@ -5,7 +5,11 @@
 ARG ESGF_REPOSITORY_BASE=esgfdeploy
 ARG ESGF_IMAGES_VERSION=latest
 
-FROM ${ESGF_REPOSITORY_BASE}/jdk:${ESGF_IMAGES_VERSION} as builder
+FROM ${ESGF_REPOSITORY_BASE}/base:${ESGF_IMAGES_VERSION} as builder
+
+RUN dnf makecache && \
+    dnf install -y java-11-openjdk-devel && \
+    dnf clean all
 
 # Unpack the THREDDS war
 ARG THREDDS_VERSION=5.5
