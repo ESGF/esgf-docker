@@ -18,8 +18,16 @@ filter {
         }
         remove_field => ["message"]
     }
+    # Drop HEAD requests
+    if [method] == "HEAD" {
+        drop { }
+    }
     # Only consider file downloads and OPeNDAP accesses
     if [request] !~ "^/thredds/(fileServer|dodsC)" {
+        drop { }
+    }
+    # Drop extraneous OPeNDAP requests
+    if [request] =~ "^/thredds/dodsC/([\?].*)\.(html|nc|dds|das)" {
         drop { }
     }
     # Replace the logstash timestamp with the timestamp from the request
