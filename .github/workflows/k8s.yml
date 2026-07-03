@@ -45,7 +45,7 @@ jobs:
   test:
     name: Test deployment
     runs-on: ubuntu-latest
-    needs: [container, helm]
+    needs: [helm]
     steps:
       - uses: actions/checkout@v4
       - name: Start minikube
