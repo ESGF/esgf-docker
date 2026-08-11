@@ -184,11 +184,6 @@ data:
   # Indicates if the data node is to be enabled
   enabled: true
 
-  # The path the file server will use to serve files, making up the first part of the download path for files
-  # WARNING: If you're running THREDDS, keep this as /thredds/fileServer to match the THREDDS server's
-  #          expected HTTP download link format
-  fileServerUrlPath: /thredds/fileServer
-
   # List of mounts required to serve data, as defined by the given datasets
   #
   # Each specified mount should include the following keys:
@@ -346,6 +341,10 @@ data:
     # Image overrides for the file server image
     image:
       repository: nginx
+    # The path the file server will use to serve files, making up the first part of the download path for files
+    # WARNING: If you're running THREDDS, keep this as /thredds/fileServer to match the THREDDS server's
+    #          expected HTTP download link format
+    urlPath: /thredds/fileServer
     # Override the default /etc/nginx/nginx.conf
     nginxConf:
     # Expects a dict of file name -> content as strings
