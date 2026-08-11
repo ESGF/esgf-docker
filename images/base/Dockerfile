@@ -26,7 +26,7 @@ ENV LC_ALL en_US.UTF-8
 
 # Upgrade all existing packages
 # Updating CACHE_BUST to the current time will bust the cache and force a rebuild
-RUN CACHE_BUST="20251028"; \
+RUN CACHE_BUST="20260811"; \
     dnf makecache && dnf upgrade -y && dnf clean all
 
 # Install ca-certificates and openssl
