@@ -6,11 +6,11 @@ ARG ESGF_REPOSITORY_BASE=esgfdeploy
 ARG ESGF_IMAGES_VERSION=latest
 FROM ${ESGF_REPOSITORY_BASE}/base:${ESGF_IMAGES_VERSION}
 
+USER root
+
 RUN dnf makecache && \
     dnf install -y java-21-openjdk-headless && \
     dnf clean all
-
-USER root
 
 # Create Tomcat home at /opt/tomcat
 ENV JAVA_HOME /usr/lib/jvm/jre
