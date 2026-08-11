@@ -7,6 +7,8 @@ ARG ESGF_IMAGES_VERSION=latest
 
 FROM ${ESGF_REPOSITORY_BASE}/base:${ESGF_IMAGES_VERSION} as builder
 
+USER root
+
 RUN dnf makecache && \
     dnf install -y java-11-openjdk-devel && \
     dnf clean all
