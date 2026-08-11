@@ -341,6 +341,10 @@ data:
     # Image overrides for the file server image
     image:
       repository: nginx
+    # The first part of the server's file download URL paths
+    # e.g. Setting urlPath to "/data" would give URLs like "https://myserver.example.com/data/some_project/file.nc"
+    # THREDDS style URLs will still be supported by the file server even if this value is changed
+    urlPath: /thredds/fileServer
     # Override the default /etc/nginx/nginx.conf
     nginxConf:
     # Expects a dict of file name -> content as strings
