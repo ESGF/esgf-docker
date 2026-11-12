@@ -224,6 +224,7 @@ data:
     #     bucket: bucket name
     #     dataPath: CMIP6Plus
     #     extraNginxConf (optional): a list of additional Nginx configurations
+    #       - conf: proxy_max_temp_file_size 0;
     #       - conf: proxy_set_header Host hostname;
     #       - conf: proxy_set_header X-Debug-Host hostname;
     #       - conf: proxy_set_header X-Forwarded-Host hostname;
